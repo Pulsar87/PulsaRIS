@@ -17,6 +17,7 @@ class Migration(migrations.Migration):
             name='Tenant',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('schema_name', models.CharField(max_length=63, unique=True)),
                 ('name', models.CharField(max_length=150, unique=True)),
                 ('subdomain', models.CharField(db_index=True, max_length=63, unique=True)),
                 ('is_active', models.BooleanField(default=True)),
