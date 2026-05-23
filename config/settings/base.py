@@ -32,6 +32,7 @@ SHARED_APPS = [
 
 TENANT_APPS = [
     "patients",
+    "auditlog",
     "orders",
     "reports",
     "integrations",
@@ -76,6 +77,7 @@ TENANT_DOMAIN_MODEL = "tenants.Domain"
 DATABASE_ROUTERS = ["django_tenants.routers.TenantSyncRouter"]
 PUBLIC_SCHEMA_NAME = "public"  # explicit is better than implicit
 TENANT_CREATION_FAKES_MIGRATIONS = False  # set True only for testing
+SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 
 # ─────────────────────────────────────────────────────────────
 # Database (Docker-ready with env fallback)
@@ -175,6 +177,8 @@ SPECTACULAR_SETTINGS = {
 # ─────────────────────────────────────────────────────────────
 # Audit Logging (HIPAA Compliance)
 # ─────────────────────────────────────────────────────────────
+# AUDITLOG_CID_GETTER = None
+# AUDITLOG_CID_HEADER = None
 AUDITLOG_INCLUDE_ALL_MODELS = False  # explicit is safer
 AUDITLOG_DISABLE_ON_RAW_SAVE = False
 AUTH_USER_MODEL = "users.User"
