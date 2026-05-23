@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    env_file: .env
+    environment:
+      POSTGRES_DB: ris_db
+      POSTGRES_USER: ris_user
+      POSTGRES_PASSWORD: ris_pass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports: ["5432:5432"]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  django:
+    build: .
+    env_file: .env # ✅ Passes .env to runtime
+    user: "${UID:-1000}:${GID:-1000}"
+    depends_on: [postgres, redis]
+    ports: ["8000:8000"]
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+    # ❌ Removed inline command. Entrypoint.sh handles migrate + collectstatic
+
+  celery:
+    build: .
+    env_file: .env
+    user: "${UID:-1000}:${GID:-1000}"
+    depends_on: [django, redis]
+    command: celery -A config worker -l info
+    volumes: [.:/app]
+
+volumes:
+  pgdata:
+  static_volume:
