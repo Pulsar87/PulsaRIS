@@ -31,12 +31,10 @@ SHARED_APPS = [
 ]
 
 TENANT_APPS = [
-    "core",
     "patients",
     "orders",
     "reports",
     "integrations",
-    "frontend",
     "django.contrib.staticfiles",
     "django_filters",
     "rest_framework",
