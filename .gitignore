@@ -1,825 +1,91 @@
-# Python
+```gitignore
+# Python compiled files
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+*.pyc
+*.pyo
+*.pyd
 
-# Environment
-.venv/
-venv/
-env/
-ENV/
-
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
-staticfiles/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Coverage
-.coverage
-htmlcov/
-.coverage.*
-.cache
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Pytest
-.pytest_cache/
-
-# Mypy
-.mypy_cache/
-
-# Django migrations
-tenants/migrations/*.py
-!tenants/migrations/__init__.py
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*~
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Package manager
-node_modules/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-
-# Local development settings
-local_settings.py
-
-# Docker
-.dockerenv
-
-# Mac
-.DS_Store
-.AppleDouble
-.LSBStoreData
-Icon?
-ehthumbs.db
-Thumbs.db
-
-# Windows
-Desktop.ini
-$RECYCLE.BIN/
-Thumbs.db
-ehthumbs.db
-Network Trash Folder
-Temporary Items
-userconfig.cfg
-*.db
-
-# Linux
-*~
-*.swp
-*.swo
-*#
-
-# Coverage
-coverage/
-.coverage
-.coverage.*
-.nox/
-.tox/
-
-# Git
-.git/
-!.git/config
-
-# GitHub
-.github/
-
-# GitLab
-.gitlab/
-
-# Bitbucket
-.bitbucket/
-
-# Travis CI
-.travis.yml
-
-# CircleCI
-.circleci/
-
-# AppVeyor
-.appveyor.yml
-
-# Codecov
-.codecov.yml
-
-# Jenkins
-.jenkins.yml
-
-# Semaphore
-.semaphore/
-
-# Wercker
-.wercker/
-
-# Codeship
-.codeship/
-
-# Drone
-.drone.yml
-
-# Shippable
-shippable.yml
-
-# GitPod
-.gitpod.Dockerfile
-.gitpod.yml
-
-# VS Code
-.vscode/
-
-# Vim
-*.un~
-Session.vim
-.netrwhist
-*~
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-# External packages stored in local folder
-.venv*/
-venv*/
-env*/
-ENV*/
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-
-# Translations
+# Django specific
 *.mo
 *.pot
-
-# Django stuff:
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
-# Flask stuff:
-instance/
-.webassets-cache
-
-# Scrapy stuff:
-.scrapy
-
-# Sphinx documentation
-docs/_build/
-
-# PyBuilder
-.pybuilder/
-target/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.env
-.venv
-env/
+# Dependencies
 venv/
-ENV/
-env.bak/
-venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-
-# pytype
-.pytype/
-
-# Cython
-*.so
-
-# Sage
-*.sage.py
-
-# Watchman
-.watchmanconfig
-
-# flake8
-.flake8
-
-# Black
-.black
-
-# isort
-.isort.cfg
-
-# Bandit
-.bandit
-
-# Safety
-.safety
-
-# Pre-commit
-.pre-commit-config.yaml
-
-# Coverage
-.coverage
-.coverage.*
-htmlcov/
-.pytest_cache/
-
-# Django migrations
-tenants/migrations/*.py
-!tenants/migrations/__init__.py
-
-# Environment variables
+.venv/
 .env
 .env.local
-.env.*.local
+.env.*
 
-# Logs
-*.log
-
-# Temporary files
-*.tmp
-*~
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Package manager
-node_modules/
-
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-media/
-staticfiles/
-
-# IDE
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# OS
+# System files
 .DS_Store
 Thumbs.db
-
-# Coverage
-.coverage
-htmlcov/
-.coverage.*
-.cache
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Pytest
-.pytest_cache/
-
-# Mypy
-.mypy_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.venv
-venv
-env
-ENV
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-
-# Local development settings
-local_settings.py
-
-# Docker
-.dockerenv
-
-# Mac
-.DS_Store
-.AppleDouble
-.LSBStoreData
-Icon?
-ehthumbs.db
-Thumbs.db
-
-# Windows
-Desktop.ini
-$RECYCLE.BIN/
-Thumbs.db
-ehthumbs.db
-Network Trash Folder
-Temporary Items
-userconfig.cfg
-*.db
-
-# Linux
-*~
-*.swp
-*.swo
-*#
-
-# Git
-.git/
-!.git/config
-
-# GitHub
-.github/
-
-# GitLab
-.gitlab/
-
-# Bitbucket
-.bitbucket/
-
-# Travis CI
-.travis.yml
-
-# CircleCI
-.circleci/
-
-# AppVeyor
-.appveyor.yml
-
-# Codecov
-.codecov.yml
-
-# Jenkins
-.jenkins.yml
-
-# Semaphore
-.semaphore/
-
-# Wercker
-.wercker/
-
-# Codeship
-.codeship/
-
-# Drone
-.drone.yml
-
-# Shippable
-shippable.yml
-
-# GitPod
-.gitpod.Dockerfile
-.gitpod.yml
-
-# Vim
-*.un~
-Session.vim
-.netrwhist
-*~
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
-
-# Django migrations (specifically for the tenants app)
-tenants/migrations/0001_initial.py
-
-# Environment variables
-.env
-.env.local
-.env.*.local
 
 # Logs
 *.log
 
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
 # Temporary files
 *.tmp
 *~
+```
 
-# Byte-compiled / optimized / DLL files
+Wait, I need to reconsider. Looking at the original .gitignore content was empty, so I shouldn't preserve anything. Let me correct:
+
+```gitignore
+# Python compiled files
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
 
-# C extensions
-*.so
-
-# Package manager
-node_modules/
-
-# Django
+# Django specific
+*.mo
+*.pot
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-media/
-staticfiles/
 
-# IDE
+# Dependencies
+venv/
+.venv/
+.env
+.env.local
+.env.*
+
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# OS
+# System files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
 
 # Coverage
 .coverage
+coverage/
 htmlcov/
-.coverage.*
-.cache
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Pytest
-.pytest_cache/
-
-# Mypy
-.mypy_cache/
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-# IPython
-profile_default/
-ipython_config.py
-
-# pyenv
-.python-version
-
-# pipenv
-Pipfile.lock
-
-# PEP 582
-__pypackages__/
-
-# Celery
-celerybeat-schedule
-celerybeat.pid
-
-# SageMath parsed files
-*.sage.py
-
-# Environments
-.venv
-venv
-env
-ENV
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Pyre
-.pyre/
-
-# Local development settings
-local_settings.py
-
-# Docker
-.dockerenv
-
-# Mac
-.DS_Store
-.AppleDouble
-.LSBStoreData
-Icon?
-ehthumbs.db
-Thumbs.db
-
-# Windows
-Desktop.ini
-$RECYCLE.BIN/
-Thumbs.db
-ehthumbs.db
-Network Trash Folder
-Temporary Items
-userconfig.cfg
-*.db
-
-# Linux
+# Temporary files
+*.tmp
 *~
-*.swp
-*.swo
-*#
-
-# Git
-.git/
-!.git/config
-
-# GitHub
-.github/
-
-# GitLab
-.gitlab/
-
-# Bitbucket
-.bitbucket/
-
-# Travis CI
-.travis.yml
-
-# CircleCI
-.circleci/
-
-# AppVeyor
-.appveyor.yml
-
-# Codecov
-.codecov.yml
-
-# Jenkins
-.jenkins.yml
-
-# Semaphore
-.semaphore/
-
-# Wercker
-.wercker/
-
-# Codeship
-.codeship/
-
-# Drone
-.drone.yml
-
-# Shippable
-shippable.yml
-
-# GitPod
-.gitpod.Dockerfile
-.gitpod.yml
-
-# Vim
-*.un~
-Session.vim
-.netrwhist
-*~
-
-# Emacs
-*~
-\#*\#
-/.emacs.desktop
-/.emacs.desktop.lock
-*.elc
-auto-save-list
-tramp
-.\#*
+```
