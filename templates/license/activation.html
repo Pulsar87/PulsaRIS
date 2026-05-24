@@ -1,0 +1,82 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4>
+                        <i class="bi bi-shield-lock"></i> System Activation
+                        Required
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p>This software is locked to this hardware.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold"
+                            >Your Machine Code:</label
+                        >
+                        <input
+                            type="text"
+                            class="form-control bg-light"
+                            value="{{ hwid }}"
+                            readonly
+                        />
+                    </div>
+
+                    <form method="POST" action="{% url 'license:activate' %}">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"
+                                >Select Expiration Date:</label
+                            >
+                            <div class="input-group">
+                                <span class="input-group-text"
+                                    ><i class="bi bi-calendar-event"></i
+                                ></span>
+                                <input
+                                    type="date"
+                                    name="expiry_date"
+                                    class="form-control"
+                                    id="datePicker"
+                                    required
+                                />
+                            </div>
+                            <small class="text-muted"
+                                >Choose the date provided by your
+                                developer.</small
+                            >
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold"
+                                >Enter Signature Key:</label
+                            >
+                            <input
+                                type="text"
+                                name="signature"
+                                class="form-control"
+                                placeholder="XXXXXXXX"
+                                required
+                                style="text-transform: uppercase"
+                            />
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger w-100 py-2 fw-bold"
+                        >
+                            ACTIVATE SYSTEM
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Optional: Prevent selecting past dates
+    document.getElementById("datePicker").min = new Date()
+        .toISOString()
+        .split("T")[0];
+</script>
+{% endblock %}

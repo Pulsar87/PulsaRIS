@@ -21,6 +21,7 @@ ROOT_URLCONF = "config.urls"
 SHARED_APPS = [
     "django_tenants",  # MUST be first
     "tenants",  # Your tenant model app
+    "license",  # License check - must be in SHARED_APPS to work across all tenants
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "license.middleware.LicenseMiddleware",  # License check middleware
     "django_htmx.middleware.HtmxMiddleware",
     "auditlog.middleware.AuditlogMiddleware",  # ← FIXED: correct middleware path
 ]

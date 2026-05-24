@@ -1,34 +1,40 @@
 ```gitignore
-# Python compiled files
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Django specific
-*.mo
-*.pot
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Dependencies
-venv/
-.venv/
+# Environment
 .env
 .env.local
 .env.*
+.venv/
+venv/
+ENV/
 
-# IDE and editor files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# System files
-.DS_Store
-Thumbs.db
+*.tmp
 
 # Logs
 *.log
@@ -38,54 +44,7 @@ Thumbs.db
 coverage/
 htmlcov/
 
-# Temporary files
-*.tmp
-*~
-```
-
-Wait, I need to reconsider. Looking at the original .gitignore content was empty, so I shouldn't preserve anything. Let me correct:
-
-```gitignore
-# Python compiled files
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Django specific
-*.mo
-*.pot
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
-
-# Dependencies
-venv/
-.venv/
-.env
-.env.local
-.env.*
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# System files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Temporary files
-*.tmp
-*~
+# Testing
+.pytest_cache/
+.mypy_cache/
 ```
