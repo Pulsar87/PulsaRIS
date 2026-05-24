@@ -6,7 +6,12 @@ import environ
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-
+TEMPLATES = [
+    {
+        "DIRS": [BASE_DIR / "templates"],
+        "APP_DIRS": True,
+    }
+]
 # ─────────────────────────────────────────────────────────────
 # Core Django Settings
 # ─────────────────────────────────────────────────────────────

@@ -26,9 +26,14 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from license import views as licenseview
+
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("license.urls")),  # License check as first step
+    path("", include("license.urls")),
+    # path("activation-required/", licenseview.activation_required, name="activation"),
+    # License check as first step
+    # path("activation-required/", include("license.views")),
     # path('api/', include('core.api_urls')),
     # path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # path("api/docs/", SpectacularSwaggerView.as_url(name="schema"), name="swagger-ui"),
