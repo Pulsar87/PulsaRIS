@@ -1,3 +1,4 @@
+{% load i18n static %}
 <!doctype html>
 <html
     lang="{{ LANGUAGE_CODE }}"
@@ -7,22 +8,25 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="Pulsar RIS - Radiology Information System" />
+        <meta
+            name="description"
+            content="Pulsar RIS - Radiology Information System"
+        />
         <title>{% block title %}Pulsar RIS{% endblock %}</title>
-        
+
         <!-- Favicon -->
         <link
             rel="icon"
             href="{% static 'favicon.svg' %}"
             type="image/svg+xml"
         />
-        
+
         <!-- Fonts -->
         <link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"
         />
-        
+
         <!-- Bootstrap CSS -->
         {% if LANGUAGE_CODE == 'ar' %}
         <link
@@ -30,39 +34,31 @@
             href="{% static 'css/bootstrap.rtl.min.css' %}"
         />
         {% else %}
-        <link
-            rel="stylesheet"
-            href="{% static 'css/bootstrap.min.css' %}"
-        />
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
         {% endif %}
-        
+
         <!-- Icons -->
-        <link
-            rel="stylesheet"
-            href="{% static 'css/bootstrap-icons.css' %}" />
-        
+        <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}" />
+
         <!-- FullCalendar -->
-        <link
-            rel="stylesheet"
-            href="{% static 'css/fullcalendar.css' %}" />
-        
+        <link rel="stylesheet" href="{% static 'css/fullcalendar.css' %}" />
+
         <!-- Custom Styles -->
-        <link
-            rel="stylesheet"
-            href="{% static 'css/custom.css' %}" />
-        
+        <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+
         {% block extra_css %}{% endblock %}
-        
+
         <!-- Scripts -->
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+
+        <script src="{% static 'js/index.global.min.js' %}"></script>
+
         <script
-            src="{% static 'js/bootstrap.bundle.min.js' %}" ></script>
-        
-        <script
-            src="{% static 'js/index.global.min.js' %}" ></script>
-        
-        <script type="text/javascript"
-            src="{% static 'js/custom.js' %}" defer></script>
-        
+            type="text/javascript"
+            src="{% static 'js/custom.js' %}"
+            defer
+        ></script>
+
         {% block extra_js %}{% endblock %}
     </head>
 
@@ -99,18 +95,24 @@
                     >
                         <!-- Worklist -->
                         <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'worklist' %}active{% endif %}" href="/worklist"
-                                ><i class="bi bi-grid-1x2 me-1"></i> {% trans "Worklist" %}</a
+                            <a
+                                class="nav-link {% if request.resolver_match.url_name == 'worklist' %}active{% endif %}"
+                                href="/worklist"
+                                ><i class="bi bi-grid-1x2 me-1"></i> {% trans
+                                "Worklist" %}</a
                             >
                         </li>
-                        
+
                         <!-- Patients -->
                         <li class="nav-item">
-                            <a class="nav-link {% if request.resolver_match.url_name == 'patients' %}active{% endif %}" href="/patients"
-                                ><i class="bi bi-people-fill me-1"></i> {% trans "Patients" %}</a
+                            <a
+                                class="nav-link {% if request.resolver_match.url_name == 'patients' %}active{% endif %}"
+                                href="/patients"
+                                ><i class="bi bi-people-fill me-1"></i> {% trans
+                                "Patients" %}</a
                             >
                         </li>
-                        
+
                         <!-- Language Selector -->
                         <li class="nav-item dropdown mx-2">
                             <a
@@ -126,18 +128,54 @@
                                 class="dropdown-menu dropdown-menu-end border-0 shadow-sm rounded-3"
                             >
                                 <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="{% url 'set_language' 'en' %}"
-                                        >English</a
+                                    <form
+                                        action="{% url 'set_language' %}"
+                                        method="post"
+                                        class="d-inline"
                                     >
+                                        {% csrf_token %}
+                                        <input
+                                            type="hidden"
+                                            name="language"
+                                            value="en"
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="next"
+                                            value="{{ request.path }}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="dropdown-item border-0 bg-transparent w-100 text-start"
+                                        >
+                                            English
+                                        </button>
+                                    </form>
                                 </li>
                                 <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="{% url 'set_language' 'ar' %}"
-                                        >العربية</a
+                                    <form
+                                        action="{% url 'set_language' %}"
+                                        method="post"
+                                        class="d-inline"
                                     >
+                                        {% csrf_token %}
+                                        <input
+                                            type="hidden"
+                                            name="language"
+                                            value="ar"
+                                        />
+                                        <input
+                                            type="hidden"
+                                            name="next"
+                                            value="{{ request.path }}"
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="dropdown-item border-0 bg-transparent w-100 text-start"
+                                        >
+                                            العربية
+                                        </button>
+                                    </form>
                                 </li>
                             </ul>
                         </li>
@@ -261,9 +299,7 @@
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a
-                                class="btn btn-primary"
-                                href="{% url 'login' %}"
+                            <a class="btn btn-primary" href="{% url 'login' %}"
                                 >{% trans "Login" %}</a
                             >
                         </li>
@@ -303,15 +339,13 @@
         {% endif %}
 
         <!-- Main Content -->
-        <main class="container">
-            {% block content %}{% endblock %}
-        </main>
+        <main class="container">{% block content %}{% endblock %}</main>
 
         <!-- Footer -->
         <footer class="mt-5 py-4 border-top">
             <div class="container text-center">
                 <p class="text-muted mb-0">
-                    &copy; {{ now.year }} Pulsar RIS. 
+                    &copy; {{ now.year }} Pulsar RIS.
                     <small>{% trans "All rights reserved." %}</small>
                 </p>
             </div>

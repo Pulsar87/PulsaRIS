@@ -1,0 +1,284 @@
+/* --- Eye Candy Variable System --- */
+:root,
+[data-bs-theme="light"] {
+    --medical-primary: #0ea5e9;
+    --medical-secondary: #64748b;
+    --bg-body: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --nav-bg: rgba(255, 255, 255, 0.8);
+    --border-color: rgba(226, 232, 240, 0.8);
+}
+
+[data-bs-theme="dark"] {
+    --medical-primary: #38bdf8;
+    --medical-secondary: #94a3b8;
+    --bg-body: #0f172a;
+    --card-bg: #1e293b;
+    --text-main: #f1f5f9;
+    --text-muted: #94a3b8;
+    --nav-bg: rgba(15, 23, 42, 0.85);
+    --border-color: rgba(51, 65, 85, 0.8);
+}
+
+body {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+}
+
+/* Force text-dark to respect theme */
+.text-dark {
+    color: var(--text-main) !important;
+}
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Navbar Glass Effect */
+.navbar-custom {
+    background: var(--nav-bg) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.75rem 0;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-muted) !important;
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--medical-primary) !important;
+    background: rgba(14, 165, 233, 0.08);
+}
+
+/* Buttons Fix */
+.btn-primary {
+    background-color: var(--medical-primary) !important;
+    border: none;
+    box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.39);
+}
+
+/* Floating Alerts (The Eye Candy Part) */
+.floating-toast {
+    min-width: 320px;
+    backdrop-filter: blur(15px) saturate(180%);
+    -webkit-backdrop-filter: blur(15px) saturate(180%);
+    background-color: rgba(255, 255, 255, 0.7) !important;
+    color: #1e293b !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1) !important;
+}
+
+[data-bs-theme="dark"] .floating-toast {
+    background-color: rgba(30, 41, 59, 0.7) !important;
+    color: #f1f5f9 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Toast icons */
+.toast.bg-success {
+    border-left: 5px solid #22c55e !important;
+}
+.toast.bg-danger {
+    border-left: 5px solid #ef4444 !important;
+}
+.toast.bg-info {
+    border-left: 5px solid #0ea5e9 !important;
+}
+
+/* Adding some hover effect to checkboxes for better UX */
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+.form-check-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Modality Specific Colors */
+.bg-purple-subtle {
+    background-color: rgba(168, 85, 247, 0.15) !important;
+    color: #7c3aed !important;
+    border: 1px solid rgba(168, 85, 247, 0.3) !important;
+}
+
+.bg-orange-subtle {
+    background-color: rgba(249, 115, 22, 0.15) !important;
+    color: #ea580c !important;
+    border: 1px solid rgba(249, 115, 22, 0.3) !important;
+}
+
+/* Enhancing standard Bootstrap subtles to match the vibe */
+.bg-primary-subtle {
+    background-color: rgba(13, 110, 253, 0.15) !important;
+    color: #0d6efd !important;
+    border: 1px solid rgba(13, 110, 253, 0.3) !important;
+}
+
+.bg-success-subtle {
+    background-color: rgba(25, 135, 84, 0.15) !important;
+    color: #198754 !important;
+    border: 1px solid rgba(25, 135, 84, 0.3) !important;
+}
+
+.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.15) !important;
+    color: #087990 !important;
+    border: 1px solid rgba(13, 202, 240, 0.3) !important;
+}
+
+/* Modality Custom Branded Colors */
+.mod-ct {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+} /* Blue */
+.mod-mr {
+    background-color: #f5f3ff;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+} /* Purple */
+.mod-xr {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+} /* Emerald */
+.mod-us {
+    background-color: #fff7ed;
+    color: #9a3412;
+    border: 1px solid #fed7aa;
+} /* Orange */
+.mod-mg {
+    background-color: #fdf2f8;
+    color: #9d174d;
+    border: 1px solid #fbcfe8;
+} /* Pink */
+.mod-default {
+    background-color: #f8fafc;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+/* Status Styles */
+.status-completed {
+    background-color: #dcfce7 !important;
+    color: #15803d !important;
+}
+
+.status-pending {
+    background-color: #fef9c3 !important;
+    color: #a16207 !important;
+    animation: status-pulse 2s infinite;
+}
+
+/* Attention-Grabbing Pulse for Pending Tasks */
+@keyframes status-pulse {
+    0% {
+        box-shadow: 0 0 0 0px rgba(250, 204, 21, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(250, 204, 21, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0px rgba(250, 204, 21, 0);
+    }
+}
+
+/* General Badge Polish */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5em 1em;
+}
+.search-glass {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+}
+.search-glass:focus-within {
+    background: #fff;
+    border-color: #0d6efd;
+    box-shadow: 0 10px 25px -5px rgba(13, 110, 253, 0.1);
+}
+.filter-heading {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+}
+.custom-select {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+}
+.hover-lift {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(13, 110, 253, 0.2) !important;
+}
+/* Reuse the same styles from order.html */
+.filter-heading {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 1px;
+}
+.custom-select {
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem;
+    background-color: #f8fafc;
+}
+.hover-lift {
+    transition: transform 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(13, 110, 253, 0.2) !important;
+}
+.hover-light:hover {
+    background-color: #f8fafc;
+    cursor: pointer;
+}
+.transition-all {
+    transition: all 0.2s ease;
+}
+.avatar-sm {
+    width: 38px;
+    height: 38px;
+    font-size: 0.8rem;
+}
+.bg-blue-subtle {
+    background-color: #e0f2fe;
+}
+.text-blue {
+    color: #0369a1;
+}
+.border-blue-subtle {
+    border-color: #bae6fd !important;
+}
+.btn-white {
+    background: white;
+    color: #64748b;
+}
+.btn-white:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}

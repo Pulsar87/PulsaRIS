@@ -22,6 +22,7 @@ urlpatterns = [
 ]
 """
 
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
@@ -29,8 +30,9 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from license import views as licenseview
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("", include("license.urls")),
+    path("admin/", admin.site.urls, name="activation_required"),
+    path("i18n/", include("django.conf.urls.i18n")),
+    path("", include("license.urls"), name="activation"),
     # path("activation-required/", licenseview.activation_required, name="activation"),
     # License check as first step
     # path("activation-required/", include("license.views")),
