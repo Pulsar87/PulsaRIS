@@ -33,6 +33,7 @@ urlpatterns = [
     path("admin/", admin.site.urls, name="activation_required"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("", include("license.urls"), name="activation"),
+    path("users/", include("users.urls")),
     # path("activation-required/", licenseview.activation_required, name="activation"),
     # License check as first step
     # path("activation-required/", include("license.views")),
