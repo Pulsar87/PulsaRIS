@@ -7,61 +7,67 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Pulsar RIS</title>
+        <meta name="description" content="Pulsar RIS - Radiology Information System" />
+        <title>{% block title %}Pulsar RIS{% endblock %}</title>
+        
+        <!-- Favicon -->
         <link
             rel="icon"
             href="{{ url_for('static', filename='favicon.svg') }}"
             type="image/svg+xml"
-
-
+        />
+        
+        <!-- Fonts -->
         <link
             rel="stylesheet"
-            href="{{ url_for('static',filename='fonts/cairo')}}"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"
         />
-        <!--https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap"-->
-
+        
+        <!-- Bootstrap CSS -->
         {% if get_locale() == 'ar' %}
         <link
             rel="stylesheet"
             href="{{ url_for('static',filename='css/bootstrap.rtl.min.css')}}"
         />
-        <!--href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css"-->
         {% else %}
         <link
             rel="stylesheet"
             href="{{ url_for('static',filename='css/bootstrap.min.css')}}"
         />
-        <!--href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"-->
         {% endif %}
-
+        
+        <!-- Icons -->
         <link
             rel="stylesheet"
             href="{{ url_for('static' ,filename='css/bootstrap-icons.css')}}" />
-            <!--href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"-->
-
+        
+        <!-- FullCalendar -->
         <link
             rel="stylesheet"
             href="{{ url_for('static' ,filename='css/fullcalendar.css')}}" />
-            <!--href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css"-->
-
+        
+        <!-- Custom Styles -->
         <link
             rel="stylesheet"
             href="{{ url_for('static' ,filename='css/custom.css')}}" />
-
-        <script
-            src="{{ url_for('static', filename='js/index.global.min.js')}}" ></script>
-
+        
+        {% block extra_css %}{% endblock %}
+        
+        <!-- Scripts -->
         <script
             src="{{ url_for('static', filename='js/bootstrap.bundle.min.js')}}" ></script>
-            <!--src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"-->
-            <script type="text/javascript"
-                src="{{ url_for('static', filename='js/custom.js')}}" defer></script>
-
-
+        
+        <script
+            src="{{ url_for('static', filename='js/index.global.min.js')}}" ></script>
+        
+        <script type="text/javascript"
+            src="{{ url_for('static', filename='js/custom.js')}}" defer></script>
+        
+        {% block extra_js %}{% endblock %}
     </head>
 
     <body>
-
+        <!-- Navigation -->
         <nav class="navbar navbar-expand-lg sticky-top navbar-custom mb-5">
             <div class="container">
                 <a class="navbar-brand d-flex align-items-center" href="/">
@@ -82,6 +88,7 @@
                     type="button"
                     data-bs-toggle="collapse"
                     data-bs-target="#mainNav"
+                    aria-label="Toggle navigation"
                 >
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -90,23 +97,30 @@
                     <ul
                         class="navbar-nav {% if get_locale() == 'ar' %}me-auto{% else %}ms-auto{% endif %} align-items-center"
                     >
+                        <!-- Worklist -->
                         <li class="nav-item">
-                            <a class="nav-link" href="/worklist"
+                            <a class="nav-link {% if request.endpoint == 'worklist' %}active{% endif %}" href="/worklist"
                                 ><i class="bi bi-grid-1x2 me-1"></i> {{
                                 _('Worklist') }}</a
                             >
                         </li>
+                        
+                        <!-- Patients -->
                         <li class="nav-item">
-                            <a class="nav-link" href="/patients"
+                            <a class="nav-link {% if request.endpoint == 'patients' %}active{% endif %}" href="/patients"
                                 ><i class="bi bi-people-fill me-1"></i> {{
                                 _('Patients') }}</a
                             >
                         </li>
+                        
+                        <!-- Language Selector -->
                         <li class="nav-item dropdown mx-2">
                             <a
                                 class="nav-link btn btn-light btn-sm rounded-pill px-3"
                                 href="#"
                                 data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
                             >
                                 <i class="bi bi-translate"></i>
                             </a>
@@ -130,17 +144,20 @@
                             </ul>
                         </li>
 
+                        <!-- Theme Toggle -->
                         <li class="nav-item mx-1">
                             <button
                                 class="btn btn-light btn-sm rounded-pill px-3"
                                 id="theme-toggle"
                                 type="button"
+                                aria-label="{{ _('Toggle Theme') }}"
                                 title="{{ _('Toggle Theme') }}"
                             >
                                 <i class="bi bi-sun-fill"></i>
                             </button>
                         </li>
 
+                        <!-- User Menu -->
                         {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown ms-lg-3">
                             <a
@@ -148,6 +165,8 @@
                                 href="#"
                                 id="userDropdown"
                                 data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
                             >
                                 <div class="user-pill">
                                     <div class="d-none d-md-block">
@@ -169,6 +188,7 @@
                             </a>
                             <ul
                                 class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 mt-2 rounded-4"
+                                aria-labelledby="userDropdown"
                             >
                                 <li>
                                     <a
@@ -176,7 +196,7 @@
                                         href="/add_practitioner"
                                     >
                                         <i
-                                            class="bi bi-gear-fill me-2 text-secondary"
+                                            class="bi bi-person-badge-fill me-2 text-secondary"
                                         ></i>
                                         {{ _('Doctors') }}
                                     </a>
@@ -189,7 +209,7 @@
                                         href="{{ url_for('manage_users') }}"
                                     >
                                         <i
-                                            class="bi bi-gear-fill me-2 text-secondary"
+                                            class="bi bi-people-fill me-2 text-secondary"
                                         ></i>
                                         {{ _('Manage Users') }}
                                     </a>
@@ -211,7 +231,7 @@
                                         href="/modalities"
                                     >
                                         <i
-                                            class="bi bi-gear-fill me-2 text-secondary"
+                                            class="bi bi-hdd-stack-fill me-2 text-secondary"
                                         ></i>
                                         {{ _('Modalities') }}</a
                                     >
@@ -222,7 +242,7 @@
                                         href="/prices"
                                     >
                                         <i
-                                            class="bi bi-gear-fill me-2 text-secondary"
+                                            class="bi bi-currency-dollar me-2 text-secondary"
                                         ></i>
                                         {{ _('Manage Prices') }}</a
                                     >
@@ -256,35 +276,52 @@
             </div>
         </nav>
 
-        <main class="container">{% block content %}{% endblock %}</main>
-
-        <div
-            id="toast-container"
-            class="position-fixed top-0 end-0 p-4"
-            style="z-index: 10000"
-        >
-            {% with messages = get_flashed_messages(with_categories=true) %} {%
-            if messages %} {% for category, message in messages %}
-            <div
-                class="toast show floating-toast text-white bg-{{ category if category != 'message' else 'info' }}"
-                role="alert"
-            >
-                <div class="d-flex p-3 align-items-center">
-                    <i
-                        class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-triangle-fill' }} fs-4 me-3"
-                    ></i>
-                    <div class="toast-body p-0 fw-medium">{{ message }}</div>
-                    <button
-                        type="button"
-                        class="btn-close btn-close-white ms-auto"
-                        data-bs-dismiss="toast"
-                    ></button>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div id="flash-messages-container">
+                        {% for category, message in messages %}
+                        <div
+                            class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show"
+                            role="alert"
+                        >
+                            <i
+                                class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-triangle-fill' }} me-2"
+                            ></i>
+                            {{ message }}
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="alert"
+                                aria-label="Close"
+                            ></button>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
             </div>
-            {% endfor %} {% endif %} {% endwith %}
-
         </div>
+        {% endif %}
+        {% endwith %}
 
+        <!-- Main Content -->
+        <main class="container">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-5 py-4 border-top">
+            <div class="container text-center">
+                <p class="text-muted mb-0">
+                    &copy; {{ now().year if now else '2024' }} Pulsar RIS. 
+                    <small>{{ _('All rights reserved.') }}</small>
+                </p>
+            </div>
+        </footer>
+
+        {% block modals %}{% endblock %}
     </body>
-
 </html>
