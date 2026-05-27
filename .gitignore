@@ -21,26 +21,16 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment
-.env
-.env.local
-.env.*
-.venv/
+# Virtual Environment
 venv/
 ENV/
+env/
+.venv/
+env.bak/
+venv.bak/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*.tmp
-
-# Logs
-*.log
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
+# Django
+*.mo
+*.pot
+.DS_Store
 ```

@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from .check import get_hardware_id, verify_key
 
+def home(request):
+    """Home page view."""
+    return render(request, 'license/home.html')
+
 def activation_required(request):
     """Display the activation page when no valid license is found."""
     hwid = get_hardware_id()
