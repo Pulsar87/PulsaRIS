@@ -15,17 +15,6 @@ class User(AbstractUser):
     email = models.CharField(max_length=50, blank=False, unique=True)
     license_number = models.CharField(max_length=50, blank=True)
     specialization = models.CharField(max_length=100, blank=True)
-    role = models.CharField(
-        max_length=50,
-        choices=[
-            ("ADMIN", "Admin"),
-            ("RADIOLOGIST", "Radiologist"),
-            ("TECH", "Technician"),
-            ("FRONT_DESK", "Front Desk"),
-            ("BILLING", "Billing"),
-            ("AUDITOR", "Auditor"),
-        ],
-    )
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -36,6 +25,6 @@ class User(AbstractUser):
 
     class Meta:
         indexes = [
-            models.Index(fields=["tenant", "role"]),
+            models.Index(fields=["tenant"]),
             models.Index(fields=["facility"]),
         ]

@@ -8,14 +8,13 @@ class UserAdmin(BaseUserAdmin):
     list_display = (
         "email",
         "username",
-        "role",
         "tenant",
         "facility",
         "is_active",
         "is_staff",
         "created_at",
     )
-    list_filter = ("role", "is_active", "is_staff", "tenant", "facility")
+    list_filter = ("is_active", "is_staff", "tenant", "facility", "groups")
     search_fields = ("email", "username", "first_name", "last_name")
     ordering = ("-created_at",)
 
@@ -28,7 +27,6 @@ class UserAdmin(BaseUserAdmin):
                 "fields": (
                     "tenant",
                     "facility",
-                    "role",
                     "license_number",
                     "specialization",
                 )
@@ -61,7 +59,6 @@ class UserAdmin(BaseUserAdmin):
                     "password2",
                     "tenant",
                     "facility",
-                    "role",
                     "license_number",
                     "specialization",
                     "is_active",

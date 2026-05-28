@@ -16,7 +16,7 @@ class Report(models.Model):
         "orders.ExamOrder", on_delete=models.CASCADE, related_name="report"
     )
     radiologist = models.ForeignKey(
-        "users.User", on_delete=models.PROTECT, limit_choices_to={"role": "RADIOLOGIST"}
+        "users.User", on_delete=models.PROTECT, limit_choices_to={"is_staff": True}
     )
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.DRAFT, db_index=True
