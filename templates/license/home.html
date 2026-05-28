@@ -1,27 +1,130 @@
 {% extends '../layout.html' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-lg">
-                <div class="card-header bg-success text-white">
-                    <h4>
-                        <i class="bi bi-check-circle-fill"></i> System Activated
-                    </h4>
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 text-primary">
+                        <i class="bi bi-calendar3 me-2"></i>{% trans "Schedule Calendar" %}
+                    </h5>
                 </div>
-                <div class="card-body">
-                    <p class="lead">Your system has been successfully activated.</p>
-                    <p>You can now access all features of Pulsar RIS.</p>
-                    
-                    <div class="mt-4">
-                        <a href="/worklist" class="btn btn-primary">
-                            <i class="bi bi-grid-1x2 me-1"></i> Go to Worklist
-                        </a>
-                    </div>
+                <div class="card-body p-0">
+                    <div id="calendar" style="min-height: 800px;"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Event Detail Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalLabel">{% trans "Exam Details" %}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>{% trans "Patient MRN" %}:</strong> <span id="modalPatientMRN"></span></p>
+                        <p><strong>{% trans "Patient Name" %}:</strong> <span id="modalPatientName"></span></p>
+                        <p><strong>{% trans "Accession Number" %}:</strong> <span id="modalAccession"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>{% trans "Modality" %}:</strong> <span id="modalModality"></span></p>
+                        <p><strong>{% trans "Procedure" %}:</strong> <span id="modalProcedure"></span></p>
+                        <p><strong>{% trans "Priority" %}:</strong> <span id="modalPriority"></span></p>
+                        <p><strong>{% trans "Status" %}:</strong> <span id="modalStatus"></span></p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p><strong>{% trans "Scheduled Time" %}:</strong> <span id="modalStartTime"></span></p>
+                        <p><strong>{% trans "Duration" %}:</strong> <span id="modalDuration"></span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="modalWorklistLink" class="btn btn-primary">
+                    <i class="bi bi-grid-1x2 me-1"></i> {% trans "View in Worklist" %}
+                </a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+        },
+        buttonText: {
+            today: '{% trans "Today" %}',
+            month: '{% trans "Month" %}',
+            week: '{% trans "Week" %}',
+            day: '{% trans "Day" %}',
+            list: '{% trans "List" %}'
+        },
+        events: '/api/calendar-events/',
+        eventClick: function(info) {
+            var event = info.event;
+            var props = event.extendedProps;
+            
+            // Populate modal with event details
+            document.getElementById('modalPatientMRN').textContent = props.patient_mrn;
+            document.getElementById('modalPatientName').textContent = props.patient_name;
+            document.getElementById('modalAccession').textContent = props.accession;
+            document.getElementById('modalModality').textContent = props.modality;
+            document.getElementById('modalProcedure').textContent = event.title;
+            document.getElementById('modalPriority').textContent = props.priority;
+            document.getElementById('modalStatus').textContent = props.status;
+            document.getElementById('modalStartTime').textContent = event.start.toLocaleString();
+            
+            // Calculate duration
+            if (event.end) {
+                var durationMinutes = Math.round((event.end - event.start) / 60000);
+                document.getElementById('modalDuration').textContent = durationMinutes + ' minutes';
+            } else {
+                document.getElementById('modalDuration').textContent = 'Not specified';
+            }
+            
+            // Set worklist link
+            document.getElementById('modalWorklistLink').href = '/worklist?accession=' + props.accession;
+            
+            // Show modal
+            var modal = new bootstrap.Modal(document.getElementById('eventModal'));
+            modal.show();
+        },
+        eventDidMount: function(info) {
+            // Add tooltip to events
+            info.el.setAttribute('title', info.event.title + '\n' + 
+                                     info.el.extendedProps.patient_name);
+        },
+        height: 'auto',
+        nowIndicator: true,
+        selectable: false,
+        editable: false,
+        navLinks: true,
+        businessHours: {
+            daysOfWeek: [ 0, 1, 2, 3, 4, 5, 6 ],
+            startTime: '07:00',
+            endTime: '22:00'
+        }
+    });
+    
+    calendar.render();
+});
+</script>
 {% endblock %}
