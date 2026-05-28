@@ -32,9 +32,19 @@ def user_login(request):
 
 def user_logout(request):
     """User logout view."""
+    # Preserve license activation status in session before logging out
+    license_activated = request.session.get("license_activated")
+    license_expiry = request.session.get("license_expiry")
     logout(request)
+
+    # Restore license activation status after logout
+    if license_activated:
+        request.session["license_activated"] = license_activated
+    if license_expiry:
+        request.session["license_expiry"] = license_expiry
+
     messages.info(request, _("You have been logged out."))
-    return redirect("users/login")
+    return redirect("/users/login")
 
 
 @login_required
