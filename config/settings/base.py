@@ -24,9 +24,9 @@ ROOT_URLCONF = "config.urls"
 # ─────────────────────────────────────────────────────────────
 # Authentication Settings
 # ─────────────────────────────────────────────────────────────
-LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'license:home'
-LOGOUT_REDIRECT_URL = 'users:login'
+LOGIN_URL = "users:login"
+LOGIN_REDIRECT_URL = "license:home"
+LOGOUT_REDIRECT_URL = "users:login"
 # ─────────────────────────────────────────────────────────────
 # Application Definition
 # ─────────────────────────────────────────────────────────────
@@ -208,8 +208,4 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
 
-# ─────────────────────────────────────────────────────────────
-# Session Configuration
-# ─────────────────────────────────────────────────────────────
-# Keep session data persistent across logouts for license activation
 SESSION_SAVE_EVERY_REQUEST = True
