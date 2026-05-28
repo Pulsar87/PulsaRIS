@@ -36,6 +36,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("orders/", include("orders.urls")),
     path("patients/", include("patients.urls")),
+    path("reports/", include("reports.urls")),
     # path("activation-required/", licenseview.activation_required, name="activation"),
     # License check as first step
     # path("activation-required/", include("license.views")),

@@ -12,8 +12,8 @@ class Report(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
-    order = models.OneToOneField(
-        "orders.ExamOrder", on_delete=models.CASCADE, related_name="report"
+    order = models.ForeignKey(
+        "orders.ExamOrder", on_delete=models.CASCADE, related_name="reports"
     )
     radiologist = models.ForeignKey(
         "users.User", on_delete=models.PROTECT, limit_choices_to={"is_staff": True}
