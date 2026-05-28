@@ -21,18 +21,38 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
-venv/
-env/
-ENV/
-.venv/
-.env/
+# Compiled and build artifacts
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.o
+*.obj
+*.out
+*.dll
+*.dylib
+*.class
 
 # Django
 *.mo
 *.pot
 
-# Dependencies
-myenv/
+# Logs
+*.log
 
+# Environment variables
+.env
+.env.local
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
 ```
