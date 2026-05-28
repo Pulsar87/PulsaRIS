@@ -48,7 +48,9 @@ class ExamOrder(models.Model):
     )
     scheduled_datetime = models.DateTimeField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=15)
-    room_station = models.CharField(max_length=50, blank=True)
+    room_station = models.ForeignKey(
+        "tenants.Device", on_delete=models.SET_NULL, null=True, blank=True, related_name="exam_orders"
+    )
     dicom_study_instance_uid = models.CharField(
         max_length=64, blank=True, db_index=True
     )
