@@ -44,6 +44,26 @@ class Facility(models.Model):
         return self.name
 
 
+class Modality(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        Tenant, on_delete=models.CASCADE, related_name="modalities"
+    )
+    code = models.CharField(max_length=3, unique=True)
+    name = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ["tenant", "code"]
+        ordering = ["code"]
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
 class Device(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(
@@ -52,28 +72,21 @@ class Device(models.Model):
     facility = models.ForeignKey(
         Facility, on_delete=models.CASCADE, related_name="devices", null=True, blank=True
     )
-    name = models.CharField(max_length=150)
-    modality = models.CharField(
-        max_length=3,
-        choices=[
-            ("CT", "CT"),
-            ("MR", "MRI"),
-            ("XR", "X-Ray"),
-            ("US", "Ultrasound"),
-            ("NM", "Nuclear"),
-            ("DX", "Digital X-Ray"),
-        ],
+    modality = models.ForeignKey(
+        Modality, on_delete=models.PROTECT, related_name="devices"
     )
+    name = models.CharField(max_length=150)
     room_number = models.CharField(max_length=50, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = ["tenant", "name"]
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} ({self.modality})"
+        return f"{self.name} ({self.modality.code})"
 
 
 class Domain(DomainMixin):

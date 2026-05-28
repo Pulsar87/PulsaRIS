@@ -75,20 +75,21 @@ def calendar_events(request):
     }
     
     for order in orders:
+        modality_code = order.modality.code if hasattr(order.modality, 'code') else str(order.modality)
         event = {
             'id': str(order.id),
-            'title': f"{order.modality} - {order.procedure_code}",
+            'title': f"{modality_code} - {order.procedure_code}",
             'start': order.scheduled_datetime.isoformat(),
             'end': (order.scheduled_datetime + timedelta(minutes=order.duration_minutes)).isoformat() if order.duration_minutes else None,
-            'backgroundColor': color_map.get(order.modality, '#95a5a6'),
-            'borderColor': color_map.get(order.modality, '#95a5a6'),
+            'backgroundColor': color_map.get(modality_code, '#95a5a6'),
+            'borderColor': color_map.get(modality_code, '#95a5a6'),
             'extendedProps': {
                 'patient_mrn': order.patient.mrn if order.patient else 'N/A',
                 'patient_name': str(order.patient) if order.patient else 'N/A',
                 'accession': order.accession_number,
                 'priority': order.priority,
                 'status': order.status,
-                'modality': order.modality,
+                'modality': modality_code,
                 'device': order.room_station or 'N/A',
             }
         }

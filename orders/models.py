@@ -26,16 +26,8 @@ class ExamOrder(models.Model):
     )
     accession_number = models.CharField(max_length=50, db_index=True)
     referring_physician = models.CharField(max_length=150, blank=True)
-    modality = models.CharField(
-        max_length=3,
-        choices=[
-            ("CT", "CT"),
-            ("MR", "MRI"),
-            ("XR", "X-Ray"),
-            ("US", "Ultrasound"),
-            ("NM", "Nuclear"),
-            ("DX", "Digital X-Ray"),
-        ],
+    modality = models.ForeignKey(
+        "tenants.Modality", on_delete=models.PROTECT, related_name="exam_orders"
     )
     procedure_code = models.CharField(max_length=20)
     procedure_name_en = models.CharField(max_length=150)
@@ -80,4 +72,4 @@ class ExamOrder(models.Model):
         ordering = ["-scheduled_datetime"]
 
     def __str__(self):
-        return f"{self.accession_number} | {self.patient.mrn} | {self.modality}"
+        return f"{self.accession_number} | {self.patient.mrn} | {self.modality.code}"
