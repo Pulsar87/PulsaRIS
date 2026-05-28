@@ -44,6 +44,38 @@ class Facility(models.Model):
         return self.name
 
 
+class Device(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey(
+        Tenant, on_delete=models.CASCADE, related_name="devices"
+    )
+    facility = models.ForeignKey(
+        Facility, on_delete=models.CASCADE, related_name="devices", null=True, blank=True
+    )
+    name = models.CharField(max_length=150)
+    modality = models.CharField(
+        max_length=3,
+        choices=[
+            ("CT", "CT"),
+            ("MR", "MRI"),
+            ("XR", "X-Ray"),
+            ("US", "Ultrasound"),
+            ("NM", "Nuclear"),
+            ("DX", "Digital X-Ray"),
+        ],
+    )
+    room_number = models.CharField(max_length=50, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ["tenant", "name"]
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} ({self.modality})"
+
+
 class Domain(DomainMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey(

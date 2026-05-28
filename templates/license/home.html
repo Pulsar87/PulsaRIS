@@ -6,9 +6,46 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 text-primary">
-                        <i class="bi bi-calendar3 me-2"></i>{% trans "Schedule Calendar" %}
-                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary">
+                            <i class="bi bi-calendar3 me-2"></i>{% trans "Schedule Calendar" %}
+                        </h5>
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#deviceFilterCollapse" aria-expanded="false" aria-controls="deviceFilterCollapse">
+                            <i class="bi bi-funnel me-1"></i> {% trans "Filter by Device" %}
+                        </button>
+                    </div>
+                </div>
+                <div class="collapse" id="deviceFilterCollapse">
+                    <div class="card-body bg-light">
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="form-label fw-bold">{% trans "Select Devices" %}:</label>
+                                <div class="d-flex flex-wrap gap-3">
+                                    {% for device in devices %}
+                                    <div class="form-check">
+                                        <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
+                                        <label class="form-check-label" for="device_{{ device.id }}">
+                                            {{ device.name }} ({{ device.modality }})
+                                        </label>
+                                    </div>
+                                    {% empty %}
+                                    <p class="text-muted mb-0">{% trans "No devices configured" %}</p>
+                                    {% endfor %}
+                                </div>
+                                <div class="mt-3">
+                                    <button class="btn btn-sm btn-primary" id="applyDeviceFilter">
+                                        <i class="bi bi-check-lg me-1"></i> {% trans "Apply Filter" %}
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary ms-2" id="selectAllDevices">
+                                        <i class="bi bi-check-all me-1"></i> {% trans "Select All" %}
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2" id="clearAllDevices">
+                                        <i class="bi bi-x-lg me-1"></i> {% trans "Clear All" %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body p-0">
                     <div id="calendar" style="min-height: 800px;"></div>
@@ -38,6 +75,7 @@
                         <p><strong>{% trans "Procedure" %}:</strong> <span id="modalProcedure"></span></p>
                         <p><strong>{% trans "Priority" %}:</strong> <span id="modalPriority"></span></p>
                         <p><strong>{% trans "Status" %}:</strong> <span id="modalStatus"></span></p>
+                        <p><strong>{% trans "Device/Room" %}:</strong> <span id="modalDevice"></span></p>
                     </div>
                 </div>
                 <div class="row mt-3">
@@ -62,6 +100,17 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var calendarEl = document.getElementById('calendar');
+    var selectedDevices = [];
+    
+    // Get all device checkboxes
+    var deviceCheckboxes = document.querySelectorAll('.device-filter');
+    
+    // Initialize selected devices from checked checkboxes
+    deviceCheckboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            selectedDevices.push(checkbox.value);
+        }
+    });
     
     var calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
@@ -77,7 +126,25 @@ document.addEventListener('DOMContentLoaded', function() {
             day: '{% trans "Day" %}',
             list: '{% trans "List" %}'
         },
-        events: '/api/calendar-events/',
+        events: function(info, successCallback, failureCallback) {
+            // Build query parameters with selected devices
+            var queryParams = '?start=' + info.startStr + '&end=' + info.endStr;
+            selectedDevices.forEach(function(deviceId) {
+                queryParams += '&devices[]=' + deviceId;
+            });
+            
+            fetch('/api/calendar-events/' + queryParams)
+                .then(function(response) {
+                    return response.json();
+                })
+                .then(function(data) {
+                    successCallback(data);
+                })
+                .catch(function(error) {
+                    console.error('Error fetching calendar events:', error);
+                    failureCallback(error);
+                });
+        },
         eventClick: function(info) {
             var event = info.event;
             var props = event.extendedProps;
@@ -90,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalProcedure').textContent = event.title;
             document.getElementById('modalPriority').textContent = props.priority;
             document.getElementById('modalStatus').textContent = props.status;
+            document.getElementById('modalDevice').textContent = props.device || 'N/A';
             document.getElementById('modalStartTime').textContent = event.start.toLocaleString();
             
             // Calculate duration
@@ -125,6 +193,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     calendar.render();
+    
+    // Device filter button handlers
+    document.getElementById('applyDeviceFilter').addEventListener('click', function() {
+        // Update selected devices from checkboxes
+        selectedDevices = [];
+        deviceCheckboxes.forEach(function(checkbox) {
+            if (checkbox.checked) {
+                selectedDevices.push(checkbox.value);
+            }
+        });
+        
+        // Refresh calendar with new filter
+        calendar.refetchEvents();
+        
+        // Close the collapse
+        var collapseElement = document.getElementById('deviceFilterCollapse');
+        var bsCollapse = new bootstrap.Collapse(collapseElement, {toggle: false});
+        bsCollapse.hide();
+    });
+    
+    document.getElementById('selectAllDevices').addEventListener('click', function() {
+        deviceCheckboxes.forEach(function(checkbox) {
+            checkbox.checked = true;
+        });
+    });
+    
+    document.getElementById('clearAllDevices').addEventListener('click', function() {
+        deviceCheckboxes.forEach(function(checkbox) {
+            checkbox.checked = false;
+        });
+    });
 });
 </script>
 {% endblock %}

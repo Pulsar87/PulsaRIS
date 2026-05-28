@@ -14,6 +14,7 @@ def home(request):
     # Fetch scheduled orders for the calendar
     if tenant:
         from orders.models import ExamOrder
+        from tenants.models import Device
         # Get orders for the next 30 days
         end_date = datetime.now() + timedelta(days=30)
         orders = ExamOrder.objects.filter(
@@ -21,21 +22,27 @@ def home(request):
             scheduled_datetime__isnull=False,
             scheduled_datetime__lte=end_date
         ).exclude(status='CANCELLED')[:100]  # Limit to 100 for performance
+        
+        # Get all active devices for the tenant
+        devices = Device.objects.filter(tenant=tenant, is_active=True).order_by('name')
     else:
         orders = []
+        devices = []
     
-    return render(request, 'license/home.html', {'orders': orders})
+    return render(request, 'license/home.html', {'orders': orders, 'devices': devices})
 
 @login_required
 def calendar_events(request):
     """API endpoint to return calendar events in FullCalendar format."""
     from orders.models import ExamOrder
+    from tenants.models import Device
     
     tenant = getattr(request, 'tenant', None)
     
     # Get date range from request
     start = request.GET.get('start')
     end = request.GET.get('end')
+    device_ids = request.GET.getlist('devices[]')
     
     if not tenant:
         return JsonResponse([], safe=False)
@@ -50,6 +57,10 @@ def calendar_events(request):
         filters['scheduled_datetime__gte'] = start
     if end:
         filters['scheduled_datetime__lte'] = end
+    
+    # Filter by selected devices if provided
+    if device_ids:
+        filters['room_station__in'] = device_ids
     
     orders = ExamOrder.objects.filter(**filters).exclude(status='CANCELLED')[:200]
     
@@ -78,6 +89,7 @@ def calendar_events(request):
                 'priority': order.priority,
                 'status': order.status,
                 'modality': order.modality,
+                'device': order.room_station or 'N/A',
             }
         }
         events.append(event)
