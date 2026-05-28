@@ -8,7 +8,7 @@ from tenants.models import Tenant
 
 
 def get_tenant(request):
-    """Get tenant from request, with fallback to session."""
+    """Get tenant from request, with fallback to session and user."""
     # First try to get from request (set by tenant middleware)
     tenant = getattr(request, "tenant", None)
     if tenant:
@@ -26,6 +26,14 @@ def get_tenant(request):
             # Clear invalid session data
             if "tenant_id" in request.session:
                 del request.session["tenant_id"]
+
+    # Fallback: try to get from authenticated user's tenant
+    if request.user.is_authenticated and hasattr(request.user, 'tenant'):
+        user_tenant = request.user.tenant
+        if user_tenant:
+            # Store in session for future requests
+            request.session["tenant_id"] = str(user_tenant.id)
+            return user_tenant
 
     return None
 
