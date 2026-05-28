@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.utils import timezone
 
 from .check import get_hardware_id, verify_key
 
@@ -29,24 +29,34 @@ class LicenseMiddleware:
             if path.startswith(exempt_path):
                 return self.get_response(request)
 
-        # Check if license is activated in session
-        if not request.session.get("license_activated"):
-            # No valid license, redirect to activation page
-            return redirect("license:activation_required")
-
-        # Optional: Check if license has expired
-        license_expiry = request.session.get("license_expiry")
-        if license_expiry:
-            from datetime import datetime
-
-            try:
-                expiry_date = datetime.strptime(license_expiry, "%Y-%m-%d")
-                if datetime.now() > expiry_date:
-                    # License expired, clear session and redirect
-                    request.session.flush()
-                    return redirect("license:activation_required")
-            except ValueError:
-                pass
+        # Get tenant from request (assuming django-tenants sets this)
+        tenant = getattr(request, 'tenant', None)
+        
+        if tenant and hasattr(tenant, 'license_activated'):
+            # Check license status from tenant model
+            if not tenant.license_activated:
+                return redirect("license:activation_required")
+            
+            # Check if license has expired
+            if tenant.license_expiry and tenant.license_expiry < timezone.now().date():
+                # License expired, deactivate and redirect
+                tenant.license_activated = False
+                tenant.save(update_fields=['license_activated'])
+                return redirect("license:activation_required")
+        else:
+            # Fallback to session-based check for non-tenant setups
+            if not request.session.get("license_activated"):
+                return redirect("license:activation_required")
+            
+            license_expiry = request.session.get("license_expiry")
+            if license_expiry:
+                try:
+                    expiry_date = timezone.datetime.strptime(license_expiry, "%Y-%m-%d").date()
+                    if timezone.now().date() > expiry_date:
+                        request.session.flush()
+                        return redirect("license:activation_required")
+                except ValueError:
+                    pass
 
         response = self.get_response(request)
         return response

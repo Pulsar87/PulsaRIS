@@ -25,7 +25,7 @@ ROOT_URLCONF = "config.urls"
 # Authentication Settings
 # ─────────────────────────────────────────────────────────────
 LOGIN_URL = 'users:login'
-LOGIN_REDIRECT_URL = 'worklist'
+LOGIN_REDIRECT_URL = 'license:home'
 LOGOUT_REDIRECT_URL = 'users:login'
 # ─────────────────────────────────────────────────────────────
 # Application Definition

@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from .check import get_hardware_id, verify_key
 
+@login_required
 def home(request):
     """Home page view."""
     return render(request, 'license/home.html')
@@ -25,11 +27,22 @@ def activate(request):
             provided_key = f"{expiry_str}-{signature.upper()}"
             
             if verify_key(provided_key):
-                # Store license in session or database
-                request.session['license_activated'] = True
-                request.session['license_expiry'] = expiry_date
+                # Get tenant from request
+                tenant = getattr(request, 'tenant', None)
+                
+                if tenant:
+                    # Store license in tenant model (persists across sessions/logouts)
+                    tenant.license_activated = True
+                    tenant.license_expiry = expiry_date
+                    tenant.license_signature = signature.upper()
+                    tenant.save(update_fields=['license_activated', 'license_expiry', 'license_signature'])
+                else:
+                    # Fallback to session for non-tenant setups
+                    request.session['license_activated'] = True
+                    request.session['license_expiry'] = expiry_date
+                
                 messages.success(request, 'System activated successfully!')
-                return redirect('home')  # Redirect to your main page
+                return redirect('license:home')
             else:
                 messages.error(request, 'Invalid license key. Please check your information.')
         except Exception as e:
