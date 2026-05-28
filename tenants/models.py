@@ -10,6 +10,9 @@ class Tenant(TenantMixin):
     name = models.CharField(max_length=150, unique=True)
     subdomain = models.CharField(max_length=63, unique=True, db_index=True)
     is_active = models.BooleanField(default=True)
+    license_activated = models.BooleanField(default=False)
+    license_expiry = models.DateField(null=True, blank=True)
+    license_signature = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

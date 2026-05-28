@@ -26,13 +26,19 @@ wheels/
 .env.local
 .env.*
 
-# Logs
+# Django
 *.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
 ```

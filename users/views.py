@@ -10,7 +10,7 @@ from users.models import User
 def user_login(request):
     """User login view."""
     if request.user.is_authenticated:
-        return redirect("home")
+        return redirect("license:home")
 
     if request.method == "POST":
         email = request.POST.get("email")
@@ -23,7 +23,7 @@ def user_login(request):
             messages.success(
                 request, _("Welcome back, %(username)s!") % {"username": user.username}
             )
-            return redirect("home")
+            return redirect("license:home")
         else:
             messages.error(request, _("Invalid email or password."))
 
@@ -44,7 +44,7 @@ def manage_users(request):
         "ADMIN",
         "MANAGER",
     ]:
-        return redirect("worklist")
+        return redirect("license:home")
 
     users = User.objects.all()
     return render(request, "users/manage_users.html", {"users": users})
