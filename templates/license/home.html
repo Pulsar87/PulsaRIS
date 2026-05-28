@@ -25,7 +25,7 @@
                                     <div class="form-check">
                                         <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
                                         <label class="form-check-label" for="device_{{ device.id }}">
-                                            {{ device.name }} ({{ device.modality }})
+                                            {{ device.name }} ({{ device.modality.code }})
                                         </label>
                                     </div>
                                     {% empty %}

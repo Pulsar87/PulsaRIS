@@ -23,8 +23,8 @@ def home(request):
             scheduled_datetime__lte=end_date
         ).exclude(status='CANCELLED')[:100]  # Limit to 100 for performance
         
-        # Get all active devices for the tenant
-        devices = Device.objects.filter(tenant=tenant, is_active=True).order_by('name')
+        # Get all active devices for the tenant with modality info
+        devices = Device.objects.filter(tenant=tenant, is_active=True).select_related('modality').order_by('name')
     else:
         orders = []
         devices = []
@@ -60,9 +60,9 @@ def calendar_events(request):
     
     # Filter by selected devices if provided
     if device_ids:
-        filters['room_station__in'] = device_ids
+        filters['room_station_id__in'] = device_ids
     
-    orders = ExamOrder.objects.filter(**filters).exclude(status='CANCELLED')[:200]
+    orders = ExamOrder.objects.filter(**filters).exclude(status='CANCELLED').select_related('room_station', 'modality', 'patient')[:200]
     
     events = []
     color_map = {
@@ -76,6 +76,7 @@ def calendar_events(request):
     
     for order in orders:
         modality_code = order.modality.code if hasattr(order.modality, 'code') else str(order.modality)
+        device_name = order.room_station.name if order.room_station else 'N/A'
         event = {
             'id': str(order.id),
             'title': f"{modality_code} - {order.procedure_code}",
@@ -90,7 +91,7 @@ def calendar_events(request):
                 'priority': order.priority,
                 'status': order.status,
                 'modality': modality_code,
-                'device': order.room_station or 'N/A',
+                'device': device_name,
             }
         }
         events.append(event)
