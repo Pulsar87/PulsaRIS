@@ -1,0 +1,403 @@
+{% extends 'layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Order Reservation" %} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-calendar-plus me-2 text-info"></i>
+                        {% trans "Reserve Exam Order" %}
+                    </h3>
+                    <a href="/worklist" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i> {% trans "Back to Worklist" %}
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{% url 'orders:reserve_order' %}">
+                    {% csrf_token %}
+                    
+                    <!-- Patient Information Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-person-fill me-2"></i>
+                            {% trans "Patient Information" %}
+                        </h5>
+                        <div class="row g-3">
+                            <!-- MRN Lookup -->
+                            <div class="col-md-6">
+                                <label for="patient_mrn" class="form-label fw-medium">
+                                    {% trans "Medical Record Number (MRN)" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        class="form-control form-control-lg" 
+                                        id="patient_mrn" 
+                                        name="patient_mrn" 
+                                        placeholder="{% trans 'Enter patient MRN' %}"
+                                        required
+                                        autofocus
+                                    />
+                                    <button 
+                                        class="btn btn-outline-primary" 
+                                        type="button" 
+                                        id="btnLookupPatient"
+                                        hx-get="/api/patients/lookup/"
+                                        hx-target="#patientResults"
+                                        hx-trigger="click"
+                                    >
+                                        <i class="bi bi-search"></i> {% trans "Lookup" %}
+                                    </button>
+                                </div>
+                                <div id="patientResults" class="mt-2"></div>
+                            </div>
+                            
+                            <!-- Patient Name (Auto-filled) -->
+                            <div class="col-md-6">
+                                <label for="patient_name" class="form-label fw-medium">
+                                    {% trans "Patient Name" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="patient_name" 
+                                    name="patient_name" 
+                                    readonly
+                                    style="background-color: #f8f9fa;"
+                                />
+                            </div>
+                            
+                            <!-- Date of Birth -->
+                            <div class="col-md-4">
+                                <label for="patient_dob" class="form-label fw-medium">
+                                    {% trans "Date of Birth" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="patient_dob" 
+                                    name="patient_dob" 
+                                    readonly
+                                    style="background-color: #f8f9fa;"
+                                />
+                            </div>
+                            
+                            <!-- Gender -->
+                            <div class="col-md-4">
+                                <label for="patient_gender" class="form-label fw-medium">
+                                    {% trans "Gender" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="patient_gender" 
+                                    name="patient_gender" 
+                                    readonly
+                                    style="background-color: #f8f9fa;"
+                                />
+                            </div>
+                            
+                            <!-- Phone -->
+                            <div class="col-md-4">
+                                <label for="patient_phone" class="form-label fw-medium">
+                                    {% trans "Phone" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="patient_phone" 
+                                    name="patient_phone" 
+                                    readonly
+                                    style="background-color: #f8f9fa;"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Details Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-file-earmark-medical-fill me-2"></i>
+                            {% trans "Order Details" %}
+                        </h5>
+                        <div class="row g-3">
+                            <!-- Accession Number -->
+                            <div class="col-md-6">
+                                <label for="accession_number" class="form-label fw-medium">
+                                    {% trans "Accession Number" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="accession_number" 
+                                    name="accession_number" 
+                                    placeholder="{% trans 'Enter accession number' %}"
+                                    required
+                                />
+                            </div>
+                            
+                            <!-- Priority -->
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label fw-medium">
+                                    {% trans "Priority" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg" id="priority" name="priority" required>
+                                    <option value="ROUTINE" selected>{% trans "Routine" %}</option>
+                                    <option value="URGENT">{% trans "Urgent" %}</option>
+                                    <option value="STAT">{% trans "Stat" %}</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Modality -->
+                            <div class="col-md-6">
+                                <label for="modality" class="form-label fw-medium">
+                                    {% trans "Modality" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select form-select-lg" id="modality" name="modality" required>
+                                    <option value="" selected disabled>{% trans "Select modality" %}</option>
+                                    <option value="CT">CT - Computed Tomography</option>
+                                    <option value="MR">MR - Magnetic Resonance</option>
+                                    <option value="CR">CR - Computed Radiography</option>
+                                    <option value="DX">DX - Digital Radiography</option>
+                                    <option value="US">US - Ultrasound</option>
+                                    <option value="NM">NM - Nuclear Medicine</option>
+                                    <option value="PT">PT - Positron Emission Tomography</option>
+                                    <option value="MG">MG - Mammography</option>
+                                    <option value="XA">XA - X-Ray Angiography</option>
+                                    <option value="RF">RF - Radio Fluoroscopy</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Procedure Code -->
+                            <div class="col-md-6">
+                                <label for="procedure_code" class="form-label fw-medium">
+                                    {% trans "Procedure Code" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="procedure_code" 
+                                    name="procedure_code" 
+                                    placeholder="{% trans 'e.g., CT-HEAD, MR-KNEE' %}"
+                                    required
+                                />
+                            </div>
+                            
+                            <!-- Procedure Name (English) -->
+                            <div class="col-md-6">
+                                <label for="procedure_name_en" class="form-label fw-medium">
+                                    {% trans "Procedure Name (English)" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="procedure_name_en" 
+                                    name="procedure_name_en" 
+                                    placeholder="{% trans 'Enter procedure name in English' %}"
+                                    required
+                                />
+                            </div>
+                            
+                            <!-- Procedure Name (Arabic) -->
+                            <div class="col-md-6">
+                                <label for="procedure_name_ar" class="form-label fw-medium">
+                                    {% trans "Procedure Name (Arabic)" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="procedure_name_ar" 
+                                    name="procedure_name_ar" 
+                                    dir="rtl"
+                                    placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
+                                />
+                            </div>
+                            
+                            <!-- Referring Physician -->
+                            <div class="col-md-6">
+                                <label for="referring_physician" class="form-label fw-medium">
+                                    {% trans "Referring Physician" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="referring_physician" 
+                                    name="referring_physician" 
+                                    placeholder="{% trans 'Enter physician name' %}"
+                                />
+                            </div>
+                            
+                            <!-- Laterality -->
+                            <div class="col-md-6">
+                                <label for="laterality" class="form-label fw-medium">
+                                    {% trans "Laterality" %}
+                                </label>
+                                <select class="form-select form-select-lg" id="laterality" name="laterality">
+                                    <option value="" selected>{% trans "Not Applicable" %}</option>
+                                    <option value="L">{% trans "Left" %}</option>
+                                    <option value="R">{% trans "Right" %}</option>
+                                    <option value="B">{% trans "Bilateral" %}</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Body Part -->
+                            <div class="col-md-6">
+                                <label for="body_part" class="form-label fw-medium">
+                                    {% trans "Body Part" %}
+                                </label>
+                                <input 
+                                    type="text" 
+                                    class="form-control form-control-lg" 
+                                    id="body_part" 
+                                    name="body_part" 
+                                    placeholder="{% trans 'e.g., Head, Knee, Chest' %}"
+                                />
+                            </div>
+                            
+                            <!-- Contrast Required -->
+                            <div class="col-md-6">
+                                <label class="form-label fw-medium d-block">
+                                    {% trans "Contrast Required" %}
+                                </label>
+                                <div class="form-check form-switch mt-2">
+                                    <input 
+                                        class="form-check-input" 
+                                        type="checkbox" 
+                                        id="contrast_required" 
+                                        name="contrast_required"
+                                    />
+                                    <label class="form-check-label" for="contrast_required">
+                                        {% trans "Yes, contrast is required" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Clinical Information Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-clipboard-data-fill me-2"></i>
+                            {% trans "Clinical Information" %}
+                        </h5>
+                        <div class="row g-3">
+                            <!-- Clinical Indication -->
+                            <div class="col-12">
+                                <label for="clinical_indication" class="form-label fw-medium">
+                                    {% trans "Clinical Indication / Reason for Exam" %}
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="clinical_indication" 
+                                    name="clinical_indication" 
+                                    rows="3"
+                                    placeholder="{% trans 'Describe clinical symptoms, diagnosis, or reason for examination...' %}"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Scheduling Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-clock-fill me-2"></i>
+                            {% trans "Scheduling" %}
+                        </h5>
+                        <div class="row g-3">
+                            <!-- Scheduled DateTime -->
+                            <div class="col-md-6">
+                                <label for="scheduled_datetime" class="form-label fw-medium">
+                                    {% trans "Scheduled Date & Time" %}
+                                </label>
+                                <input 
+                                    type="datetime-local" 
+                                    class="form-control form-control-lg" 
+                                    id="scheduled_datetime" 
+                                    name="scheduled_datetime"
+                                />
+                            </div>
+                            
+                            <!-- Duration -->
+                            <div class="col-md-6">
+                                <label for="duration_minutes" class="form-label fw-medium">
+                                    {% trans "Duration (minutes)" %}
+                                </label>
+                                <input 
+                                    type="number" 
+                                    class="form-control form-control-lg" 
+                                    id="duration_minutes" 
+                                    name="duration_minutes" 
+                                    value="15"
+                                    min="5"
+                                    max="240"
+                                />
+                            </div>
+                            
+                            <!-- Room/Station -->
+                            <div class="col-md-6">
+                                <label for="room_station" class="form-label fw-medium">
+                                    {% trans "Room / Station" %}
+                                </label>
+                                <select class="form-select form-select-lg" id="room_station" name="room_station">
+                                    <option value="" selected>{% trans "Auto-assign" %}</option>
+                                    <option value="1">{% trans "Room 1" %}</option>
+                                    <option value="2">{% trans "Room 2" %}</option>
+                                    <option value="3">{% trans "Room 3" %}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between gap-2 mt-5 pt-3 border-top">
+                        <button type="reset" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle me-2"></i> {% trans "Clear Form" %}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i> {% trans "Reserve Order" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate accession number if empty
+    const accessionField = document.getElementById('accession_number');
+    if (!accessionField.value) {
+        const timestamp = new Date().getTime();
+        const random = Math.floor(Math.random() * 1000);
+        accessionField.value = 'ACC-' + timestamp + '-' + random;
+    }
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const mrn = document.getElementById('patient_mrn').value.trim();
+        if (!mrn) {
+            e.preventDefault();
+            alert('{% trans "Please enter a valid MRN" %}');
+            document.getElementById('patient_mrn').focus();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}
