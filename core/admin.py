@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.models import Group
-from django.contrib.auth.admin import GroupAdmin as BaseGroupAdmin
 
-# Register the default Django Group model
-admin.site.register(Group, BaseGroupAdmin)
+# Group is already registered by Django's default admin, no need to re-register
+# Custom groups can be created via the Django admin interface for permission management

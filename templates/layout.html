@@ -214,11 +214,19 @@
                                             "
                                             >{{ user.username }}</span
                                         >
+                                        {% if user.is_superuser %}
                                         <small
                                             class="text-muted text-uppercase"
                                             style="font-size: 0.65rem"
-                                            >{{ user.role }}</small
+                                            >Super Admin</small
                                         >
+                                        {% elif user.is_staff %}
+                                        <small
+                                            class="text-muted text-uppercase"
+                                            style="font-size: 0.65rem"
+                                            >Staff</small
+                                        >
+                                        {% endif %}
                                     </div>
                                 </div>
                             </a>
@@ -237,7 +245,7 @@
                                         {% trans "Doctors" %}
                                     </a>
                                 </li>
-                                {% if user.role in 'ADMIN,MANAGER' %}
+                                {% if user.is_staff %}
                                 <li>
                                     <a
                                         class="dropdown-item rounded-2"

@@ -51,10 +51,7 @@ def user_logout(request):
 @login_required
 def manage_users(request):
     """View for managing users (admin only)."""
-    if not hasattr(request.user, "role") or request.user.role not in [
-        "ADMIN",
-        "MANAGER",
-    ]:
+    if not request.user.is_staff:
         return redirect("license:home")
 
     users = User.objects.all()
