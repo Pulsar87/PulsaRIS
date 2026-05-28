@@ -33,6 +33,7 @@ def user_login(request):
 def user_logout(request):
     """User logout view."""
     # Preserve license activation status in session before logging out
+
     license_activated = request.session.get("license_activated")
     license_expiry = request.session.get("license_expiry")
     logout(request)

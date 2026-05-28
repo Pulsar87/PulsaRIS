@@ -34,6 +34,7 @@ SHARED_APPS = [
     "django_tenants",  # MUST be first
     "tenants",  # Your tenant model app
     "license",  # License check - must be in SHARED_APPS to work across all tenants
+    "core",  # Core admin registrations including Group
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
@@ -206,6 +207,5 @@ if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = "DENY"
-
 
 SESSION_SAVE_EVERY_REQUEST = True
