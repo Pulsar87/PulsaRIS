@@ -1,0 +1,243 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Add Patient' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>{% trans 'Add New Patient' %}
+                </h2>
+                <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-1"></i>{% trans 'Patient List' %}
+                </a>
+            </div>
+
+            <!-- Patient Form -->
+            <form method="post" id="patientForm">
+                {% csrf_token %}
+                
+                <!-- Patient Information Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>{% trans 'Patient Information' %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <!-- MRN -->
+                            <div class="col-md-4">
+                                <label for="mrn" class="form-label">{% trans 'MRN' %} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control {% if form.mrn.errors %}is-invalid{% endif %}" 
+                                       id="mrn" name="mrn" required 
+                                       placeholder="{% trans 'Enter MRN' %}">
+                                {% if form.mrn.errors %}
+                                    <div class="invalid-feedback">{{ form.mrn.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- National ID -->
+                            <div class="col-md-4">
+                                <label for="national_id" class="form-label">{% trans 'National ID' %}</label>
+                                <input type="text" class="form-control" id="national_id" name="national_id" 
+                                       placeholder="{% trans 'Enter National ID' %}">
+                            </div>
+
+                            <!-- Nationality -->
+                            <div class="col-md-4">
+                                <label for="nationality" class="form-label">{% trans 'Nationality' %}</label>
+                                <select class="form-select" id="nationality" name="nationality">
+                                    <option value="">-- {% trans 'Select' %} --</option>
+                                    <option value="SAU">{% trans 'Saudi Arabia' %}</option>
+                                    <option value="EGY">{% trans 'Egypt' %}</option>
+                                    <option value="IND">{% trans 'India' %}</option>
+                                    <option value="PAK">{% trans 'Pakistan' %}</option>
+                                    <option value="PHL">{% trans 'Philippines' %}</option>
+                                    <option value="BGD">{% trans 'Bangladesh' %}</option>
+                                    <option value="OTHER">{% trans 'Other' %}</option>
+                                </select>
+                            </div>
+
+                            <!-- First Name English -->
+                            <div class="col-md-4">
+                                <label for="first_name_en" class="form-label">{% trans 'First Name (English)' %} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control {% if form.first_name_en.errors %}is-invalid{% endif %}" 
+                                       id="first_name_en" name="first_name_en" required 
+                                       placeholder="{% trans 'First Name' %}">
+                            </div>
+
+                            <!-- Last Name English -->
+                            <div class="col-md-4">
+                                <label for="last_name_en" class="form-label">{% trans 'Last Name (English)' %} <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control {% if form.last_name_en.errors %}is-invalid{% endif %}" 
+                                       id="last_name_en" name="last_name_en" required 
+                                       placeholder="{% trans 'Last Name' %}">
+                            </div>
+
+                            <!-- First Name Arabic -->
+                            <div class="col-md-4">
+                                <label for="first_name_ar" class="form-label">{% trans 'First Name (Arabic)' %}</label>
+                                <input type="text" class="form-control" id="first_name_ar" name="first_name_ar" 
+                                       placeholder="{% trans 'الاسم الأول' %}" dir="rtl">
+                            </div>
+
+                            <!-- Last Name Arabic -->
+                            <div class="col-md-4">
+                                <label for="last_name_ar" class="form-label">{% trans 'Last Name (Arabic)' %}</label>
+                                <input type="text" class="form-control" id="last_name_ar" name="last_name_ar" 
+                                       placeholder="{% trans 'اسم العائلة' %}" dir="rtl">
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="col-md-4">
+                                <label for="dob" class="form-label">{% trans 'Date of Birth' %} <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control {% if form.dob.errors %}is-invalid{% endif %}" 
+                                       id="dob" name="dob" required>
+                            </div>
+
+                            <!-- Gender -->
+                            <div class="col-md-4">
+                                <label for="gender" class="form-label">{% trans 'Gender' %} <span class="text-danger">*</span></label>
+                                <select class="form-select {% if form.gender.errors %}is-invalid{% endif %}" 
+                                        id="gender" name="gender" required>
+                                    <option value="">-- {% trans 'Select' %} --</option>
+                                    <option value="M">{% trans 'Male' %}</option>
+                                    <option value="F">{% trans 'Female' %}</option>
+                                    <option value="O">{% trans 'Other' %}</option>
+                                </select>
+                            </div>
+
+                            <!-- Phone -->
+                            <div class="col-md-4">
+                                <label for="phone" class="form-label">{% trans 'Phone' %}</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       placeholder="{% trans 'Enter phone number' %}">
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-md-4">
+                                <label for="email" class="form-label">{% trans 'Email' %}</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       placeholder="{% trans 'Enter email address' %}">
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="row g-3 mt-2">
+                            <div class="col-12">
+                                <label for="address" class="form-label">{% trans 'Address' %}</label>
+                                <textarea class="form-control" id="address" name="address" rows="2" 
+                                          placeholder="{% trans 'Enter full address' %}"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contact Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning">
+                        <h5 class="mb-0"><i class="fas fa-phone-alt me-2"></i>{% trans 'Emergency Contact' %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="emergency_contact_name" class="form-label">{% trans 'Contact Name' %}</label>
+                                <input type="text" class="form-control" id="emergency_contact_name" name="emergency_contact_name" 
+                                       placeholder="{% trans 'Enter contact name' %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="emergency_contact_phone" class="form-label">{% trans 'Contact Phone' %}</label>
+                                <input type="tel" class="form-control" id="emergency_contact_phone" name="emergency_contact_phone" 
+                                       placeholder="{% trans 'Enter contact phone' %}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Insurance Information Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{% trans 'Insurance Information' %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="insurance_provider" class="form-label">{% trans 'Insurance Provider' %}</label>
+                                <input type="text" class="form-control" id="insurance_provider" name="insurance_provider" 
+                                       placeholder="{% trans 'Enter insurance provider' %}">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="insurance_policy_number" class="form-label">{% trans 'Policy Number' %}</label>
+                                <input type="text" class="form-control" id="insurance_policy_number" name="insurance_policy_number" 
+                                       placeholder="{% trans 'Enter policy number' %}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options Card -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>{% trans 'Additional Options' %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="consent_data_sharing" name="consent_data_sharing">
+                                    <label class="form-check-label" for="consent_data_sharing">
+                                        {% trans 'Consent to Data Sharing' %}
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="data_retention_until" class="form-label">{% trans 'Data Retention Until' %}</label>
+                                <input type="date" class="form-control" id="data_retention_until" name="data_retention_until">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{% url 'patients:patient_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i>{% trans 'Cancel' %}
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>{% trans 'Save Patient' %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-generate MRN if empty on focus
+    const mrnField = document.getElementById('mrn');
+    if (mrnField && !mrnField.value) {
+        // Generate a simple MRN format: YYYYMMDD + random 4 digits
+        const now = new Date();
+        const dateStr = now.toISOString().slice(0,10).replace(/-/g,'');
+        const randomNum = Math.floor(1000 + Math.random() * 9000);
+        mrnField.value = dateStr + randomNum;
+    }
+
+    // Form validation feedback
+    const form = document.getElementById('patientForm');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
+</script>
+{% endblock %}
