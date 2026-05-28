@@ -1,0 +1,14 @@
+{% extends '../layout.html' %} {% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+Welcome. This is the home page
+        </div>
+    </div>
+</div>
+<script>
+    // Optional: Prevent selecting past dates
+    document.getElementById("datePicker").min = new Date()
+        .toISOString()
+        .split("T")[0];
+</script>
+{% endblock %}

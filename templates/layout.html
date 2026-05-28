@@ -98,7 +98,8 @@
                             <a
                                 class="nav-link {% if request.resolver_match.url_name == 'worklist' %}active{% endif %}"
                                 href="/worklist"
-                                ><i class="bi bi-grid-1x2 me-1"></i> {% trans "Worklist" %}</a
+                                ><i class="bi bi-grid-1x2 me-1"></i> {% trans
+                                "Worklist" %}</a
                             >
                         </li>
 
@@ -107,7 +108,8 @@
                             <a
                                 class="nav-link {% if request.resolver_match.url_name == 'patients' %}active{% endif %}"
                                 href="/patients"
-                                ><i class="bi bi-people-fill me-1"></i> {% trans "Patients" %}</a
+                                ><i class="bi bi-people-fill me-1"></i> {% trans
+                                "Patients" %}</a
                             >
                         </li>
 
@@ -239,7 +241,7 @@
                                 <li>
                                     <a
                                         class="dropdown-item rounded-2"
-                                        href="{% url 'manage_users' %}"
+                                        href="{% url 'users:manage_users' %}"
                                     >
                                         <i
                                             class="bi bi-people-fill me-2 text-secondary"
@@ -285,7 +287,7 @@
                                 <li>
                                     <a
                                         class="dropdown-item rounded-2 text-danger"
-                                        href="{% url 'logout' %}"
+                                        href="{% url 'users:logout' %}"
                                     >
                                         <i
                                             class="bi bi-box-arrow-right me-2"
@@ -297,7 +299,9 @@
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="btn btn-primary" href="{% url 'login' %}"
+                            <a
+                                class="btn btn-primary"
+                                href="{% url 'users:login' %}"
                                 >{% trans "Login" %}</a
                             >
                         </li>
