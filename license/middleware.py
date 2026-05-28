@@ -19,6 +19,8 @@ class LicenseMiddleware:
             "/admin/",
             "/static/",
             "/media/",
+            "/users/login",
+            "/users/logout",
         ]
 
     def __call__(self, request):
@@ -29,7 +31,7 @@ class LicenseMiddleware:
             if path.startswith(exempt_path):
                 return self.get_response(request)
 
-        # Get tenant from request (assuming django-tenants sets this)
+        # Get tenant from request (set by django_tenants middleware)
         tenant = getattr(request, 'tenant', None)
         
         if tenant and hasattr(tenant, 'license_activated'):
@@ -44,7 +46,7 @@ class LicenseMiddleware:
                 tenant.save(update_fields=['license_activated'])
                 return redirect("license:activation_required")
         else:
-            # Fallback to session-based check for non-tenant setups
+            # Fallback to session-based check for non-tenant setups or public schema
             if not request.session.get("license_activated"):
                 return redirect("license:activation_required")
             
