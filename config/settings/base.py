@@ -20,6 +20,13 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 AUDITLOG_DISABLE_REMOTE_ADDR = False
 ROOT_URLCONF = "config.urls"
+
+# ─────────────────────────────────────────────────────────────
+# Authentication Settings
+# ─────────────────────────────────────────────────────────────
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'worklist'
+LOGOUT_REDIRECT_URL = 'users:login'
 # ─────────────────────────────────────────────────────────────
 # Application Definition
 # ─────────────────────────────────────────────────────────────
