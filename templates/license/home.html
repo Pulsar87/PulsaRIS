@@ -579,6 +579,29 @@ document.addEventListener('DOMContentLoaded', function() {
         initialDate: selectedDate.toISOString().split('T')[0],
         headerToolbar: false,
         footerToolbar: false,
+        eventDidMount: function(info) {
+            // Add tooltip to events with device information
+            var tooltipText = info.event.title + '\n' + 
+                             info.event.extendedProps.patient_name + '\n' +
+                             '{% trans "Device" %}: ' + info.event.extendedProps.device;
+            info.el.setAttribute('title', tooltipText);
+            
+            // Color events based on status (use backend color as fallback)
+            var status = info.event.extendedProps.status;
+            if (status === 'COMPLETED' || status === 'REPORTED' || status === 'FINALIZED') {
+                info.el.style.backgroundColor = '#22c55e'; // Green
+                info.el.style.borderColor = '#16a34a';
+            } else if (status === 'REGISTERED' || status === 'SCHEDULED') {
+                info.el.style.backgroundColor = '#eab308'; // Yellow
+                info.el.style.borderColor = '#ca8a04';
+            } else if (status === 'IN_PROGRESS') {
+                info.el.style.backgroundColor = '#f97316'; // Orange
+                info.el.style.borderColor = '#ea580c';
+            } else if (status === 'CANCELLED') {
+                info.el.style.backgroundColor = '#ef4444'; // Red
+                info.el.style.borderColor = '#dc2626';
+            }
+        },
         events: function(info, successCallback, failureCallback) {
             // Build query parameters with selected devices and single day
             var startDate = info.startStr.split('T')[0];
@@ -637,29 +660,6 @@ document.addEventListener('DOMContentLoaded', function() {
             var modal = new bootstrap.Modal(document.getElementById('eventModal'));
             modal.show();
         },
-        eventDidMount: function(info) {
-            // Add tooltip to events with device information
-            var tooltipText = info.event.title + '\n' + 
-                             info.event.extendedProps.patient_name + '\n' +
-                             '{% trans "Device" %}: ' + info.event.extendedProps.device;
-            info.el.setAttribute('title', tooltipText);
-            
-            // Color events based on status (use backend color as fallback)
-            var status = info.event.extendedProps.status;
-            if (status === 'COMPLETED' || status === 'REPORTED' || status === 'FINALIZED') {
-                info.el.style.backgroundColor = '#22c55e'; // Green
-                info.el.style.borderColor = '#16a34a';
-            } else if (status === 'REGISTERED' || status === 'SCHEDULED') {
-                info.el.style.backgroundColor = '#eab308'; // Yellow
-                info.el.style.borderColor = '#ca8a04';
-            } else if (status === 'IN_PROGRESS') {
-                info.el.style.backgroundColor = '#f97316'; // Orange
-                info.el.style.borderColor = '#ea580c';
-            } else if (status === 'CANCELLED') {
-                info.el.style.backgroundColor = '#ef4444'; // Red
-                info.el.style.borderColor = '#dc2626';
-            }
-        },
         height: '100%',
         expandRows: true,
         nowIndicator: true,
@@ -681,6 +681,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     calendar.render();
+    
+    // Auto-refresh calendar every 30 seconds
+    var autoRefreshInterval = setInterval(function() {
+        calendar.refetchEvents();
+    }, 30000);
+    
+    // Clean up interval when page is unloaded
+    window.addEventListener('beforeunload', function() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+        }
+    });
     
     // Device list click handlers
     deviceCheckboxes.forEach(function(checkbox) {
