@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from datetime import datetime, timedelta
+from django.utils import timezone
 from .check import get_hardware_id, verify_key
 
 @login_required
@@ -16,7 +17,7 @@ def home(request):
         from orders.models import ExamOrder
         from tenants.models import Device
         # Get orders for the next 30 days
-        end_date = datetime.now() + timedelta(days=30)
+        end_date = timezone.now() + timedelta(days=30)
         orders = ExamOrder.objects.filter(
             tenant=tenant,
             scheduled_datetime__isnull=False,
@@ -36,7 +37,9 @@ def calendar_events(request):
     """API endpoint to return calendar events in FullCalendar format."""
     from orders.models import ExamOrder
     from tenants.models import Device
+    import logging
     
+    logger = logging.getLogger(__name__)
     tenant = getattr(request, 'tenant', None)
     
     # Get date range from request
@@ -44,7 +47,10 @@ def calendar_events(request):
     end = request.GET.get('end')
     device_ids = request.GET.getlist('devices[]')
     
+    logger.info(f"calendar_events called: start={start}, end={end}, devices={device_ids}, tenant={tenant}")
+    
     if not tenant:
+        logger.warning("No tenant found")
         return JsonResponse([], safe=False)
     
     # Filter orders within the date range
@@ -54,15 +60,48 @@ def calendar_events(request):
     }
     
     if start:
-        filters['scheduled_datetime__gte'] = start
+        # Parse the start date - FullCalendar sends ISO format with timezone
+        try:
+            from dateutil import parser
+            start_dt = parser.parse(start)
+            filters['scheduled_datetime__gte'] = start_dt
+            logger.info(f"Parsed start date: {start_dt}")
+        except (ValueError, ImportError) as e:
+            logger.error(f"Error parsing start date: {e}")
+            filters['scheduled_datetime__gte'] = start
     if end:
-        filters['scheduled_datetime__lte'] = end
+        # Parse the end date - FullCalendar sends ISO format with timezone
+        try:
+            from dateutil import parser
+            end_dt = parser.parse(end)
+            filters['scheduled_datetime__lte'] = end_dt
+            logger.info(f"Parsed end date: {end_dt}")
+        except (ValueError, ImportError) as e:
+            logger.error(f"Error parsing end date: {e}")
+            filters['scheduled_datetime__lte'] = end
     
     # Filter by selected devices if provided
     if device_ids:
-        filters['room_station_id__in'] = device_ids
+        # Convert device IDs to UUIDs if needed
+        from uuid import UUID
+        valid_device_ids = []
+        for device_id in device_ids:
+            try:
+                # Try to convert to UUID
+                valid_device_ids.append(str(UUID(device_id)))
+            except (ValueError, AttributeError):
+                # If not a valid UUID, keep as string
+                valid_device_ids.append(device_id)
+        filters['room_station_id__in'] = valid_device_ids
+        logger.info(f"Filtering by device IDs: {valid_device_ids}")
+    
+    logger.info(f"Final filters: {filters}")
     
     orders = ExamOrder.objects.filter(**filters).exclude(status='CANCELLED').select_related('room_station', 'modality', 'patient')[:200]
+    
+    logger.info(f"Found {orders.count()} orders")
+    for order in orders:
+        logger.info(f"Order: {order.id}, scheduled={order.scheduled_datetime}, device={order.room_station_id}, status={order.status}")
     
     events = []
     color_map = {
@@ -77,11 +116,21 @@ def calendar_events(request):
     for order in orders:
         modality_code = order.modality.code if hasattr(order.modality, 'code') else str(order.modality)
         device_name = order.room_station.name if order.room_station else 'N/A'
+        
+        # Ensure scheduled_datetime is timezone-aware
+        scheduled_dt = order.scheduled_datetime
+        if scheduled_dt and timezone.is_naive(scheduled_dt):
+            scheduled_dt = timezone.make_aware(scheduled_dt)
+        
+        end_dt = None
+        if order.duration_minutes:
+            end_dt = scheduled_dt + timedelta(minutes=order.duration_minutes)
+        
         event = {
             'id': str(order.id),
             'title': f"{modality_code} - {order.procedure_code}",
-            'start': order.scheduled_datetime.isoformat(),
-            'end': (order.scheduled_datetime + timedelta(minutes=order.duration_minutes)).isoformat() if order.duration_minutes else None,
+            'start': scheduled_dt.isoformat(),
+            'end': end_dt.isoformat() if end_dt else None,
             'backgroundColor': color_map.get(modality_code, '#95a5a6'),
             'borderColor': color_map.get(modality_code, '#95a5a6'),
             'extendedProps': {
