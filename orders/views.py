@@ -5,7 +5,7 @@ from django.http import JsonResponse
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
-from tenants.models import Device
+from tenants.models import Device, Tenant
 
 
 def reserve_order(request):
@@ -60,14 +60,24 @@ def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
     tenant = get_tenant(request)
     
+    # Debug: log tenant info
+    print(f"DEBUG get_devices: tenant={tenant}")
+
     if not tenant:
         from django.template.loader import render_to_string
-        return render_to_string('orders/_device_options.html', {'devices': [], 'error': 'Tenant not found'})
-    
+        html = render_to_string('orders/_device_options.html', {'devices': [], 'error': 'Tenant not found'})
+        print(f"DEBUG get_devices: no tenant, returning error HTML")
+        return html
+
     devices = Device.objects.filter(
         tenant=tenant,
         is_active=True
     ).select_related('modality').order_by('name')
     
+    # Debug: log device count
+    print(f"DEBUG get_devices: found {devices.count()} devices")
+
     from django.template.loader import render_to_string
-    return render_to_string('orders/_device_options.html', {'devices': devices})
+    html = render_to_string('orders/_device_options.html', {'devices': devices})
+    print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
+    return html
