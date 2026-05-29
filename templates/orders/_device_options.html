@@ -1,0 +1,13 @@
+{% load i18n %}
+{% if error %}
+    <option value="" selected disabled>{{ error }}</option>
+{% elif devices %}
+    <option value="" selected disabled>{% trans "Select a device" %}</option>
+    {% for device in devices %}
+        <option value="{{ device.id }}">
+            {{ device.name }} ({{ device.modality.code }}){% if device.room_number %} - {{ device.room_number }}{% endif %}
+        </option>
+    {% endfor %}
+{% else %}
+    <option value="" selected disabled>{% trans "No devices available" %}</option>
+{% endif %}
