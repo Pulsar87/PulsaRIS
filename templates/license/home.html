@@ -534,6 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
         renderMiniCalendar();
         updateSelectedDateDisplay();
         calendar.changeView('timeGridDay', date);
+        calendar.refetchEvents();
     }
     
     function updateSelectedDateDisplay() {
@@ -544,11 +545,15 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('miniCalPrev').addEventListener('click', function() {
         miniCalDate.setMonth(miniCalDate.getMonth() - 1);
         renderMiniCalendar();
+        calendar.changeView('timeGridDay', miniCalDate);
+        calendar.refetchEvents();
     });
     
     document.getElementById('miniCalNext').addEventListener('click', function() {
         miniCalDate.setMonth(miniCalDate.getMonth() + 1);
         renderMiniCalendar();
+        calendar.changeView('timeGridDay', miniCalDate);
+        calendar.refetchEvents();
     });
     
     // Initialize mini calendar
@@ -578,9 +583,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // Build query parameters with selected devices and single day
             var startDate = info.startStr.split('T')[0];
             var endDate = info.endStr.split('T')[0];
-            var queryParams = '?start=' + startDate + 'T00:00:00&end=' + endDate + 'T23:59:59';
+            var queryParams = '?start=' + encodeURIComponent(startDate + 'T00:00:00') + '&end=' + encodeURIComponent(endDate + 'T23:59:59');
             selectedDevices.forEach(function(deviceId) {
-                queryParams += '&devices[]=' + deviceId;
+                queryParams += '&devices[]=' + encodeURIComponent(deviceId);
             });
             
             fetch('/api/calendar-events/' + queryParams)
@@ -635,12 +640,12 @@ document.addEventListener('DOMContentLoaded', function() {
         eventDidMount: function(info) {
             // Add tooltip to events with device information
             var tooltipText = info.event.title + '\n' + 
-                             info.el.extendedProps.patient_name + '\n' +
-                             '{% trans "Device" %}: ' + info.el.extendedProps.device;
+                             info.event.extendedProps.patient_name + '\n' +
+                             '{% trans "Device" %}: ' + info.event.extendedProps.device;
             info.el.setAttribute('title', tooltipText);
             
-            // Color events based on status
-            var status = info.el.extendedProps.status;
+            // Color events based on status (use backend color as fallback)
+            var status = info.event.extendedProps.status;
             if (status === 'COMPLETED' || status === 'REPORTED' || status === 'FINALIZED') {
                 info.el.style.backgroundColor = '#22c55e'; // Green
                 info.el.style.borderColor = '#16a34a';
