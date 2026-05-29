@@ -1,5 +1,8 @@
+import json
+
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
@@ -178,6 +181,8 @@ def search_patient(request):
             Q(mrn__icontains=query)
             | Q(first_name_en__icontains=query)
             | Q(last_name_en__icontains=query)
+            | Q(first_name_ar__icontains=query)
+            | Q(last_name_ar__icontains=query)
             | Q(national_id__icontains=query),
             tenant=tenant,
         )[:10]  # Limit to 10 results
@@ -186,3 +191,50 @@ def search_patient(request):
         "patients": patients,
     }
     return render(request, "patients/partials/search_results.html", context)
+
+
+def patient_lookup(request):
+    """API endpoint for patient lookup supporting multiple search fields.
+    
+    Returns JSON response with matching patients.
+    Search supports: MRN, name (English/Arabic), national ID, phone.
+    """
+    query = request.GET.get("q", "").strip()
+    tenant = get_tenant(request)
+
+    if not query:
+        return JsonResponse({"patients": [], "error": "No search query provided"}, status=400)
+
+    patients = []
+    if tenant:
+        patients = Patient.objects.filter(
+            Q(mrn__icontains=query)
+            | Q(first_name_en__icontains=query)
+            | Q(last_name_en__icontains=query)
+            | Q(first_name_ar__icontains=query)
+            | Q(last_name_ar__icontains=query)
+            | Q(national_id__icontains=query)
+            | Q(phone__icontains=query),
+            tenant=tenant,
+        ).values(
+            'id', 'mrn', 'first_name_en', 'last_name_en', 
+            'first_name_ar', 'last_name_ar', 'dob', 'gender', 'phone'
+        )[:20]  # Limit to 20 results
+
+        # Convert to list of dicts with formatted data
+        patient_list = []
+        for p in patients:
+            patient_list.append({
+                'id': str(p['id']),
+                'mrn': p['mrn'],
+                'name_en': f"{p['first_name_en']} {p['last_name_en']}",
+                'name_ar': f"{p['first_name_ar']} {p['last_name_ar']}".strip(),
+                'dob': p['dob'].isoformat() if p['dob'] else '',
+                'gender': p['gender'],
+                'phone': p['phone'],
+                'display': f"{p['mrn']} - {p['first_name_en']} {p['last_name_en']}"
+            })
+        
+        return JsonResponse({"patients": patient_list})
+    
+    return JsonResponse({"patients": [], "error": "Tenant not found"}, status=400)
