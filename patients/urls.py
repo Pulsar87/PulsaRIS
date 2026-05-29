@@ -8,4 +8,5 @@ urlpatterns = [
     path('', views.patient_list, name='patient_list'),
     path('<uuid:pk>/', views.patient_detail, name='patient_detail'),
     path('search/', views.search_patient, name='search_patient'),
+    path('api/lookup/', views.patient_lookup, name='patient_lookup'),
 ]

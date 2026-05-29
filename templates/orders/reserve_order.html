@@ -398,6 +398,76 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
     });
+
+    // Patient lookup functionality
+    const btnLookup = document.getElementById('btnLookupPatient');
+    const patientResultsDiv = document.getElementById('patientResults');
+    
+    if (btnLookup) {
+        btnLookup.addEventListener('click', function() {
+            const mrnInput = document.getElementById('patient_mrn');
+            const query = mrnInput.value.trim();
+            
+            if (!query) {
+                patientResultsDiv.innerHTML = '<div class="alert alert-warning">Please enter an MRN, name, or ID to search</div>';
+                return;
+            }
+            
+            // Fetch patients from API
+            fetch(`/patients/api/lookup/?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        patientResultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                        return;
+                    }
+                    
+                    if (!data.patients || data.patients.length === 0) {
+                        patientResultsDiv.innerHTML = '<div class="alert alert-info">No patients found. <a href="/patients/add/" target="_blank">Add new patient?</a></div>';
+                        return;
+                    }
+                    
+                    // Build results HTML
+                    let html = '<div class="list-group">';
+                    data.patients.forEach(patient => {
+                        const displayName = patient.name_ar ? `${patient.name_en} / ${patient.name_ar}` : patient.name_en;
+                        const genderDisplay = patient.gender === 'M' ? 'Male' : (patient.gender === 'F' ? 'Female' : 'Other');
+                        
+                        html += `
+                            <button type="button" class="list-group-item list-group-item-action" 
+                                onclick="selectPatient('${patient.id}', '${patient.mrn.replace(/'/g, "\\'")}', '${displayName.replace(/'/g, "\\'")}', '${patient.dob}', '${genderDisplay}', '${(patient.phone || '').replace(/'/g, "\\'")}')">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${patient.mrn}</strong> - ${displayName}
+                                        <br>
+                                        <small class="text-muted">DOB: ${patient.dob} | Gender: ${genderDisplay}</small>
+                                        ${patient.phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${patient.phone}</small>` : ''}
+                                    </div>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </button>
+                        `;
+                    });
+                    html += '</div>';
+                    patientResultsDiv.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    patientResultsDiv.innerHTML = '<div class="alert alert-danger">Error searching for patients</div>';
+                });
+        });
+    }
 });
+
+function selectPatient(id, mrn, name, dob, gender, phone) {
+    document.getElementById('patient_mrn').value = mrn;
+    document.getElementById('patient_name').value = name;
+    document.getElementById('patient_dob').value = dob;
+    document.getElementById('patient_gender').value = gender;
+    document.getElementById('patient_phone').value = phone;
+    
+    // Clear the results
+    document.getElementById('patientResults').innerHTML = '';
+}
 </script>
 {% endblock %}
