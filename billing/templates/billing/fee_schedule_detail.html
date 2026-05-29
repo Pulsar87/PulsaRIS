@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ fee_schedule.name }} - Fee Schedule Details{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header with Breadcrumb -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'billing:fee_schedule_list' %}">Fee Schedules</a></li>
+                    <li class="breadcrumb-item active">{{ fee_schedule.code }}</li>
+                </ol>
+            </nav>
+            <h2><i class="fas fa-file-invoice-dollar"></i> {{ fee_schedule.name }}</h2>
+            <p class="text-muted">{{ fee_schedule.description|default:"No description" }}</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'billing:fee_schedule_update' fee_schedule.pk %}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Edit Schedule
+            </a>
+            <a href="{% url 'billing:fee_schedule_item_add' fee_schedule.pk %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Item
+            </a>
+        </div>
+    </div>
+
+    <!-- Schedule Info Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Schedule Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="text-muted small">Code</label>
+                            <p class="fw-bold">{{ fee_schedule.code }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Type</label>
+                            <p>
+                                <span class="badge bg-{% if fee_schedule.schedule_type == 'CHARGEMASTER' %}secondary{% elif fee_schedule.schedule_type == 'MEDICARE' %}primary{% elif fee_schedule.schedule_type == 'CONTRACT' %}success{% else %}info{% endif %}">
+                                    {{ fee_schedule.get_schedule_type_display }}
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Payer</label>
+                            <p>{{ fee_schedule.payer.name|default:"N/A" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Status</label>
+                            <p>
+                                {% if is_currently_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% elif fee_schedule.expiration_date and fee_schedule.expiration_date < now %}
+                                    <span class="badge bg-danger">Expired</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-3">
+                            <label class="text-muted small">Effective Date</label>
+                            <p>{{ fee_schedule.effective_date }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Expiration Date</label>
+                            <p>{{ fee_schedule.expiration_date|default:"No expiry" }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Currency</label>
+                            <p>{{ fee_schedule.currency }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="text-muted small">Created By</label>
+                            <p>{{ fee_schedule.created_by.get_full_name|default:fee_schedule.created_by.username }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Items</h6>
+                    <h2>{{ item_count }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Avg Professional Fee</h6>
+                    <h2>${{ professional_avg|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Avg Technical Fee</h6>
+                    <h2>${{ technical_avg|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-title">Avg Global Fee</h6>
+                    <h2>${{ global_avg|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fee Schedule Items -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Procedure Items ({{ item_count }})</h5>
+            <a href="{% url 'billing:fee_schedule_item_add' fee_schedule.pk %}" class="btn btn-sm btn-primary">
+                <i class="fas fa-plus"></i> Add New Item
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Procedure Name</th>
+                            <th>Modifier</th>
+                            <th>Professional</th>
+                            <th>Technical</th>
+                            <th>Global</th>
+                            <th>Unit</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in fee_schedule.items.all %}
+                        <tr>
+                            <td><strong>{{ item.procedure_code }}</strong></td>
+                            <td>{{ item.procedure_name }}</td>
+                            <td>
+                                {% if item.modifier %}
+                                    <span class="badge bg-secondary">{{ item.modifier }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>${{ item.professional_fee|floatformat:2 }}</td>
+                            <td>${{ item.technical_fee|floatformat:2 }}</td>
+                            <td>
+                                {% if item.global_fee %}
+                                    ${{ item.global_fee|floatformat:2 }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.get_unit_of_service_display }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'billing:fee_schedule_item_update' item.pk %}" 
+                                       class="btn btn-outline-warning" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{% url 'billing:fee_schedule_item_delete' item.pk %}" 
+                                       class="btn btn-outline-danger" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-procedures fa-3x mb-3"></i>
+                                <p>No items in this fee schedule yet.</p>
+                                <a href="{% url 'billing:fee_schedule_item_add' fee_schedule.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Add First Item
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-4">
+        <a href="{% url 'billing:fee_schedule_list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+{% endblock %}
