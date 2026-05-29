@@ -156,7 +156,10 @@
     }
     
     .device-list-item input[type="checkbox"] {
-        display: none;
+        margin-right: 0.75rem;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
     }
     
     .device-modality-badge {
@@ -635,6 +638,22 @@ document.addEventListener('DOMContentLoaded', function() {
                              info.el.extendedProps.patient_name + '\n' +
                              '{% trans "Device" %}: ' + info.el.extendedProps.device;
             info.el.setAttribute('title', tooltipText);
+            
+            // Color events based on status
+            var status = info.el.extendedProps.status;
+            if (status === 'COMPLETED' || status === 'REPORTED' || status === 'FINALIZED') {
+                info.el.style.backgroundColor = '#22c55e'; // Green
+                info.el.style.borderColor = '#16a34a';
+            } else if (status === 'REGISTERED' || status === 'SCHEDULED') {
+                info.el.style.backgroundColor = '#eab308'; // Yellow
+                info.el.style.borderColor = '#ca8a04';
+            } else if (status === 'IN_PROGRESS') {
+                info.el.style.backgroundColor = '#f97316'; // Orange
+                info.el.style.borderColor = '#ea580c';
+            } else if (status === 'CANCELLED') {
+                info.el.style.backgroundColor = '#ef4444'; // Red
+                info.el.style.borderColor = '#dc2626';
+            }
         },
         height: '100%',
         expandRows: true,
