@@ -5,6 +5,7 @@ from orders import views
 app_name = 'orders'
 
 urlpatterns = [
+    path('worklist/', views.worklist, name='worklist'),
     path('list/', views.order_list, name='order_list'),
     path('<uuid:pk>/', views.order_detail, name='order_detail'),
     path('add/', views.add_order, name='add_order'),
