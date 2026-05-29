@@ -178,14 +178,98 @@
                                     {% trans "Procedure Code" %}
                                     <span class="text-danger">*</span>
                                 </label>
-                                <input 
-                                    type="text" 
-                                    class="form-control form-control-lg" 
-                                    id="procedure_code" 
-                                    name="procedure_code" 
-                                    placeholder="{% trans 'e.g., CT-HEAD, MR-KNEE' %}"
-                                    required
-                                />
+                                <select class="form-select form-select-lg" id="procedure_code" name="procedure_code" required>
+                                    <option value="" selected disabled>{% trans "Select procedure code" %}</option>
+                                    {% load i18n %}
+                                    {% trans "CT Procedures" as ct_group %}
+                                    <optgroup label="{{ ct_group }}">
+                                        <option value="CT_HEAD">{% trans "CT Head without contrast" %}</option>
+                                        <option value="CT_HEAD_C">{% trans "CT Head with contrast" %}</option>
+                                        <option value="CT_CHEST">{% trans "CT Chest without contrast" %}</option>
+                                        <option value="CT_CHEST_C">{% trans "CT Chest with contrast" %}</option>
+                                        <option value="CT_ABD">{% trans "CT Abdomen without contrast" %}</option>
+                                        <option value="CT_ABD_C">{% trans "CT Abdomen with contrast" %}</option>
+                                        <option value="CT_PELVIS">{% trans "CT Pelvis without contrast" %}</option>
+                                        <option value="CT_PELVIS_C">{% trans "CT Pelvis with contrast" %}</option>
+                                        <option value="CT_SPINE_C">{% trans "CT Cervical spine with contrast" %}</option>
+                                        <option value="CT_ANGIO">{% trans "CT Angiography" %}</option>
+                                    </optgroup>
+                                    {% trans "MR Procedures" as mr_group %}
+                                    <optgroup label="{{ mr_group }}">
+                                        <option value="MR_BRAIN">{% trans "MRI Brain without contrast" %}</option>
+                                        <option value="MR_BRAIN_C">{% trans "MRI Brain with contrast" %}</option>
+                                        <option value="MR_SPINE_C">{% trans "MRI Cervical spine without contrast" %}</option>
+                                        <option value="MR_SPINE_T">{% trans "MRI Thoracic spine without contrast" %}</option>
+                                        <option value="MR_SPINE_L">{% trans "MRI Lumbar spine without contrast" %}</option>
+                                        <option value="MR_KNEE">{% trans "MRI Knee without contrast" %}</option>
+                                        <option value="MR_SHOULDER">{% trans "MRI Shoulder without contrast" %}</option>
+                                        <option value="MR_JOINT">{% trans "MRI Joint without contrast" %}</option>
+                                        <option value="MR_ANGIO">{% trans "MR Angiography" %}</option>
+                                    </optgroup>
+                                    {% trans "X-Ray Procedures" as xr_group %}
+                                    <optgroup label="{{ xr_group }}">
+                                        <option value="CXR">{% trans "Chest X-Ray" %}</option>
+                                        <option value="XR_SKULL">{% trans "X-Ray Skull" %}</option>
+                                        <option value="XR_RIBS">{% trans "X-Ray Ribs" %}</option>
+                                        <option value="XR_SPINE_C">{% trans "X-Ray Cervical spine" %}</option>
+                                        <option value="XR_SPINE_T">{% trans "X-Ray Thoracic spine" %}</option>
+                                        <option value="XR_SPINE_L">{% trans "X-Ray Lumbar spine" %}</option>
+                                        <option value="XR_PELVIS">{% trans "X-Ray Pelvis" %}</option>
+                                        <option value="XR_HIP">{% trans "X-Ray Hip" %}</option>
+                                        <option value="XR_FEMUR">{% trans "X-Ray Femur" %}</option>
+                                        <option value="XR_KNEE">{% trans "X-Ray Knee" %}</option>
+                                        <option value="XR_TIBIA">{% trans "X-Ray Tibia/Fibula" %}</option>
+                                        <option value="XR_ANKLE">{% trans "X-Ray Ankle" %}</option>
+                                        <option value="XR_FOOT">{% trans "X-Ray Foot" %}</option>
+                                        <option value="XR_SHOULDER">{% trans "X-Ray Shoulder" %}</option>
+                                        <option value="XR_HUMERUS">{% trans "X-Ray Humerus" %}</option>
+                                        <option value="XR_ELBOW">{% trans "X-Ray Elbow" %}</option>
+                                        <option value="XR_FOREARM">{% trans "X-Ray Forearm" %}</option>
+                                        <option value="XR_WRIST">{% trans "X-Ray Wrist" %}</option>
+                                        <option value="XR_HAND">{% trans "X-Ray Hand" %}</option>
+                                        <option value="XR_FINGER">{% trans "X-Ray Finger" %}</option>
+                                        <option value="XR_MAMMO">{% trans "Mammography" %}</option>
+                                    </optgroup>
+                                    {% trans "Ultrasound Procedures" as us_group %}
+                                    <optgroup label="{{ us_group }}">
+                                        <option value="US_ABD">{% trans "Ultrasound Abdomen" %}</option>
+                                        <option value="US_PELVIS">{% trans "Ultrasound Pelvis" %}</option>
+                                        <option value="US_OBST">{% trans "Ultrasound Obstetric" %}</option>
+                                        <option value="US_THYROID">{% trans "Ultrasound Thyroid" %}</option>
+                                        <option value="US_BREAST">{% trans "Ultrasound Breast" %}</option>
+                                        <option value="US_SCROTAL">{% trans "Ultrasound Scrotal" %}</option>
+                                        <option value="US_DOPPLER">{% trans "Ultrasound Doppler" %}</option>
+                                        <option value="US_ECHO">{% trans "Echocardiography" %}</option>
+                                    </optgroup>
+                                    {% trans "Nuclear Medicine Procedures" as nm_group %}
+                                    <optgroup label="{{ nm_group }}">
+                                        <option value="NM_BONE">{% trans "Bone Scan" %}</option>
+                                        <option value="NM_CARDIAC">{% trans "Cardiac Stress Test" %}</option>
+                                        <option value="NM_THYROID">{% trans "Thyroid Scan" %}</option>
+                                        <option value="NM_LUNG">{% trans "Lung Perfusion/Ventilation" %}</option>
+                                        <option value="NM_RENAL">{% trans "Renal Scan" %}</option>
+                                        <option value="NM_HEPATOBILIARY">{% trans "Hepatobiliary Scan" %}</option>
+                                    </optgroup>
+                                    {% trans "PET Procedures" as pet_group %}
+                                    <optgroup label="{{ pet_group }}">
+                                        <option value="PET_CT">{% trans "PET-CT Whole Body" %}</option>
+                                        <option value="PET_BRAIN">{% trans "PET Brain" %}</option>
+                                    </optgroup>
+                                    {% trans "Fluoroscopy Procedures" as fluoro_group %}
+                                    <optgroup label="{{ fluoro_group }}">
+                                        <option value="FLUORO_BARIUM">{% trans "Barium Swallow/Meal" %}</option>
+                                        <option value="FLUORO_ENEMA">{% trans "Barium Enema" %}</option>
+                                        <option value="FLUORO_IVP">{% trans "IVP/Urogram" %}</option>
+                                        <option value="FLUORO_HSG">{% trans "Hysterosalpingography" %}</option>
+                                        <option value="FLUORO_VCUG">{% trans "VCUG" %}</option>
+                                    </optgroup>
+                                    {% trans "Interventional Procedures" as int_group %}
+                                    <optgroup label="{{ int_group }}">
+                                        <option value="INT_BIOPSY">{% trans "Image-guided Biopsy" %}</option>
+                                        <option value="INT_DRAINAGE">{% trans "Image-guided Drainage" %}</option>
+                                        <option value="INT_INJECTION">{% trans "Image-guided Injection" %}</option>
+                                    </optgroup>
+                                </select>
                             </div>
                             
                             <!-- Procedure Name (English) -->
@@ -201,6 +285,7 @@
                                     name="procedure_name_en" 
                                     placeholder="{% trans 'Enter procedure name in English' %}"
                                     required
+                                    readonly
                                 />
                             </div>
                             
@@ -216,6 +301,7 @@
                                     name="procedure_name_ar" 
                                     dir="rtl"
                                     placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
+                                    readonly
                                 />
                             </div>
                             
@@ -396,6 +482,92 @@ document.addEventListener('DOMContentLoaded', function() {
     // Patient lookup functionality
     const btnLookup = document.getElementById('btnLookupPatient');
     const patientResultsDiv = document.getElementById('patientResults');
+    
+    // Procedure code to name mapping
+    const procedureNames = {
+        'CT_HEAD': ['CT Head without contrast', 'الأشعة المقطعية للرأس بدون صبغة'],
+        'CT_HEAD_C': ['CT Head with contrast', 'الأشعة المقطعية للرأس مع صبغة'],
+        'CT_CHEST': ['CT Chest without contrast', 'الأشعة المقطعية للصدر بدون صبغة'],
+        'CT_CHEST_C': ['CT Chest with contrast', 'الأشعة المقطعية للصدر مع صبغة'],
+        'CT_ABD': ['CT Abdomen without contrast', 'الأشعة المقطعية للبطن بدون صبغة'],
+        'CT_ABD_C': ['CT Abdomen with contrast', 'الأشعة المقطعية للبطن مع صبغة'],
+        'CT_PELVIS': ['CT Pelvis without contrast', 'الأشعة المقطعية للحوض بدون صبغة'],
+        'CT_PELVIS_C': ['CT Pelvis with contrast', 'الأشعة المقطعية للحوض مع صبغة'],
+        'CT_SPINE_C': ['CT Cervical spine with contrast', 'الأشعة المقطعية للعمود الفقري العنقي مع صبغة'],
+        'CT_ANGIO': ['CT Angiography', 'تصوير الأوعية بالأشعة المقطعية'],
+        'MR_BRAIN': ['MRI Brain without contrast', 'الرنين المغناطيسي للدماغ بدون صبغة'],
+        'MR_BRAIN_C': ['MRI Brain with contrast', 'الرنين المغناطيسي للدماغ مع صبغة'],
+        'MR_SPINE_C': ['MRI Cervical spine without contrast', 'الرنين المغناطيسي للعمود الفقري العنقي بدون صبغة'],
+        'MR_SPINE_T': ['MRI Thoracic spine without contrast', 'الرنين المغناطيسي للعمود الفقري الصدري بدون صبغة'],
+        'MR_SPINE_L': ['MRI Lumbar spine without contrast', 'الرنين المغناطيسي للعمود الفقري القطني بدون صبغة'],
+        'MR_KNEE': ['MRI Knee without contrast', 'الرنين المغناطيسي للركبة بدون صبغة'],
+        'MR_SHOULDER': ['MRI Shoulder without contrast', 'الرنين المغناطيسي للكتف بدون صبغة'],
+        'MR_JOINT': ['MRI Joint without contrast', 'الرنين المغناطيسي للمفصل بدون صبغة'],
+        'MR_ANGIO': ['MR Angiography', 'تصوير الأوعية بالرنين المغناطيسي'],
+        'CXR': ['Chest X-Ray', 'أشعة سينية للصدر'],
+        'XR_SKULL': ['X-Ray Skull', 'أشعة سينية للجمجمة'],
+        'XR_RIBS': ['X-Ray Ribs', 'أشعة سينية للأضلاع'],
+        'XR_SPINE_C': ['X-Ray Cervical spine', 'أشعة سينية للعمود الفقري العنقي'],
+        'XR_SPINE_T': ['X-Ray Thoracic spine', 'أشعة سينية للعمود الفقري الصدري'],
+        'XR_SPINE_L': ['X-Ray Lumbar spine', 'أشعة سينية للعمود الفقري القطني'],
+        'XR_PELVIS': ['X-Ray Pelvis', 'أشعة سينية للحوض'],
+        'XR_HIP': ['X-Ray Hip', 'أشعة سينية للورك'],
+        'XR_FEMUR': ['X-Ray Femur', 'أشعة سينية لعظم الفخذ'],
+        'XR_KNEE': ['X-Ray Knee', 'أشعة سينية للركبة'],
+        'XR_TIBIA': ['X-Ray Tibia/Fibula', 'أشعة سينية للساق (الظنبوب/الشظية)'],
+        'XR_ANKLE': ['X-Ray Ankle', 'أشعة سينية للكاحل'],
+        'XR_FOOT': ['X-Ray Foot', 'أشعة سينية للقدم'],
+        'XR_SHOULDER': ['X-Ray Shoulder', 'أشعة سينية للكتف'],
+        'XR_HUMERUS': ['X-Ray Humerus', 'أشعة سينية لعضد'],
+        'XR_ELBOW': ['X-Ray Elbow', 'أشعة سينية للكوع'],
+        'XR_FOREARM': ['X-Ray Forearm', 'أشعة سينية للساعد'],
+        'XR_WRIST': ['X-Ray Wrist', 'أشعة سينية للمعصم'],
+        'XR_HAND': ['X-Ray Hand', 'أشعة سينية لليد'],
+        'XR_FINGER': ['X-Ray Finger', 'أشعة سينية للإصبع'],
+        'XR_MAMMO': ['Mammography', 'تصوير الثدي الشعاعي'],
+        'US_ABD': ['Ultrasound Abdomen', 'الموجات فوق الصوتية للبطن'],
+        'US_PELVIS': ['Ultrasound Pelvis', 'الموجات فوق الصوتية للحوض'],
+        'US_OBST': ['Ultrasound Obstetric', 'الموجات فوق الصوتية للولادة'],
+        'US_THYROID': ['Ultrasound Thyroid', 'الموجات فوق الصوتية للغدة الدرقية'],
+        'US_BREAST': ['Ultrasound Breast', 'الموجات فوق الصوتية للثدي'],
+        'US_SCROTAL': ['Ultrasound Scrotal', 'الموجات فوق الصوتية للصفن'],
+        'US_DOPPLER': ['Ultrasound Doppler', 'دوبلر بالموجات فوق الصوتية'],
+        'US_ECHO': ['Echocardiography', 'تخطيط صدى القلب'],
+        'NM_BONE': ['Bone Scan', 'فحص العظام'],
+        'NM_CARDIAC': ['Cardiac Stress Test', 'اختبار إجهاد القلب'],
+        'NM_THYROID': ['Thyroid Scan', 'فحص الغدة الدرقية'],
+        'NM_LUNG': ['Lung Perfusion/Ventilation', 'تروية/تهوية الرئة'],
+        'NM_RENAL': ['Renal Scan', 'فحص الكلى'],
+        'NM_HEPATOBILIARY': ['Hepatobiliary Scan', 'فحص الكبد والقنوات الصفراوية'],
+        'PET_CT': ['PET-CT Whole Body', 'التصوير المقطعي بالإصدار البوزيتروني للجسم كامل'],
+        'PET_BRAIN': ['PET Brain', 'التصوير المقطعي بالإصدار البوزيتروني للدماغ'],
+        'FLUORO_BARIUM': ['Barium Swallow/Meal', 'ابتلاع الباريوم/الوجبة'],
+        'FLUORO_ENEMA': ['Barium Enema', 'حقنة الباريوم الشرجية'],
+        'FLUORO_IVP': ['IVP/Urogram', 'تصوير الوريد بالصبغة'],
+        'FLUORO_HSG': ['Hysterosalpingography', 'تصوير الرحم وقنوات فالوب'],
+        'FLUORO_VCUG': ['VCUG', 'تصوير المثانة والإحليل أثناء التبول'],
+        'INT_BIOPSY': ['Image-guided Biopsy', 'خزعة موجهة بالتصوير'],
+        'INT_DRAINAGE': ['Image-guided Drainage', 'تصريف موجه بالتصوير'],
+        'INT_INJECTION': ['Image-guided Injection', 'حقن موجه بالتصوير']
+    };
+    
+    // Auto-populate procedure names when code is selected
+    const procedureCodeSelect = document.getElementById('procedure_code');
+    const procedureNameEnInput = document.getElementById('procedure_name_en');
+    const procedureNameArInput = document.getElementById('procedure_name_ar');
+    
+    if (procedureCodeSelect) {
+        procedureCodeSelect.addEventListener('change', function() {
+            const selectedCode = this.value;
+            if (selectedCode && procedureNames[selectedCode]) {
+                procedureNameEnInput.value = procedureNames[selectedCode][0];
+                procedureNameArInput.value = procedureNames[selectedCode][1];
+            } else {
+                procedureNameEnInput.value = '';
+                procedureNameArInput.value = '';
+            }
+        });
+    }
     
     if (btnLookup) {
         btnLookup.addEventListener('click', function() {

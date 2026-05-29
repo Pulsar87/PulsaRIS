@@ -4,6 +4,58 @@ from django.db import models
 from django_tenants.models import TenantMixin, DomainMixin
 
 
+# DICOM Standard Modality Types (PS3.16 - CID 29)
+DICOM_MODALITY_CHOICES = [
+    ('AU', 'Audio'),
+    ('BD', 'Biomagnetic Device'),
+    ('BI', 'Biosignal'),
+    ('CD', 'Confocal Microscopy'),
+    ('CR', 'Computed Radiography'),
+    ('CT', 'Computed Tomography'),
+    ('DG', 'Diaphanography'),
+    ('DX', 'Digital Radiography'),
+    ('ECG', 'Electrocardiography'),
+    ('EPS', 'Cardiac Electrophysiology'),
+    ('ES', 'Endoscopy'),
+    ('FID', 'Fiducials'),
+    ('GM', 'General Microscopy'),
+    ('HC', 'Hard Copy'),
+    ('HD', 'Hemodynamic Waveform'),
+    ('IO', 'Intra-oral Radiography'),
+    ('IVUS', 'Intravascular Ultrasound'),
+    ('KO', 'Key Object Selection'),
+    ('LS', 'Laser Surface Scan'),
+    ('MG', 'Mammography'),
+    ('MR', 'Magnetic Resonance'),
+    ('NM', 'Nuclear Medicine'),
+    ('OP', 'Ophthalmic Photography'),
+    ('OPM', 'Ophthalmic Mapping'),
+    ('OPT', 'Ophthalmic Tomography'),
+    ('OSS', 'Optical Surface Scan'),
+    ('OT', 'Other'),
+    ('PX', 'Panoramic X-Ray'),
+    ('PT', 'Positron Emission Tomography'),
+    ('RG', 'Radiographic Imaging'),
+    ('RF', 'Radio Fluoroscopy'),
+    ('RTDOSE', 'Radiotherapy Dose'),
+    ('RTIMAGE', 'Radiotherapy Image'),
+    ('RTPLAN', 'Radiotherapy Plan'),
+    ('RTRECORD', 'Radiotherapy Record'),
+    ('RTSTRUCT', 'Radiotherapy Structure Set'),
+    ('RWV', 'Real World Value Map'),
+    ('SC', 'Secondary Capture'),
+    ('SM', 'Slide Microscopy'),
+    ('SMR', 'Stereometric Radiography'),
+    ('SR', 'Structured Report'),
+    ('STAIN', 'Staining'),
+    ('TG', 'Thermography'),
+    ('US', 'Ultrasound'),
+    ('VA', 'Visual Acuity'),
+    ('XC', 'External Camera Photography'),
+    ('XA', 'X-Ray Angiography'),
+]
+
+
 class Tenant(TenantMixin):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     schema_name = models.CharField(max_length=63, unique=True)
@@ -49,8 +101,8 @@ class Modality(models.Model):
     tenant = models.ForeignKey(
         Tenant, on_delete=models.CASCADE, related_name="modalities"
     )
-    code = models.CharField(max_length=3, unique=True)
-    name = models.CharField(max_length=50)
+    code = models.CharField(max_length=10, choices=DICOM_MODALITY_CHOICES)
+    name = models.CharField(max_length=50, blank=True)
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
