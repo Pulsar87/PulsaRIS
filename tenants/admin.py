@@ -28,7 +28,7 @@ class FacilityAdmin(admin.ModelAdmin):
 @admin.register(Modality)
 class ModalityAdmin(admin.ModelAdmin):
     list_display = ["code", "name", "tenant", "is_active", "created_at"]
-    list_filter = ["tenant", "is_active"]
+    list_filter = ["tenant", "is_active", "code"]
     search_fields = ["code", "name", "description"]
     readonly_fields = ["id", "created_at", "updated_at"]
 

@@ -3,6 +3,91 @@ import uuid
 from django.db import models
 
 
+# Common Radiology Procedure Codes (CPT/RadLex based examples)
+# In production, this would be loaded from a comprehensive ICD-10/CPT code database
+RADIOLOGY_PROCEDURE_CHOICES = [
+    # CT Procedures
+    ('CT_HEAD', 'CT Head without contrast'),
+    ('CT_HEAD_C', 'CT Head with contrast'),
+    ('CT_CHEST', 'CT Chest without contrast'),
+    ('CT_CHEST_C', 'CT Chest with contrast'),
+    ('CT_ABD', 'CT Abdomen without contrast'),
+    ('CT_ABD_C', 'CT Abdomen with contrast'),
+    ('CT_PELVIS', 'CT Pelvis without contrast'),
+    ('CT_PELVIS_C', 'CT Pelvis with contrast'),
+    ('CT_SPINE_C', 'CT Cervical spine with contrast'),
+    ('CT_ANGIO', 'CT Angiography'),
+    
+    # MR Procedures
+    ('MR_BRAIN', 'MRI Brain without contrast'),
+    ('MR_BRAIN_C', 'MRI Brain with contrast'),
+    ('MR_SPINE_C', 'MRI Cervical spine without contrast'),
+    ('MR_SPINE_T', 'MRI Thoracic spine without contrast'),
+    ('MR_SPINE_L', 'MRI Lumbar spine without contrast'),
+    ('MR_KNEE', 'MRI Knee without contrast'),
+    ('MR_SHOULDER', 'MRI Shoulder without contrast'),
+    ('MR_JOINT', 'MRI Joint without contrast'),
+    ('MR_ANGIO', 'MR Angiography'),
+    
+    # X-Ray Procedures
+    ('CXR', 'Chest X-Ray'),
+    ('XR_SKULL', 'X-Ray Skull'),
+    ('XR_RIBS', 'X-Ray Ribs'),
+    ('XR_SPINE_C', 'X-Ray Cervical spine'),
+    ('XR_SPINE_T', 'X-Ray Thoracic spine'),
+    ('XR_SPINE_L', 'X-Ray Lumbar spine'),
+    ('XR_PELVIS', 'X-Ray Pelvis'),
+    ('XR_HIP', 'X-Ray Hip'),
+    ('XR_FEMUR', 'X-Ray Femur'),
+    ('XR_KNEE', 'X-Ray Knee'),
+    ('XR_TIBIA', 'X-Ray Tibia/Fibula'),
+    ('XR_ANKLE', 'X-Ray Ankle'),
+    ('XR_FOOT', 'X-Ray Foot'),
+    ('XR_SHOULDER', 'X-Ray Shoulder'),
+    ('XR_HUMERUS', 'X-Ray Humerus'),
+    ('XR_ELBOW', 'X-Ray Elbow'),
+    ('XR_FOREARM', 'X-Ray Forearm'),
+    ('XR_WRIST', 'X-Ray Wrist'),
+    ('XR_HAND', 'X-Ray Hand'),
+    ('XR_FINGER', 'X-Ray Finger'),
+    ('XR_MAMMO', 'Mammography'),
+    
+    # Ultrasound Procedures
+    ('US_ABD', 'Ultrasound Abdomen'),
+    ('US_PELVIS', 'Ultrasound Pelvis'),
+    ('US_OBST', 'Ultrasound Obstetric'),
+    ('US_THYROID', 'Ultrasound Thyroid'),
+    ('US_BREAST', 'Ultrasound Breast'),
+    ('US_SCROTAL', 'Ultrasound Scrotal'),
+    ('US_DOPPLER', 'Ultrasound Doppler'),
+    ('US_ECHO', 'Echocardiography'),
+    
+    # Nuclear Medicine Procedures
+    ('NM_BONE', 'Bone Scan'),
+    ('NM_CARDIAC', 'Cardiac Stress Test'),
+    ('NM_THYROID', 'Thyroid Scan'),
+    ('NM_LUNG', 'Lung Perfusion/Ventilation'),
+    ('NM_RENAL', 'Renal Scan'),
+    ('NM_HEPATOBILIARY', 'Hepatobiliary Scan'),
+    
+    # PET Procedures
+    ('PET_CT', 'PET-CT Whole Body'),
+    ('PET_BRAIN', 'PET Brain'),
+    
+    # Fluoroscopy Procedures
+    ('FLUORO_BARIUM', 'Barium Swallow/Meal'),
+    ('FLUORO_ENEMA', 'Barium Enema'),
+    ('FLUORO_IVP', 'IVP/Urogram'),
+    ('FLUORO_HSG', 'Hysterosalpingography'),
+    ('FLUORO_VCUG', 'VCUG'),
+    
+    # Interventional Procedures
+    ('INT_BIOPSY', 'Image-guided Biopsy'),
+    ('INT_DRAINAGE', 'Image-guided Drainage'),
+    ('INT_INJECTION', 'Image-guided Injection'),
+]
+
+
 class ExamOrder(models.Model):
     class Priority(models.TextChoices):
         STAT = "STAT", "Stat"
@@ -29,7 +114,7 @@ class ExamOrder(models.Model):
     modality = models.ForeignKey(
         "tenants.Modality", on_delete=models.PROTECT, related_name="exam_orders"
     )
-    procedure_code = models.CharField(max_length=20)
+    procedure_code = models.CharField(max_length=20, choices=RADIOLOGY_PROCEDURE_CHOICES)
     procedure_name_en = models.CharField(max_length=150)
     procedure_name_ar = models.CharField(max_length=150, blank=True)
     priority = models.CharField(
