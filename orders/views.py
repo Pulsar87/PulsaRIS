@@ -4,16 +4,32 @@ from django.utils.translation import gettext as _
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
+from tenants.models import Modality, Device
 
 
 def reserve_order(request):
     """Handle order reservation page and form submission."""
+    tenant = get_tenant(request)
+    
+    # Get active modalities and devices for this tenant
+    modalities = []
+    devices = []
+    
+    if tenant:
+        modalities = Modality.objects.filter(tenant=tenant, is_active=True).order_by('code')
+        devices = Device.objects.filter(tenant=tenant, is_active=True).select_related('modality').order_by('name')
+    
+    context = {
+        'modalities': modalities,
+        'devices': devices,
+    }
+    
     if request.method == "POST":
         # Get form data
         patient_mrn = request.POST.get("patient_mrn", "").strip()
         accession_number = request.POST.get("accession_number", "").strip()
         priority = request.POST.get("priority", "ROUTINE")
-        modality_code = request.POST.get("modality", "")
+        modality_id = request.POST.get("modality", "")
         procedure_code = request.POST.get("procedure_code", "").strip()
         procedure_name_en = request.POST.get("procedure_name_en", "").strip()
         procedure_name_ar = request.POST.get("procedure_name_ar", "").strip()
@@ -35,7 +51,7 @@ def reserve_order(request):
             messages.error(request, _("Accession number is required"))
             return redirect("orders:reserve_order")
 
-        if not modality_code:
+        if not modality_id:
             messages.error(request, _("Please select a modality"))
             return redirect("orders:reserve_order")
 
@@ -52,4 +68,4 @@ def reserve_order(request):
         messages.success(request, _("Order reserved successfully!"))
         return redirect("orders:worklist")
 
-    return render(request, "orders/reserve_order.html")
+    return render(request, "orders/reserve_order.html", context)

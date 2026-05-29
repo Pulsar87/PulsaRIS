@@ -165,16 +165,11 @@
                                 </label>
                                 <select class="form-select form-select-lg" id="modality" name="modality" required>
                                     <option value="" selected disabled>{% trans "Select modality" %}</option>
-                                    <option value="CT">CT - Computed Tomography</option>
-                                    <option value="MR">MR - Magnetic Resonance</option>
-                                    <option value="CR">CR - Computed Radiography</option>
-                                    <option value="DX">DX - Digital Radiography</option>
-                                    <option value="US">US - Ultrasound</option>
-                                    <option value="NM">NM - Nuclear Medicine</option>
-                                    <option value="PT">PT - Positron Emission Tomography</option>
-                                    <option value="MG">MG - Mammography</option>
-                                    <option value="XA">XA - X-Ray Angiography</option>
-                                    <option value="RF">RF - Radio Fluoroscopy</option>
+                                    {% for modality in modalities %}
+                                    <option value="{{ modality.id }}">{{ modality.code }} - {{ modality.name }}</option>
+                                    {% empty %}
+                                    <option value="" disabled>{% trans "No modalities configured. Please add modalities in the admin panel." %}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                             
@@ -352,9 +347,11 @@
                                 </label>
                                 <select class="form-select form-select-lg" id="room_station" name="room_station">
                                     <option value="" selected>{% trans "Auto-assign" %}</option>
-                                    <option value="1">{% trans "Room 1" %}</option>
-                                    <option value="2">{% trans "Room 2" %}</option>
-                                    <option value="3">{% trans "Room 3" %}</option>
+                                    {% for device in devices %}
+                                    <option value="{{ device.id }}">{{ device.name }} ({{ device.modality.code }}){% if device.room_number %} - {{ device.room_number }}{% endif %}</option>
+                                    {% empty %}
+                                    <option value="" disabled>{% trans "No devices configured. Please add devices in the admin panel." %}</option>
+                                    {% endfor %}
                                 </select>
                             </div>
                         </div>

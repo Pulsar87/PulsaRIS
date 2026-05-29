@@ -21,35 +21,30 @@ wheels/
 .installed.cfg
 *.egg
 
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-
 # Environment
+.env
+.env.local
+.env.*
 .venv/
 venv/
-env/
 ENV/
-
-# Logs
-*.log
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# OS
-.DS_Store
-Thumbs.db
+# Logs
+*.log
 
 # Coverage
 .coverage
 coverage/
 htmlcov/
 
-# Temporary files
-*.tmp
-*.temp
+# Testing
+.pytest_cache/
+.mypy_cache/
 ```
