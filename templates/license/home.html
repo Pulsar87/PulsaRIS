@@ -2,199 +2,212 @@
 
 {% block extra_css %}
 <style>
-    /* Hero Header Gradient */
-    .calendar-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 20px;
-        padding: 2rem;
-        color: white;
-        margin-bottom: 2rem;
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
-        position: relative;
+    /* Main Layout - No Scrolling */
+    html, body {
+        height: 100%;
         overflow: hidden;
     }
     
-    .calendar-hero::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
+    .calendar-page-container {
+        height: calc(100vh - 140px);
+        max-height: 900px;
+        display: flex;
+        flex-direction: column;
     }
     
-    .calendar-hero::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        left: -5%;
-        width: 200px;
-        height: 200px;
-        background: rgba(255, 255, 255, 0.08);
-        border-radius: 50%;
+    /* Left Sidebar */
+    .calendar-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
     
-    .calendar-hero h2 {
-        font-weight: 700;
-        letter-spacing: -0.5px;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .calendar-hero p {
-        opacity: 0.9;
-        position: relative;
-        z-index: 1;
-    }
-    
-    /* Enhanced Card Design */
-    .calendar-card {
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    /* Numeric Mini Calendar */
+    .mini-calendar-card {
         background: var(--card-bg);
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-    
-    .calendar-card:hover {
-        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
-        transform: translateY(-2px);
-    }
-    
-    .calendar-card .card-header {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
-        border-bottom: 1px solid var(--border-color);
-        padding: 1.5rem 2rem;
-        backdrop-filter: blur(10px);
-    }
-    
-    .calendar-card .card-body {
-        padding: 0;
-        background: var(--card-bg);
-    }
-    
-    /* Filter Panel Enhancement */
-    .filter-panel {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(14, 165, 233, 0.01) 100%);
         border-radius: 16px;
-        padding: 1.5rem;
-        margin: 1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1rem;
         border: 1px solid var(--border-color);
     }
     
-    .device-chip {
-        display: inline-flex;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        background: var(--card-bg);
-        border: 2px solid var(--border-color);
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        font-weight: 500;
-        font-size: 0.9rem;
-        user-select: none;
+    .mini-calendar-header {
+        text-align: center;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--text-main);
+        font-size: 0.95rem;
     }
     
-    .device-chip:hover {
-        border-color: var(--medical-primary);
-        background: rgba(14, 165, 233, 0.05);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    .mini-calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
     }
     
-    .device-chip input[type="checkbox"] {
-        display: none;
-    }
-    
-    .device-chip.active {
-        background: var(--medical-primary);
-        border-color: var(--medical-primary);
-        color: white;
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-    }
-    
-    .device-chip .modality-badge {
-        background: rgba(14, 165, 233, 0.15);
-        padding: 0.2rem 0.5rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 700;
-        margin-left: 0.5rem;
+    .mini-calendar-day-header {
+        text-align: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        padding: 0.25rem;
         text-transform: uppercase;
     }
     
-    .device-chip.active .modality-badge {
-        background: rgba(255, 255, 255, 0.25);
-        color: white;
+    .mini-calendar-day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        color: var(--text-main);
     }
     
-    /* Action Buttons */
-    .action-btn {
-        border-radius: 12px;
-        padding: 0.6rem 1.2rem;
+    .mini-calendar-day:hover {
+        background: rgba(14, 165, 233, 0.1);
+    }
+    
+    .mini-calendar-day.selected {
+        background: var(--medical-primary);
+        color: white;
         font-weight: 600;
-        transition: all 0.2s ease;
+    }
+    
+    .mini-calendar-day.other-month {
+        color: var(--text-muted);
+        opacity: 0.5;
+    }
+    
+    .mini-calendar-day.today {
+        border: 2px solid var(--medical-primary);
+    }
+    
+    .mini-calendar-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .mini-calendar-nav button {
+        background: transparent;
         border: none;
-        display: inline-flex;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        color: var(--text-muted);
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .mini-calendar-nav button:hover {
+        background: rgba(14, 165, 233, 0.1);
+        color: var(--medical-primary);
+    }
+    
+    /* Device List */
+    .device-list-card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        flex-grow: 1;
+        overflow-y: auto;
+        max-height: 400px;
+    }
+    
+    .device-list-header {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    .action-btn-primary {
-        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
-        color: white;
-        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
-    }
-    
-    .action-btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
-        color: white;
-    }
-    
-    .action-btn-secondary {
-        background: var(--card-bg);
-        color: var(--text-main);
+    .device-list-item {
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 0.75rem;
+        border-radius: 10px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
         border: 2px solid var(--border-color);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-    
-    .action-btn-secondary:hover {
-        background: var(--medical-primary);
-        color: white;
-        border-color: var(--medical-primary);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
-    }
-    
-    .action-btn-outline {
-        background: transparent;
-        color: var(--text-muted);
-        border: 2px solid var(--border-color);
-    }
-    
-    .action-btn-outline:hover {
         background: var(--bg-body);
+    }
+    
+    .device-list-item:hover {
+        border-color: var(--medical-primary);
+        background: rgba(14, 165, 233, 0.05);
+        transform: translateX(4px);
+    }
+    
+    .device-list-item.active {
+        background: var(--medical-primary);
+        border-color: var(--medical-primary);
+        color: white;
+    }
+    
+    .device-list-item input[type="checkbox"] {
+        display: none;
+    }
+    
+    .device-modality-badge {
+        font-size: 0.65rem;
+        font-weight: 700;
+        padding: 0.2rem 0.5rem;
+        border-radius: 6px;
+        text-transform: uppercase;
+        margin-right: 0.5rem;
+    }
+    
+    .device-name {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    /* Main Calendar Area */
+    .calendar-main-area {
+        flex-grow: 1;
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .calendar-main-header {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .calendar-main-title {
+        font-weight: 700;
+        font-size: 1.1rem;
         color: var(--text-main);
-        border-color: var(--text-muted);
-        transform: translateY(-1px);
     }
     
-    /* Calendar Container */
     #calendar {
-        padding: 1.5rem;
-        min-height: 800px;
+        flex-grow: 1;
+        padding: 0.5rem;
+        overflow: hidden;
     }
     
-    /* FullCalendar Customization */
+    /* FullCalendar Customization for Day View */
     .fc-theme-standard .fc-scrollgrid {
         border: none;
-        border-radius: 16px;
-        overflow: hidden;
     }
     
     .fc-theme-standard td, 
@@ -202,54 +215,53 @@
         border-color: var(--border-color);
     }
     
-    .fc-toolbar-title {
-        font-size: 1.5rem !important;
-        font-weight: 700;
+    .fc-toolbar {
+        display: none !important;
+    }
+    
+    .fc-col-header-cell {
+        background: rgba(14, 165, 233, 0.05);
+        padding: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
         color: var(--text-main);
     }
     
-    .fc-button-primary {
-        background: var(--card-bg) !important;
-        border: 2px solid var(--border-color) !important;
-        color: var(--text-main) !important;
-        padding: 0.5rem 1rem;
-        font-weight: 600;
-        border-radius: 10px !important;
-        transition: all 0.2s ease;
+    .fc-timegrid-slot {
+        height: 40px !important;
     }
     
-    .fc-button-primary:hover {
-        background: var(--medical-primary) !important;
-        border-color: var(--medical-primary) !important;
-        color: white !important;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
-    }
-    
-    .fc-button-active {
-        background: var(--medical-primary) !important;
-        border-color: var(--medical-primary) !important;
-        color: white !important;
+    .fc-timegrid-slot-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        font-weight: 500;
     }
     
     .fc-day-today {
-        background: rgba(14, 165, 233, 0.04) !important;
+        background: rgba(14, 165, 233, 0.03) !important;
     }
     
     .fc-event {
         border: none;
-        border-radius: 8px;
-        padding: 4px 8px;
+        border-radius: 6px;
+        padding: 2px 6px;
         font-weight: 600;
-        font-size: 0.85rem;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        transition: all 0.2s ease;
+        font-size: 0.75rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         cursor: pointer;
     }
     
     .fc-event:hover {
         transform: scale(1.02);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+    
+    .fc-now-indicator-line {
+        border-top: 2px solid var(--medical-primary);
+    }
+    
+    .fc-now-indicator-arrow {
+        border-top-color: var(--medical-primary);
     }
     
     /* Modal Enhancement */
@@ -298,87 +310,68 @@
         font-size: 1rem;
     }
     
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .calendar-hero {
-            padding: 1.5rem;
-            border-radius: 16px;
-        }
-        
-        .calendar-hero h2 {
-            font-size: 1.5rem;
-        }
-        
-        .filter-panel {
-            margin: 0.75rem;
-            padding: 1rem;
-        }
-        
-        .device-chip {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.85rem;
-        }
-    }
+    /* Modality Colors */
+    .mod-ct { background-color: #eff6ff; color: #1e40af; }
+    .mod-mr { background-color: #f5f3ff; color: #5b21b6; }
+    .mod-xr { background-color: #ecfdf5; color: #065f46; }
+    .mod-us { background-color: #fff7ed; color: #9a3412; }
+    .mod-default { background-color: #f8fafc; color: #475569; }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="calendar-hero">
-    <div class="row align-items-center">
-        <div class="col-md-8">
-            <h2 class="mb-2">
-                <i class="bi bi-calendar3 me-3"></i>{% trans "Schedule Calendar" %}
-            </h2>
-            <p class="mb-0 opacity-75">{% trans "Manage and track your medical appointments and procedures" %}</p>
-        </div>
-        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-            <button class="btn btn-light action-btn" type="button" data-bs-toggle="collapse" data-bs-target="#deviceFilterCollapse" aria-expanded="false" aria-controls="deviceFilterCollapse">
-                <i class="bi bi-funnel me-2"></i>{% trans "Filter Devices" %}
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Main Calendar Card -->
-<div class="calendar-card">
-    <!-- Filter Panel -->
-    <div class="collapse" id="deviceFilterCollapse">
-        <div class="filter-panel">
-            <div class="row">
-                <div class="col-12">
-                    <label class="form-label fw-bold mb-3" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
-                        <i class="bi bi-hdd-stack me-2"></i>{% trans "Select Devices" %}
-                    </label>
-                    <div class="d-flex flex-wrap gap-2 mb-4">
-                        {% for device in devices %}
-                        <label class="device-chip" for="device_{{ device.id }}">
-                            <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
-                            <span>{{ device.name }}</span>
-                            <span class="modality-badge">{{ device.modality.code }}</span>
-                        </label>
-                        {% empty %}
-                        <p class="text-muted mb-0">{% trans "No devices configured" %}</p>
-                        {% endfor %}
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn action-btn action-btn-primary" id="applyDeviceFilter">
-                            <i class="bi bi-check-lg"></i> {% trans "Apply Filter" %}
-                        </button>
-                        <button class="btn action-btn action-btn-secondary" id="selectAllDevices">
-                            <i class="bi bi-check-all"></i> {% trans "Select All" %}
-                        </button>
-                        <button class="btn action-btn action-btn-outline" id="clearAllDevices">
-                            <i class="bi bi-x-lg"></i> {% trans "Clear All" %}
-                        </button>
-                    </div>
+<div class="calendar-page-container">
+    <div class="d-flex h-100 gap-3">
+        <!-- Left Sidebar -->
+        <div class="calendar-sidebar">
+            <!-- Numeric Mini Calendar -->
+            <div class="mini-calendar-card">
+                <div class="mini-calendar-nav">
+                    <button id="miniCalPrev"><i class="bi bi-chevron-left"></i></button>
+                    <span class="mini-calendar-header" id="miniCalMonthYear"></span>
+                    <button id="miniCalNext"><i class="bi bi-chevron-right"></i></button>
                 </div>
+                <div class="mini-calendar-grid">
+                    <div class="mini-calendar-day-header">{% trans "Sun" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Mon" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Tue" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Wed" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Thu" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Fri" %}</div>
+                    <div class="mini-calendar-day-header">{% trans "Sat" %}</div>
+                </div>
+                <div class="mini-calendar-grid" id="miniCalendarDays"></div>
+            </div>
+            
+            <!-- Device List -->
+            <div class="device-list-card">
+                <div class="device-list-header">
+                    <i class="bi bi-hdd-stack-fill"></i>
+                    {% trans "Devices" %}
+                </div>
+                {% for device in devices %}
+                <label class="device-list-item active" for="device_{{ device.id }}">
+                    <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
+                    <span class="device-modality-badge mod-{{ device.modality.code|lower }}">{{ device.modality.code }}</span>
+                    <span class="device-name">{{ device.name }}</span>
+                </label>
+                {% empty %}
+                <p class="text-muted mb-0 small">{% trans "No devices configured" %}</p>
+                {% endfor %}
             </div>
         </div>
+        
+        <!-- Main Calendar Area -->
+        <div class="calendar-main-area">
+            <div class="calendar-main-header">
+                <div class="calendar-main-title">
+                    <i class="bi bi-calendar-event me-2"></i>
+                    <span id="selectedDateDisplay"></span>
+                </div>
+            </div>
+            <div id="calendar"></div>
+        </div>
     </div>
-    
-    <!-- Calendar -->
-    <div id="calendar"></div>
 </div>
 
 <!-- Event Detail Modal -->
@@ -457,6 +450,102 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // === Mini Calendar Logic ===
+    var miniCalDate = new Date();
+    var selectedDate = new Date();
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    function renderMiniCalendar() {
+        var year = miniCalDate.getFullYear();
+        var month = miniCalDate.getMonth();
+        
+        // Update header
+        var monthNames = ['{% trans "January" %}', '{% trans "February" %}', '{% trans "March" %}', '{% trans "April" %}', '{% trans "May" %}', '{% trans "June" %}', '{% trans "July" %}', '{% trans "August" %}', '{% trans "September" %}', '{% trans "October" %}', '{% trans "November" %}', '{% trans "December" %}'];
+        document.getElementById('miniCalMonthYear').textContent = monthNames[month] + ' ' + year;
+        
+        // Get first day and days in month
+        var firstDay = new Date(year, month, 1).getDay();
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        var daysInPrevMonth = new Date(year, month, 0).getDate();
+        
+        var container = document.getElementById('miniCalendarDays');
+        container.innerHTML = '';
+        
+        // Previous month days
+        for (var i = firstDay - 1; i >= 0; i--) {
+            var day = daysInPrevMonth - i;
+            var dayEl = document.createElement('div');
+            dayEl.className = 'mini-calendar-day other-month';
+            dayEl.textContent = day;
+            container.appendChild(dayEl);
+        }
+        
+        // Current month days
+        for (var day = 1; day <= daysInMonth; day++) {
+            var dayEl = document.createElement('div');
+            dayEl.className = 'mini-calendar-day';
+            dayEl.textContent = day;
+            
+            var thisDate = new Date(year, month, day);
+            thisDate.setHours(0, 0, 0, 0);
+            
+            if (thisDate.getTime() === today.getTime()) {
+                dayEl.classList.add('today');
+            }
+            
+            if (thisDate.getTime() === selectedDate.getTime()) {
+                dayEl.classList.add('selected');
+            }
+            
+            dayEl.addEventListener('click', function(d) {
+                return function() {
+                    selectDate(d);
+                };
+            }(new Date(year, month, day)));
+            
+            container.appendChild(dayEl);
+        }
+        
+        // Next month days to fill grid
+        var totalCells = container.children.length;
+        var remaining = 42 - totalCells;
+        for (var i = 1; i <= remaining; i++) {
+            var dayEl = document.createElement('div');
+            dayEl.className = 'mini-calendar-day other-month';
+            dayEl.textContent = i;
+            container.appendChild(dayEl);
+        }
+    }
+    
+    function selectDate(date) {
+        selectedDate = date;
+        miniCalDate = new Date(date);
+        renderMiniCalendar();
+        updateSelectedDateDisplay();
+        calendar.changeView('timeGridDay', date);
+    }
+    
+    function updateSelectedDateDisplay() {
+        var options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('selectedDateDisplay').textContent = selectedDate.toLocaleDateString('{% trans "en" %}', options);
+    }
+    
+    document.getElementById('miniCalPrev').addEventListener('click', function() {
+        miniCalDate.setMonth(miniCalDate.getMonth() - 1);
+        renderMiniCalendar();
+    });
+    
+    document.getElementById('miniCalNext').addEventListener('click', function() {
+        miniCalDate.setMonth(miniCalDate.getMonth() + 1);
+        renderMiniCalendar();
+    });
+    
+    // Initialize mini calendar
+    renderMiniCalendar();
+    updateSelectedDateDisplay();
+    
+    // === Main Calendar Logic ===
     var calendarEl = document.getElementById('calendar');
     var selectedDevices = [];
     
@@ -471,22 +560,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'timeGridWeek',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-        },
-        buttonText: {
-            today: '{% trans "Today" %}',
-            month: '{% trans "Month" %}',
-            week: '{% trans "Week" %}',
-            day: '{% trans "Day" %}',
-            list: '{% trans "List" %}'
-        },
+        initialView: 'timeGridDay',
+        initialDate: selectedDate.toISOString().split('T')[0],
+        headerToolbar: false,
+        footerToolbar: false,
         events: function(info, successCallback, failureCallback) {
-            // Build query parameters with selected devices
-            var queryParams = '?start=' + info.startStr + '&end=' + info.endStr;
+            // Build query parameters with selected devices and single day
+            var startDate = info.startStr.split('T')[0];
+            var endDate = info.endStr.split('T')[0];
+            var queryParams = '?start=' + startDate + 'T00:00:00&end=' + endDate + 'T23:59:59';
             selectedDevices.forEach(function(deviceId) {
                 queryParams += '&devices[]=' + deviceId;
             });
@@ -540,85 +622,47 @@ document.addEventListener('DOMContentLoaded', function() {
                              '{% trans "Device" %}: ' + info.el.extendedProps.device;
             info.el.setAttribute('title', tooltipText);
         },
-        height: 'auto',
+        height: '100%',
+        expandRows: true,
         nowIndicator: true,
         selectable: false,
         editable: false,
-        navLinks: true,
+        navLinks: false,
+        slotMinTime: '07:00:00',
+        slotMaxTime: '22:00:00',
         businessHours: {
-            daysOfWeek: [ 0, 1, 2, 3, 4, 5, 6 ],
+            daysOfWeek: [ 1, 2, 3, 4, 5 ],
             startTime: '07:00',
             endTime: '22:00'
         },
-        // Enable overlapping events display - shows multiple events at same time
         eventOverlap: true,
-        // Show all events even when overlapping
         eventDisplay: 'block',
-        // Better handling of concurrent events in time grid views
         slotEventOverlap: true,
-        // Allow more events to be visible in month view
-        dayMaxEventRows: false
+        allDaySlot: false,
+        scrollTime: '08:00:00'
     });
     
     calendar.render();
     
-    // Add visual feedback for device chips
+    // Device list click handlers
     deviceCheckboxes.forEach(function(checkbox) {
-        var chipLabel = checkbox.closest('.device-chip');
-        if (chipLabel) {
-            // Set initial state
-            if (checkbox.checked) {
-                chipLabel.classList.add('active');
-            }
-            
+        var itemLabel = checkbox.closest('.device-list-item');
+        if (itemLabel) {
             // Toggle active class on change
             checkbox.addEventListener('change', function() {
                 if (this.checked) {
-                    chipLabel.classList.add('active');
+                    itemLabel.classList.add('active');
                 } else {
-                    chipLabel.classList.remove('active');
+                    itemLabel.classList.remove('active');
                 }
+                // Refresh calendar with new filter
+                selectedDevices = [];
+                document.querySelectorAll('.device-filter:checked').forEach(function(cb) {
+                    selectedDevices.push(cb.value);
+                });
+                calendar.refetchEvents();
             });
         }
-    });
-    
-    // Device filter button handlers
-    document.getElementById('applyDeviceFilter').addEventListener('click', function() {
-        // Update selected devices from checkboxes
-        selectedDevices = [];
-        deviceCheckboxes.forEach(function(checkbox) {
-            if (checkbox.checked) {
-                selectedDevices.push(checkbox.value);
-            }
-        });
-        
-        // Refresh calendar with new filter
-        calendar.refetchEvents();
-        
-        // Close the collapse
-        var collapseElement = document.getElementById('deviceFilterCollapse');
-        var bsCollapse = new bootstrap.Collapse(collapseElement, {toggle: false});
-        bsCollapse.hide();
-    });
-    
-    document.getElementById('selectAllDevices').addEventListener('click', function() {
-        deviceCheckboxes.forEach(function(checkbox) {
-            checkbox.checked = true;
-            var chipLabel = checkbox.closest('.device-chip');
-            if (chipLabel) {
-                chipLabel.classList.add('active');
-            }
-        });
-    });
-    
-    document.getElementById('clearAllDevices').addEventListener('click', function() {
-        deviceCheckboxes.forEach(function(checkbox) {
-            checkbox.checked = false;
-            var chipLabel = checkbox.closest('.device-chip');
-            if (chipLabel) {
-                chipLabel.classList.remove('active');
-            }
-        });
     });
 });
 </script>
