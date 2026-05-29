@@ -1,0 +1,102 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Delete Order' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-trash-alt me-2"></i>{% trans 'Delete Order' %}
+                </h2>
+                <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-list me-1"></i>{% trans 'Order List' %}
+                </a>
+            </div>
+
+            <!-- Delete Confirmation Card -->
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>{% trans 'Confirm Deletion' %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <strong>{% trans 'Warning:' %}</strong> {% trans 'This action cannot be undone.' %}
+                    </div>
+                    
+                    <p class="lead mb-4">
+                        {% blocktrans with accession=order.accession_number patient=order.patient.mrn %}
+                            Are you sure you want to delete order <strong>{{ accession }}</strong> for patient <strong>{{ patient }}</strong>?
+                        {% endblocktrans %}
+                    </p>
+
+                    <!-- Order Summary -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-3 text-muted">{% trans 'Order Summary' %}</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Accession Number' %}:</strong> {{ order.accession_number }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Patient MRN' %}:</strong> {{ order.patient.mrn }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Patient Name' %}:</strong> {{ order.patient.first_name_en }} {{ order.patient.last_name_en }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Procedure' %}:</strong> {{ order.procedure_name_en }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Modality' %}:</strong> {{ order.modality.code|default:"-" }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Status' %}:</strong> 
+                                    {% if order.status == 'REGISTERED' %}
+                                        <span class="badge bg-primary">{% trans 'Registered' %}</span>
+                                    {% elif order.status == 'SCHEDULED' %}
+                                        <span class="badge bg-info">{% trans 'Scheduled' %}</span>
+                                    {% elif order.status == 'IN_PROGRESS' %}
+                                        <span class="badge bg-warning text-dark">{% trans 'In Progress' %}</span>
+                                    {% elif order.status == 'COMPLETED' %}
+                                        <span class="badge bg-success">{% trans 'Completed' %}</span>
+                                    {% elif order.status == 'REPORTED' %}
+                                        <span class="badge bg-success">{% trans 'Reported' %}</span>
+                                    {% elif order.status == 'FINALIZED' %}
+                                        <span class="badge bg-dark">{% trans 'Finalized' %}</span>
+                                    {% elif order.status == 'CANCELLED' %}
+                                        <span class="badge bg-secondary">{% trans 'Cancelled' %}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>{% trans 'Created At' %}:</strong> {{ order.created_at|date:"Y-m-d H:i" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delete Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between gap-2">
+                            <a href="{% url 'orders:order_detail' order.pk %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to Details' %}
+                            </a>
+                            <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>{% trans 'Cancel' %}
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>{% trans 'Yes, Delete Order' %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
