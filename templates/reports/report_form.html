@@ -5,191 +5,534 @@
 
 {% block extra_css %}
 <!-- TinyMCE -->
-<script src="https://cdn.tiny.mce.com/1/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js"></script>
 <style>
+    :root {
+        --editor-border-color: #e2e8f0;
+        --editor-focus-border: #3b82f6;
+        --section-header-bg: #f8fafc;
+        --sidebar-width: 280px;
+    }
+    
+    .report-editor-layout {
+        display: grid;
+        grid-template-columns: 1fr var(--sidebar-width);
+        gap: 1.5rem;
+    }
+    
+    @media (max-width: 1200px) {
+        .report-editor-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .main-editor-panel {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    
+    .editor-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .editor-header h4 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .editor-section {
+        border-bottom: 1px solid var(--editor-border-color);
+        padding: 1.25rem;
+    }
+    
+    .editor-section:last-child {
+        border-bottom: none;
+    }
+    
+    .section-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.75rem;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .section-title i {
+        color: #667eea;
+        font-size: 1.1rem;
+    }
+    
     .tox-tinymce {
         border-radius: 0.5rem !important;
-        border: 1px solid #dee2e6 !important;
+        border: 1px solid var(--editor-border-color) !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
+    
+    .tox-tinymce:focus-within {
+        border-color: var(--editor-focus-border) !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .tox-toolbar-overlord {
+        background: #f8fafc !important;
+        border-bottom: 1px solid var(--editor-border-color) !important;
+    }
+    
     .editor-container {
+        margin-bottom: 0;
+    }
+    
+    .sidebar-panel {
+        background: #ffffff;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        padding: 1.25rem;
+        height: fit-content;
+        position: sticky;
+        top: 20px;
+    }
+    
+    .sidebar-section {
         margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--editor-border-color);
     }
-    .editor-label {
+    
+    .sidebar-section:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    
+    .sidebar-title {
         font-weight: 600;
-        color: #495057;
+        color: #475569;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .status-selector .btn {
+        width: 100%;
         margin-bottom: 0.5rem;
-        display: block;
+        text-align: left;
+        border: 2px solid var(--editor-border-color);
+        background: white;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.2s;
     }
-    .status-badge {
-        font-size: 0.85rem;
+    
+    .status-selector .btn:hover {
+        border-color: #94a3b8;
+        background: #f8fafc;
     }
+    
+    .status-selector .btn.active {
+        border-color: #667eea;
+        background: #f0f4ff;
+        color: #667eea;
+    }
+    
+    .status-selector .btn.status-draft.active {
+        border-color: #64748b;
+        background: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .status-selector .btn.status-preliminary.active {
+        border-color: #f59e0b;
+        background: #fffbeb;
+        color: #d97706;
+    }
+    
+    .status-selector .btn.status-final.active {
+        border-color: #22c55e;
+        background: #f0fdf4;
+        color: #16a34a;
+    }
+    
+    .status-selector .btn.status-amended.active {
+        border-color: #ef4444;
+        background: #fef2f2;
+        color: #dc2626;
+    }
+    
+    .critical-finding-switch {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .critical-finding-switch:hover {
+        background: #fee2e2;
+    }
+    
+    .critical-finding-switch input:checked + .switch-label {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .switch-label {
+        flex: 1;
+        font-size: 0.9rem;
+        color: #991b1b;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+    }
+    
+    .patient-info-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .patient-info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    
+    .patient-info-row:last-child {
+        border-bottom: none;
+    }
+    
+    .patient-info-label {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    .patient-info-value {
+        font-size: 0.9rem;
+        color: #1e293b;
+        font-weight: 600;
+    }
+    
+    .template-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
     .auto-save-indicator {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        padding: 10px 20px;
-        background: #28a745;
+        padding: 12px 24px;
+        background: #22c55e;
         color: white;
         border-radius: 50px;
         font-size: 0.9rem;
+        font-weight: 500;
         opacity: 0;
         transition: opacity 0.3s ease;
         z-index: 9999;
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
+    
     .auto-save-indicator.show {
         opacity: 1;
     }
+    
     .auto-save-indicator.saving {
-        background: #ffc107;
+        background: #f59e0b;
         color: #000;
+    }
+    
+    .language-toggle {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .language-toggle .btn {
+        flex: 1;
+        font-size: 0.85rem;
+        padding: 0.5rem;
+    }
+    
+    .tab-content-editor {
+        display: none;
+    }
+    
+    .tab-content-editor.active {
+        display: block;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-12">
-        <!-- Report Header -->
-        <div class="card shadow-sm border-0 rounded-4 mb-4">
-            <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="fw-bold mb-1">
-                            <i class="bi bi-file-earmark-medical-fill me-2 text-info"></i>
-                            {% if report %}{% trans "Edit Report" %}{% else %}{% trans "Create New Report" %}{% endif %}
-                        </h3>
-                        <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
-                    </div>
+<div class="container-fluid py-4">
+    <!-- Top Navigation Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="bi bi-file-earmark-medical-fill me-2 text-primary"></i>
+                {% if report %}{% trans "Edit Report" %}{% else %}{% trans "Create Report" %}{% endif %}
+            </h2>
+            <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            {% if report %}
+            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-eye me-1"></i> {% trans "View" %}
+            </a>
+            {% endif %}
+            <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}
+            </a>
+        </div>
+    </div>
+
+    <form method="post" id="reportForm">
+        {% csrf_token %}
+        
+        <div class="report-editor-layout">
+            <!-- Main Editor Panel -->
+            <div class="main-editor-panel">
+                <!-- Editor Header -->
+                <div class="editor-header">
+                    <h4>
+                        <i class="bi bi-pencil-square me-2"></i>
+                        {% trans "Report Editor" %}
+                    </h4>
                     <div class="d-flex gap-2">
-                        {% if report %}
-                        <a href="{% url 'reports:view_report' report.id %}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-eye me-1"></i> {% trans "View" %}
-                        </a>
-                        {% endif %}
-                        <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-arrow-left me-1"></i> {% trans "Back to Reports" %}
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <small class="text-muted d-block">{% trans "Patient" %}</small>
-                        <strong>{{ order.patient.full_name }}</strong>
-                    </div>
-                    <div class="col-md-4">
-                        <small class="text-muted d-block">{% trans "Modality" %}</small>
-                        <strong>{{ order.modality.code }} - {{ order.procedure_name_en }}</strong>
-                    </div>
-                    <div class="col-md-4">
-                        <small class="text-muted d-block">{% trans "Priority" %}</small>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-person-circle me-1"></i>
+                            {{ request.user.get_full_name|default:request.user.username }}
+                        </span>
                         <span class="badge bg-{% if order.priority == 'STAT' %}danger{% elif order.priority == 'URGENT' %}warning{% else %}secondary{% endif %}">
                             {{ order.get_priority_display }}
                         </span>
                     </div>
                 </div>
 
-                <form method="post" id="reportForm">
-                    {% csrf_token %}
-                    
-                    <!-- Status Selection -->
-                    <div class="mb-4">
-                        <label for="status" class="form-label fw-medium">
-                            <i class="bi bi-flag-fill me-1 text-warning"></i>
-                            {% trans "Report Status" %}
-                        </label>
-                        <select class="form-select form-select-lg" id="status" name="status" required>
-                            <option value="DRAFT" {% if report.status == 'DRAFT' %}selected{% endif %}>{% trans "Draft" %}</option>
-                            <option value="PRELIMINARY" {% if report.status == 'PRELIMINARY' %}selected{% endif %}>{% trans "Preliminary" %}</option>
-                            <option value="FINAL" {% if report.status == 'FINAL' %}selected{% endif %}>{% trans "Final" %}</option>
-                            <option value="AMENDED" {% if report.status == 'AMENDED' %}selected{% endif %}>{% trans "Amended" %}</option>
-                        </select>
-                        <small class="text-muted">
-                            <i class="bi bi-info-circle me-1"></i>
-                            {% trans "Select 'Final' when the report is complete and ready for clinical use." %}
-                        </small>
+                <!-- Patient Info Banner -->
+                <div class="patient-info-card mx-3 mt-3">
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">{% trans "Patient Name" %}</span>
+                        <span class="patient-info-value">{{ order.patient.full_name }}</span>
                     </div>
-
-                    <!-- Critical Finding Checkbox -->
-                    <div class="mb-4">
-                        <div class="form-check form-switch">
-                            <input class="form-check-input" type="checkbox" id="critical_finding" name="critical_finding" {% if report.critical_finding %}checked{% endif %}>
-                            <label class="form-check-label fw-semibold text-danger" for="critical_finding">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i>
-                                {% trans "Critical Finding" %}
-                            </label>
-                        </div>
-                        <small class="text-muted">
-                            {% trans "Check this if the report contains critical findings that require immediate attention." %}
-                        </small>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">{% trans "MRN" %}</span>
+                        <span class="patient-info-value">{{ order.patient.mrn }}</span>
                     </div>
-
-                    <!-- Findings Section (English) -->
-                    <div class="editor-container">
-                        <label class="editor-label">
-                            <i class="bi bi-file-text-fill me-1 text-primary"></i>
-                            {% trans "Findings (English)" %}
-                        </label>
-                        <textarea id="findings_en" name="findings_en" class="form-control">{% if report %}{{ report.findings_en }}{% endif %}</textarea>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">{% trans "Procedure" %}</span>
+                        <span class="patient-info-value">{{ order.procedure_name_en }}</span>
                     </div>
-
-                    <!-- Findings Section (Arabic) -->
-                    <div class="editor-container">
-                        <label class="editor-label">
-                            <i class="bi bi-file-text-fill me-1 text-success"></i>
-                            {% trans "Findings (Arabic)" %}
-                        </label>
-                        <textarea id="findings_ar" name="findings_ar" class="form-control" dir="rtl">{% if report %}{{ report.findings_ar }}{% endif %}</textarea>
+                    <div class="patient-info-row">
+                        <span class="patient-info-label">{% trans "Modality" %}</span>
+                        <span class="patient-info-value">{{ order.modality.code }}</span>
                     </div>
+                </div>
 
-                    <!-- Impression Section (English) -->
-                    <div class="editor-container">
-                        <label class="editor-label">
-                            <i class="bi bi-lightbulb-fill me-1 text-warning"></i>
-                            {% trans "Impression / Conclusion (English)" %}
-                        </label>
-                        <textarea id="impression_en" name="impression_en" class="form-control">{% if report %}{{ report.impression_en }}{% endif %}</textarea>
-                    </div>
-
-                    <!-- Impression Section (Arabic) -->
-                    <div class="editor-container">
-                        <label class="editor-label">
-                            <i class="bi bi-lightbulb-fill me-1 text-info"></i>
-                            {% trans "Impression / Conclusion (Arabic)" %}
-                        </label>
-                        <textarea id="impression_ar" name="impression_ar" class="form-control" dir="rtl">{% if report %}{{ report.impression_ar }}{% endif %}</textarea>
-                    </div>
-
-                    <!-- Template Buttons -->
-                    <div class="mb-4">
-                        <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#templatesModal">
-                            <i class="bi bi-collection me-1"></i> {% trans "Load Template" %}
+                <!-- Language Toggle -->
+                <div class="editor-section">
+                    <div class="language-toggle">
+                        <button type="button" class="btn btn-outline-primary active" data-lang="en">
+                            <i class="bi bi-translate me-1"></i> English
                         </button>
-                        <small class="text-muted ms-2">
-                            {% trans "Quickly insert standard report templates." %}
-                        </small>
+                        <button type="button" class="btn btn-outline-success" data-lang="ar">
+                            <i class="bi bi-translate me-1"></i> العربية
+                        </button>
+                    </div>
+                </div>
+
+                <!-- English Sections -->
+                <div id="en-content" class="tab-content-editor active">
+                    <!-- Findings (English) -->
+                    <div class="editor-section">
+                        <div class="section-title">
+                            <i class="bi bi-file-text-fill"></i>
+                            <span>{% trans "Findings" %}</span>
+                        </div>
+                        <textarea id="findings_en" name="findings_en">{% if report %}{{ report.findings_en }}{% endif %}</textarea>
                     </div>
 
-                    <!-- Submit Buttons -->
-                    <div class="d-flex gap-2">
-                        <button type="submit" name="action" value="save" class="btn btn-primary btn-lg">
-                            <i class="bi bi-check-circle-fill me-1"></i>
+                    <!-- Impression (English) -->
+                    <div class="editor-section">
+                        <div class="section-title">
+                            <i class="bi bi-lightbulb-fill"></i>
+                            <span>{% trans "Impression / Conclusion" %}</span>
+                        </div>
+                        <textarea id="impression_en" name="impression_en">{% if report %}{{ report.impression_en }}{% endif %}</textarea>
+                    </div>
+                </div>
+
+                <!-- Arabic Sections -->
+                <div id="ar-content" class="tab-content-editor">
+                    <!-- Findings (Arabic) -->
+                    <div class="editor-section">
+                        <div class="section-title">
+                            <i class="bi bi-file-text-fill"></i>
+                            <span>{% trans "النتائج" %}</span>
+                        </div>
+                        <textarea id="findings_ar" name="findings_ar" dir="rtl">{% if report %}{{ report.findings_ar }}{% endif %}</textarea>
+                    </div>
+
+                    <!-- Impression (Arabic) -->
+                    <div class="editor-section">
+                        <div class="section-title">
+                            <i class="bi bi-lightbulb-fill"></i>
+                            <span>{% trans "الانطباع / الخلاصة" %}</span>
+                        </div>
+                        <textarea id="impression_ar" name="impression_ar" dir="rtl">{% if report %}{{ report.impression_ar }}{% endif %}</textarea>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="editor-section bg-light">
+                    <div class="d-flex gap-3">
+                        <button type="submit" name="action" value="save" class="btn btn-primary btn-lg flex-fill">
+                            <i class="bi bi-check-circle-fill me-2"></i>
                             {% if report %}{% trans "Update Report" %}{% else %}{% trans "Create Report" %}{% endif %}
                         </button>
                         <button type="button" id="btnSaveDraft" class="btn btn-outline-secondary btn-lg">
-                            <i class="bi bi-cloud-upload me-1"></i>
+                            <i class="bi bi-cloud-upload me-2"></i>
                             {% trans "Save Draft" %}
                         </button>
-                        <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-danger btn-lg">
-                            <i class="bi bi-x-circle-fill me-1"></i>
-                            {% trans "Cancel" %}
-                        </a>
+                        <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#templatesModal">
+                            <i class="bi bi-collection me-2"></i>
+                            {% trans "Templates" %}
+                        </button>
                     </div>
-                </form>
+                </div>
+            </div>
+
+            <!-- Sidebar Panel -->
+            <div class="sidebar-panel">
+                <!-- Report Status -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="bi bi-flag-fill text-warning"></i>
+                        <span>{% trans "Report Status" %}</span>
+                    </div>
+                    <div class="status-selector">
+                        <input type="radio" class="btn-check" name="status" id="status-draft" value="DRAFT" {% if report.status == 'DRAFT' %}checked{% endif %} autocomplete="off">
+                        <label class="btn status-draft" for="status-draft">
+                            <i class="bi bi-circle-fill me-2 small"></i>
+                            <div>
+                                <div class="fw-bold">{% trans "Draft" %}</div>
+                                <small class="text-muted">{% trans "Work in progress" %}</small>
+                            </div>
+                        </label>
+
+                        <input type="radio" class="btn-check" name="status" id="status-preliminary" value="PRELIMINARY" {% if report.status == 'PRELIMINARY' %}checked{% endif %} autocomplete="off">
+                        <label class="btn status-preliminary" for="status-preliminary">
+                            <i class="bi bi-circle-fill me-2 small"></i>
+                            <div>
+                                <div class="fw-bold">{% trans "Preliminary" %}</div>
+                                <small class="text-muted">{% trans "Initial interpretation" %}</small>
+                            </div>
+                        </label>
+
+                        <input type="radio" class="btn-check" name="status" id="status-final" value="FINAL" {% if report.status == 'FINAL' %}checked{% endif %} autocomplete="off">
+                        <label class="btn status-final" for="status-final">
+                            <i class="bi bi-check-circle-fill me-2 small"></i>
+                            <div>
+                                <div class="fw-bold">{% trans "Final" %}</div>
+                                <small class="text-muted">{% trans "Ready for clinical use" %}</small>
+                            </div>
+                        </label>
+
+                        <input type="radio" class="btn-check" name="status" id="status-amended" value="AMENDED" {% if report.status == 'AMENDED' %}checked{% endif %} autocomplete="off">
+                        <label class="btn status-amended" for="status-amended">
+                            <i class="bi bi-arrow-repeat me-2 small"></i>
+                            <div>
+                                <div class="fw-bold">{% trans "Amended" %}</div>
+                                <small class="text-muted">{% trans "Modified after final" %}</small>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Critical Finding -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                        <span>{% trans "Flags" %}</span>
+                    </div>
+                    <label class="critical-finding-switch">
+                        <input type="checkbox" id="critical_finding" name="critical_finding" {% if report.critical_finding %}checked{% endif %} style="display: none;">
+                        <i class="bi {% if report.critical_finding %}bi-check-circle-fill text-success{% else %}bi-circle text-muted{% endif %} fs-5"></i>
+                        <span class="switch-label">
+                            <strong>{% trans "Critical Finding" %}</strong>
+                            <br>
+                            <small>{% trans "Requires immediate attention" %}</small>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="bi bi-lightning-fill text-warning"></i>
+                        <span>{% trans "Quick Actions" %}</span>
+                    </div>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="insertNormalTemplate()">
+                            <i class="bi bi-file-earmark-check me-1"></i>
+                            {% trans "Normal Report" %}
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="clearAllFields()">
+                            <i class="bi bi-eraser me-1"></i>
+                            {% trans "Clear All" %}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="alert alert-info mb-0">
+                    <div class="d-flex gap-2">
+                        <i class="bi bi-info-circle-fill fs-5"></i>
+                        <div>
+                            <strong>{% trans "Auto-save Enabled" %}</strong>
+                            <p class="mb-0 small">{% trans "Your work is automatically saved as you type." %}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
 <!-- Templates Modal -->
@@ -226,63 +569,104 @@
 
 {% block extra_js %}
 <script>
-// Initialize TinyMCE editors
-tinymce.init({
-    selector: '#findings_en',
-    height: 300,
-    plugins: 'lists link table code wordcount',
-    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | code',
+// Language toggle functionality
+document.querySelectorAll('.language-toggle .btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Update active state
+        document.querySelectorAll('.language-toggle .btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Show/hide content
+        const lang = this.dataset.lang;
+        if (lang === 'en') {
+            document.getElementById('en-content').classList.add('active');
+            document.getElementById('ar-content').classList.remove('active');
+        } else {
+            document.getElementById('en-content').classList.remove('active');
+            document.getElementById('ar-content').classList.add('active');
+        }
+    });
+});
+
+// Status button visual feedback
+document.querySelectorAll('.status-selector input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        document.querySelectorAll('.status-selector .btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`label[for="${this.id}"]`).classList.add('active');
+    });
+});
+
+// Critical finding checkbox visual update
+document.getElementById('critical_finding').addEventListener('change', function() {
+    const icon = this.parentElement.querySelector('i');
+    if (this.checked) {
+        icon.classList.remove('bi-circle', 'text-muted');
+        icon.classList.add('bi-check-circle-fill', 'text-success');
+    } else {
+        icon.classList.remove('bi-check-circle-fill', 'text-success');
+        icon.classList.add('bi-circle', 'text-muted');
+    }
+});
+
+// Initialize TinyMCE editors with enhanced configuration
+const tinyMCEConfig = {
+    height: 350,
     menubar: false,
     branding: false,
+    promotion: false,
+    skin: 'oxide',
+    content_css: 'default',
+    plugins: 'lists link table code wordcount preview searchreplace fullscreen',
+    toolbar: 'undo redo | blocks | bold italic strikethrough | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link | code fullscreen',
+    block_formats: 'Paragraph=p; Heading 1=h1; Heading 2=h2; Heading 3=h3; Heading 4=h4',
+    style_formats: [
+        { title: 'Normal', format: 'p' },
+        { title: 'Heading 1', format: 'h1' },
+        { title: 'Heading 2', format: 'h2' },
+        { title: 'Heading 3', format: 'h3' },
+    ],
     setup: function(editor) {
         editor.on('change', function() {
             autoSave();
         });
+        editor.on('init', function() {
+            // Set initial content if exists
+            const textarea = document.getElementById(editor.id);
+            if (textarea.value) {
+                editor.setContent(textarea.value);
+            }
+        });
     }
+};
+
+tinymce.init({
+    selector: '#findings_en',
+    ...tinyMCEConfig,
+    height: 400,
+    placeholder: 'Enter radiology findings here...',
 });
 
 tinymce.init({
     selector: '#findings_ar',
-    height: 300,
-    plugins: 'lists link table code wordcount',
-    toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist | code',
-    menubar: false,
-    branding: false,
+    ...tinyMCEConfig,
+    height: 400,
     directionality: 'rtl',
-    setup: function(editor) {
-        editor.on('change', function() {
-            autoSave();
-        });
-    }
+    placeholder: 'أدخل النتائج الإشعاعية هنا...',
 });
 
 tinymce.init({
     selector: '#impression_en',
-    height: 200,
-    plugins: 'lists link code wordcount',
-    toolbar: 'undo redo | formatselect | bold italic | bullist numlist | code',
-    menubar: false,
-    branding: false,
-    setup: function(editor) {
-        editor.on('change', function() {
-            autoSave();
-        });
-    }
+    ...tinyMCEConfig,
+    height: 250,
+    placeholder: 'Enter impression/conclusion...',
 });
 
 tinymce.init({
     selector: '#impression_ar',
-    height: 200,
-    plugins: 'lists link code wordcount',
-    toolbar: 'undo redo | formatselect | bold italic | bullist numlist | code',
-    menubar: false,
-    branding: false,
+    ...tinyMCEConfig,
+    height: 250,
     directionality: 'rtl',
-    setup: function(editor) {
-        editor.on('change', function() {
-            autoSave();
-        });
-    }
+    placeholder: 'أدخل الانطباع/الخلاصة...',
 });
 
 // Auto-save functionality
@@ -373,7 +757,56 @@ function loadTemplate(content) {
     } else {
         tinymce.get('findings_en').insertContent(content);
     }
-    $('#templatesModal').modal('hide');
+    const modal = bootstrap.Modal.getInstance(document.getElementById('templatesModal'));
+    if (modal) {
+        modal.hide();
+    }
 }
+
+// Insert normal report template
+function insertNormalTemplate() {
+    const normalTemplate = "No acute abnormality identified.\\n\\nFindings:\\n- Normal study without significant findings.\\n- No evidence of acute disease process.\\n\\nImpression:\\nNormal examination.";
+    
+    const activeEditor = tinymce.activeEditor;
+    if (activeEditor) {
+        activeEditor.setContent(normalTemplate);
+    } else {
+        tinymce.get('findings_en').setContent(normalTemplate);
+    }
+    
+    // Trigger auto-save
+    autoSave();
+}
+
+// Clear all fields
+function clearAllFields() {
+    if (confirm('Are you sure you want to clear all fields? This cannot be undone.')) {
+        tinymce.get('findings_en').setContent('');
+        tinymce.get('findings_ar').setContent('');
+        tinymce.get('impression_en').setContent('');
+        tinymce.get('impression_ar').setContent('');
+        
+        // Reset status to draft
+        document.getElementById('status-draft').checked = true;
+        document.querySelectorAll('.status-selector .btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector('label[for="status-draft"]').classList.add('active');
+        
+        // Reset critical finding
+        document.getElementById('critical_finding').checked = false;
+        const icon = document.querySelector('.critical-finding-switch i');
+        icon.classList.remove('bi-check-circle-fill', 'text-success');
+        icon.classList.add('bi-circle', 'text-muted');
+    }
+}
+
+// Initialize status buttons on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial active status button
+    const checkedStatus = document.querySelector('.status-selector input[type="radio"]:checked');
+    if (checkedStatus) {
+        document.querySelectorAll('.status-selector .btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`label[for="${checkedStatus.id}"]`).classList.add('active');
+    }
+});
 </script>
 {% endblock %}
