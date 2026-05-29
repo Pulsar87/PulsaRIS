@@ -9,6 +9,65 @@ from patients.views import get_tenant
 from tenants.models import Device, Tenant
 
 
+def worklist(request):
+    """Display worklist of orders with advanced filtering."""
+    query = request.GET.get("q", "")
+    status_filter = request.GET.get("status", "")
+    modality_filter = request.GET.get("modality", "")
+    priority_filter = request.GET.get("priority", "")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    tenant = get_tenant(request)
+
+    orders = ExamOrder.objects.none()
+    modalities = []
+    if tenant:
+        from tenants.models import Modality
+        modalities = Modality.objects.filter(tenant=tenant, is_active=True)
+        
+        orders = ExamOrder.objects.filter(tenant=tenant).select_related(
+            'patient', 'modality', 'facility', 'room_station'
+        )
+
+        if query:
+            orders = orders.filter(
+                Q(accession_number__icontains=query)
+                | Q(patient__mrn__icontains=query)
+                | Q(patient__first_name_en__icontains=query)
+                | Q(patient__last_name_en__icontains=query)
+                | Q(procedure_name_en__icontains=query)
+            )
+
+        if status_filter:
+            orders = orders.filter(status=status_filter)
+
+        if modality_filter:
+            orders = orders.filter(modality__code=modality_filter)
+
+        if priority_filter:
+            orders = orders.filter(priority=priority_filter)
+
+        if date_from:
+            orders = orders.filter(scheduled_datetime__date__gte=date_from)
+
+        if date_to:
+            orders = orders.filter(scheduled_datetime__date__lte=date_to)
+
+    context = {
+        "orders": orders,
+        "query": query,
+        "status_filter": status_filter,
+        "modality_filter": modality_filter,
+        "priority_filter": priority_filter,
+        "date_from": date_from,
+        "date_to": date_to,
+        "status_choices": ExamOrder.Status.choices,
+        "priority_choices": ExamOrder.Priority.choices,
+        "modalities": modalities,
+    }
+    return render(request, "orders/worklist.html", context)
+
+
 def order_list(request):
     """Display list of orders with search functionality."""
     query = request.GET.get("q", "")
