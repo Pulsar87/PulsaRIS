@@ -105,6 +105,11 @@
                                             <i class="bi bi-pencil"></i>
                                         </a>
                                         {% endif %}
+                                        {% if user.is_staff %}
+                                        <a href="{% url 'reports:delete_report' report.id %}" class="btn btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                        {% endif %}
                                     </div>
                                 </td>
                             </tr>
