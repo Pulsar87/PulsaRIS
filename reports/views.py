@@ -20,12 +20,12 @@ def create_report(request, order_id):
     order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
     
     if request.method == "POST":
-        findings_en = request.POST.get("findings_en", "").strip()
-        findings_ar = request.POST.get("findings_ar", "").strip()
-        impression_en = request.POST.get("impression_en", "").strip()
-        impression_ar = request.POST.get("impression_ar", "").strip()
-        critical_finding = request.POST.get("critical_finding") == "on"
+        report_content = request.POST.get("report_content", "").strip()
         status = request.POST.get("status", Report.Status.DRAFT)
+        
+        # Parse content to separate findings and impression if needed
+        # For now, store full content in findings_en
+        findings_en = report_content
         
         # Create new report
         report = Report.objects.create(
@@ -33,10 +33,6 @@ def create_report(request, order_id):
             order=order,
             radiologist=request.user,
             findings_en=findings_en,
-            findings_ar=findings_ar,
-            impression_en=impression_en,
-            impression_ar=impression_ar,
-            critical_finding=critical_finding,
             status=status,
         )
         
@@ -70,19 +66,11 @@ def edit_report(request, report_id):
         return redirect("reports:view_report", report_id=report_id)
     
     if request.method == "POST":
-        findings_en = request.POST.get("findings_en", "").strip()
-        findings_ar = request.POST.get("findings_ar", "").strip()
-        impression_en = request.POST.get("impression_en", "").strip()
-        impression_ar = request.POST.get("impression_ar", "").strip()
-        critical_finding = request.POST.get("critical_finding") == "on"
+        report_content = request.POST.get("report_content", "").strip()
         status = request.POST.get("status", report.status)
         
         # Update report
-        report.findings_en = findings_en
-        report.findings_ar = findings_ar
-        report.impression_en = impression_en
-        report.impression_ar = impression_ar
-        report.critical_finding = critical_finding
+        report.findings_en = report_content
         report.status = status
         
         if status == Report.Status.FINAL and not report.finalized_at:
@@ -189,10 +177,7 @@ def save_report_draft(request):
         return JsonResponse({"error": "Order ID required"}, status=400)
     
     order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
-    findings_en = request.POST.get("findings_en", "")
-    findings_ar = request.POST.get("findings_ar", "")
-    impression_en = request.POST.get("impression_en", "")
-    impression_ar = request.POST.get("impression_ar", "")
+    report_content = request.POST.get("report_content", "")
     
     # Get or create draft report
     report, created = Report.objects.get_or_create(
@@ -201,18 +186,12 @@ def save_report_draft(request):
         status=Report.Status.DRAFT,
         defaults={
             "tenant": tenant,
-            "findings_en": findings_en,
-            "findings_ar": findings_ar,
-            "impression_en": impression_en,
-            "impression_ar": impression_ar,
+            "findings_en": report_content,
         }
     )
     
     if not created:
-        report.findings_en = findings_en
-        report.findings_ar = findings_ar
-        report.impression_en = impression_en
-        report.impression_ar = impression_ar
+        report.findings_en = report_content
         report.save()
     
     return JsonResponse({
