@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext as _
+from django.http import JsonResponse
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
+from tenants.models import Device
 
 
 def reserve_order(request):
@@ -13,7 +15,7 @@ def reserve_order(request):
         patient_mrn = request.POST.get("patient_mrn", "").strip()
         accession_number = request.POST.get("accession_number", "").strip()
         priority = request.POST.get("priority", "ROUTINE")
-        modality_code = request.POST.get("modality", "")
+        device_id = request.POST.get("device", "")
         procedure_code = request.POST.get("procedure_code", "").strip()
         procedure_name_en = request.POST.get("procedure_name_en", "").strip()
         procedure_name_ar = request.POST.get("procedure_name_ar", "").strip()
@@ -24,7 +26,6 @@ def reserve_order(request):
         clinical_indication = request.POST.get("clinical_indication", "").strip()
         scheduled_datetime = request.POST.get("scheduled_datetime", "")
         duration_minutes = request.POST.get("duration_minutes", 15)
-        room_station_id = request.POST.get("room_station", "")
 
         # Basic validation
         if not patient_mrn:
@@ -35,8 +36,8 @@ def reserve_order(request):
             messages.error(request, _("Accession number is required"))
             return redirect("orders:reserve_order")
 
-        if not modality_code:
-            messages.error(request, _("Please select a modality"))
+        if not device_id:
+            messages.error(request, _("Please select a device"))
             return redirect("orders:reserve_order")
 
         if not procedure_code or not procedure_name_en:
@@ -47,9 +48,26 @@ def reserve_order(request):
         # This would involve:
         # 1. Looking up the patient by MRN
         # 2. Getting the tenant from the request
-        # 3. Creating the ExamOrder instance
+        # 3. Creating the ExamOrder instance with device_id as room_station
 
         messages.success(request, _("Order reserved successfully!"))
         return redirect("orders:worklist")
 
     return render(request, "orders/reserve_order.html")
+
+
+def get_devices(request):
+    """HTMX endpoint to fetch devices for the current tenant."""
+    tenant = get_tenant(request)
+    
+    if not tenant:
+        from django.template.loader import render_to_string
+        return render_to_string('orders/_device_options.html', {'devices': [], 'error': 'Tenant not found'})
+    
+    devices = Device.objects.filter(
+        tenant=tenant,
+        is_active=True
+    ).select_related('modality').order_by('name')
+    
+    from django.template.loader import render_to_string
+    return render_to_string('orders/_device_options.html', {'devices': devices})

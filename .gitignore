@@ -21,18 +21,11 @@ wheels/
 .installed.cfg
 *.egg
 
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-
 # Environment
 .venv/
 venv/
 env/
 ENV/
-
-# Logs
-*.log
 
 # IDE
 .vscode/
@@ -40,16 +33,10 @@ ENV/
 *.swp
 *.swo
 
+# Logs
+*.log
+
 # OS
 .DS_Store
 Thumbs.db
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Temporary files
-*.tmp
-*.temp
 ```

@@ -157,24 +157,18 @@
                                 </select>
                             </div>
                             
-                            <!-- Modality -->
+                            <!-- Device (replaces Modality) -->
                             <div class="col-md-6">
-                                <label for="modality" class="form-label fw-medium">
-                                    {% trans "Modality" %}
+                                <label for="device" class="form-label fw-medium">
+                                    {% trans "Device" %}
                                     <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select form-select-lg" id="modality" name="modality" required>
-                                    <option value="" selected disabled>{% trans "Select modality" %}</option>
-                                    <option value="CT">CT - Computed Tomography</option>
-                                    <option value="MR">MR - Magnetic Resonance</option>
-                                    <option value="CR">CR - Computed Radiography</option>
-                                    <option value="DX">DX - Digital Radiography</option>
-                                    <option value="US">US - Ultrasound</option>
-                                    <option value="NM">NM - Nuclear Medicine</option>
-                                    <option value="PT">PT - Positron Emission Tomography</option>
-                                    <option value="MG">MG - Mammography</option>
-                                    <option value="XA">XA - X-Ray Angiography</option>
-                                    <option value="RF">RF - Radio Fluoroscopy</option>
+                                <select class="form-select form-select-lg" id="device" name="device" required
+                                        hx-get="{% url 'orders:get_devices' %}"
+                                        hx-trigger="load once"
+                                        hx-target="#device"
+                                        hx-swap="innerHTML">
+                                    <option value="" selected disabled>{% trans "Loading devices..." %}</option>
                                 </select>
                             </div>
                             
