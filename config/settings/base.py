@@ -50,6 +50,7 @@ TENANT_APPS = [
     "orders",
     "reports",
     "integrations",
+    "billing",  # Financial/Billing module
     "django.contrib.staticfiles",
     "django_filters",
     "rest_framework",
