@@ -138,6 +138,33 @@ def study_reports(request, order_id):
     return render(request, "reports/study_reports.html", context)
 
 
+def delete_report(request, report_id):
+    """Delete a report."""
+    tenant = get_tenant(request)
+    if not tenant:
+        messages.error(request, _("Tenant not found. Please select a tenant."))
+        return redirect("orders:worklist")
+    
+    report = get_object_or_404(Report, id=report_id, tenant=tenant)
+    order_id = report.order.id
+    
+    # Check permission - only staff can delete
+    if not request.user.is_staff:
+        messages.error(request, _("You don't have permission to delete this report."))
+        return redirect("reports:view_report", report_id=report_id)
+    
+    if request.method == "POST":
+        report.delete()
+        messages.success(request, _("Report deleted successfully!"))
+        return redirect("reports:study_reports", order_id=order_id)
+    
+    context = {
+        "report": report,
+        "order": report.order,
+    }
+    return render(request, "reports/report_confirm_delete.html", context)
+
+
 @require_http_methods(["GET"])
 def get_report_templates(request):
     """Get available report templates via AJAX."""

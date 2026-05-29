@@ -182,6 +182,11 @@
                                            title="{% trans 'View Details' %}">
                                             <i class="fas fa-eye"></i>
                                         </a>
+                                        <a href="{% url 'reports:study_reports' order.id %}" 
+                                           class="btn btn-sm btn-outline-info" 
+                                           title="{% trans 'View Reports' %}">
+                                            <i class="fas fa-file-medical-alt"></i>
+                                        </a>
                                         <a href="{% url 'orders:edit_order' order.pk %}" 
                                            class="btn btn-sm btn-outline-warning" 
                                            title="{% trans 'Edit' %}">
