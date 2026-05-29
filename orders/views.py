@@ -417,16 +417,18 @@ def reserve_order(request):
 
 def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
+    from django.http import HttpResponse
+    from django.template.loader import render_to_string
+    
     tenant = get_tenant(request)
     
     # Debug: log tenant info
     print(f"DEBUG get_devices: tenant={tenant}")
 
     if not tenant:
-        from django.template.loader import render_to_string
         html = render_to_string('orders/_device_options.html', {'devices': [], 'error': 'Tenant not found'})
         print(f"DEBUG get_devices: no tenant, returning error HTML")
-        return html
+        return HttpResponse(html)
 
     devices = Device.objects.filter(
         tenant=tenant,
@@ -436,7 +438,6 @@ def get_devices(request):
     # Debug: log device count
     print(f"DEBUG get_devices: found {devices.count()} devices")
 
-    from django.template.loader import render_to_string
     html = render_to_string('orders/_device_options.html', {'devices': devices})
     print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
-    return html
+    return HttpResponse(html)
