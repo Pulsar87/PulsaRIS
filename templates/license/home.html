@@ -1,95 +1,453 @@
 {% extends '../layout.html' %}
 
+{% block extra_css %}
+<style>
+    /* Hero Header Gradient */
+    .calendar-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .calendar-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+    
+    .calendar-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -5%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 50%;
+    }
+    
+    .calendar-hero h2 {
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .calendar-hero p {
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Enhanced Card Design */
+    .calendar-card {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        background: var(--card-bg);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    
+    .calendar-card:hover {
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+        transform: translateY(-2px);
+    }
+    
+    .calendar-card .card-header {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1.5rem 2rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    .calendar-card .card-body {
+        padding: 0;
+        background: var(--card-bg);
+    }
+    
+    /* Filter Panel Enhancement */
+    .filter-panel {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(14, 165, 233, 0.01) 100%);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin: 1rem;
+        border: 1px solid var(--border-color);
+    }
+    
+    .device-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        font-size: 0.9rem;
+        user-select: none;
+    }
+    
+    .device-chip:hover {
+        border-color: var(--medical-primary);
+        background: rgba(14, 165, 233, 0.05);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    }
+    
+    .device-chip input[type="checkbox"] {
+        display: none;
+    }
+    
+    .device-chip.active {
+        background: var(--medical-primary);
+        border-color: var(--medical-primary);
+        color: white;
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+    
+    .device-chip .modality-badge {
+        background: rgba(14, 165, 233, 0.15);
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        margin-left: 0.5rem;
+        text-transform: uppercase;
+    }
+    
+    .device-chip.active .modality-badge {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+    
+    /* Action Buttons */
+    .action-btn {
+        border-radius: 12px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .action-btn-primary {
+        background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+        color: white;
+        box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
+    }
+    
+    .action-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+        color: white;
+    }
+    
+    .action-btn-secondary {
+        background: var(--card-bg);
+        color: var(--text-main);
+        border: 2px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+    
+    .action-btn-secondary:hover {
+        background: var(--medical-primary);
+        color: white;
+        border-color: var(--medical-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+    }
+    
+    .action-btn-outline {
+        background: transparent;
+        color: var(--text-muted);
+        border: 2px solid var(--border-color);
+    }
+    
+    .action-btn-outline:hover {
+        background: var(--bg-body);
+        color: var(--text-main);
+        border-color: var(--text-muted);
+        transform: translateY(-1px);
+    }
+    
+    /* Calendar Container */
+    #calendar {
+        padding: 1.5rem;
+        min-height: 800px;
+    }
+    
+    /* FullCalendar Customization */
+    .fc-theme-standard .fc-scrollgrid {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    
+    .fc-theme-standard td, 
+    .fc-theme-standard th {
+        border-color: var(--border-color);
+    }
+    
+    .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    .fc-button-primary {
+        background: var(--card-bg) !important;
+        border: 2px solid var(--border-color) !important;
+        color: var(--text-main) !important;
+        padding: 0.5rem 1rem;
+        font-weight: 600;
+        border-radius: 10px !important;
+        transition: all 0.2s ease;
+    }
+    
+    .fc-button-primary:hover {
+        background: var(--medical-primary) !important;
+        border-color: var(--medical-primary) !important;
+        color: white !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+    }
+    
+    .fc-button-active {
+        background: var(--medical-primary) !important;
+        border-color: var(--medical-primary) !important;
+        color: white !important;
+    }
+    
+    .fc-day-today {
+        background: rgba(14, 165, 233, 0.04) !important;
+    }
+    
+    .fc-event {
+        border: none;
+        border-radius: 8px;
+        padding: 4px 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .fc-event:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Modal Enhancement */
+    .modal-content {
+        border: none;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(14, 165, 233, 0.02) 100%);
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+    }
+    
+    .modal-title {
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    
+    .modal-body {
+        padding: 2rem;
+    }
+    
+    .detail-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-value {
+        font-weight: 500;
+        color: var(--text-main);
+        font-size: 1rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .calendar-hero {
+            padding: 1.5rem;
+            border-radius: 16px;
+        }
+        
+        .calendar-hero h2 {
+            font-size: 1.5rem;
+        }
+        
+        .filter-panel {
+            margin: 0.75rem;
+            padding: 1rem;
+        }
+        
+        .device-chip {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 text-primary">
-                            <i class="bi bi-calendar3 me-2"></i>{% trans "Schedule Calendar" %}
-                        </h5>
-                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#deviceFilterCollapse" aria-expanded="false" aria-controls="deviceFilterCollapse">
-                            <i class="bi bi-funnel me-1"></i> {% trans "Filter by Device" %}
-                        </button>
-                    </div>
-                </div>
-                <div class="collapse" id="deviceFilterCollapse">
-                    <div class="card-body bg-light">
-                        <div class="row">
-                            <div class="col-12">
-                                <label class="form-label fw-bold">{% trans "Select Devices" %}:</label>
-                                <div class="d-flex flex-wrap gap-3">
-                                    {% for device in devices %}
-                                    <div class="form-check">
-                                        <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
-                                        <label class="form-check-label" for="device_{{ device.id }}">
-                                            {{ device.name }} ({{ device.modality.code }})
-                                        </label>
-                                    </div>
-                                    {% empty %}
-                                    <p class="text-muted mb-0">{% trans "No devices configured" %}</p>
-                                    {% endfor %}
-                                </div>
-                                <div class="mt-3">
-                                    <button class="btn btn-sm btn-primary" id="applyDeviceFilter">
-                                        <i class="bi bi-check-lg me-1"></i> {% trans "Apply Filter" %}
-                                    </button>
-                                    <button class="btn btn-sm btn-secondary ms-2" id="selectAllDevices">
-                                        <i class="bi bi-check-all me-1"></i> {% trans "Select All" %}
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-secondary ms-2" id="clearAllDevices">
-                                        <i class="bi bi-x-lg me-1"></i> {% trans "Clear All" %}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0">
-                    <div id="calendar" style="min-height: 800px;"></div>
-                </div>
-            </div>
+<!-- Hero Section -->
+<div class="calendar-hero">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h2 class="mb-2">
+                <i class="bi bi-calendar3 me-3"></i>{% trans "Schedule Calendar" %}
+            </h2>
+            <p class="mb-0 opacity-75">{% trans "Manage and track your medical appointments and procedures" %}</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <button class="btn btn-light action-btn" type="button" data-bs-toggle="collapse" data-bs-target="#deviceFilterCollapse" aria-expanded="false" aria-controls="deviceFilterCollapse">
+                <i class="bi bi-funnel me-2"></i>{% trans "Filter Devices" %}
+            </button>
         </div>
     </div>
 </div>
 
+<!-- Main Calendar Card -->
+<div class="calendar-card">
+    <!-- Filter Panel -->
+    <div class="collapse" id="deviceFilterCollapse">
+        <div class="filter-panel">
+            <div class="row">
+                <div class="col-12">
+                    <label class="form-label fw-bold mb-3" style="color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px;">
+                        <i class="bi bi-hdd-stack me-2"></i>{% trans "Select Devices" %}
+                    </label>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for device in devices %}
+                        <label class="device-chip" for="device_{{ device.id }}">
+                            <input class="form-check-input device-filter" type="checkbox" value="{{ device.id }}" id="device_{{ device.id }}" checked>
+                            <span>{{ device.name }}</span>
+                            <span class="modality-badge">{{ device.modality.code }}</span>
+                        </label>
+                        {% empty %}
+                        <p class="text-muted mb-0">{% trans "No devices configured" %}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn action-btn action-btn-primary" id="applyDeviceFilter">
+                            <i class="bi bi-check-lg"></i> {% trans "Apply Filter" %}
+                        </button>
+                        <button class="btn action-btn action-btn-secondary" id="selectAllDevices">
+                            <i class="bi bi-check-all"></i> {% trans "Select All" %}
+                        </button>
+                        <button class="btn action-btn action-btn-outline" id="clearAllDevices">
+                            <i class="bi bi-x-lg"></i> {% trans "Clear All" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Calendar -->
+    <div id="calendar"></div>
+</div>
+
 <!-- Event Detail Modal -->
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="eventModalLabel">{% trans "Exam Details" %}</h5>
+                <h5 class="modal-title" id="eventModalLabel">
+                    <i class="bi bi-file-earmark-medical me-2"></i>{% trans "Exam Details" %}
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="row">
+                <div class="row g-4">
                     <div class="col-md-6">
-                        <p><strong>{% trans "Patient MRN" %}:</strong> <span id="modalPatientMRN"></span></p>
-                        <p><strong>{% trans "Patient Name" %}:</strong> <span id="modalPatientName"></span></p>
-                        <p><strong>{% trans "Accession Number" %}:</strong> <span id="modalAccession"></span></p>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Patient MRN" %}</span>
+                            <span class="detail-value" id="modalPatientMRN"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Patient Name" %}</span>
+                            <span class="detail-value" id="modalPatientName"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Accession Number" %}</span>
+                            <span class="detail-value" id="modalAccession"></span>
+                        </div>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>{% trans "Modality" %}:</strong> <span id="modalModality"></span></p>
-                        <p><strong>{% trans "Procedure" %}:</strong> <span id="modalProcedure"></span></p>
-                        <p><strong>{% trans "Priority" %}:</strong> <span id="modalPriority"></span></p>
-                        <p><strong>{% trans "Status" %}:</strong> <span id="modalStatus"></span></p>
-                        <p><strong>{% trans "Device/Room" %}:</strong> <span id="modalDevice"></span></p>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Modality" %}</span>
+                            <span class="detail-value" id="modalModality"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Procedure" %}</span>
+                            <span class="detail-value" id="modalProcedure"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Priority" %}</span>
+                            <span class="detail-value" id="modalPriority"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Status" %}</span>
+                            <span class="detail-value" id="modalStatus"></span>
+                        </div>
+                        <div class="detail-item d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Device/Room" %}</span>
+                            <span class="detail-value" id="modalDevice"></span>
+                        </div>
                     </div>
                 </div>
-                <div class="row mt-3">
+                <div class="row mt-4 pt-3 border-top">
                     <div class="col-12">
-                        <p><strong>{% trans "Scheduled Time" %}:</strong> <span id="modalStartTime"></span></p>
-                        <p><strong>{% trans "Duration" %}:</strong> <span id="modalDuration"></span></p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="detail-label">{% trans "Scheduled Time" %}</span>
+                            <span class="detail-value" id="modalStartTime"></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="detail-label">{% trans "Duration" %}</span>
+                            <span class="detail-value" id="modalDuration"></span>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <a href="#" id="modalWorklistLink" class="btn btn-primary">
-                    <i class="bi bi-grid-1x2 me-1"></i> {% trans "View in Worklist" %}
+            <div class="modal-footer border-0 pt-0">
+                <a href="#" id="modalWorklistLink" class="btn action-btn action-btn-primary">
+                    <i class="bi bi-grid-1x2"></i> {% trans "View in Worklist" %}
                 </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                <button type="button" class="btn action-btn action-btn-outline" data-bs-dismiss="modal">{% trans "Close" %}</button>
             </div>
         </div>
     </div>
@@ -204,6 +562,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     calendar.render();
     
+    // Add visual feedback for device chips
+    deviceCheckboxes.forEach(function(checkbox) {
+        var chipLabel = checkbox.closest('.device-chip');
+        if (chipLabel) {
+            // Set initial state
+            if (checkbox.checked) {
+                chipLabel.classList.add('active');
+            }
+            
+            // Toggle active class on change
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    chipLabel.classList.add('active');
+                } else {
+                    chipLabel.classList.remove('active');
+                }
+            });
+        }
+    });
+    
     // Device filter button handlers
     document.getElementById('applyDeviceFilter').addEventListener('click', function() {
         // Update selected devices from checkboxes
@@ -226,12 +604,20 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('selectAllDevices').addEventListener('click', function() {
         deviceCheckboxes.forEach(function(checkbox) {
             checkbox.checked = true;
+            var chipLabel = checkbox.closest('.device-chip');
+            if (chipLabel) {
+                chipLabel.classList.add('active');
+            }
         });
     });
     
     document.getElementById('clearAllDevices').addEventListener('click', function() {
         deviceCheckboxes.forEach(function(checkbox) {
             checkbox.checked = false;
+            var chipLabel = checkbox.closest('.device-chip');
+            if (chipLabel) {
+                chipLabel.classList.remove('active');
+            }
         });
     });
 });
