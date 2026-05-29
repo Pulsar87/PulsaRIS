@@ -132,13 +132,26 @@ def calendar_events(request):
         if order.duration_minutes:
             end_dt = scheduled_dt + timedelta(minutes=order.duration_minutes)
         
+        # Set color based on status
+        status_color_map = {
+            'COMPLETED': '#22c55e',
+            'REPORTED': '#22c55e',
+            'FINALIZED': '#22c55e',
+            'REGISTERED': '#eab308',
+            'SCHEDULED': '#eab308',
+            'IN_PROGRESS': '#f97316',
+            'CANCELLED': '#ef4444',
+        }
+        default_color = color_map.get(modality_code, '#95a5a6')
+        event_color = status_color_map.get(order.status, default_color)
+        
         event = {
             'id': str(order.id),
             'title': f"{modality_code} - {order.procedure_code}",
             'start': scheduled_dt.isoformat(),
             'end': end_dt.isoformat() if end_dt else None,
-            'backgroundColor': color_map.get(modality_code, '#95a5a6'),
-            'borderColor': color_map.get(modality_code, '#95a5a6'),
+            'backgroundColor': event_color,
+            'borderColor': event_color,
             'extendedProps': {
                 'patient_mrn': order.patient.mrn if order.patient else 'N/A',
                 'patient_name': str(order.patient) if order.patient else 'N/A',
