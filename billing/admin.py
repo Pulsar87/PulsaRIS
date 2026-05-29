@@ -11,15 +11,94 @@ from .models import (
 
 @admin.register(InsurancePayer)
 class InsurancePayerAdmin(admin.ModelAdmin):
-    list_display = ['name', 'payer_id', 'payer_type', 'is_active']
-    list_filter = ['payer_type', 'is_active']
-    search_fields = ['name', 'payer_id']
+    list_display = ['name', 'code', 'payer_id', 'payer_type', 'edi_enabled', 'claim_format', 'is_active']
+    list_filter = ['payer_type', 'edi_enabled', 'is_active', 'claim_format']
+    search_fields = ['name', 'code', 'payer_id', 'short_name']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('tenant', 'name', 'short_name', 'code', 'payer_id', 'payer_type')
+        }),
+        ('Contact Information', {
+            'fields': (
+                ('address_line1', 'address_line2'),
+                ('city', 'state_province', 'postal_code', 'country'),
+                ('phone', 'fax', 'email', 'website')
+            )
+        }),
+        ('EDI Configuration', {
+            'fields': (
+                ('edi_enabled', 'clearinghouse'),
+                ('edi_qualifier', 'edi_receiver_id'),
+                ('transmitter_name', 'isa_receiver_id', 'gs_receiver_id'),
+                ('billing_provider_npi', 'billing_provider_tin')
+            )
+        }),
+        ('Claim Settings', {
+            'fields': (
+                ('claim_format', 'fee_schedule', 'default_copay'),
+                ('require_auth', 'auth_required_for_cpt'),
+                'place_of_service_restrictions'
+            )
+        }),
+        ('ERA Settings', {
+            'fields': ('era_enabled', 'era_trace_number_qualifier')
+        }),
+        ('Status', {
+            'fields': ('is_active', 'created_at', 'updated_at')
+        }),
+    )
 
 
 @admin.register(Clearinghouse)
 class ClearinghouseAdmin(admin.ModelAdmin):
-    list_display = ['name', 'is_active', 'created_at']
-    list_filter = ['is_active']
+    list_display = ['name', 'code', 'vendor_name', 'transmission_protocol', 'supports_837p', 'supports_835', 'is_active']
+    list_filter = ['is_active', 'transmission_protocol', 'supports_837p', 'supports_837i', 'supports_835']
+    search_fields = ['name', 'code', 'vendor_name']
+    readonly_fields = ['created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('tenant', 'name', 'code', 'vendor_name')
+        }),
+        ('Support Contact', {
+            'fields': (
+                ('support_phone', 'support_email'),
+                'website'
+            )
+        }),
+        ('API Connection', {
+            'fields': (
+                ('api_endpoint', 'api_username'),
+                'api_password',
+                'api_key'
+            )
+        }),
+        ('EDI Settings', {
+            'fields': (
+                ('sender_id', 'receiver_id'),
+                'interchange_control_version',
+                'trading_partner_id'
+            )
+        }),
+        ('Supported Transactions', {
+            'fields': (
+                ('supports_837p', 'supports_837i'),
+                ('supports_835', 'supports_270_271'),
+                'supports_278'
+            )
+        }),
+        ('Transmission Protocol', {
+            'fields': (
+                ('transmission_protocol', 'sftp_host', 'sftp_port'),
+                'sftp_username'
+            )
+        }),
+        ('Status', {
+            'fields': ('is_active', 'created_at', 'updated_at')
+        }),
+    )
 
 
 @admin.register(PatientInsurance)
