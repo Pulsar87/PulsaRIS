@@ -415,7 +415,11 @@
                         </div>
                         <div class="detail-item d-flex justify-content-between align-items-center">
                             <span class="detail-label">{% trans "Status" %}</span>
-                            <span class="detail-value" id="modalStatus"></span>
+                            <select class="form-select form-select-sm" id="modalStatusSelect" style="width: 150px;">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
                         <div class="detail-item d-flex justify-content-between align-items-center">
                             <span class="detail-label">{% trans "Device/Room" %}</span>
@@ -441,6 +445,9 @@
                     <i class="bi bi-grid-1x2"></i> {% trans "View in Worklist" %}
                 </a>
                 <button type="button" class="btn action-btn action-btn-outline" data-bs-dismiss="modal">{% trans "Close" %}</button>
+                <button type="button" class="btn action-btn action-btn-primary" id="modalSaveStatusBtn">
+                    <i class="bi bi-check-lg"></i> {% trans "Save Status" %}
+                </button>
             </div>
         </div>
     </div>
@@ -589,6 +596,9 @@ document.addEventListener('DOMContentLoaded', function() {
             var event = info.event;
             var props = event.extendedProps;
             
+            // Store the order ID for later use
+            window.currentOrderId = event.id;
+            
             // Populate modal with event details
             document.getElementById('modalPatientMRN').textContent = props.patient_mrn;
             document.getElementById('modalPatientName').textContent = props.patient_name;
@@ -596,7 +606,11 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modalModality').textContent = props.modality;
             document.getElementById('modalProcedure').textContent = event.title;
             document.getElementById('modalPriority').textContent = props.priority;
-            document.getElementById('modalStatus').textContent = props.status;
+            
+            // Set status in dropdown
+            var statusSelect = document.getElementById('modalStatusSelect');
+            statusSelect.value = props.status;
+            
             document.getElementById('modalDevice').textContent = props.device || 'N/A';
             document.getElementById('modalStartTime').textContent = event.start.toLocaleString();
             
@@ -664,6 +678,67 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+    
+    // Save status button handler
+    var saveStatusBtn = document.getElementById('modalSaveStatusBtn');
+    if (saveStatusBtn) {
+        saveStatusBtn.addEventListener('click', function() {
+            if (!window.currentOrderId) {
+                alert('{% trans "No order selected" %}');
+                return;
+            }
+            
+            var statusSelect = document.getElementById('modalStatusSelect');
+            var newStatus = statusSelect.value;
+            
+            // Send AJAX request to update order status
+            fetch('/orders/' + window.currentOrderId + '/update-status/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    alert('{% trans "Status updated successfully!" %}');
+                    // Close modal
+                    var modalEl = document.getElementById('eventModal');
+                    var modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    // Refresh calendar events
+                    calendar.refetchEvents();
+                } else {
+                    alert('{% trans "Error updating status: " %}' + (data.error || '{% trans "Unknown error" %}'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('{% trans "Error updating status. Please try again." %}');
+            });
+        });
+    }
 });
+
+// Helper function to get CSRF token
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 </script>
 {% endblock %}

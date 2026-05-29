@@ -441,3 +441,42 @@ def get_devices(request):
     html = render_to_string('orders/_device_options.html', {'devices': devices})
     print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
     return HttpResponse(html)
+
+
+def update_order_status(request, pk):
+    """API endpoint to update order status via AJAX."""
+    from orders.models import ExamOrder
+    from django.http import JsonResponse
+    from django.views.decorators.http import require_POST
+    import json
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'})
+    
+    try:
+        data = json.loads(request.body)
+        new_status = data.get('status')
+        
+        if not new_status:
+            return JsonResponse({'success': False, 'error': 'Status is required'})
+        
+        # Validate status choice
+        valid_statuses = [choice[0] for choice in ExamOrder.Status.choices]
+        if new_status not in valid_statuses:
+            return JsonResponse({'success': False, 'error': 'Invalid status'})
+        
+        # Get the order
+        order = ExamOrder.objects.get(pk=pk)
+        
+        # Update status
+        order.status = new_status
+        order.save()
+        
+        return JsonResponse({'success': True, 'status': new_status})
+        
+    except ExamOrder.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Order not found'})
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

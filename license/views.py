@@ -9,12 +9,13 @@ from .check import get_hardware_id, verify_key
 @login_required
 def home(request):
     """Home page view with calendar."""
+    from orders.models import ExamOrder
+    
     # Get tenant from request
     tenant = getattr(request, 'tenant', None)
     
     # Fetch scheduled orders for the calendar
     if tenant:
-        from orders.models import ExamOrder
         from tenants.models import Device
         # Get orders for the next 30 days
         end_date = timezone.now() + timedelta(days=30)
@@ -30,7 +31,12 @@ def home(request):
         orders = []
         devices = []
     
-    return render(request, 'license/home.html', {'orders': orders, 'devices': devices})
+    context = {
+        'orders': orders, 
+        'devices': devices,
+        'status_choices': ExamOrder.Status.choices,
+    }
+    return render(request, 'license/home.html', context)
 
 @login_required
 def calendar_events(request):

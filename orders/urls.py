@@ -12,4 +12,5 @@ urlpatterns = [
     path('<uuid:pk>/delete/', views.delete_order, name='delete_order'),
     path('reserve/', views.reserve_order, name='reserve_order'),
     path('api/devices/', views.get_devices, name='get_devices'),
+    path('<uuid:pk>/update-status/', views.update_order_status, name='update_order_status'),
 ]
