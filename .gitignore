@@ -1,3 +1,4 @@
+```
 # Python
 __pycache__/
 *.py[cod]
@@ -25,14 +26,9 @@ wheels/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-
-# Environment
+media/
+staticfiles/
 .env
-.env.local
-.env.*
-.venv/
-venv/
-ENV/
 
 # IDE
 .vscode/
@@ -43,14 +39,4 @@ ENV/
 # OS
 .DS_Store
 Thumbs.db
-
-# Coverage
-.coverage
-coverage/
-htmlcov/
-
-# Build
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
+```

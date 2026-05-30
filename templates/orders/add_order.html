@@ -103,8 +103,13 @@
                                 <label for="procedure_code" class="form-label">{% trans 'Procedure Code' %} <span class="text-danger">*</span></label>
                                 <select class="form-select" id="procedure_code" name="procedure_code" required>
                                     <option value="">-- {% trans 'Select Procedure' %} --</option>
-                                    {% for value, label in procedure_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
+                                    {% regroup procedures by modality_type as procedure_groups %}
+                                    {% for group in procedure_groups %}
+                                        <optgroup label="{{ group.grouper }}">
+                                            {% for procedure in group.list %}
+                                                <option value="{{ procedure.code }}" data-name-en="{{ procedure.name_en }}" data-name-ar="{{ procedure.name_ar }}">{{ procedure.code }} - {{ procedure.name_en }}</option>
+                                            {% endfor %}
+                                        </optgroup>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -113,14 +118,14 @@
                             <div class="col-md-6">
                                 <label for="procedure_name_en" class="form-label">{% trans 'Procedure Name (English)' %} <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="procedure_name_en" name="procedure_name_en" required 
-                                       placeholder="{% trans 'Enter procedure name in English' %}">
+                                       placeholder="{% trans 'Enter procedure name in English' %}" readonly>
                             </div>
 
                             <!-- Procedure Name Arabic -->
                             <div class="col-md-6">
                                 <label for="procedure_name_ar" class="form-label">{% trans 'Procedure Name (Arabic)' %}</label>
                                 <input type="text" class="form-control" id="procedure_name_ar" name="procedure_name_ar" 
-                                       placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}" dir="rtl">
+                                       placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}" dir="rtl" readonly>
                             </div>
 
                             <!-- Referring Physician -->
@@ -247,18 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
         accessionInput.value = 'ACC' + timestamp;
     }
 
-    // Auto-fill procedure name when code is selected
-    const procedureCodeSelect = document.getElementById('procedure_code');
-    const procedureNameInput = document.getElementById('procedure_name_en');
-    
-    if (procedureCodeSelect && procedureNameInput) {
-        procedureCodeSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.value && selectedOption.text) {
-                procedureNameInput.value = selectedOption.text;
-            }
-        });
-    }
 });
 </script>
 {% endblock %}

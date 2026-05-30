@@ -219,10 +219,14 @@ def add_order(request):
     if tenant:
         from tenants.models import Facility
         facilities = Facility.objects.filter(tenant=tenant, is_active=True)
+    
+    # Get active procedures from database
+    from orders.models import Procedure
+    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
 
     context = {
         "facilities": facilities,
-        "procedure_choices": ExamOrder._meta.get_field('procedure_code').choices,
+        "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
     }
     return render(request, "orders/add_order.html", context)
@@ -334,11 +338,15 @@ def edit_order(request, pk):
     if tenant:
         from tenants.models import Facility
         facilities = Facility.objects.filter(tenant=tenant, is_active=True)
+    
+    # Get active procedures from database
+    from orders.models import Procedure
+    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
 
     context = {
         "order": order,
         "facilities": facilities,
-        "procedure_choices": ExamOrder._meta.get_field('procedure_code').choices,
+        "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
         "status_choices": ExamOrder.Status.choices,
     }
@@ -465,10 +473,14 @@ def reserve_order(request):
     # GET request - pre-fill MRN if provided
     prefill_mrn = request.GET.get("mrn", "")
     tenant = get_tenant(request)
+    
+    # Get active procedures from database
+    from orders.models import Procedure
+    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
 
     context = {
         "prefill_mrn": prefill_mrn,
-        "procedure_choices": ExamOrder._meta.get_field('procedure_code').choices,
+        "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
     }
     return render(request, "orders/reserve_order.html", context)

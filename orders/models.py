@@ -3,8 +3,45 @@ import uuid
 from django.db import models
 
 
-# Common Radiology Procedure Codes (CPT/RadLex based examples)
-# In production, this would be loaded from a comprehensive ICD-10/CPT code database
+class Procedure(models.Model):
+    """Database model for radiology procedures that can be managed via admin panel."""
+    
+    class ModalityType(models.TextChoices):
+        CT = 'CT', 'CT'
+        MR = 'MR', 'MR'
+        XR = 'XR', 'X-Ray'
+        US = 'US', 'Ultrasound'
+        NM = 'NM', 'Nuclear Medicine'
+        PET = 'PET', 'PET'
+        FLUORO = 'FLUORO', 'Fluoroscopy'
+        INT = 'INT', 'Interventional'
+        OTHER = 'OTHER', 'Other'
+    
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=20, unique=True, db_index=True)
+    name_en = models.CharField(max_length=150)
+    name_ar = models.CharField(max_length=150, blank=True)
+    modality_type = models.CharField(
+        max_length=10, 
+        choices=ModalityType.choices, 
+        default=ModalityType.OTHER
+    )
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['modality_type', 'code']
+        indexes = [
+            models.Index(fields=['modality_type', 'is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.code} - {self.name_en}"
+
+
+# DICOM Standard Modality Types (PS3.16 - CID 29)
 RADIOLOGY_PROCEDURE_CHOICES = [
     # CT Procedures
     ('CT_HEAD', 'CT Head without contrast'),
@@ -114,7 +151,7 @@ class ExamOrder(models.Model):
     modality = models.ForeignKey(
         "tenants.Modality", on_delete=models.PROTECT, related_name="exam_orders"
     )
-    procedure_code = models.CharField(max_length=20, choices=RADIOLOGY_PROCEDURE_CHOICES)
+    procedure_code = models.CharField(max_length=20)
     procedure_name_en = models.CharField(max_length=150)
     procedure_name_ar = models.CharField(max_length=150, blank=True)
     priority = models.CharField(
