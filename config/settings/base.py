@@ -195,8 +195,8 @@ SPECTACULAR_SETTINGS = {
 # ─────────────────────────────────────────────────────────────
 # AUDITLOG_CID_GETTER = None
 # AUDITLOG_CID_HEADER = None
-AUDITLOG_INCLUDE_ALL_MODELS = False  # explicit is safer
-AUDITLOG_DISABLE_ON_RAW_SAVE = False
+AUDITLOG_INCLUDE_ALL_MODELS = True  # explicit is safer
+# AUDITLOG_DISABLE_ON_RAW_SAVE = False
 AUTH_USER_MODEL = "users.User"
 # ─────────────────────────────────────────────────────────────
 # Security (Production Hardening - override in prod.py)
