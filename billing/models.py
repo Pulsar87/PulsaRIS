@@ -270,8 +270,10 @@ class FeeScheduleItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     fee_schedule = models.ForeignKey(FeeSchedule, on_delete=models.CASCADE, related_name='items')
     
-    # Procedure Relation - links to master procedure catalog
-    procedure = models.ForeignKey("orders.Procedure", on_delete=models.PROTECT, related_name='fee_schedule_items', null=True, blank=True)
+    # Procedure Identification
+    procedure_code = models.CharField(max_length=20, db_index=True)  # CPT/HCPCS code
+    procedure_description = models.CharField(max_length=250)
+    modality = models.ForeignKey("tenants.Modality", on_delete=models.SET_NULL, null=True, blank=True)
     
     # Pricing Components
     professional_component = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
@@ -282,6 +284,9 @@ class FeeScheduleItem(models.Model):
     contrast_charge = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     sedation_charge = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     
+    # Revenue Code (for UB-04 claims)
+    revenue_code = models.CharField(max_length=4, blank=True)
+    
     # Units
     default_units = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('1.00'))
     
@@ -289,21 +294,11 @@ class FeeScheduleItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ['fee_schedule', 'procedure']
-        ordering = ['procedure__code']
+        unique_together = ['fee_schedule', 'procedure_code']
+        ordering = ['procedure_code']
 
     def __str__(self):
-        return f"{self.procedure.code} - {self.procedure.name}" if self.procedure else "No procedure"
-    
-    @property
-    def procedure_code(self):
-        """Backward compatibility property for procedure code"""
-        return self.procedure.code if self.procedure else ''
-    
-    @property
-    def procedure_description(self):
-        """Backward compatibility property for procedure description"""
-        return self.procedure.name if self.procedure else ''
+        return f"{self.procedure_code} - {self.procedure_description}"
 
 
 # ============================================================================
@@ -379,11 +374,10 @@ class ServiceLine(models.Model):
     exam_order = models.ForeignKey("orders.ExamOrder", on_delete=models.PROTECT, related_name='service_lines')
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='service_lines')
     
-    # Service Details - linked to master procedure catalog
+    # Service Details
     service_date = models.DateField(db_index=True)
-    procedure = models.ForeignKey("orders.Procedure", on_delete=models.PROTECT, related_name='service_lines', null=True, blank=True)
-    procedure_code = models.CharField(max_length=20, db_index=True)  # CPT code (denormalized for performance)
-    procedure_name = models.CharField(max_length=250)  # Denormalized for historical record
+    procedure_code = models.CharField(max_length=20, db_index=True)  # CPT code
+    procedure_name = models.CharField(max_length=250)
     
     # Diagnosis Codes (ICD-10)
     diagnosis_codes = models.JSONField(default=list, help_text="[{'code': 'Z12.31', 'primary': True}, ...]")
