@@ -3,6 +3,75 @@ import uuid
 from django.db import models
 
 
+class Procedure(models.Model):
+    """Master procedure catalog for radiology procedures"""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE, related_name='procedures')
+    
+    # Procedure Identification
+    code = models.CharField(max_length=20, db_index=True)  # CPT/HCPCS code or internal code
+    name = models.CharField(max_length=250)
+    description = models.TextField(blank=True)
+    
+    # Modality Association
+    modality = models.ForeignKey("tenants.Modality", on_delete=models.SET_NULL, null=True, blank=True, related_name='procedures')
+    
+    # Procedure Category
+    category = models.CharField(
+        max_length=20,
+        choices=[
+            ('CT', 'Computed Tomography'),
+            ('MR', 'Magnetic Resonance'),
+            ('XR', 'X-Ray'),
+            ('US', 'Ultrasound'),
+            ('NM', 'Nuclear Medicine'),
+            ('PT', 'Positron Emission Tomography'),
+            ('FLUORO', 'Fluoroscopy'),
+            ('INT', 'Interventional'),
+            ('OT', 'Other'),
+        ],
+        default='OT'
+    )
+    
+    # Clinical Details
+    body_part = models.CharField(max_length=100, blank=True)
+    laterality = models.CharField(
+        max_length=3,
+        choices=[('L', 'Left'), ('R', 'Right'), ('B', 'Bilateral'), ('N', 'Not Applicable')],
+        default='N'
+    )
+    contrast_options = models.CharField(
+        max_length=20,
+        choices=[
+            ('NONE', 'No Contrast'),
+            ('WITH', 'With Contrast'),
+            ('WITHOUT', 'Without Contrast'),
+            ('WITH_WITHOUT', 'With and Without Contrast'),
+        ],
+        default='NONE'
+    )
+    
+    # Billing Defaults
+    default_units = models.DecimalField(max_digits=5, decimal_places=2, default=1.00)
+    revenue_code = models.CharField(max_length=4, blank=True, help_text="UB-04 revenue code")
+    
+    # Status
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['tenant', 'code']
+        ordering = ['code']
+        indexes = [
+            models.Index(fields=['tenant', 'category']),
+            models.Index(fields=['tenant', 'is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
 # Common Radiology Procedure Codes (CPT/RadLex based examples)
 # In production, this would be loaded from a comprehensive ICD-10/CPT code database
 RADIOLOGY_PROCEDURE_CHOICES = [
