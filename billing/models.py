@@ -10,15 +10,14 @@ from django.conf import settings
 # ============================================================================
 
 class InsurancePayer(models.Model):
-    """Insurance company/payer master data - Core entity for Payer Management"""
+    """Insurance company/payer master data"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     
     # Payer Identification
-    payer_id = models.CharField(max_length=50, unique=True, db_index=True, help_text="EDI payer ID (e.g., BCBS, 99999)")
+    payer_id = models.CharField(max_length=50, unique=True, db_index=True)  # EDI payer ID
     name = models.CharField(max_length=150)
     short_name = models.CharField(max_length=50, blank=True)
-    code = models.CharField(max_length=20, unique=True, help_text="Internal short code")
     
     # Payer Type
     payer_type = models.CharField(
@@ -31,11 +30,9 @@ class InsurancePayer(models.Model):
             ('WORKERS_COMP', "Workers' Compensation"),
             ('TRICARE', 'Tricare'),
             ('CHAMPVA', 'CHAMPVA'),
-            ('AUTO_INSURANCE', 'Auto Insurance'),
             ('OTHER', 'Other'),
         ],
-        default='COMMERCIAL',
-        db_index=True
+        default='COMMERCIAL'
     )
     
     # Contact Information
@@ -51,42 +48,16 @@ class InsurancePayer(models.Model):
     website = models.URLField(blank=True)
     
     # EDI Configuration
-    edi_enabled = models.BooleanField(default=False, db_index=True)
     edi_qualifier = models.CharField(max_length=2, blank=True, help_text="e.g., 'PI', 'XV'")
-    edi_receiver_id = models.CharField(max_length=50, blank=True, help_text="ISA06/GS02 Receiver ID")
-    clearinghouse = models.ForeignKey('Clearinghouse', on_delete=models.SET_NULL, null=True, blank=True, related_name='payers')
+    edi_receiver_id = models.CharField(max_length=50, blank=True)
+    clearinghouse = models.ForeignKey('Clearinghouse', on_delete=models.SET_NULL, null=True, blank=True)
     
-    # EDI Transaction Specifics
-    transmitter_name = models.CharField(max_length=100, blank=True, help_text="Transmitter Name (Loop 1000A)")
-    billing_provider_npi = models.CharField(max_length=10, blank=True, help_text="Billing Provider NPI if specific to payer")
-    billing_provider_tin = models.CharField(max_length=9, blank=True, help_text="Billing Provider TIN/EIN")
-    isa_receiver_id = models.CharField(max_length=15, blank=True, help_text="ISA06 Receiver ID override")
-    gs_receiver_id = models.CharField(max_length=15, blank=True, help_text="GS02 Receiver ID override")
-    
-    # Claim Format Preferences
-    claim_format = models.CharField(
-        max_length=10, 
-        choices=[
-            ('837P', 'CMS-1500 / 837P (Professional)'),
-            ('837I', 'UB-04 / 837I (Institutional)'),
-            ('PAPER', 'Paper Only'),
-        ], 
-        default='837P'
-    )
-    
-    # Contract & Billing Rules
-    fee_schedule = models.ForeignKey('FeeSchedule', on_delete=models.SET_NULL, null=True, blank=True, related_name='payers')
+    # Contract Settings
+    fee_schedule = models.ForeignKey('FeeSchedule', on_delete=models.SET_NULL, null=True, blank=True)
     default_copay = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
-    require_auth = models.BooleanField(default=False, help_text="Always require pre-authorization")
-    auth_required_for_cpt = models.TextField(blank=True, help_text="Comma-separated CPT codes requiring auth")
-    place_of_service_restrictions = models.TextField(blank=True, help_text="Allowed POS codes (comma-separated)")
-    
-    # ERA/Remittance Rules
-    era_enabled = models.BooleanField(default=False)
-    era_trace_number_qualifier = models.CharField(max_length=2, default='CI', help_text="Trace Number Qualifier")
     
     # Status
-    is_active = models.BooleanField(default=True, db_index=True)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -95,8 +66,6 @@ class InsurancePayer(models.Model):
         indexes = [
             models.Index(fields=['tenant', 'payer_type']),
             models.Index(fields=['tenant', 'is_active']),
-            models.Index(fields=['code']),
-            models.Index(fields=['edi_enabled']),
         ]
 
     def __str__(self):
@@ -104,67 +73,26 @@ class InsurancePayer(models.Model):
 
 
 class Clearinghouse(models.Model):
-    """EDI Clearinghouse configuration for electronic claim submission"""
+    """EDI Clearinghouse configuration"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
-    code = models.CharField(max_length=20, unique=True, help_text="Internal short code")
-    
-    # Vendor Information
-    vendor_name = models.CharField(max_length=150, blank=True)
-    support_phone = models.CharField(max_length=30, blank=True)
-    support_email = models.EmailField(blank=True)
-    website = models.URLField(blank=True)
     
     # Connection Details
-    api_endpoint = models.URLField(blank=True, help_text="Base API URL")
+    api_endpoint = models.URLField(blank=True)
     api_username = models.CharField(max_length=100, blank=True)
     api_password = models.CharField(max_length=255, blank=True)  # Encrypted in production
     api_key = models.CharField(max_length=255, blank=True)
     
     # EDI Settings
-    sender_id = models.CharField(max_length=50, blank=True, help_text="ISA08 Interchange Sender ID")
-    receiver_id = models.CharField(max_length=50, blank=True, help_text="ISA06 Interchange Receiver ID")
-    interchange_control_version = models.CharField(max_length=5, default='00501', help_text="EDI version (e.g., 00501)")
-    
-    # Trading Partner IDs
-    trading_partner_id = models.CharField(max_length=50, blank=True, help_text="Clearinghouse-assigned ID")
-    
-    # Supported Transactions
-    supports_837p = models.BooleanField(default=True, help_text="Professional Claims")
-    supports_837i = models.BooleanField(default=False, help_text="Institutional Claims")
-    supports_835 = models.BooleanField(default=True, help_text="ERA/Remittance Advice")
-    supports_270_271 = models.BooleanField(default=True, help_text="Eligibility Inquiry/Response")
-    supports_278 = models.BooleanField(default=False, help_text="Authorization Request/Response")
-    
-    # Transmission Settings
-    transmission_protocol = models.CharField(
-        max_length=20,
-        choices=[
-            ('SFTP', 'SFTP'),
-            ('HTTPS', 'HTTPS/REST API'),
-            ('AS2', 'AS2'),
-            ('DIRECT', 'Direct Connect'),
-        ],
-        default='HTTPS'
-    )
-    sftp_host = models.CharField(max_length=150, blank=True)
-    sftp_port = models.IntegerField(default=22)
-    sftp_username = models.CharField(max_length=100, blank=True)
+    sender_id = models.CharField(max_length=50, blank=True)
+    receiver_id = models.CharField(max_length=50, blank=True)
     
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['name']
-        indexes = [
-            models.Index(fields=['tenant', 'is_active']),
-            models.Index(fields=['code']),
-        ]
 
     def __str__(self):
-        return f"{self.name} ({self.code})"
+        return self.name
 
 
 class PatientInsurance(models.Model):
