@@ -1,18 +1,18 @@
-{% extends 'layout.html' %}
-{% load i18n %}
-
-{% block title %}{% trans 'Add Order' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Add
+Order' %}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-file-medical-plus me-2"></i>{% trans 'Add New Order' %}
+                    <i class="fas fa-file-medical-plus me-2"></i>{% trans 'Add
+                    New Order' %}
                 </h2>
-                <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary">
+                <a
+                    href="{% url 'orders:worklist' %}"
+                    class="btn btn-outline-secondary"
+                >
                     <i class="fas fa-list me-1"></i>{% trans 'Order List' %}
                 </a>
             </div>
@@ -20,33 +20,60 @@
             <!-- Order Form -->
             <form method="post" id="orderForm">
                 {% csrf_token %}
-                
+
                 <!-- Patient Information Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>{% trans 'Patient Information' %}</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>{% trans 'Patient
+                            Information' %}
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <!-- MRN -->
                             <div class="col-md-6">
-                                <label for="patient_mrn" class="form-label">{% trans 'Patient MRN' %} <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="patient_mrn" name="patient_mrn" required 
-                                       placeholder="{% trans 'Enter patient MRN' %}">
-                                <div class="form-text">{% trans 'Enter the patient MRN to lookup' %}</div>
+                                <label for="patient_mrn" class="form-label"
+                                    >{% trans 'Patient MRN' %}
+                                    <span class="text-danger">*</span></label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="patient_mrn"
+                                    name="patient_mrn"
+                                    required
+                                    placeholder="{% trans 'Enter patient MRN' %}"
+                                />
+                                <div class="form-text">
+                                    {% trans 'Enter the patient MRN to lookup'
+                                    %}
+                                </div>
                             </div>
                             <div class="col-md-6 d-flex align-items-end">
-                                <button type="button" class="btn btn-outline-primary" id="lookupPatientBtn">
-                                    <i class="fas fa-search me-1"></i>{% trans 'Lookup Patient' %}
+                                <button
+                                    type="button"
+                                    class="btn btn-outline-primary"
+                                    id="lookupPatientBtn"
+                                >
+                                    <i class="fas fa-search me-1"></i>{% trans
+                                    'Lookup Patient' %}
                                 </button>
                             </div>
                         </div>
-                        
+
                         <!-- Patient Lookup Results (hidden by default) -->
-                        <div id="patientLookupResults" class="mt-3" style="display:none;">
+                        <div
+                            id="patientLookupResults"
+                            class="mt-3"
+                            style="display: none"
+                        >
                             <div class="alert alert-info">
                                 <strong id="patientNameDisplay"></strong>
-                                <span id="patientDobDisplay" class="ms-2"></span>
+                                <span
+                                    id="patientDobDisplay"
+                                    class="ms-2"
+                                ></span>
                             </div>
                         </div>
                     </div>
@@ -55,131 +82,281 @@
                 <!-- Order Details Card -->
                 <div class="card mb-4">
                     <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>{% trans 'Order Details' %}</h5>
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list me-2"></i>{% trans
+                            'Order Details' %}
+                        </h5>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <!-- Accession Number -->
                             <div class="col-md-6">
-                                <label for="accession_number" class="form-label">{% trans 'Accession Number' %} <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="accession_number" name="accession_number" required 
-                                       placeholder="{% trans 'Enter accession number' %}">
+                                <label for="accession_number" class="form-label"
+                                    >{% trans 'Accession Number' %}
+                                    <span class="text-danger">*</span></label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="accession_number"
+                                    name="accession_number"
+                                    required
+                                    placeholder="{% trans 'Enter accession number' %}"
+                                />
                             </div>
 
                             <!-- Priority -->
                             <div class="col-md-6">
-                                <label for="priority" class="form-label">{% trans 'Priority' %} <span class="text-danger">*</span></label>
-                                <select class="form-select" id="priority" name="priority" required>
+                                <label for="priority" class="form-label"
+                                    >{% trans 'Priority' %}
+                                    <span class="text-danger">*</span></label
+                                >
+                                <select
+                                    class="form-select"
+                                    id="priority"
+                                    name="priority"
+                                    required
+                                >
                                     {% for value, label in priority_choices %}
-                                    <option value="{{ value }}">{{ label }}</option>
+                                    <option value="{{ value }}">
+                                        {{ label }}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
 
                             <!-- Facility -->
                             <div class="col-md-6">
-                                <label for="facility" class="form-label">{% trans 'Facility' %}</label>
-                                <select class="form-select" id="facility" name="facility">
-                                    <option value="">-- {% trans 'Select Facility' %} --</option>
+                                <label for="facility" class="form-label"
+                                    >{% trans 'Facility' %}</label
+                                >
+                                <select
+                                    class="form-select"
+                                    id="facility"
+                                    name="facility"
+                                >
+                                    <option value="">
+                                        -- {% trans 'Select Facility' %} --
+                                    </option>
                                     {% for facility in facilities %}
-                                    <option value="{{ facility.id }}">{{ facility.name }}</option>
+                                    <option value="{{ facility.id }}">
+                                        {{ facility.name }}
+                                    </option>
                                     {% endfor %}
                                 </select>
                             </div>
 
                             <!-- Device/Room Station -->
                             <div class="col-md-6">
-                                <label for="device" class="form-label">{% trans 'Device/Room' %}</label>
-                                <select class="form-select" id="device" name="device" 
-                                        hx-get="{% url 'orders:get_devices' %}" 
-                                        hx-trigger="load, change" 
-                                        hx-target="#device">
-                                    <option value="">-- {% trans 'Select Device' %} --</option>
+                                <label for="device" class="form-label"
+                                    >{% trans 'Device/Room' %}</label
+                                >
+                                <select
+                                    class="form-select"
+                                    id="device"
+                                    name="device"
+                                    hx-get="{% url 'orders:get_devices' %}"
+                                    hx-trigger="load, change"
+                                    hx-target="#device"
+                                >
+                                    <option value="">
+                                        -- {% trans 'Select Device' %} --
+                                    </option>
                                 </select>
                             </div>
 
                             <!-- Procedure Code -->
                             <div class="col-md-6">
-                                <label for="procedure_code" class="form-label">{% trans 'Procedure Code' %} <span class="text-danger">*</span></label>
-                                <select class="form-select" id="procedure_code" name="procedure_code" required>
-                                    <option value="">-- {% trans 'Select Procedure' %} --</option>
-                                    {% regroup procedures by modality_type as procedure_groups %}
-                                    {% for group in procedure_groups %}
-                                        <optgroup label="{{ group.grouper }}">
-                                            {% for procedure in group.list %}
-                                                <option value="{{ procedure.code }}" data-name-en="{{ procedure.name_en }}" data-name-ar="{{ procedure.name_ar }}">{{ procedure.code }} - {{ procedure.name_en }}</option>
-                                            {% endfor %}
-                                        </optgroup>
+                                <label for="procedure_code" class="form-label"
+                                    >{% trans 'Procedure Code' %}
+                                    <span class="text-danger">*</span></label
+                                >
+                                <select
+                                    class="form-select"
+                                    id="procedure_code"
+                                    name="procedure_code"
+                                    required
+                                >
+                                    <option value="">
+                                        -- {% trans 'Select Procedure' %} --
+                                    </option>
+                                    {% regroup procedures by modality_type as
+                                    procedure_groups %} {% for group in
+                                    procedure_groups %}
+                                    <optgroup label="{{ group.grouper }}">
+                                        {% for procedure in group.list %}
+                                        <option
+                                            value="{{ procedure.code }}"
+                                            data-name-en="{{ procedure.name_en }}"
+                                            data-name-ar="{{ procedure.name_ar }}"
+                                        >
+                                            {{ procedure.code }} - {{
+                                            procedure.name_en }}
+                                        </option>
+                                        {% endfor %}
+                                    </optgroup>
                                     {% endfor %}
                                 </select>
                             </div>
 
                             <!-- Procedure Name English -->
                             <div class="col-md-6">
-                                <label for="procedure_name_en" class="form-label">{% trans 'Procedure Name (English)' %} <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="procedure_name_en" name="procedure_name_en" required 
-                                       placeholder="{% trans 'Enter procedure name in English' %}" readonly>
+                                <label
+                                    for="procedure_name_en"
+                                    class="form-label"
+                                    >{% trans 'Procedure Name (English)' %}
+                                    <span class="text-danger">*</span></label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="procedure_name_en"
+                                    name="procedure_name_en"
+                                    required
+                                    placeholder="{% trans 'Enter procedure name in English' %}"
+                                    readonly
+                                />
                             </div>
 
                             <!-- Procedure Name Arabic -->
                             <div class="col-md-6">
-                                <label for="procedure_name_ar" class="form-label">{% trans 'Procedure Name (Arabic)' %}</label>
-                                <input type="text" class="form-control" id="procedure_name_ar" name="procedure_name_ar" 
-                                       placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}" dir="rtl" readonly>
+                                <label
+                                    for="procedure_name_ar"
+                                    class="form-label"
+                                    >{% trans 'Procedure Name (Arabic)'
+                                    %}</label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="procedure_name_ar"
+                                    name="procedure_name_ar"
+                                    placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
+                                    dir="rtl"
+                                    readonly
+                                />
                             </div>
 
                             <!-- Referring Physician -->
                             <div class="col-md-6">
-                                <label for="referring_physician" class="form-label">{% trans 'Referring Physician' %}</label>
-                                <input type="text" class="form-control" id="referring_physician" name="referring_physician" 
-                                       placeholder="{% trans 'Enter referring physician name' %}">
+                                <label
+                                    for="referring_physician"
+                                    class="form-label"
+                                    >{% trans 'Referring Physician' %}</label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="referring_physician"
+                                    name="referring_physician"
+                                    placeholder="{% trans 'Enter referring physician name' %}"
+                                />
                             </div>
 
                             <!-- Laterality -->
                             <div class="col-md-6">
-                                <label for="laterality" class="form-label">{% trans 'Laterality' %}</label>
-                                <select class="form-select" id="laterality" name="laterality">
-                                    <option value="">-- {% trans 'Select' %} --</option>
-                                    <option value="L">{% trans 'Left' %}</option>
-                                    <option value="R">{% trans 'Right' %}</option>
-                                    <option value="B">{% trans 'Bilateral' %}</option>
+                                <label for="laterality" class="form-label"
+                                    >{% trans 'Laterality' %}</label
+                                >
+                                <select
+                                    class="form-select"
+                                    id="laterality"
+                                    name="laterality"
+                                >
+                                    <option value="">
+                                        -- {% trans 'Select' %} --
+                                    </option>
+                                    <option value="L">
+                                        {% trans 'Left' %}
+                                    </option>
+                                    <option value="R">
+                                        {% trans 'Right' %}
+                                    </option>
+                                    <option value="B">
+                                        {% trans 'Bilateral' %}
+                                    </option>
                                 </select>
                             </div>
 
                             <!-- Body Part -->
                             <div class="col-md-6">
-                                <label for="body_part" class="form-label">{% trans 'Body Part' %}</label>
-                                <input type="text" class="form-control" id="body_part" name="body_part" 
-                                       placeholder="{% trans 'Enter body part' %}">
+                                <label for="body_part" class="form-label"
+                                    >{% trans 'Body Part' %}</label
+                                >
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="body_part"
+                                    name="body_part"
+                                    placeholder="{% trans 'Enter body part' %}"
+                                />
                             </div>
 
                             <!-- Contrast Required -->
                             <div class="col-md-6">
-                                <label class="form-label">{% trans 'Contrast Required' %}</label>
+                                <label class="form-label"
+                                    >{% trans 'Contrast Required' %}</label
+                                >
                                 <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" id="contrast_required" name="contrast_required">
-                                    <label class="form-check-label" for="contrast_required">{% trans 'Yes' %}</label>
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="contrast_required"
+                                        name="contrast_required"
+                                    />
+                                    <label
+                                        class="form-check-label"
+                                        for="contrast_required"
+                                        >{% trans 'Yes' %}</label
+                                    >
                                 </div>
                             </div>
 
                             <!-- Scheduled DateTime -->
                             <div class="col-md-6">
-                                <label for="scheduled_datetime" class="form-label">{% trans 'Scheduled DateTime' %}</label>
-                                <input type="datetime-local" class="form-control" id="scheduled_datetime" name="scheduled_datetime">
+                                <label
+                                    for="scheduled_datetime"
+                                    class="form-label"
+                                    >{% trans 'Scheduled DateTime' %}</label
+                                >
+                                <input
+                                    type="datetime-local"
+                                    class="form-control"
+                                    id="scheduled_datetime"
+                                    name="scheduled_datetime"
+                                />
                             </div>
 
                             <!-- Duration Minutes -->
                             <div class="col-md-6">
-                                <label for="duration_minutes" class="form-label">{% trans 'Duration (minutes)' %}</label>
-                                <input type="number" class="form-control" id="duration_minutes" name="duration_minutes" 
-                                       value="15" min="5" max="240">
+                                <label for="duration_minutes" class="form-label"
+                                    >{% trans 'Duration (minutes)' %}</label
+                                >
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    id="duration_minutes"
+                                    name="duration_minutes"
+                                    value="15"
+                                    min="5"
+                                    max="240"
+                                />
                             </div>
 
                             <!-- Clinical Indication -->
                             <div class="col-12">
-                                <label for="clinical_indication" class="form-label">{% trans 'Clinical Indication' %}</label>
-                                <textarea class="form-control" id="clinical_indication" name="clinical_indication" rows="3" 
-                                          placeholder="{% trans 'Enter clinical indication or reason for exam' %}"></textarea>
+                                <label
+                                    for="clinical_indication"
+                                    class="form-label"
+                                    >{% trans 'Clinical Indication' %}</label
+                                >
+                                <textarea
+                                    class="form-control"
+                                    id="clinical_indication"
+                                    name="clinical_indication"
+                                    rows="3"
+                                    placeholder="{% trans 'Enter clinical indication or reason for exam' %}"
+                                ></textarea>
                             </div>
                         </div>
                     </div>
@@ -187,7 +364,10 @@
 
                 <!-- Form Actions -->
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{% url 'orders:order_list' %}" class="btn btn-secondary">
+                    <a
+                        href="{% url 'orders:worklist' %}"
+                        class="btn btn-secondary"
+                    >
                         <i class="fas fa-times me-1"></i>{% trans 'Cancel' %}
                     </a>
                     <button type="submit" class="btn btn-primary">
@@ -198,60 +378,61 @@
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
+{% endblock %} {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Patient lookup functionality
-    const lookupBtn = document.getElementById('lookupPatientBtn');
-    const mrnInput = document.getElementById('patient_mrn');
-    const resultsDiv = document.getElementById('patientLookupResults');
-    const nameDisplay = document.getElementById('patientNameDisplay');
-    const dobDisplay = document.getElementById('patientDobDisplay');
+    document.addEventListener("DOMContentLoaded", function () {
+        // Patient lookup functionality
+        const lookupBtn = document.getElementById("lookupPatientBtn");
+        const mrnInput = document.getElementById("patient_mrn");
+        const resultsDiv = document.getElementById("patientLookupResults");
+        const nameDisplay = document.getElementById("patientNameDisplay");
+        const dobDisplay = document.getElementById("patientDobDisplay");
 
-    if (lookupBtn && mrnInput) {
-        lookupBtn.addEventListener('click', function() {
-            const mrn = mrnInput.value.trim();
-            if (!mrn) {
-                alert('{% trans "Please enter an MRN" %}');
-                return;
-            }
+        if (lookupBtn && mrnInput) {
+            lookupBtn.addEventListener("click", function () {
+                const mrn = mrnInput.value.trim();
+                if (!mrn) {
+                    alert('{% trans "Please enter an MRN" %}');
+                    return;
+                }
 
-            fetch(`/patients/api/lookup/?q=${encodeURIComponent(mrn)}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.patients && data.patients.length > 0) {
-                        const patient = data.patients[0];
-                        nameDisplay.textContent = `${patient.mrn} - ${patient.name_en}`;
-                        dobDisplay.textContent = patient.dob ? `(${patient.dob})` : '';
-                        resultsDiv.style.display = 'block';
-                        resultsDiv.className = 'alert alert-success';
-                    } else {
-                        nameDisplay.textContent = '{% trans "Patient not found" %}';
-                        dobDisplay.textContent = '';
-                        resultsDiv.style.display = 'block';
-                        resultsDiv.className = 'alert alert-danger';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    nameDisplay.textContent = '{% trans "Error looking up patient" %}';
-                    resultsDiv.style.display = 'block';
-                    resultsDiv.className = 'alert alert-danger';
-                });
-        });
-    }
+                fetch(`/patients/api/lookup/?q=${encodeURIComponent(mrn)}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.patients && data.patients.length > 0) {
+                            const patient = data.patients[0];
+                            nameDisplay.textContent = `${patient.mrn} - ${patient.name_en}`;
+                            dobDisplay.textContent = patient.dob
+                                ? `(${patient.dob})`
+                                : "";
+                            resultsDiv.style.display = "block";
+                            resultsDiv.className = "alert alert-success";
+                        } else {
+                            nameDisplay.textContent =
+                                '{% trans "Patient not found" %}';
+                            dobDisplay.textContent = "";
+                            resultsDiv.style.display = "block";
+                            resultsDiv.className = "alert alert-danger";
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        nameDisplay.textContent =
+                            '{% trans "Error looking up patient" %}';
+                        resultsDiv.style.display = "block";
+                        resultsDiv.className = "alert alert-danger";
+                    });
+            });
+        }
 
-    // Auto-generate accession number if empty
-    const accessionInput = document.getElementById('accession_number');
-    if (accessionInput && !accessionInput.value) {
-        // Generate a simple accession format: ACC + timestamp
-        const now = new Date();
-        const timestamp = now.getTime().toString().slice(-8);
-        accessionInput.value = 'ACC' + timestamp;
-    }
-
-});
+        // Auto-generate accession number if empty
+        const accessionInput = document.getElementById("accession_number");
+        if (accessionInput && !accessionInput.value) {
+            // Generate a simple accession format: ACC + timestamp
+            const now = new Date();
+            const timestamp = now.getTime().toString().slice(-8);
+            accessionInput.value = "ACC" + timestamp;
+        }
+    });
 </script>
 {% endblock %}

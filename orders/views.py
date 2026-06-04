@@ -1,8 +1,8 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render, get_object_or_404
-from django.utils.translation import gettext as _
-from django.http import JsonResponse
 from django.db.models import Q
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.translation import gettext as _
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
@@ -23,10 +23,11 @@ def worklist(request):
     modalities = []
     if tenant:
         from tenants.models import Modality
+
         modalities = Modality.objects.filter(tenant=tenant, is_active=True)
-        
+
         orders = ExamOrder.objects.filter(tenant=tenant).select_related(
-            'patient', 'modality', 'facility', 'room_station'
+            "patient", "modality", "facility", "room_station"
         )
 
         if query:
@@ -66,39 +67,6 @@ def worklist(request):
         "modalities": modalities,
     }
     return render(request, "orders/worklist.html", context)
-
-
-def order_list(request):
-    """Display list of orders with search functionality."""
-    query = request.GET.get("q", "")
-    status_filter = request.GET.get("status", "")
-    tenant = get_tenant(request)
-
-    orders = ExamOrder.objects.none()
-    if tenant:
-        orders = ExamOrder.objects.filter(tenant=tenant).select_related(
-            'patient', 'modality', 'facility', 'room_station'
-        )
-
-        if query:
-            orders = orders.filter(
-                Q(accession_number__icontains=query)
-                | Q(patient__mrn__icontains=query)
-                | Q(patient__first_name_en__icontains=query)
-                | Q(patient__last_name_en__icontains=query)
-                | Q(procedure_name_en__icontains=query)
-            )
-
-        if status_filter:
-            orders = orders.filter(status=status_filter)
-
-    context = {
-        "orders": orders,
-        "query": query,
-        "status_filter": status_filter,
-        "status_choices": ExamOrder.Status.choices,
-    }
-    return render(request, "orders/order_list.html", context)
 
 
 def order_detail(request, pk):
@@ -151,15 +119,22 @@ def add_order(request):
 
         # Look up patient by MRN
         from patients.models import Patient
+
         try:
             patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
         except Patient.DoesNotExist:
-            messages.error(request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn})
+            messages.error(
+                request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
+            )
             return redirect("orders:add_order")
 
         # Check for duplicate accession number within tenant
-        if ExamOrder.objects.filter(tenant=tenant, accession_number=accession_number).exists():
-            messages.error(request, _("An order with this accession number already exists"))
+        if ExamOrder.objects.filter(
+            tenant=tenant, accession_number=accession_number
+        ).exists():
+            messages.error(
+                request, _("An order with this accession number already exists")
+            )
             return redirect("orders:add_order")
 
         # Get modality from device
@@ -177,6 +152,7 @@ def add_order(request):
         facility = None
         if facility_id:
             from tenants.models import Facility
+
             try:
                 facility = Facility.objects.get(id=facility_id, tenant=tenant)
             except Facility.DoesNotExist:
@@ -206,11 +182,15 @@ def add_order(request):
                 created_by=request.user if request.user.is_authenticated else None,
             )
             messages.success(
-                request, _("Order created successfully! Accession: %(acc)s") % {"acc": accession_number}
+                request,
+                _("Order created successfully! Accession: %(acc)s")
+                % {"acc": accession_number},
             )
             return redirect("orders:order_detail", pk=order.pk)
         except Exception as e:
-            messages.error(request, _("Error creating order: %(error)s") % {"error": str(e)})
+            messages.error(
+                request, _("Error creating order: %(error)s") % {"error": str(e)}
+            )
             return redirect("orders:add_order")
 
     # GET request - render form
@@ -218,11 +198,15 @@ def add_order(request):
     facilities = []
     if tenant:
         from tenants.models import Facility
+
         facilities = Facility.objects.filter(tenant=tenant, is_active=True)
-    
+
     # Get active procedures from database
     from orders.models import Procedure
-    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
+
+    procedures = Procedure.objects.filter(is_active=True).order_by(
+        "modality_type", "code"
+    )
 
     context = {
         "facilities": facilities,
@@ -275,15 +259,24 @@ def edit_order(request, pk):
 
         # Look up patient by MRN
         from patients.models import Patient
+
         try:
             patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
         except Patient.DoesNotExist:
-            messages.error(request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn})
+            messages.error(
+                request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
+            )
             return redirect("orders:edit_order", pk=pk)
 
         # Check for duplicate accession number within tenant (excluding current order)
-        if ExamOrder.objects.filter(tenant=tenant, accession_number=accession_number).exclude(pk=pk).exists():
-            messages.error(request, _("An order with this accession number already exists"))
+        if (
+            ExamOrder.objects.filter(tenant=tenant, accession_number=accession_number)
+            .exclude(pk=pk)
+            .exists()
+        ):
+            messages.error(
+                request, _("An order with this accession number already exists")
+            )
             return redirect("orders:edit_order", pk=pk)
 
         # Get modality from device
@@ -301,6 +294,7 @@ def edit_order(request, pk):
         facility = None
         if facility_id:
             from tenants.models import Facility
+
             try:
                 facility = Facility.objects.get(id=facility_id, tenant=tenant)
             except Facility.DoesNotExist:
@@ -322,7 +316,9 @@ def edit_order(request, pk):
             order.body_part = body_part
             order.contrast_required = contrast_required
             order.status = status
-            order.scheduled_datetime = scheduled_datetime if scheduled_datetime else None
+            order.scheduled_datetime = (
+                scheduled_datetime if scheduled_datetime else None
+            )
             order.duration_minutes = int(duration_minutes)
             order.room_station = device
             order.save()
@@ -330,18 +326,24 @@ def edit_order(request, pk):
             messages.success(request, _("Order updated successfully!"))
             return redirect("orders:order_detail", pk=order.pk)
         except Exception as e:
-            messages.error(request, _("Error updating order: %(error)s") % {"error": str(e)})
+            messages.error(
+                request, _("Error updating order: %(error)s") % {"error": str(e)}
+            )
             return redirect("orders:edit_order", pk=pk)
 
     # GET request - render form
     facilities = []
     if tenant:
         from tenants.models import Facility
+
         facilities = Facility.objects.filter(tenant=tenant, is_active=True)
-    
+
     # Get active procedures from database
     from orders.models import Procedure
-    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
+
+    procedures = Procedure.objects.filter(is_active=True).order_by(
+        "modality_type", "code"
+    )
 
     context = {
         "order": order,
@@ -368,7 +370,9 @@ def delete_order(request, pk):
             messages.success(request, _("Order deleted successfully!"))
             return redirect("orders:order_list")
         except Exception as e:
-            messages.error(request, _("Error deleting order: %(error)s") % {"error": str(e)})
+            messages.error(
+                request, _("Error deleting order: %(error)s") % {"error": str(e)}
+            )
             return redirect("orders:order_detail", pk=pk)
 
     context = {
@@ -421,15 +425,22 @@ def reserve_order(request):
 
         # Look up patient by MRN
         from patients.models import Patient
+
         try:
             patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
         except Patient.DoesNotExist:
-            messages.error(request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn})
+            messages.error(
+                request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
+            )
             return redirect("orders:reserve_order")
 
         # Check for duplicate accession number within tenant
-        if ExamOrder.objects.filter(tenant=tenant, accession_number=accession_number).exists():
-            messages.error(request, _("An order with this accession number already exists"))
+        if ExamOrder.objects.filter(
+            tenant=tenant, accession_number=accession_number
+        ).exists():
+            messages.error(
+                request, _("An order with this accession number already exists")
+            )
             return redirect("orders:reserve_order")
 
         # Get modality from device
@@ -463,20 +474,27 @@ def reserve_order(request):
                 created_by=request.user if request.user.is_authenticated else None,
             )
             messages.success(
-                request, _("Order reserved successfully! Accession: %(acc)s") % {"acc": accession_number}
+                request,
+                _("Order reserved successfully! Accession: %(acc)s")
+                % {"acc": accession_number},
             )
             return redirect("orders:order_detail", pk=order.pk)
         except Exception as e:
-            messages.error(request, _("Error creating order: %(error)s") % {"error": str(e)})
+            messages.error(
+                request, _("Error creating order: %(error)s") % {"error": str(e)}
+            )
             return redirect("orders:reserve_order")
 
     # GET request - pre-fill MRN if provided
     prefill_mrn = request.GET.get("mrn", "")
     tenant = get_tenant(request)
-    
+
     # Get active procedures from database
     from orders.models import Procedure
-    procedures = Procedure.objects.filter(is_active=True).order_by('modality_type', 'code')
+
+    procedures = Procedure.objects.filter(is_active=True).order_by(
+        "modality_type", "code"
+    )
 
     context = {
         "prefill_mrn": prefill_mrn,
@@ -490,64 +508,69 @@ def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
-    
+
     tenant = get_tenant(request)
-    
+
     # Debug: log tenant info
     print(f"DEBUG get_devices: tenant={tenant}")
 
     if not tenant:
-        html = render_to_string('orders/_device_options.html', {'devices': [], 'error': 'Tenant not found'})
+        html = render_to_string(
+            "orders/_device_options.html", {"devices": [], "error": "Tenant not found"}
+        )
         print(f"DEBUG get_devices: no tenant, returning error HTML")
         return HttpResponse(html)
 
-    devices = Device.objects.filter(
-        tenant=tenant,
-        is_active=True
-    ).select_related('modality').order_by('name')
-    
+    devices = (
+        Device.objects.filter(tenant=tenant, is_active=True)
+        .select_related("modality")
+        .order_by("name")
+    )
+
     # Debug: log device count
     print(f"DEBUG get_devices: found {devices.count()} devices")
 
-    html = render_to_string('orders/_device_options.html', {'devices': devices})
+    html = render_to_string("orders/_device_options.html", {"devices": devices})
     print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
     return HttpResponse(html)
 
 
 def update_order_status(request, pk):
     """API endpoint to update order status via AJAX."""
-    from orders.models import ExamOrder
+    import json
+
     from django.http import JsonResponse
     from django.views.decorators.http import require_POST
-    import json
-    
-    if request.method != 'POST':
-        return JsonResponse({'success': False, 'error': 'Method not allowed'})
-    
+
+    from orders.models import ExamOrder
+
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Method not allowed"})
+
     try:
         data = json.loads(request.body)
-        new_status = data.get('status')
-        
+        new_status = data.get("status")
+
         if not new_status:
-            return JsonResponse({'success': False, 'error': 'Status is required'})
-        
+            return JsonResponse({"success": False, "error": "Status is required"})
+
         # Validate status choice
         valid_statuses = [choice[0] for choice in ExamOrder.Status.choices]
         if new_status not in valid_statuses:
-            return JsonResponse({'success': False, 'error': 'Invalid status'})
-        
+            return JsonResponse({"success": False, "error": "Invalid status"})
+
         # Get the order
         order = ExamOrder.objects.get(pk=pk)
-        
+
         # Update status
         order.status = new_status
         order.save()
-        
-        return JsonResponse({'success': True, 'status': new_status})
-        
+
+        return JsonResponse({"success": True, "status": new_status})
+
     except ExamOrder.DoesNotExist:
-        return JsonResponse({'success': False, 'error': 'Order not found'})
+        return JsonResponse({"success": False, "error": "Order not found"})
     except json.JSONDecodeError:
-        return JsonResponse({'success': False, 'error': 'Invalid JSON'})
+        return JsonResponse({"success": False, "error": "Invalid JSON"})
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)})
+        return JsonResponse({"success": False, "error": str(e)})

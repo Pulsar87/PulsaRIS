@@ -28,6 +28,7 @@ from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from license import views as licenseview
+from orders import views as ordersview
 
 admin.site.site_header = "PulsaRIS Admin"
 admin.site.site_title = "PulsaRIS Admin Portal"
@@ -36,6 +37,7 @@ admin.site.index_title = "Welcome to PulsaRIS Admin"
 urlpatterns = [
     path("admin/", admin.site.urls, name="activation_required"),
     path("i18n/", include("django.conf.urls.i18n")),
+    path("worklist/", ordersview.worklist, name="worklist"),
     path("", include("license.urls"), name="activation"),
     path("users/", include("users.urls")),
     path("orders/", include("orders.urls")),

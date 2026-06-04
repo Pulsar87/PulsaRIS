@@ -235,61 +235,17 @@
                                 class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2 mt-2 rounded-4"
                                 aria-labelledby="userDropdown"
                             >
-                                <li>
-                                    <a
-                                        class="dropdown-item rounded-2"
-                                        href="/add_practitioner"
-                                    >
-                                        <i
-                                            class="bi bi-person-badge-fill me-2 text-secondary"
-                                        ></i>
-                                        {% trans "Doctors" %}
-                                    </a>
-                                </li>
                                 {% if user.is_staff %}
                                 <li>
                                     <a
                                         class="dropdown-item rounded-2"
-                                        href="{% url 'users:manage_users' %}"
-                                    >
-                                        <i
-                                            class="bi bi-people-fill me-2 text-secondary"
-                                        ></i>
-                                        {% trans "Manage Users" %}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        class="dropdown-item rounded-2"
-                                        href="/settings"
+                                        href="/admin"
                                     >
                                         <i
                                             class="bi bi-gear-fill me-2 text-secondary"
                                         ></i>
-                                        {% trans "System Settings" %}
+                                        {% trans "Admin panel" %}
                                     </a>
-                                </li>
-                                <li>
-                                    <a
-                                        class="dropdown-item rounded-2"
-                                        href="/modalities"
-                                    >
-                                        <i
-                                            class="bi bi-hdd-stack-fill me-2 text-secondary"
-                                        ></i>
-                                        {% trans "Modalities" %}</a
-                                    >
-                                </li>
-                                <li>
-                                    <a
-                                        class="dropdown-item rounded-2"
-                                        href="/prices"
-                                    >
-                                        <i
-                                            class="bi bi-currency-dollar me-2 text-secondary"
-                                        ></i>
-                                        {% trans "Manage Prices" %}</a
-                                    >
                                 </li>
                                 <li><hr class="dropdown-divider" /></li>
                                 {% endif %}
