@@ -13,22 +13,22 @@ def get_modality_worklist():
 
     # 3. Build the Query Dataset (Filter)
     ds = Dataset()
-    ds.PatientName = "*"
-    ds.PatientID = "*"
+    ds.PatientName = ""
+    ds.PatientID = ""
 
     # Scheduled Procedure Step Sequence (0040,0100)
     step_seq = Dataset()
-    step_seq.ScheduledStationAETitle = "*"
-    step_seq.ScheduledProcedureStepStartDate = "20260629"  # Current date
-    step_seq.ScheduledProcedureStepStartTime = "000000"
-    step_seq.Modality = "*"  # Filter by modality (e.g., CT, MR, CR)
-    step_seq.ScheduledProcedureStepDescription = "*"
-    step_seq.ScheduledPerformingPhysicianName = "*"
+    step_seq.ScheduledStationAETitle = ""
+    step_seq.ScheduledProcedureStepStartDate = ""  # Current date
+    step_seq.ScheduledProcedureStepStartTime = ""
+    step_seq.Modality = "MR"  # Filter by modality (e.g., CT, MR, CR)
+    step_seq.ScheduledProcedureStepDescription = ""
+    step_seq.ScheduledPerformingPhysicianName = ""
 
     ds.ScheduledProcedureStepSequence = [step_seq]
 
     # 4. Define RIS (Worklist SCP) connection parameters
-    remote_ip = "0.0.0.0"
+    remote_ip = "127.0.0.1"
     remote_port = 11112
     remote_ae = "RIS_SCP"
 

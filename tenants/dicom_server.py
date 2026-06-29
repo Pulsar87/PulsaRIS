@@ -16,15 +16,16 @@ os.environ.setdefault(
 )  # Adjust 'config.settings' to your project settings
 django.setup()
 
+from django_tenants.utils import get_tenant_model, schema_context
 from pydicom.dataset import Dataset
 from pydicom.sequence import Sequence
 from pynetdicom import AE, debug_logger, evt
 from pynetdicom.status import STATUS_PENDING, STATUS_SUCCESS
 
-from django_tenants.utils import get_tenant_model
-
 from orders.models import ExamOrder  # Import from orders app
 from tenants.models import Device, Modality, Tenant  # Import related models
+
+debug_logger()
 
 
 def get_worklist_items(request_dataset):
@@ -38,87 +39,91 @@ def get_worklist_items(request_dataset):
     patient_name_filter = getattr(request_dataset, "PatientName", None)
     patient_id_filter = getattr(request_dataset, "PatientID", None)
 
-    # Build queryset from public schema - ExamOrder has a tenant FK
-    queryset = ExamOrder.objects.select_related(
-        "patient", "modality", "room_station", "tenant"
-    ).filter(status=ExamOrder.Status.SCHEDULED)
+    # Use schema_context to access public schema where ExamOrder table exists
+    with schema_context("moas"):
+        # Build queryset from public schema - ExamOrder has a tenant FK
+        queryset = ExamOrder.objects.select_related(
+            "patient", "modality", "room_station", "tenant"
+        ).filter(status__in=[ExamOrder.Status.REGISTERED, ExamOrder.Status.SCHEDULED])
 
-    if modality_filter and modality_filter != "*":
-        # Map DICOM modality codes to database modality codes
-        queryset = queryset.filter(modality__code__iexact=modality_filter)
+        if modality_filter and modality_filter != "*":
+            # Map DICOM modality codes to database modality codes
+            queryset = queryset.filter(modality__code__iexact=modality_filter)
 
-    if station_ae_filter and station_ae_filter != "*":
-        queryset = queryset.filter(room_station__dicom_ae_title=station_ae_filter)
+        if station_ae_filter and station_ae_filter != "*":
+            queryset = queryset.filter(room_station__dicom_ae_title=station_ae_filter)
 
-    if patient_name_filter and patient_name_filter != "*":
-        if "*" in patient_name_filter:
-            pattern = patient_name_filter.replace("*", "")
-            queryset = queryset.filter(
-                patient__first_name_en__icontains=pattern
-            ) | queryset.filter(patient__last_name_en__icontains=pattern)
-        else:
-            queryset = queryset.filter(
-                patient__first_name_en__icontains=patient_name_filter
-            ) | queryset.filter(patient__last_name_en__icontains=patient_name_filter)
+        if patient_name_filter and patient_name_filter != "*":
+            if "*" in patient_name_filter:
+                pattern = patient_name_filter.replace("*", "")
+                queryset = queryset.filter(
+                    patient__first_name_en__icontains=pattern
+                ) | queryset.filter(patient__last_name_en__icontains=pattern)
+            else:
+                queryset = queryset.filter(
+                    patient__first_name_en__icontains=patient_name_filter
+                ) | queryset.filter(
+                    patient__last_name_en__icontains=patient_name_filter
+                )
 
-    if patient_id_filter and patient_id_filter != "*":
-        if "*" in patient_id_filter:
-            pattern = patient_id_filter.replace("*", "")
-            queryset = queryset.filter(patient__mrn__icontains=pattern)
-        else:
-            queryset = queryset.filter(patient__mrn=patient_id_filter)
+        if patient_id_filter and patient_id_filter != "*":
+            if "*" in patient_id_filter:
+                pattern = patient_id_filter.replace("*", "")
+                queryset = queryset.filter(patient__mrn__icontains=pattern)
+            else:
+                queryset = queryset.filter(patient__mrn=patient_id_filter)
 
-    # Convert to DICOM datasets
-    all_items = []
-    for order in queryset[:100]:  # Limit results
-        item = Dataset()
+        # Convert to DICOM datasets
+        all_items = []
+        for order in queryset[:100]:  # Limit results
+            item = Dataset()
 
-        # Patient Module
-        patient = order.patient
-        if patient:
-            # Combine first and last name for PatientName
-            patient_name = f"{patient.first_name_en} {patient.last_name_en}".strip()
-            item.PatientName = patient_name if patient_name else ""
-            item.PatientID = patient.mrn if patient.mrn else ""
-            item.PatientBirthDate = (
-                patient.dob.strftime("%Y%m%d") if patient.dob else ""
+            # Patient Module
+            patient = order.patient
+            if patient:
+                # Combine first and last name for PatientName
+                patient_name = f"{patient.first_name_en} {patient.last_name_en}".strip()
+                item.PatientName = patient_name if patient_name else ""
+                item.PatientID = patient.mrn if patient.mrn else ""
+                item.PatientBirthDate = (
+                    patient.dob.strftime("%Y%m%d") if patient.dob else ""
+                )
+                item.PatientSex = patient.gender if patient.gender else ""
+            else:
+                item.PatientName = ""
+                item.PatientID = ""
+                item.PatientBirthDate = ""
+                item.PatientSex = ""
+
+            # Scheduled Procedure Step Module
+            step = Dataset()
+            step.Modality = order.modality.code if order.modality else "OT"
+            step.ScheduledStationAETitle = (
+                order.room_station.dicom_ae_title if order.room_station else ""
             )
-            item.PatientSex = patient.gender if patient.gender else ""
-        else:
-            item.PatientName = ""
-            item.PatientID = ""
-            item.PatientBirthDate = ""
-            item.PatientSex = ""
 
-        # Scheduled Procedure Step Module
-        step = Dataset()
-        step.Modality = order.modality.code if order.modality else "OT"
-        step.ScheduledStationAETitle = (
-            order.room_station.dicom_ae_title if order.room_station else ""
-        )
+            if order.scheduled_datetime:
+                step.ScheduledProcedureStepStartDate = (
+                    order.scheduled_datetime.strftime("%Y%m%d")
+                )
+                step.ScheduledProcedureStepStartTime = (
+                    order.scheduled_datetime.strftime("%H%M%S")
+                )
+            else:
+                step.ScheduledProcedureStepStartDate = ""
+                step.ScheduledProcedureStepStartTime = "000000"
 
-        if order.scheduled_datetime:
-            step.ScheduledProcedureStepStartDate = order.scheduled_datetime.strftime(
-                "%Y%m%d"
-            )
-            step.ScheduledProcedureStepStartTime = order.scheduled_datetime.strftime(
-                "%H%M%S"
-            )
-        else:
-            step.ScheduledProcedureStepStartDate = ""
-            step.ScheduledProcedureStepStartTime = "000000"
+            step.ScheduledProcedureStepDescription = order.procedure_name_en or ""
+            step.ScheduledPerformingPhysicianName = order.referring_physician or ""
+            step.ScheduledProcedureStepID = str(order.id)
+            step.AccessionNumber = order.accession_number or ""
+            step.RequestedProcedureID = order.procedure_code or ""
 
-        step.ScheduledProcedureStepDescription = order.procedure_name_en or ""
-        step.ScheduledPerformingPhysicianName = order.referring_physician or ""
-        step.ScheduledProcedureStepID = str(order.id)
-        step.AccessionNumber = order.accession_number or ""
-        step.RequestedProcedureID = order.procedure_code or ""
+            item.ScheduledProcedureStepSequence = [step]
 
-        item.ScheduledProcedureStepSequence = [step]
+            all_items.append(item)
 
-        all_items.append(item)
-
-    return all_items
+        return all_items
 
 
 def handle_find(event):
@@ -131,8 +136,8 @@ def handle_find(event):
     except AttributeError:
         # Fallback for different pynetdicom versions
         request = event.dataset
-    
-    print(f"\nReceived C-FIND request from {event.association.requestor.ae_title}")
+
+    # print(f"\nReceived C-FIND request from {event.association.requestor.ae_title}")
     print(
         f"Filters: Modality={getattr(request, 'Modality', '*')}, "
         f"Station={getattr(request, 'ScheduledStationAETitle', '*')}"
@@ -159,7 +164,7 @@ def main():
     # Configuration
     AE_TITLE = "RIS_SCP"
     PORT = 11112
-    HOST = "0.0.0.0"  # Listen on all interfaces
+    HOST = "127.0.0.1"  # Listen on all interfaces
 
     # Initialize Application Entity
     ae = AE(ae_title=AE_TITLE)
