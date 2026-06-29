@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
+import logging
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
@@ -573,4 +574,98 @@ def update_order_status(request, pk):
     except json.JSONDecodeError:
         return JsonResponse({"success": False, "error": "Invalid JSON"})
     except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+def send_order_worklist(request, pk):
+    """
+    API endpoint to send worklist for a specific order to configured DICOM devices.
+    
+    This endpoint triggers sending the worklist entry for an order to all
+    relevant DICOM modality devices.
+    
+    Args:
+        pk: Primary key of the ExamOrder
+        
+    Returns:
+        JSON response with success status and details
+    """
+    from django.http import JsonResponse
+    from integrations.dicom import send_worklist_for_order
+    
+    try:
+        order = ExamOrder.objects.select_related(
+            'patient', 'modality', 'room_station', 'tenant'
+        ).get(pk=pk)
+        
+        # Check if order has required information
+        if not order.room_station or not order.room_station.dicom_host:
+            return JsonResponse({
+                "success": False,
+                "error": "No DICOM device configured for this order"
+            })
+        
+        # Send worklist to device(s)
+        success, message, results = send_worklist_for_order(order)
+        
+        return JsonResponse({
+            "success": success,
+            "message": message,
+            "details": results
+        })
+        
+    except ExamOrder.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Order not found"})
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error sending worklist: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)})
+
+
+def test_dicom_connection(request, device_id):
+    """
+    API endpoint to test DICOM connection to a specific device.
+    
+    Args:
+        device_id: UUID of the Device to test
+        
+    Returns:
+        JSON response with connection status
+    """
+    from django.http import JsonResponse
+    from integrations.dicom import verify_dicom_connection
+    
+    try:
+        device = Device.objects.get(id=device_id)
+        
+        if not device.dicom_host:
+            return JsonResponse({
+                "success": False,
+                "error": "Device has no DICOM host configured"
+            })
+        
+        success, message = verify_dicom_connection(
+            ae_title=device.dicom_ae_title,
+            host=device.dicom_host,
+            port=device.dicom_port,
+            calling_ae_title="RIS_SYSTEM",
+            timeout=10
+        )
+        
+        return JsonResponse({
+            "success": success,
+            "message": message,
+            "device": {
+                "name": device.name,
+                "ae_title": device.dicom_ae_title,
+                "host": device.dicom_host,
+                "port": device.dicom_port
+            }
+        })
+        
+    except Device.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Device not found"})
+    except Exception as e:
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error testing DICOM connection: {str(e)}")
         return JsonResponse({"success": False, "error": str(e)})

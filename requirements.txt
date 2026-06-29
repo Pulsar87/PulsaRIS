@@ -27,3 +27,4 @@ six
 sqlparse
 uritemplate
 whitenoise
+pynetdicom>=2.3.0

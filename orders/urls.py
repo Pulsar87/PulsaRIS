@@ -17,4 +17,6 @@ urlpatterns = [
         views.update_order_status,
         name="update_order_status",
     ),
+    path("<uuid:pk>/send-worklist/", views.send_order_worklist, name="send_order_worklist"),
+    path("devices/<uuid:device_id>/test-connection/", views.test_dicom_connection, name="test_dicom_connection"),
 ]
