@@ -129,6 +129,12 @@ class Device(models.Model):
     )
     name = models.CharField(max_length=150)
     room_number = models.CharField(max_length=50, blank=True)
+    
+    # DICOM Network Configuration
+    dicom_ae_title = models.CharField(max_length=16, default="DEVICE", help_text="DICOM AE Title of the device")
+    dicom_host = models.GenericIPAddressField(help_text="IP address or hostname of the DICOM device")
+    dicom_port = models.PositiveIntegerField(default=104, help_text="DICOM port number")
+    
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -138,7 +144,7 @@ class Device(models.Model):
         ordering = ["name"]
 
     def __str__(self):
-        return f"{self.name} ({self.modality.code})"
+        return f"{self.name} ({self.modality.code}) - {self.dicom_host}:{self.dicom_port}"
 
 
 class Domain(DomainMixin):
