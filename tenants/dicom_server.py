@@ -21,6 +21,8 @@ from pydicom.sequence import Sequence
 from pynetdicom import AE, debug_logger, evt
 from pynetdicom.status import STATUS_PENDING, STATUS_SUCCESS
 
+from django_tenants.utils import get_tenant_model, tenant_context
+
 from orders.models import ExamOrder  # Import from orders app
 from tenants.models import Device, Modality  # Import related models
 
@@ -33,94 +35,99 @@ def get_worklist_items(request_dataset):
     Query the database for worklist items matching the request filters.
     Returns a list of Datasets representing worklist items.
     """
-    items = []
-
     # Extract filters from request
     modality_filter = getattr(request_dataset, "Modality", None)
     station_ae_filter = getattr(request_dataset, "ScheduledStationAETitle", None)
     patient_name_filter = getattr(request_dataset, "PatientName", None)
     patient_id_filter = getattr(request_dataset, "PatientID", None)
 
-    # Build queryset - use ExamOrder from orders app
-    queryset = ExamOrder.objects.select_related(
-        "patient", "modality", "room_station"
-    ).filter(status=ExamOrder.Status.SCHEDULED)
+    # Get all active tenants and query each tenant's schema
+    Tenant = get_tenant_model()
+    all_items = []
 
-    if modality_filter and modality_filter != "*":
-        # Map DICOM modality codes to database modality codes
-        queryset = queryset.filter(modality__code__iexact=modality_filter)
+    # Iterate through all tenants (excluding public schema)
+    for tenant in Tenant.objects.exclude(schema_name="public"):
+        with tenant_context(tenant):
+            # Build queryset - use ExamOrder from orders app
+            queryset = ExamOrder.objects.select_related(
+                "patient", "modality", "room_station"
+            ).filter(status=ExamOrder.Status.SCHEDULED)
 
-    if station_ae_filter and station_ae_filter != "*":
-        queryset = queryset.filter(room_station__dicom_ae_title=station_ae_filter)
+            if modality_filter and modality_filter != "*":
+                # Map DICOM modality codes to database modality codes
+                queryset = queryset.filter(modality__code__iexact=modality_filter)
 
-    if patient_name_filter and patient_name_filter != "*":
-        if "*" in patient_name_filter:
-            pattern = patient_name_filter.replace("*", "")
-            queryset = queryset.filter(
-                patient__first_name_en__icontains=pattern
-            ) | queryset.filter(patient__last_name_en__icontains=pattern)
-        else:
-            queryset = queryset.filter(
-                patient__first_name_en__icontains=patient_name_filter
-            ) | queryset.filter(patient__last_name_en__icontains=patient_name_filter)
+            if station_ae_filter and station_ae_filter != "*":
+                queryset = queryset.filter(room_station__dicom_ae_title=station_ae_filter)
 
-    if patient_id_filter and patient_id_filter != "*":
-        if "*" in patient_id_filter:
-            pattern = patient_id_filter.replace("*", "")
-            queryset = queryset.filter(patient__mrn__icontains=pattern)
-        else:
-            queryset = queryset.filter(patient__mrn=patient_id_filter)
+            if patient_name_filter and patient_name_filter != "*":
+                if "*" in patient_name_filter:
+                    pattern = patient_name_filter.replace("*", "")
+                    queryset = queryset.filter(
+                        patient__first_name_en__icontains=pattern
+                    ) | queryset.filter(patient__last_name_en__icontains=pattern)
+                else:
+                    queryset = queryset.filter(
+                        patient__first_name_en__icontains=patient_name_filter
+                    ) | queryset.filter(patient__last_name_en__icontains=patient_name_filter)
 
-    # Convert to DICOM datasets
-    for order in queryset[:100]:  # Limit results
-        item = Dataset()
+            if patient_id_filter and patient_id_filter != "*":
+                if "*" in patient_id_filter:
+                    pattern = patient_id_filter.replace("*", "")
+                    queryset = queryset.filter(patient__mrn__icontains=pattern)
+                else:
+                    queryset = queryset.filter(patient__mrn=patient_id_filter)
 
-        # Patient Module
-        patient = order.patient
-        if patient:
-            # Combine first and last name for PatientName
-            patient_name = f"{patient.first_name_en} {patient.last_name_en}".strip()
-            item.PatientName = patient_name if patient_name else ""
-            item.PatientID = patient.mrn if patient.mrn else ""
-            item.PatientBirthDate = (
-                patient.dob.strftime("%Y%m%d") if patient.dob else ""
-            )
-            item.PatientSex = patient.gender if patient.gender else ""
-        else:
-            item.PatientName = ""
-            item.PatientID = ""
-            item.PatientBirthDate = ""
-            item.PatientSex = ""
+            # Convert to DICOM datasets
+            for order in queryset[:100]:  # Limit results per tenant
+                item = Dataset()
 
-        # Scheduled Procedure Step Module
-        step = Dataset()
-        step.Modality = order.modality.code if order.modality else "OT"
-        step.ScheduledStationAETitle = (
-            order.room_station.dicom_ae_title if order.room_station else ""
-        )
+                # Patient Module
+                patient = order.patient
+                if patient:
+                    # Combine first and last name for PatientName
+                    patient_name = f"{patient.first_name_en} {patient.last_name_en}".strip()
+                    item.PatientName = patient_name if patient_name else ""
+                    item.PatientID = patient.mrn if patient.mrn else ""
+                    item.PatientBirthDate = (
+                        patient.dob.strftime("%Y%m%d") if patient.dob else ""
+                    )
+                    item.PatientSex = patient.gender if patient.gender else ""
+                else:
+                    item.PatientName = ""
+                    item.PatientID = ""
+                    item.PatientBirthDate = ""
+                    item.PatientSex = ""
 
-        if order.scheduled_datetime:
-            step.ScheduledProcedureStepStartDate = order.scheduled_datetime.strftime(
-                "%Y%m%d"
-            )
-            step.ScheduledProcedureStepStartTime = order.scheduled_datetime.strftime(
-                "%H%M%S"
-            )
-        else:
-            step.ScheduledProcedureStepStartDate = ""
-            step.ScheduledProcedureStepStartTime = "000000"
+                # Scheduled Procedure Step Module
+                step = Dataset()
+                step.Modality = order.modality.code if order.modality else "OT"
+                step.ScheduledStationAETitle = (
+                    order.room_station.dicom_ae_title if order.room_station else ""
+                )
 
-        step.ScheduledProcedureStepDescription = order.procedure_name_en or ""
-        step.ScheduledPerformingPhysicianName = order.referring_physician or ""
-        step.ScheduledProcedureStepID = str(order.id)
-        step.AccessionNumber = order.accession_number or ""
-        step.RequestedProcedureID = order.procedure_code or ""
+                if order.scheduled_datetime:
+                    step.ScheduledProcedureStepStartDate = order.scheduled_datetime.strftime(
+                        "%Y%m%d"
+                    )
+                    step.ScheduledProcedureStepStartTime = order.scheduled_datetime.strftime(
+                        "%H%M%S"
+                    )
+                else:
+                    step.ScheduledProcedureStepStartDate = ""
+                    step.ScheduledProcedureStepStartTime = "000000"
 
-        item.ScheduledProcedureStepSequence = [step]
+                step.ScheduledProcedureStepDescription = order.procedure_name_en or ""
+                step.ScheduledPerformingPhysicianName = order.referring_physician or ""
+                step.ScheduledProcedureStepID = str(order.id)
+                step.AccessionNumber = order.accession_number or ""
+                step.RequestedProcedureID = order.procedure_code or ""
 
-        items.append(item)
+                item.ScheduledProcedureStepSequence = [step]
 
-    return items
+                all_items.append(item)
+
+    return all_items
 
 
 def handle_find(event):
