@@ -4,36 +4,34 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('tenants', '0008_alter_modality_code_alter_modality_name'),
+        ("tenants", "0008_alter_modality_code_alter_modality_name"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='device',
-            name='dicom_ae_title',
+            model_name="device",
+            name="dicom_ae_title",
             field=models.CharField(
-                max_length=16, 
-                default='DEVICE',
-                help_text='DICOM AE Title of the device'
+                max_length=16,
+                default="DEVICE",
+                help_text="DICOM AE Title of the device",
             ),
         ),
         migrations.AddField(
-            model_name='device',
-            name='dicom_host',
+            model_name="device",
+            name="dicom_host",
             field=models.GenericIPAddressField(
-                help_text='IP address or hostname of the DICOM device',
+                help_text="IP address or hostname of the DICOM device",
                 null=True,
                 blank=True,
             ),
         ),
         migrations.AddField(
-            model_name='device',
-            name='dicom_port',
+            model_name="device",
+            name="dicom_port",
             field=models.PositiveIntegerField(
-                default=104,
-                help_text='DICOM port number'
+                default=104, help_text="DICOM port number"
             ),
         ),
     ]

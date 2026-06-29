@@ -180,9 +180,9 @@ Order' %}{% endblock %} {% block content %}
                                     <option value="">
                                         -- {% trans 'Select Procedure' %} --
                                     </option>
-                                    {% regroup procedures by modality_type as
-                                    procedure_groups %} {% for group in
-                                    procedure_groups %}
+                                    {%regroup procedures by modality_type as
+                                    procedure_groups%} {%for group in
+                                    procedure_groups%}
                                     <optgroup label="{{ group.grouper }}">
                                         {% for procedure in group.list %}
                                         <option
@@ -190,8 +190,8 @@ Order' %}{% endblock %} {% block content %}
                                             data-name-en="{{ procedure.name_en }}"
                                             data-name-ar="{{ procedure.name_ar }}"
                                         >
-                                            {{ procedure.code }} - {{
-                                            procedure.name_en }}
+                                            {{procedure.code}} -
+                                            {{procedure.name_en}}
                                         </option>
                                         {% endfor %}
                                     </optgroup>
