@@ -1,9 +1,4 @@
-{% extends 'layout.html' %}
-{% load i18n %}
-
-{% block title %}{% trans 'Worklist' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}Worklist{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
@@ -20,90 +15,173 @@
             <!-- Advanced Filter Bar -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="get" action="{% url 'orders:worklist' %}" class="row g-3">
+                    <form
+                        method="get"
+                        action="{% url 'orders:worklist' %}"
+                        class="row g-3"
+                    >
                         <!-- Search Field -->
                         <div class="col-md-3">
-                            <label class="form-label small text-muted">{% trans 'Search' %}</label>
+                            <label class="form-label small text-muted"
+                                >{% trans 'Search' %}</label
+                            >
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" name="q" value="{{ query }}" 
-                                       placeholder="{% trans 'Accession, MRN, Patient, Procedure' %}">
+                                <span class="input-group-text"
+                                    ><i class="fas fa-search"></i
+                                ></span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="q"
+                                    value="{{ query }}"
+                                    placeholder="{% trans 'Accession, MRN, Patient, Procedure' %}"
+                                />
                             </div>
                         </div>
-                        
+
                         <!-- Status Filter -->
                         <div class="col-md-2">
-                            <label class="form-label small text-muted">{% trans 'Status' %}</label>
+                            <label class="form-label small text-muted"
+                                >{% trans 'Status' %}</label
+                            >
                             <select class="form-select" name="status">
-                                <option value="">{% trans 'All Statuses' %}</option>
+                                <option value="">
+                                    {% trans 'All Statuses' %}
+                                </option>
                                 {% for status_value, status_label in status_choices %}
-                                <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>
+                                <option
+                                    value="{{ status_value }}"
+                                    {% if
+                                    status_filter=""
+                                    ="status_value"
+                                    %}selected{%
+                                    endif
+                                    %}
+                                >
                                     {{ status_label }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        
+
                         <!-- Modality Filter -->
                         <div class="col-md-2">
-                            <label class="form-label small text-muted">{% trans 'Modality' %}</label>
+                            <label class="form-label small text-muted"
+                                >{% trans 'Modality' %}</label
+                            >
                             <select class="form-select" name="modality">
-                                <option value="">{% trans 'All Modalities' %}</option>
+                                <option value="">
+                                    {% trans 'All Modalities' %}
+                                </option>
                                 {% for modality in modalities %}
-                                <option value="{{ modality.code }}" {% if modality_filter == modality.code %}selected{% endif %}>
+                                <option
+                                    value="{{ modality.code }}"
+                                    {%
+                                    if
+                                    modality_filter=""
+                                    ="modality.code"
+                                    %}selected{%
+                                    endif
+                                    %}
+                                >
                                     {{ modality.code }} - {{ modality.name }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        
+
                         <!-- Priority Filter -->
                         <div class="col-md-2">
-                            <label class="form-label small text-muted">{% trans 'Priority' %}</label>
+                            <label class="form-label small text-muted"
+                                >{% trans 'Priority' %}</label
+                            >
                             <select class="form-select" name="priority">
-                                <option value="">{% trans 'All Priorities' %}</option>
+                                <option value="">
+                                    {% trans 'All Priorities' %}
+                                </option>
                                 {% for priority_value, priority_label in priority_choices %}
-                                <option value="{{ priority_value }}" {% if priority_filter == priority_value %}selected{% endif %}>
+                                <option
+                                    value="{{ priority_value }}"
+                                    {%
+                                    if
+                                    priority_filter=""
+                                    ="priority_value"
+                                    %}selected{%
+                                    endif
+                                    %}
+                                >
                                     {{ priority_label }}
                                 </option>
                                 {% endfor %}
                             </select>
                         </div>
-                        
+
                         <!-- Date From -->
                         <div class="col-md-2">
-                            <label class="form-label small text-muted">{% trans 'From Date' %}</label>
-                            <input type="date" class="form-control" name="date_from" value="{{ date_from }}">
+                            <label class="form-label small text-muted"
+                                >{% trans 'From Date' %}</label
+                            >
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="date_from"
+                                value="{{ date_from }}"
+                            />
                         </div>
-                        
+
                         <!-- Date To -->
                         <div class="col-md-2">
-                            <label class="form-label small text-muted">{% trans 'To Date' %}</label>
-                            <input type="date" class="form-control" name="date_to" value="{{ date_to }}">
+                            <label class="form-label small text-muted"
+                                >{% trans 'To Date' %}</label
+                            >
+                            <input
+                                type="date"
+                                class="form-control"
+                                name="date_to"
+                                value="{{ date_to }}"
+                            />
                         </div>
-                        
+
                         <!-- Submit Button -->
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-outline-primary w-100">
+                            <button
+                                type="submit"
+                                class="btn btn-outline-primary w-100"
+                            >
                                 <i class="fas fa-filter me-1"></i>{% trans 'Filter' %}
                             </button>
                         </div>
                     </form>
-                    
+
                     <!-- Clear Filters -->
                     {% if query or status_filter or modality_filter or priority_filter or date_from or date_to %}
                     <div class="mt-2">
-                        <a href="{% url 'orders:worklist' %}" class="btn btn-sm btn-outline-secondary">
+                        <a
+                            href="{% url 'orders:worklist' %}"
+                            class="btn btn-sm btn-outline-secondary"
+                        >
                             <i class="fas fa-times"></i> {% trans 'Clear All Filters' %}
                         </a>
                         <span class="text-muted small ms-2">
-                            {% trans 'Active filters:' %}
-                            {% if query %}<span class="badge bg-primary me-1">Search: {{ query }}</span>{% endif %}
-                            {% if status_filter %}<span class="badge bg-info me-1">{{ status_filter }}</span>{% endif %}
-                            {% if modality_filter %}<span class="badge bg-success me-1">{{ modality_filter }}</span>{% endif %}
-                            {% if priority_filter %}<span class="badge bg-warning text-dark me-1">{{ priority_filter }}</span>{% endif %}
-                            {% if date_from %}<span class="badge bg-secondary me-1">From: {{ date_from }}</span>{% endif %}
-                            {% if date_to %}<span class="badge bg-secondary me-1">To: {{ date_to }}</span>{% endif %}
+                            {% trans 'Active filters:' %} {% if query %}<span
+                                class="badge bg-primary me-1"
+                                >Search: {{ query }}</span
+                            >{% endif %} {% if status_filter %}<span
+                                class="badge bg-info me-1"
+                                >{{ status_filter }}</span
+                            >{% endif %} {% if modality_filter %}<span
+                                class="badge bg-success me-1"
+                                >{{ modality_filter }}</span
+                            >{% endif %} {% if priority_filter %}<span
+                                class="badge bg-warning text-dark me-1"
+                                >{{ priority_filter }}</span
+                            >{% endif %} {% if date_from %}<span
+                                class="badge bg-secondary me-1"
+                                >From: {{ date_from }}</span
+                            >{% endif %} {% if date_to %}<span
+                                class="badge bg-secondary me-1"
+                                >To: {{ date_to }}</span
+                            >{% endif %}
                         </span>
                     </div>
                     {% endif %}
@@ -125,77 +203,116 @@
                                     <th>{% trans 'Priority' %}</th>
                                     <th>{% trans 'Status' %}</th>
                                     <th>{% trans 'Scheduled' %}</th>
-                                    <th class="text-end">{% trans 'Actions' %}</th>
+                                    <th class="text-end">
+                                        {% trans 'Actions' %}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for order in orders %}
                                 <tr>
-                                    <td><strong>{{ order.accession_number }}</strong></td>
                                     <td>
-                                        <a href="{% url 'patients:patient_detail' order.patient.pk %}">
+                                        <strong
+                                            >{{ order.accession_number }}</strong
+                                        >
+                                    </td>
+                                    <td>
+                                        <a
+                                            href="{% url 'patients:patient_detail' order.patient.pk %}"
+                                        >
                                             {{ order.patient.mrn }} - {{ order.patient.first_name_en }} {{ order.patient.last_name_en }}
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="badge bg-info">{{ order.modality.code|default:"-" }}</span>
+                                        <span class="badge bg-info"
+                                            >{{ order.modality.code|default:"-" }}</span
+                                        >
                                     </td>
                                     <td>{{ order.procedure_name_en }}</td>
                                     <td>
                                         {% if order.priority == 'STAT' %}
-                                            <span class="badge bg-danger">{% trans 'STAT' %}</span>
+                                        <span class="badge bg-danger"
+                                            >{% trans 'STAT' %}</span
+                                        >
                                         {% elif order.priority == 'URGENT' %}
-                                            <span class="badge bg-warning text-dark">{% trans 'Urgent' %}</span>
+                                        <span class="badge bg-warning text-dark"
+                                            >{% trans 'Urgent' %}</span
+                                        >
                                         {% else %}
-                                            <span class="badge bg-secondary">{% trans 'Routine' %}</span>
+                                        <span class="badge bg-secondary"
+                                            >{% trans 'Routine' %}</span
+                                        >
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if order.status == 'REGISTERED' %}
-                                            <span class="badge bg-primary">{% trans 'Registered' %}</span>
+                                        <span class="badge bg-primary"
+                                            >{% trans 'Registered' %}</span
+                                        >
                                         {% elif order.status == 'SCHEDULED' %}
-                                            <span class="badge bg-info">{% trans 'Scheduled' %}</span>
+                                        <span class="badge bg-info"
+                                            >{% trans 'Scheduled' %}</span
+                                        >
                                         {% elif order.status == 'IN_PROGRESS' %}
-                                            <span class="badge bg-warning text-dark">{% trans 'In Progress' %}</span>
+                                        <span class="badge bg-warning text-dark"
+                                            >{% trans 'In Progress' %}</span
+                                        >
                                         {% elif order.status == 'COMPLETED' %}
-                                            <span class="badge bg-success">{% trans 'Completed' %}</span>
+                                        <span class="badge bg-success"
+                                            >{% trans 'Completed' %}</span
+                                        >
                                         {% elif order.status == 'REPORTED' %}
-                                            <span class="badge bg-success">{% trans 'Reported' %}</span>
+                                        <span class="badge bg-success"
+                                            >{% trans 'Reported' %}</span
+                                        >
                                         {% elif order.status == 'FINALIZED' %}
-                                            <span class="badge bg-dark">{% trans 'Finalized' %}</span>
+                                        <span class="badge bg-dark"
+                                            >{% trans 'Finalized' %}</span
+                                        >
                                         {% elif order.status == 'CANCELLED' %}
-                                            <span class="badge bg-secondary">{% trans 'Cancelled' %}</span>
+                                        <span class="badge bg-secondary"
+                                            >{% trans 'Cancelled' %}</span
+                                        >
                                         {% else %}
-                                            <span class="badge bg-secondary">{{ order.status }}</span>
+                                        <span class="badge bg-secondary"
+                                            >{{ order.status }}</span
+                                        >
                                         {% endif %}
                                     </td>
                                     <td>
-                                        {% if order.scheduled_datetime %}
-                                            {{ order.scheduled_datetime|date:"Y-m-d H:i" }}
-                                        {% else %}
-                                            <span class="text-muted">-</span>
+                                        {% if order.scheduled_datetime %} {{ order.scheduled_datetime|date:"Y-m-d H:i" }} {% else %}
+                                        <span class="text-muted">-</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-end">
-                                        <a href="{% url 'orders:order_detail' order.pk %}" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           title="{% trans 'View Details' %}">
-                                            <i class="fas fa-eye"></i>
+                                        <a
+                                            href="{% url 'orders:order_detail' order.pk %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                        >
+                                            <i class="bi bi-eye fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'reports:study_reports' order.id %}" 
-                                           class="btn btn-sm btn-outline-info" 
-                                           title="{% trans 'View Reports' %}">
-                                            <i class="fas fa-file-medical-alt"></i>
+                                        <a
+                                            href="{% url 'reports:study_reports' order.id %}"
+                                            class="btn btn-sm btn-outline-info"
+                                            title="{% trans 'View Reports' %}"
+                                        >
+                                            <i
+                                                class="bi bi-file-earmark-text fas fa-file-medical-alt"
+                                            ></i>
                                         </a>
-                                        <a href="{% url 'orders:edit_order' order.pk %}" 
-                                           class="btn btn-sm btn-outline-warning" 
-                                           title="{% trans 'Edit' %}">
-                                            <i class="fas fa-edit"></i>
+                                        <a
+                                            href="{% url 'orders:edit_order' order.pk %}"
+                                            class="btn btn-sm btn-outline-warning"
+                                            title="{% trans 'Edit' %}"
+                                        >
+                                            <i class="bi bi-pencil-square fas fa-edit"></i>
                                         </a>
-                                        <a href="{% url 'orders:delete_order' order.pk %}" 
-                                           class="btn btn-sm btn-outline-danger" 
-                                           title="{% trans 'Delete' %}">
-                                            <i class="fas fa-trash"></i>
+                                        <a
+                                            href="{% url 'orders:delete_order' order.pk %}"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="{% trans 'Delete' %}"
+                                        >
+                                            <i class="bi bi-trash fas fa-trash"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -206,17 +323,22 @@
                     {% else %}
                     <div class="text-center py-5">
                         <i class="fas fa-list-alt fa-4x text-muted mb-3"></i>
-                        <h4 class="text-muted">{% trans 'No orders found' %}</h4>
+                        <h4 class="text-muted">
+                            {% trans 'No orders found' %}
+                        </h4>
                         <p class="text-muted">
                             {% if query or status_filter or modality_filter or priority_filter or date_from or date_to %}
-                                {% trans 'Try adjusting your filter criteria' %}
-                            {% else %}
-                                {% trans 'Get started by adding your first order' %}
+                            {% trans 'Try adjusting your filter criteria' %} {% else %}
+                            {% trans 'Get started by adding your first order' %}
                             {% endif %}
                         </p>
                         {% if not query and not status_filter and not modality_filter and not priority_filter and not date_from and not date_to %}
-                        <a href="{% url 'orders:add_order' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>{% trans 'Add Order' %}
+                        <a
+                            href="{% url 'orders:add_order' %}"
+                            class="btn btn-primary"
+                        >
+                            <i class="fas fa-plus me-1"></i>{% trans 'Add Order'
+                            %}
                         </a>
                         {% endif %}
                     </div>
@@ -228,10 +350,8 @@
             {% if orders %}
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">
-                    {% blocktrans count counter=orders.count %}
-                        Showing {{ counter }} order
-                    {% plural %}
-                        Showing {{ counter }} orders
+                    {% blocktrans count counter=orders.count %} Showing {{
+                    counter }} order {% plural %} Showing {{ counter }} orders
                     {% endblocktrans %}
                 </small>
             </div>
