@@ -1752,7 +1752,7 @@ msgstr "Unspecified response body"
 #: myenv/lib/python3.11/site-packages/drf_spectacular/plumbing.py:488
 #, python-format
 msgid "Token-based authentication with required prefix \"%s\""
-msgstr "Token-based authentication with required prefix \"%s\"
+msgstr "Token-based authentication with required prefix \"%s\""
 
 #: myenv/lib/python3.11/site-packages/drf_spectacular/views.py:45
 msgid ""
@@ -2423,6 +2423,10 @@ msgstr "الرقم الطبي للمريض"
 msgid "Patient Name"
 msgstr "اسم المريض"
 
+#| msgid "Patients"
+msgid "Patients"
+msgstr "المرضى"
+
 #: templates/license/home.html:71
 msgid "Accession Number"
 msgstr "رقم الطلب"
@@ -2454,8 +2458,8 @@ msgstr "وقت الجدولة"
 #: templates/license/home.html:90
 #, fuzzy
 #| msgid "Worklist"
-msgid "View in Worklist"
-msgstr "عرض في قائمة العمل"
+msgid "Worklist"
+msgstr "قائمة العمل"
 
 #: templates/license/home.html:92
 msgid "Close"
