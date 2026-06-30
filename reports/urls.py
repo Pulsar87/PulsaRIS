@@ -5,7 +5,7 @@ from reports import views
 app_name = "reports"
 
 urlpatterns = [
-    # path("", views.reports_list, name="reports_list"),
+    path("", views.report_list, name="report_list"),
     path("study/<uuid:order_id>/", views.study_reports, name="study_reports"),
     path("<uuid:order_id>/create/", views.create_report, name="create_report"),
     path("<uuid:report_id>/view/", views.view_report, name="view_report"),

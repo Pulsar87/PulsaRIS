@@ -4,7 +4,7 @@ from django.utils.translation import gettext as _
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
-
+from django.db.models import Q
 from orders.models import ExamOrder
 from reports.models import Report
 from patients.views import get_tenant
@@ -16,17 +16,17 @@ def create_report(request, order_id):
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
         return redirect("orders:worklist")
-    
+
     order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
-    
+
     if request.method == "POST":
         report_content = request.POST.get("report_content", "").strip()
         status = request.POST.get("status", Report.Status.DRAFT)
-        
+
         # Parse content to separate findings and impression if needed
         # For now, store full content in findings_en
         findings_en = report_content
-        
+
         # Create new report
         report = Report.objects.create(
             tenant=tenant,
@@ -35,15 +35,15 @@ def create_report(request, order_id):
             findings_en=findings_en,
             status=status,
         )
-        
+
         # Update order status if report is finalized
         if status == Report.Status.FINAL:
             order.status = ExamOrder.Status.REPORTED
             order.save(update_fields=["status"])
-        
+
         messages.success(request, _("Report created successfully!"))
         return redirect("reports:view_report", report_id=report.id)
-    
+
     context = {
         "order": order,
         "report": None,
@@ -57,35 +57,35 @@ def edit_report(request, report_id):
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
         return redirect("orders:worklist")
-    
+
     report = get_object_or_404(Report, id=report_id, tenant=tenant)
-    
+
     # Check permission - only the author or staff can edit
     if report.radiologist != request.user and not request.user.is_staff:
         messages.error(request, _("You don't have permission to edit this report."))
         return redirect("reports:view_report", report_id=report_id)
-    
+
     if request.method == "POST":
         report_content = request.POST.get("report_content", "").strip()
         status = request.POST.get("status", report.status)
-        
+
         # Update report
         report.findings_en = report_content
         report.status = status
-        
+
         if status == Report.Status.FINAL and not report.finalized_at:
             report.finalized_at = timezone.now()
-        
+
         report.save()
-        
+
         # Update order status if report is finalized
         if status == Report.Status.FINAL:
             report.order.status = ExamOrder.Status.REPORTED
             report.order.save(update_fields=["status"])
-        
+
         messages.success(request, _("Report updated successfully!"))
         return redirect("reports:view_report", report_id=report.id)
-    
+
     context = {
         "order": report.order,
         "report": report,
@@ -99,9 +99,9 @@ def view_report(request, report_id):
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
         return redirect("orders:worklist")
-    
+
     report = get_object_or_404(Report, id=report_id, tenant=tenant)
-    
+
     context = {
         "report": report,
         "order": report.order,
@@ -115,10 +115,10 @@ def study_reports(request, order_id):
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
         return redirect("orders:worklist")
-    
+
     order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
     reports = order.reports.all().order_by("-created_at")
-    
+
     context = {
         "order": order,
         "reports": reports,
@@ -132,25 +132,109 @@ def delete_report(request, report_id):
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
         return redirect("orders:worklist")
-    
+
     report = get_object_or_404(Report, id=report_id, tenant=tenant)
     order_id = report.order.id
-    
+
     # Check permission - only staff can delete
     if not request.user.is_staff:
         messages.error(request, _("You don't have permission to delete this report."))
         return redirect("reports:view_report", report_id=report_id)
-    
+
     if request.method == "POST":
         report.delete()
         messages.success(request, _("Report deleted successfully!"))
         return redirect("reports:study_reports", order_id=order_id)
-    
+
     context = {
         "report": report,
         "order": report.order,
     }
     return render(request, "reports/report_confirm_delete.html", context)
+
+def report_list(request):
+    """Display list of all reports with advanced filtering."""
+    query = request.GET.get("q", "")
+    status_filter = request.GET.get("status", "")
+    radiologist_filter = request.GET.get("radiologist", "")
+    modality_filter = request.GET.get("modality", "")
+    date_from = request.GET.get("date_from", "")
+    date_to = request.GET.get("date_to", "")
+    critical_filter = request.GET.get("critical", "")
+    tenant = get_tenant(request)
+
+    reports = Report.objects.none()
+    modalities = []
+    radiologists = []
+
+    if tenant:
+        from tenants.models import Modality
+        from users.models import User
+
+        modalities = Modality.objects.filter(tenant=tenant, is_active=True)
+
+        # Get radiologists who have created reports
+        radiologists = User.objects.filter(
+            is_staff=True,
+            report__tenant=tenant
+        ).distinct().order_by("username")
+
+        reports = Report.objects.filter(tenant=tenant).select_related(
+            "order__patient", "order__modality", "radiologist"
+        )
+
+        # Search filter
+        if query:
+            reports = reports.filter(
+                Q(id__icontains=query)
+                | Q(order__accession_number__icontains=query)
+                | Q(order__patient__mrn__icontains=query)
+                | Q(order__patient__first_name_en__icontains=query)
+                | Q(order__patient__last_name_en__icontains=query)
+                | Q(findings_en__icontains=query)
+                | Q(impression_en__icontains=query)
+            )
+
+        # Status filter
+        if status_filter:
+            reports = reports.filter(status=status_filter)
+
+        # Radiologist filter
+        if radiologist_filter:
+            reports = reports.filter(radiologist_id=radiologist_filter)
+
+        # Modality filter (via order)
+        if modality_filter:
+            reports = reports.filter(order__modality__code=modality_filter)
+
+        # Date range filters
+        if date_from:
+            reports = reports.filter(created_at__date__gte=date_from)
+
+        if date_to:
+            reports = reports.filter(created_at__date__lte=date_to)
+
+        # Critical finding filter
+        if critical_filter == "true":
+            reports = reports.filter(critical_finding=True)
+        elif critical_filter == "false":
+            reports = reports.filter(critical_finding=False)
+
+    context = {
+        "reports": reports,
+        "query": query,
+        "status_filter": status_filter,
+        "radiologist_filter": radiologist_filter,
+        "modality_filter": modality_filter,
+        "date_from": date_from,
+        "date_to": date_to,
+        "critical_filter": critical_filter,
+        "status_choices": Report.Status.choices,
+        "modalities": modalities,
+        "radiologists": radiologists,
+    }
+    return render(request, "reports/report_list.html", context)
+
 
 
 @require_http_methods(["GET"])
@@ -171,14 +255,14 @@ def save_report_draft(request):
     tenant = get_tenant(request)
     if not tenant:
         return JsonResponse({"error": "Tenant not found"}, status=400)
-    
+
     order_id = request.POST.get("order_id")
     if not order_id:
         return JsonResponse({"error": "Order ID required"}, status=400)
-    
+
     order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
     report_content = request.POST.get("report_content", "")
-    
+
     # Get or create draft report
     report, created = Report.objects.get_or_create(
         order=order,
@@ -189,11 +273,11 @@ def save_report_draft(request):
             "findings_en": report_content,
         }
     )
-    
+
     if not created:
         report.findings_en = report_content
         report.save()
-    
+
     return JsonResponse({
         "success": True,
         "report_id": str(report.id),

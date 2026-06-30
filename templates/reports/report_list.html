@@ -1,0 +1,240 @@
+{% extends 'layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Reports List" %} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="bi bi-file-earmark-medical-fill me-2"></i>{% trans 'Reports List' %}
+                </h2>
+                <a href="{% url 'orders:add_order' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle me-1"></i>{% trans 'New Order' %}
+                </a>
+            </div>
+
+            <!-- Advanced Filter Bar -->
+            <div class="card mb-4 shadow-sm border-0 rounded-4">
+                <div class="card-body">
+                    <form method="get" action="{% url 'reports:report_list' %}" class="row g-3">
+                        <!-- Search Field -->
+                        <div class="col-md-3">
+                            <label class="form-label small text-muted">{% trans 'Search' %}</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" name="q" value="{{ query }}"
+                                    placeholder="{% trans 'Report ID, Accession, MRN, Patient, Findings' %}"/>
+                            </div>
+                        </div>
+
+                        <!-- Status Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'Status' %}</label>
+                            <select class="form-select" name="status">
+                                <option value="">{% trans 'All Statuses' %}</option>
+                                {% for status_value, status_label in status_choices %}
+                                <option value="{{ status_value }}" {% if status_filter == status_value %}selected{% endif %}>
+                                    {{ status_label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Radiologist Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'Radiologist' %}</label>
+                            <select class="form-select" name="radiologist">
+                                <option value="">{% trans 'All Radiologists' %}</option>
+                                {% for radiologist in radiologists %}
+                                <option value="{{ radiologist.id }}" {% if radiologist_filter == radiologist.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ radiologist.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Modality Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'Modality' %}</label>
+                            <select class="form-select" name="modality">
+                                <option value="">{% trans 'All Modalities' %}</option>
+                                {% for modality in modalities %}
+                                <option value="{{ modality.code }}" {% if modality_filter == modality.code %}selected{% endif %}>
+                                    {{ modality.code }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Critical Finding Filter -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'Critical Finding' %}</label>
+                            <select class="form-select" name="critical">
+                                <option value="">{% trans 'All' %}</option>
+                                <option value="true" {% if critical_filter == "true" %}selected{% endif %}>{% trans 'Yes' %}</option>
+                                <option value="false" {% if critical_filter == "false" %}selected{% endif %}>{% trans 'No' %}</option>
+                            </select>
+                        </div>
+
+                        <!-- Date From -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'From Date' %}</label>
+                            <input type="date" class="form-control" name="date_from" value="{{ date_from }}"/>
+                        </div>
+
+                        <!-- Date To -->
+                        <div class="col-md-2">
+                            <label class="form-label small text-muted">{% trans 'To Date' %}</label>
+                            <input type="date" class="form-control" name="date_to" value="{{ date_to }}"/>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-filter me-1"></i>{% trans 'Filter' %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Clear Filters -->
+                    {% if query or status_filter or radiologist_filter or modality_filter or critical_filter or date_from or date_to %}
+                    <div class="mt-2">
+                        <a href="{% url 'reports:report_list' %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> {% trans 'Clear All Filters' %}
+                        </a>
+                        <span class="text-muted small ms-2">
+                            {% trans 'Active filters:' %}
+                            {% if query %}<span class="badge bg-primary me-1">Search: {{ query }}</span>{% endif %}
+                            {% if status_filter %}<span class="badge bg-info me-1">{{ status_filter }}</span>{% endif %}
+                            {% if radiologist_filter %}<span class="badge bg-success me-1">Radiologist: {{ radiologist_filter }}</span>{% endif %}
+                            {% if modality_filter %}<span class="badge bg-warning text-dark me-1">{{ modality_filter }}</span>{% endif %}
+                            {% if critical_filter == "true" %}<span class="badge bg-danger me-1">{% trans 'Critical Only' %}</span>{% endif %}
+                            {% if critical_filter == "false" %}<span class="badge bg-secondary me-1">{% trans 'Non-Critical Only' %}</span>{% endif %}
+                            {% if date_from %}<span class="badge bg-secondary me-1">From: {{ date_from }}</span>{% endif %}
+                            {% if date_to %}<span class="badge bg-secondary me-1">To: {{ date_to }}</span>{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-0">
+                    {% if reports %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>{% trans 'Report ID' %}</th>
+                                    <th>{% trans 'Accession #' %}</th>
+                                    <th>{% trans 'Patient' %}</th>
+                                    <th>{% trans 'Modality' %}</th>
+                                    <th>{% trans 'Radiologist' %}</th>
+                                    <th>{% trans 'Status' %}</th>
+                                    <th>{% trans 'Critical' %}</th>
+                                    <th>{% trans 'Created' %}</th>
+                                    <th>{% trans 'Actions' %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for report in reports %}
+                                <tr>
+                                    <td>
+                                        <small class="text-muted">#{{ report.id|truncatechars:8 }}</small>
+                                    </td>
+                                    <td>
+                                        <strong>{{ report.order.accession_number }}</strong>
+                                    </td>
+                                    <td>
+                                        <div>{{ report.order.patient.full_name }}</div>
+                                        <small class="text-muted">{{ report.order.patient.mrn }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ report.order.modality.code }}</span>
+                                    </td>
+                                    <td>
+                                        <i class="bi bi-person-circle me-1"></i>{{ report.radiologist.username }}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{% if report.status == 'FINAL' %}success{% elif report.status == 'PRELIMINARY' %}info{% elif report.status == 'AMENDED' %}warning{% else %}secondary{% endif %}">
+                                            {{ report.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if report.critical_finding %}
+                                        <span class="badge bg-danger">
+                                            <i class="bi bi-exclamation-triangle-fill"></i> {% trans 'Yes' %}
+                                        </span>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ report.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'reports:view_report' report.id %}"
+                                                class="btn btn-outline-primary"
+                                                title="{% trans 'View' %}">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% if report.status == 'DRAFT' or report.radiologist == user or user.is_staff %}
+                                            <a href="{% url 'reports:edit_report' report.id %}"
+                                                class="btn btn-outline-secondary"
+                                                title="{% trans 'Edit' %}">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            {% endif %}
+                                            <a href="{% url 'reports:study_reports' report.order.id %}"
+                                                class="btn btn-outline-info"
+                                                title="{% trans 'Study Reports' %}">
+                                                <i class="bi bi-files"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-file-earmark-text display-1 text-muted"></i>
+                        <h5 class="mt-3 text-muted">{% trans "No reports found" %}</h5>
+                        <p class="text-muted">
+                            {% if query or status_filter or radiologist_filter or modality_filter or critical_filter or date_from or date_to %}
+                            {% trans 'Try adjusting your filter criteria' %}
+                            {% else %}
+                            {% trans 'No reports have been created yet' %}
+                            {% endif %}
+                        </p>
+                        {% if not query and not status_filter and not radiologist_filter and not modality_filter and not critical_filter and not date_from and not date_to %}
+                        <a href="{% url 'orders:worklist' %}" class="btn btn-primary">
+                            <i class="bi bi-list-task me-1"></i>{% trans 'Go to Worklist' %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Pagination info -->
+            {% if reports %}
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <small class="text-muted">
+                    {% blocktrans count counter=reports.count %}
+                    Showing {{ counter }} report
+                    {% plural %}
+                    Showing {{ counter }} reports
+                    {% endblocktrans %}
+                </small>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
