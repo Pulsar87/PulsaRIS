@@ -13,8 +13,9 @@
                         href="/worklist"
                         class="btn btn-outline-secondary btn-sm"
                     >
-                        <i class="bi bi-arrow-left me-1"></i> {% trans "Back to
-                        Worklist" %}
+                        <i class="bi bi-arrow-left me-1">
+                            {% trans "Back to Worklist" %}</i
+                        >
                     </a>
                 </div>
             </div>
@@ -56,8 +57,9 @@
                                         hx-target="#patientResults"
                                         hx-trigger="click"
                                     >
-                                        <i class="bi bi-search"></i> {% trans
-                                        "Lookup" %}
+                                        <i class="bi bi-search">
+                                            <trans>Lookup</trans></i
+                                        >
                                     </button>
                                 </div>
                                 <div id="patientResults" class="mt-2"></div>
@@ -610,8 +612,7 @@
                                     for="clinical_indication"
                                     class="form-label fw-medium"
                                 >
-                                    {% trans "Clinical Indication / Reason for
-                                    Exam" %}
+                                    {% trans "Clinical Indication" %}
                                 </label>
                                 <textarea
                                     class="form-control"
@@ -704,12 +705,14 @@
                             type="reset"
                             class="btn btn-outline-secondary btn-lg"
                         >
-                            <i class="bi bi-x-circle me-2"></i> {% trans "Clear
-                            Form" %}
+                            <i class="bi bi-x-circle me-2"
+                                >{% trans "Clear Form" %}</i
+                            >
                         </button>
                         <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-check-circle me-2"></i> {% trans
-                            "Reserve Order" %}
+                            <i class="bi bi-check-circle me-2"
+                                >{% trans "Reserve Order" %}</i
+                            >
                         </button>
                     </div>
                 </form>

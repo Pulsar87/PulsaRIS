@@ -6,14 +6,15 @@
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-users me-2"></i>{% trans 'Patient List' %}
+                    <i class="fas fa-users me-2">{% trans 'Patient List' %}</i>
                 </h2>
                 <a
                     href="{% url 'patients:add_patient' %}"
                     class="btn btn-primary"
                 >
-                    <i class="fas fa-plus me-1"></i>{% trans 'Add New Patient'
-                    %}
+                    <i class="fas fa-plus me-1"
+                        >{% trans 'Add New Patient' %}</i
+                    >
                 </a>
             </div>
 
@@ -44,8 +45,9 @@
                                 type="submit"
                                 class="btn btn-outline-primary"
                             >
-                                <i class="fas fa-filter me-1"></i>{% trans
-                                'Search' %}
+                                <i class="fas fa-filter me-1"
+                                    >{% trans 'Search' %}</i
+                                >
                             </button>
                             {% if query %}
                             <a
@@ -149,8 +151,9 @@
                             href="{% url 'patients:add_patient' %}"
                             class="btn btn-primary"
                         >
-                            <i class="fas fa-plus me-1"></i>{% trans 'Add
-                            Patient' %}
+                            <i class="fas fa-plus me-1"
+                                >{% trans 'Add Patient' %}</i
+                            >
                         </a>
                         {% endif %}
                     </div>

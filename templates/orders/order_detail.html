@@ -6,21 +6,22 @@ Details' %}{% endblock %} {% block content %}
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-file-medical me-2"></i>{% trans 'Order
-                    Details' %}
+                    <i class="fas fa-file-medical me-2"
+                        >{% trans 'Order Details' %}</i
+                    >
                 </h2>
                 <div>
                     <a
                         href="{% url 'orders:worklist' %}"
                         class="btn btn-outline-secondary"
                     >
-                        <i class="fas fa-list me-1"></i>{% trans 'Order List' %}
+                        <i class="fas fa-list me-1">{% trans 'Order List' %}</i>
                     </a>
                     <a
                         href="{% url 'orders:edit_order' order.pk %}"
                         class="btn btn-warning"
                     >
-                        <i class="fas fa-edit me-1"></i>{% trans 'Edit Order' %}
+                        <i class="fas fa-edit me-1">{% trans 'Edit Order' %}</i>
                     </a>
                 </div>
             </div>
@@ -29,8 +30,9 @@ Details' %}{% endblock %} {% block content %}
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>{% trans 'Order
-                        Information' %}
+                        <i class="fas fa-info-circle me-2"
+                            >{% trans 'Order Information' %}</i
+                        >
                     </h5>
                 </div>
                 <div class="card-body">
@@ -113,8 +115,9 @@ Details' %}{% endblock %} {% block content %}
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-user me-2"></i>{% trans 'Patient
-                        Information' %}
+                        <i class="fas fa-user me-2"
+                            >{% trans 'Patient Information' %}</i
+                        >
                     </h5>
                 </div>
                 <div class="card-body">
@@ -181,8 +184,9 @@ Details' %}{% endblock %} {% block content %}
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-stethoscope me-2"></i>{% trans
-                        'Procedure Information' %}
+                        <i class="fas fa-stethoscope me-2"
+                            >{% trans 'Procedure Information' %}</i
+                        >
                     </h5>
                 </div>
                 <div class="card-body">
@@ -258,8 +262,9 @@ Details' %}{% endblock %} {% block content %}
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
                     <h5 class="mb-0">
-                        <i class="fas fa-notes-medical me-2"></i>{% trans
-                        'Additional Information' %}
+                        <i class="fas fa-notes-medical me-2"
+                            >{% trans 'Additional Information' %}</i
+                        >
                     </h5>
                 </div>
                 <div class="card-body">
@@ -319,27 +324,29 @@ Details' %}{% endblock %} {% block content %}
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-2">
                 <a href="{% url 'orders:worklist' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to
-                    List' %}
+                    <i class="fas fa-arrow-left me-1"
+                        >{% trans 'Back to List' %}</i
+                    >
                 </a>
                 <a
                     href="{% url 'reports:study_reports' order.id %}"
                     class="btn btn-info text-white"
                 >
-                    <i class="fas fa-file-medical-alt me-1"></i>{% trans 'View
-                    Reports' %}
+                    <i class="fas fa-file-medical-alt me-1"
+                        >{% trans 'View Reports' %}</i
+                    >
                 </a>
                 <a
                     href="{% url 'orders:edit_order' order.pk %}"
                     class="btn btn-warning"
                 >
-                    <i class="fas fa-edit me-1"></i>{% trans 'Edit' %}
+                    <i class="fas fa-edit me-1">{% trans 'Edit' %}</i>
                 </a>
                 <a
                     href="{% url 'orders:delete_order' order.pk %}"
                     class="btn btn-danger"
                 >
-                    <i class="fas fa-trash me-1"></i>{% trans 'Delete' %}
+                    <i class="fas fa-trash me-1">{% trans 'Delete' %}</i>
                 </a>
             </div>
         </div>

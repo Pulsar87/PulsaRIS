@@ -14,27 +14,29 @@
                         href="{% url 'patients:patient_list' %}"
                         class="btn btn-outline-secondary"
                     >
-                        <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to
-                        List' %}
+                        <i class="fas fa-arrow-left me-1"
+                            >{% trans 'Back to List' %}</i
+                        >
                     </a>
                     <a
                         href="{% url 'patients:edit_patient' patient.pk %}"
                         class="btn btn-warning"
                     >
-                        <i class="fas fa-edit me-1"></i>{% trans 'Edit' %}
+                        <i class="fas fa-edit me-1">{% trans 'Edit' %}</i>
                     </a>
                     <a
                         href="{% url 'patients:delete_patient' patient.pk %}"
                         class="btn btn-danger"
                     >
-                        <i class="fas fa-trash me-1"></i>{% trans 'Delete' %}
+                        <i class="fas fa-trash me-1">{% trans 'Delete' %}</i>
                     </a>
                     <a
                         href="{% url 'orders:add_order' %}?mrn={{ patient.mrn }}"
                         class="btn btn-primary"
                     >
-                        <i class="fas fa-file-medical me-1"></i>{% trans 'Create
-                        Order' %}
+                        <i class="fas fa-file-medical me-1"
+                            >{% trans 'Create Order' %}</i
+                        >
                     </a>
                 </div>
             </div>
@@ -46,8 +48,9 @@
                     <div class="card mb-4">
                         <div class="card-header bg-primary text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-id-card me-2"></i>{% trans
-                                'Patient Information' %}
+                                <i class="fas fa-id-card me-2"
+                                    >{% trans 'Patient Information' %}</i
+                                >
                             </h5>
                         </div>
                         <div class="card-body">
@@ -157,8 +160,9 @@
                     <div class="card mb-4">
                         <div class="card-header bg-warning">
                             <h5 class="mb-0">
-                                <i class="fas fa-phone-alt me-2"></i>{% trans
-                                'Emergency Contact' %}
+                                <i class="fas fa-phone-alt me-2"
+                                    >{% trans 'Emergency Contact' %}</i
+                                >
                             </h5>
                         </div>
                         <div class="card-body">
@@ -194,8 +198,9 @@
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-shield-alt me-2"></i>{% trans
-                                'Insurance' %}
+                                <i class="fas fa-shield-alt me-2"
+                                    >{% trans 'Insurance' %}</i
+                                >
                             </h5>
                         </div>
                         <div class="card-body">
@@ -224,8 +229,9 @@
                     <div class="card mb-4">
                         <div class="card-header bg-info text-white">
                             <h5 class="mb-0">
-                                <i class="fas fa-info-circle me-2"></i>{% trans
-                                'Additional Info' %}
+                                <i class="fas fa-info-circle me-2"
+                                    >{% trans 'Additional Info' %}</i
+                                >
                             </h5>
                         </div>
                         <div class="card-body">
@@ -278,8 +284,9 @@
                     <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0">
-                                <i class="fas fa-clock me-2"></i>{% trans
-                                'Record Metadata' %}
+                                <i class="fas fa-clock me-2"
+                                    >{% trans 'Record Metadata' %}</i
+                                >
                             </h5>
                         </div>
                         <div class="card-body">

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-28 11:20+0000\n"
+"POT-Creation-Date: 2026-06-30 17:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,2543 +19,1597 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: myenv/lib/python3.11/site-packages/click/_termui_impl.py:191
-msgid "d"
-msgstr "d"
+#: orders/views.py:105 orders/views.py:251 templates/orders/add_order.html:737
+msgid "Please enter a valid MRN"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/click/_termui_impl.py:693
-#, python-brace-format
-msgid "{editor}: Editing failed"
-msgstr "{editor}: Editing failed"
+#: orders/views.py:109 orders/views.py:255
+msgid "Accession number is required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/click/_termui_impl.py:697
-#, python-brace-format
-msgid "{editor}: Editing failed: {e}"
-msgstr "{editor}: Editing failed: {e}"
+#: orders/views.py:113 orders/views.py:259
+msgid "Procedure code and name are required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/click/_winconsole.py:156
-#: myenv/lib/python3.11/site-packages/click/_winconsole.py:173
-#, python-brace-format
-msgid "Windows error: {error}"
-msgstr "Windows error: {error}"
+#: orders/views.py:119 orders/views.py:227 orders/views.py:366
+#: patients/views.py:91 patients/views.py:179 patients/views.py:275
+#: reports/views.py:17 reports/views.py:58 reports/views.py:100
+#: reports/views.py:116 reports/views.py:133
+msgid "Tenant not found. Please select a tenant."
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/click/core.py:98
-msgid "deprecated"
-msgstr "deprecated"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1209
-msgid "Options"
-msgstr "Options"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1284
-#, python-brace-format
-msgid "Got unexpected extra argument ({args})"
-msgid_plural "Got unexpected extra arguments ({args})"
-msgstr[0] "Got unexpected extra arguments ({args})"
-msgstr[1] "Got unexpected extra arguments ({args})"
-msgstr[2] "Got unexpected extra arguments ({args})"
-msgstr[3] "Got unexpected extra arguments ({args})"
-msgstr[4] "Got unexpected extra arguments ({args})"
-msgstr[5] "Got unexpected extra arguments ({args})"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1300
-msgid "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The command {name!r} is deprecated.{extra_message}"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1487
-msgid "Aborted!"
-msgstr "Aborted!"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1861
-msgid "Commands"
-msgstr "Commands"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:1892
-msgid "Missing command."
-msgstr "Missing command."
-
-#: myenv/lib/python3.11/site-packages/click/core.py:2404
-msgid "Value must be an iterable."
-msgstr "Value must be an iterable."
-
-#: myenv/lib/python3.11/site-packages/click/core.py:2427
-#, python-brace-format
-msgid "Takes {nargs} values but 1 was given."
-msgid_plural "Takes {nargs} values but {len} were given."
-msgstr[0] "Takes {nargs} values but {len} were given."
-msgstr[1] "Takes {nargs} values but {len} were given."
-msgstr[2] "Takes {nargs} values but {len} were given."
-msgstr[3] "Takes {nargs} values but {len} were given."
-msgstr[4] "Takes {nargs} values but {len} were given."
-msgstr[5] "Takes {nargs} values but {len} were given."
-
-#: myenv/lib/python3.11/site-packages/click/core.py:2624
-msgid ""
-"DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-msgstr "DeprecationWarning: The {param_type} {name!r} is deprecated.{extra_message}"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3025
-#, python-brace-format
-msgid "Name '{name}' defined twice"
-msgstr "Name '{name}' defined twice"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3041
-msgid "Boolean option {decl!r} cannot use the same flag for true/false."
-msgstr "Boolean option {decl!r} cannot use the same flag for true/false."
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3060
-msgid "Could not determine name for option with declarations {decls!r}"
-msgstr "Could not determine name for option with declarations {decls!r}"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3067
-#, python-brace-format
-msgid ""
-"No options defined but a name was passed ({name}). Did you mean to declare "
-"an argument instead? Did you mean to pass '--{name}'?"
-msgstr "No options defined but a name was passed ({name}). Did you mean to declare an argument instead? Did you mean to pass '--{name}'?"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3144
-#, python-brace-format
-msgid "env var: {var}"
-msgstr "env var: {var}"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3147
-#, python-brace-format
-msgid "default: {default}"
-msgstr "default: {default}"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3211
-msgid "(dynamic)"
-msgstr "(dynamic)"
-
-#: myenv/lib/python3.11/site-packages/click/core.py:3503
-#, python-brace-format
-msgid ""
-"Arguments take exactly one parameter declaration, got {length}: {decls}."
-msgstr "Arguments take exactly one parameter declaration, got {length}: {decls}."
-
-#: myenv/lib/python3.11/site-packages/click/decorators.py:399
-msgid "Do you want to continue?"
-msgstr "Do you want to continue?"
-
-#: myenv/lib/python3.11/site-packages/click/decorators.py:400
-msgid "Confirm the action without prompting."
-msgstr "Confirm the action without prompting."
-
-#: myenv/lib/python3.11/site-packages/click/decorators.py:465
-#, python-format
-msgid "%(prog)s, version %(version)s"
-msgstr "%(prog)s, version %(version)s"
-
-#: myenv/lib/python3.11/site-packages/click/decorators.py:522
-msgid "Show the version and exit."
-msgstr "Show the version and exit."
-
-#: myenv/lib/python3.11/site-packages/click/decorators.py:548
-msgid "Show this message and exit."
-msgstr "Show this message and exit."
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:29
-#, python-brace-format
-msgid "Did you mean {possibility}?"
-msgid_plural "(Did you mean one of: {possibilities}?)"
-msgstr[0] "(Did you mean one of: {possibilities}?)"
-msgstr[1] "(Did you mean one of: {possibilities}?)"
-msgstr[2] "(Did you mean one of: {possibilities}?)"
-msgstr[3] "(Did you mean one of: {possibilities}?)"
-msgstr[4] "(Did you mean one of: {possibilities}?)"
-msgstr[5] "(Did you mean one of: {possibilities}?)"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:59
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:102
-#: myenv/lib/python3.11/site-packages/click/termui.py:228
-#, python-brace-format
-msgid "Error: {message}"
-msgstr "Error: {message}"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:93
-#, python-brace-format
-msgid "Try '{command} {option}' for help."
-msgstr "Try '{command} {option}' for help."
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:143
-#, python-brace-format
-msgid "Invalid value: {message}"
-msgstr "Invalid value: {message}"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:145
-#, python-brace-format
-msgid "Invalid value for {param_hint}: {message}"
-msgstr "Invalid value for {param_hint}: {message}"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:203
-msgid "Missing argument"
-msgstr "Missing argument"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:205
-msgid "Missing option"
-msgstr "Missing option"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:207
-msgid "Missing parameter"
-msgstr "Missing parameter"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:209
-#, python-brace-format
-msgid "Missing {param_type}"
-msgstr "Missing {param_type}"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:216
-#, python-brace-format
-msgid "Missing parameter: {param_name}"
-msgstr "Missing parameter: {param_name}"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:235
-msgid "No such option {name!r}."
-msgstr "No such option {name!r}."
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:265
-msgid "No such command {name!r}."
-msgstr "No such command {name!r}."
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:321
-msgid "unknown error"
-msgstr "unknown error"
-
-#: myenv/lib/python3.11/site-packages/click/exceptions.py:328
-msgid "Could not open file {filename!r}: {message}"
-msgstr "Could not open file {filename!r}: {message}"
-
-#: myenv/lib/python3.11/site-packages/click/formatting.py:162
-msgid "Usage:"
-msgstr "Usage:"
-
-#: myenv/lib/python3.11/site-packages/click/parser.py:145
-#, python-brace-format
-msgid "Invalid start character for option ({option})"
-msgstr "Invalid start character for option ({option})"
-
-#: myenv/lib/python3.11/site-packages/click/parser.py:203
-msgid "Argument {name!r} takes {nargs} values."
-msgstr "Argument {name!r} takes {nargs} values."
-
-#: myenv/lib/python3.11/site-packages/click/parser.py:382
-msgid "Option {name!r} does not take a value."
-msgstr "Option {name!r} does not take a value."
-
-#: myenv/lib/python3.11/site-packages/click/parser.py:445
-msgid "Option {name!r} requires an argument."
-msgid_plural "Option {name!r} requires {nargs} arguments."
-msgstr[0] "Option {name!r} requires {nargs} arguments."
-msgstr[1] "Option {name!r} requires {nargs} arguments."
-msgstr[2] "Option {name!r} requires {nargs} arguments."
-msgstr[3] "Option {name!r} requires {nargs} arguments."
-msgstr[4] "Option {name!r} requires {nargs} arguments."
-msgstr[5] "Option {name!r} requires {nargs} arguments."
-
-#: myenv/lib/python3.11/site-packages/click/shell_completion.py:337
-msgid "Shell completion is not supported for Bash versions older than 4.4."
-msgstr "Shell completion is not supported for Bash versions older than 4.4."
-
-#: myenv/lib/python3.11/site-packages/click/shell_completion.py:344
-msgid "Couldn't detect Bash version, shell completion is not supported."
-msgstr "Couldn't detect Bash version, shell completion is not supported."
-
-#: myenv/lib/python3.11/site-packages/click/termui.py:212
-msgid "Repeat for confirmation"
-msgstr "Repeat for confirmation"
-
-#: myenv/lib/python3.11/site-packages/click/termui.py:239
-msgid "Error: The two entered values do not match."
-msgstr "Error: The two entered values do not match."
-
-#: myenv/lib/python3.11/site-packages/click/termui.py:293
-msgid "Error: invalid input"
-msgstr "Error: invalid input"
-
-#: myenv/lib/python3.11/site-packages/click/termui.py:675
-#: myenv/lib/python3.11/site-packages/click/termui.py:681
-msgid "Unknown color {colour!r}"
-msgstr "Unknown color {colour!r}"
-
-#: myenv/lib/python3.11/site-packages/click/termui.py:930
-msgid "Press any key to continue..."
-msgstr "Press any key to continue..."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:364
-#, python-brace-format
-msgid ""
-"Choose from:\n"
-"\t{choices}"
-msgstr "Choose from:\n\t{choices}"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:401
-msgid "{value!r} is not {choice}."
-msgid_plural "{value!r} is not one of {choices}."
-msgstr[0] "{value!r} is not one of {choices}."
-msgstr[1] "{value!r} is not one of {choices}."
-msgstr[2] "{value!r} is not one of {choices}."
-msgstr[3] "{value!r} is not one of {choices}."
-msgstr[4] "{value!r} is not one of {choices}."
-msgstr[5] "{value!r} is not one of {choices}."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:407
-#, python-brace-format
-msgid "Choice({choices})"
-msgstr "Choice({choices})"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:493
-msgid "{value!r} does not match the format {format}."
-msgid_plural "{value!r} does not match the formats {formats}."
-msgstr[0] "{value!r} does not match the formats {formats}."
-msgstr[1] "{value!r} does not match the formats {formats}."
-msgstr[2] "{value!r} does not match the formats {formats}."
-msgstr[3] "{value!r} does not match the formats {formats}."
-msgstr[4] "{value!r} does not match the formats {formats}."
-msgstr[5] "{value!r} does not match the formats {formats}."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:515
-msgid "{value!r} is not a valid {number_type}."
-msgstr "{value!r} is not a valid {number_type}."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:580
-#, python-brace-format
-msgid "{value} is not in the range {range}."
-msgstr "{value} is not in the range {range}."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:762
-msgid "{value!r} is not a valid boolean. Recognized values: {states}"
-msgstr "{value!r} is not a valid boolean. Recognized values: {states}"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:788
-msgid "{value!r} is not a valid UUID."
-msgstr "{value!r} is not a valid UUID."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:998
-msgid "file"
-msgstr "file"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1000
-msgid "directory"
-msgstr "directory"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1002
-msgid "path"
-msgstr "path"
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1048
-msgid "{name} {filename!r} does not exist."
-msgstr "{name} {filename!r} does not exist."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1057
-msgid "{name} {filename!r} is a file."
-msgstr "{name} {filename!r} is a file."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1065
-msgid "{name} {filename!r} is a directory."
-msgstr "{name} {filename!r} is a directory."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1074
-msgid "{name} {filename!r} is not readable."
-msgstr "{name} {filename!r} is not readable."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1083
-msgid "{name} {filename!r} is not writable."
-msgstr "{name} {filename!r} is not writable."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1092
-msgid "{name} {filename!r} is not executable."
-msgstr "{name} {filename!r} is not executable."
-
-#: myenv/lib/python3.11/site-packages/click/types.py:1164
-#, python-brace-format
-msgid "{len_type} values are required, but {len_value} was given."
-msgid_plural "{len_type} values are required, but {len_value} were given."
-msgstr[0] "{len_type} values are required, but {len_value} were given."
-msgstr[1] "{len_type} values are required, but {len_value} were given."
-msgstr[2] "{len_type} values are required, but {len_value} were given."
-msgstr[3] "{len_type} values are required, but {len_value} were given."
-msgstr[4] "{len_type} values are required, but {len_value} were given."
-msgstr[5] "{len_type} values are required, but {len_value} were given."
-
-#: myenv/lib/python3.11/site-packages/click/utils.py:345
-#: myenv/lib/python3.11/site-packages/click/utils.py:366
-#, python-brace-format
-msgid "Unknown standard stream '{name}'"
-msgstr "Unknown standard stream '{name}'"
-
-#: myenv/lib/python3.11/site-packages/django/contrib/messages/apps.py:16
-msgid "Messages"
-msgstr "Messages"
-
-#: myenv/lib/python3.11/site-packages/django/contrib/sitemaps/apps.py:8
-msgid "Site Maps"
-msgstr "Site Maps"
-
-#: myenv/lib/python3.11/site-packages/django/contrib/staticfiles/apps.py:9
-msgid "Static Files"
-msgstr "Static Files"
-
-#: myenv/lib/python3.11/site-packages/django/contrib/syndication/apps.py:7
-msgid "Syndication"
-msgstr "Syndication"
-
-#. Translators: String used to replace omitted page numbers in elided page
-#. range generated by paginators, e.g. [1, 2, '…', 5, 6, 7, '…', 9, 10].
-#: myenv/lib/python3.11/site-packages/django/core/paginator.py:30
-msgid "…"
-msgstr "…"
-
-#: myenv/lib/python3.11/site-packages/django/core/paginator.py:32
-msgid "That page number is not an integer"
-msgstr "That page number is not an integer"
-
-#: myenv/lib/python3.11/site-packages/django/core/paginator.py:33
-msgid "That page number is less than 1"
-msgstr "That page number is less than 1"
-
-#: myenv/lib/python3.11/site-packages/django/core/paginator.py:34
-msgid "That page contains no results"
-msgstr "That page contains no results"
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:22
-msgid "Enter a valid value."
-msgstr "Enter a valid value."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:70
-msgid "Enter a valid domain name."
-msgstr "Enter a valid domain name."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:153
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:774
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:812
-msgid "Enter a valid URL."
-msgstr "Enter a valid URL."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:200
-msgid "Enter a valid integer."
-msgstr "Enter a valid integer."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:211
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:774
-msgid "Enter a valid email address."
-msgstr "Enter a valid email address."
-
-#. Translators: "letters" means latin letters: a-z and A-Z.
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:289
-msgid ""
-"Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
-msgstr "Enter a valid “slug” consisting of letters, numbers, underscores or hyphens."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:297
-msgid ""
-"Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or "
-"hyphens."
-msgstr "Enter a valid “slug” consisting of Unicode letters, numbers, underscores, or hyphens."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:309
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:318
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:332
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2220
-#, python-format
-msgid "Enter a valid %(protocol)s address."
-msgstr "Enter a valid %(protocol)s address."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:311
-msgid "IPv4"
-msgstr "IPv4"
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:320
-#: myenv/lib/python3.11/site-packages/django/utils/ipv6.py:43
-msgid "IPv6"
-msgstr "IPv6"
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:334
-msgid "IPv4 or IPv6"
-msgstr "IPv4 or IPv6"
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:375
-msgid "Enter only digits separated by commas."
-msgstr "Enter only digits separated by commas."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:381
-#, python-format
-msgid "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-msgstr "Ensure this value is %(limit_value)s (it is %(show_value)s)."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:416
-#, python-format
-msgid "Ensure this value is less than or equal to %(limit_value)s."
-msgstr "Ensure this value is less than or equal to %(limit_value)s."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:425
-#, python-format
-msgid "Ensure this value is greater than or equal to %(limit_value)s."
-msgstr "Ensure this value is greater than or equal to %(limit_value)s."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:434
-#, python-format
-msgid "Ensure this value is a multiple of step size %(limit_value)s."
-msgstr "Ensure this value is a multiple of step size %(limit_value)s."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:441
-#, python-format
-msgid ""
-"Ensure this value is a multiple of step size %(limit_value)s, starting from "
-"%(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
-msgstr "Ensure this value is a multiple of step size %(limit_value)s, starting from %(offset)s, e.g. %(offset)s, %(valid_value1)s, %(valid_value2)s, and so on."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:473
-#, python-format
-msgid ""
-"Ensure this value has at least %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at least %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-msgstr[1] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-msgstr[2] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-msgstr[3] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-msgstr[4] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-msgstr[5] "Ensure this value has at least %(limit_value)d characters (it has %(show_value)d)."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:491
-#, python-format
-msgid ""
-"Ensure this value has at most %(limit_value)d character (it has "
-"%(show_value)d)."
-msgid_plural ""
-"Ensure this value has at most %(limit_value)d characters (it has "
-"%(show_value)d)."
-msgstr[0] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-msgstr[1] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-msgstr[2] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-msgstr[3] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-msgstr[4] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-msgstr[5] "Ensure this value has at most %(limit_value)d characters (it has %(show_value)d)."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:514
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:365
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:404
-msgid "Enter a number."
-msgstr "Enter a number."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:516
-#, python-format
-msgid "Ensure that there are no more than %(max)s digit in total."
-msgid_plural "Ensure that there are no more than %(max)s digits in total."
-msgstr[0] "Ensure that there are no more than %(max)s digits in total."
-msgstr[1] "Ensure that there are no more than %(max)s digits in total."
-msgstr[2] "Ensure that there are no more than %(max)s digits in total."
-msgstr[3] "Ensure that there are no more than %(max)s digits in total."
-msgstr[4] "Ensure that there are no more than %(max)s digits in total."
-msgstr[5] "Ensure that there are no more than %(max)s digits in total."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:521
-#, python-format
-msgid "Ensure that there are no more than %(max)s decimal place."
-msgid_plural "Ensure that there are no more than %(max)s decimal places."
-msgstr[0] "Ensure that there are no more than %(max)s decimal places."
-msgstr[1] "Ensure that there are no more than %(max)s decimal places."
-msgstr[2] "Ensure that there are no more than %(max)s decimal places."
-msgstr[3] "Ensure that there are no more than %(max)s decimal places."
-msgstr[4] "Ensure that there are no more than %(max)s decimal places."
-msgstr[5] "Ensure that there are no more than %(max)s decimal places."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:526
-#, python-format
-msgid ""
-"Ensure that there are no more than %(max)s digit before the decimal point."
-msgid_plural ""
-"Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[0] "Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[1] "Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[2] "Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[3] "Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[4] "Ensure that there are no more than %(max)s digits before the decimal point."
-msgstr[5] "Ensure that there are no more than %(max)s digits before the decimal point."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:597
-#, python-format
-msgid ""
-"File extension “%(extension)s” is not allowed. Allowed extensions are: "
-"%(allowed_extensions)s."
-msgstr "File extension “%(extension)s” is not allowed. Allowed extensions are: %(allowed_extensions)s."
-
-#: myenv/lib/python3.11/site-packages/django/core/validators.py:659
-msgid "Null characters are not allowed."
-msgstr "Null characters are not allowed."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/base.py:1600
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:908
-msgid "and"
-msgstr "and"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/base.py:1602
-#, python-format
-msgid "%(model_name)s with this %(field_labels)s already exists."
-msgstr "%(model_name)s with this %(field_labels)s already exists."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/constraints.py:22
-#, python-format
-msgid "Constraint “%(name)s” is violated."
-msgstr "Constraint “%(name)s” is violated."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:134
-#, python-format
-msgid "Value %(value)r is not a valid choice."
-msgstr "Value %(value)r is not a valid choice."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:135
-msgid "This field cannot be null."
-msgstr "This field cannot be null."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:136
-msgid "This field cannot be blank."
-msgstr "This field cannot be blank."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:137
-#, python-format
-msgid "%(model_name)s with this %(field_label)s already exists."
-msgstr "%(model_name)s with this %(field_label)s already exists."
-
-#. Translators: The 'lookup_type' is one of 'date', 'year' or
-#. 'month'. Eg: "Title must be unique for pub_date year"
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:141
-#, python-format
-msgid ""
-"%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
-msgstr "%(field_label)s must be unique for %(date_field_label)s %(lookup_type)s."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:180
-#, python-format
-msgid "Field of type: %(field_type)s"
-msgstr "Field of type: %(field_type)s"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1162
-#, python-format
-msgid "“%(value)s” value must be either True or False."
-msgstr "“%(value)s” value must be either True or False."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1163
-#, python-format
-msgid "“%(value)s” value must be either True, False, or None."
-msgstr "“%(value)s” value must be either True, False, or None."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1165
-msgid "Boolean (Either True or False)"
-msgstr "Boolean (Either True or False)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1215
-#, python-format
-msgid "String (up to %(max_length)s)"
-msgstr "String (up to %(max_length)s)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1217
-msgid "String (unlimited)"
-msgstr "String (unlimited)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1326
-msgid "Comma-separated integers"
-msgstr "Comma-separated integers"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1427
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD "
-"format."
-msgstr "“%(value)s” value has an invalid date format. It must be in YYYY-MM-DD format."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1431
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1566
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid "
-"date."
-msgstr "“%(value)s” value has the correct format (YYYY-MM-DD) but it is an invalid date."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1435
-msgid "Date (without time)"
-msgstr "Date (without time)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1562
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[."
-"uuuuuu]][TZ] format."
-msgstr "“%(value)s” value has an invalid format. It must be in YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1570
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]]"
-"[TZ]) but it is an invalid date/time."
-msgstr "“%(value)s” value has the correct format (YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]) but it is an invalid date/time."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1575
-msgid "Date (with time)"
-msgstr "Date (with time)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1702
-#, python-format
-msgid "“%(value)s” value must be a decimal number."
-msgstr "“%(value)s” value must be a decimal number."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1704
-msgid "Decimal number"
-msgstr "Decimal number"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1864
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[."
-"uuuuuu] format."
-msgstr "“%(value)s” value has an invalid format. It must be in [DD] [[HH:]MM:]ss[.uuuuuu] format."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1868
-#: templates/license/home.html:84
-msgid "Duration"
-msgstr "المدة"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1920
-msgid "Email address"
-msgstr "Email address"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:1945
-msgid "File path"
-msgstr "File path"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2023
-#, python-format
-msgid "“%(value)s” value must be a float."
-msgstr "“%(value)s” value must be a float."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2025
-msgid "Floating point number"
-msgstr "Floating point number"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2065
-#, python-format
-msgid "“%(value)s” value must be an integer."
-msgstr "“%(value)s” value must be an integer."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2067
-msgid "Integer"
-msgstr "Integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2163
-msgid "Big (8 byte) integer"
-msgstr "Big (8 byte) integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2180
-msgid "Small integer"
-msgstr "Small integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2188
-msgid "IPv4 address"
-msgstr "IPv4 address"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2219
-msgid "IP address"
-msgstr "IP address"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2310
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2311
-#, python-format
-msgid "“%(value)s” value must be either None, True or False."
-msgstr "“%(value)s” value must be either None, True or False."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2313
-msgid "Boolean (Either True, False or None)"
-msgstr "Boolean (Either True, False or None)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2364
-msgid "Positive big integer"
-msgstr "Positive big integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2379
-msgid "Positive integer"
-msgstr "Positive integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2394
-msgid "Positive small integer"
-msgstr "Positive small integer"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2410
-#, python-format
-msgid "Slug (up to %(max_length)s)"
-msgstr "Slug (up to %(max_length)s)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2446
-msgid "Text"
-msgstr "Text"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2526
-#, python-format
-msgid ""
-"“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] "
-"format."
-msgstr "“%(value)s” value has an invalid format. It must be in HH:MM[:ss[.uuuuuu]] format."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2530
-#, python-format
-msgid ""
-"“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an "
-"invalid time."
-msgstr "“%(value)s” value has the correct format (HH:MM[:ss[.uuuuuu]]) but it is an invalid time."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2534
-msgid "Time"
-msgstr "Time"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2642
-msgid "URL"
-msgstr "URL"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2666
-msgid "Raw binary data"
-msgstr "Raw binary data"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2731
-#, python-format
-msgid "“%(value)s” is not a valid UUID."
-msgstr "“%(value)s” is not a valid UUID."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/__init__.py:2733
-msgid "Universally unique identifier"
-msgstr "Universally unique identifier"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/files.py:244
-msgid "File"
-msgstr "File"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/files.py:420
-msgid "Image"
-msgstr "Image"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/json.py:24
-msgid "A JSON object"
-msgstr "A JSON object"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/json.py:26
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1809
-msgid "Value must be valid JSON."
-msgstr "Value must be valid JSON."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:979
-#, python-format
-msgid "%(model)s instance with %(field)s %(value)r is not a valid choice."
-msgstr "%(model)s instance with %(field)s %(value)r is not a valid choice."
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:982
-msgid "Foreign Key (type determined by related field)"
-msgstr "Foreign Key (type determined by related field)"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:1276
-msgid "One-to-one relationship"
-msgstr "One-to-one relationship"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:1333
-#, python-format
-msgid "%(from)s-%(to)s relationship"
-msgstr "%(from)s-%(to)s relationship"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:1335
-#, python-format
-msgid "%(from)s-%(to)s relationships"
-msgstr "%(from)s-%(to)s relationships"
-
-#: myenv/lib/python3.11/site-packages/django/db/models/fields/related.py:1383
-msgid "Many-to-many relationship"
-msgstr "Many-to-many relationship"
-
-#. Translators: If found as last label character, these punctuation
-#. characters will prevent the default label_suffix to be appended to the label
-#: myenv/lib/python3.11/site-packages/django/forms/boundfield.py:185
-msgid ":?.!"
-msgstr ":?.!"
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:94
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:292
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:240
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:276
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:112
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:246
-msgid "This field is required."
-msgstr "This field is required."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:314
-msgid "Enter a whole number."
-msgstr "Enter a whole number."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:485
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1257
-msgid "Enter a valid date."
-msgstr "Enter a valid date."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:508
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1258
-msgid "Enter a valid time."
-msgstr "Enter a valid time."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:535
-msgid "Enter a valid date/time."
-msgstr "Enter a valid date/time."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:569
-msgid "Enter a valid duration."
-msgstr "Enter a valid duration."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:570
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1373
-#, python-brace-format
-msgid "The number of days must be between {min_days} and {max_days}."
-msgstr "The number of days must be between {min_days} and {max_days}."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:639
-msgid "No file was submitted. Check the encoding type on the form."
-msgstr "No file was submitted. Check the encoding type on the form."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:640
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1566
-msgid "No file was submitted."
-msgstr "No file was submitted."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:641
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1569
-msgid "The submitted file is empty."
-msgstr "The submitted file is empty."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:643
-#, python-format
-msgid "Ensure this filename has at most %(max)d character (it has %(length)d)."
-msgid_plural ""
-"Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[0] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[1] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[2] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[3] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[4] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-msgstr[5] "Ensure this filename has at most %(max)d characters (it has %(length)d)."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:648
-msgid "Please either submit a file or check the clear checkbox, not both."
-msgstr "Please either submit a file or check the clear checkbox, not both."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:716
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1618
-msgid ""
-"Upload a valid image. The file you uploaded was either not an image or a "
-"corrupted image."
-msgstr "Upload a valid image. The file you uploaded was either not an image or a corrupted image."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:879
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:965
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:1592
-#, python-format
-msgid "Select a valid choice. %(value)s is not one of the available choices."
-msgstr "Select a valid choice. %(value)s is not one of the available choices."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:967
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1086
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:1590
-msgid "Enter a list of values."
-msgstr "Enter a list of values."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1087
-msgid "Enter a complete value."
-msgstr "Enter a complete value."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1329
-msgid "Enter a valid UUID."
-msgstr "Enter a valid UUID."
-
-#: myenv/lib/python3.11/site-packages/django/forms/fields.py:1359
-msgid "Enter a valid JSON."
-msgstr "Enter a valid JSON."
-
-#. Translators: This is the default suffix added to form field labels
-#: myenv/lib/python3.11/site-packages/django/forms/forms.py:97
-msgid ":"
-msgstr ":"
-
-#: myenv/lib/python3.11/site-packages/django/forms/forms.py:239
-#, python-format
-msgid "(Hidden field %(name)s) %(error)s"
-msgstr "(Hidden field %(name)s) %(error)s"
-
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:61
-#, python-format
-msgid ""
-"ManagementForm data is missing or has been tampered with. Missing fields: "
-"%(field_names)s. You may need to file a bug report if the issue persists."
-msgstr "ManagementForm data is missing or has been tampered with. Missing fields: %(field_names)s. You may need to file a bug report if the issue persists."
-
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:65
-#, python-format
-msgid "Please submit at most %(num)d form."
-msgid_plural "Please submit at most %(num)d forms."
-msgstr[0] "Please submit at most %(num)d forms."
-msgstr[1] "Please submit at most %(num)d forms."
-msgstr[2] "Please submit at most %(num)d forms."
-msgstr[3] "Please submit at most %(num)d forms."
-msgstr[4] "Please submit at most %(num)d forms."
-msgstr[5] "Please submit at most %(num)d forms."
-
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:70
-#, python-format
-msgid "Please submit at least %(num)d form."
-msgid_plural "Please submit at least %(num)d forms."
-msgstr[0] "Please submit at least %(num)d forms."
-msgstr[1] "Please submit at least %(num)d forms."
-msgstr[2] "Please submit at least %(num)d forms."
-msgstr[3] "Please submit at least %(num)d forms."
-msgstr[4] "Please submit at least %(num)d forms."
-msgstr[5] "Please submit at least %(num)d forms."
-
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:484
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:491
-msgid "Order"
-msgstr "Order"
-
-#: myenv/lib/python3.11/site-packages/django/forms/formsets.py:499
-msgid "Delete"
-msgstr "Delete"
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:901
-#, python-format
-msgid "Please correct the duplicate data for %(field)s."
-msgstr "Please correct the duplicate data for %(field)s."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:906
-#, python-format
-msgid "Please correct the duplicate data for %(field)s, which must be unique."
-msgstr "Please correct the duplicate data for %(field)s, which must be unique."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:913
-#, python-format
-msgid ""
-"Please correct the duplicate data for %(field_name)s which must be unique "
-"for the %(lookup)s in %(date_field)s."
-msgstr "Please correct the duplicate data for %(field_name)s which must be unique for the %(lookup)s in %(date_field)s."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:922
-msgid "Please correct the duplicate values below."
-msgstr "Please correct the duplicate values below."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:1359
-msgid "The inline value did not match the parent instance."
-msgstr "The inline value did not match the parent instance."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:1450
-msgid "Select a valid choice. That choice is not one of the available choices."
-msgstr "Select a valid choice. That choice is not one of the available choices."
-
-#: myenv/lib/python3.11/site-packages/django/forms/models.py:1594
-#, python-format
-msgid "“%(pk)s” is not a valid value."
-msgstr "“%(pk)s” is not a valid value."
-
-#: myenv/lib/python3.11/site-packages/django/forms/utils.py:229
-#, python-format
-msgid ""
-"%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it "
-"may be ambiguous or it may not exist."
-msgstr "%(datetime)s couldn’t be interpreted in time zone %(current_timezone)s; it may be ambiguous or it may not exist."
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:527
-msgid "Clear"
-msgstr "Clear"
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:528
-msgid "Currently"
-msgstr "Currently"
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:529
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:52
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:60
-msgid "Change"
-msgstr "Change"
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:866
-msgid "Unknown"
-msgstr "Unknown"
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:867
-msgid "Yes"
-msgstr "Yes"
-
-#: myenv/lib/python3.11/site-packages/django/forms/widgets.py:868
-msgid "No"
-msgstr "No"
-
-#. Translators: Please do not add spaces around commas.
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:873
-msgid "yes,no,maybe"
-msgstr "yes,no,maybe"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:903
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:920
-#, python-format
-msgid "%(size)d byte"
-msgid_plural "%(size)d bytes"
-msgstr[0] "%(size)d bytes"
-msgstr[1] "%(size)d bytes"
-msgstr[2] "%(size)d bytes"
-msgstr[3] "%(size)d bytes"
-msgstr[4] "%(size)d bytes"
-msgstr[5] "%(size)d bytes"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:922
-#, python-format
-msgid "%s KB"
-msgstr "%s KB"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:924
-#, python-format
-msgid "%s MB"
-msgstr "%s MB"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:926
-#, python-format
-msgid "%s GB"
-msgstr "%s GB"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:928
-#, python-format
-msgid "%s TB"
-msgstr "%s TB"
-
-#: myenv/lib/python3.11/site-packages/django/template/defaultfilters.py:930
-#, python-format
-msgid "%s PB"
-msgstr "%s PB"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:74
-msgid "p.m."
-msgstr "p.m."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:75
-msgid "a.m."
-msgstr "a.m."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:80
-msgid "PM"
-msgstr "PM"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:81
-msgid "AM"
-msgstr "AM"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:153
-msgid "midnight"
-msgstr "midnight"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dateformat.py:155
-msgid "noon"
-msgstr "noon"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:7
-msgid "Monday"
-msgstr "Monday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:8
-msgid "Tuesday"
-msgstr "Tuesday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:9
-msgid "Wednesday"
-msgstr "Wednesday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:10
-msgid "Thursday"
-msgstr "Thursday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:11
-msgid "Friday"
-msgstr "Friday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:12
-msgid "Saturday"
-msgstr "Saturday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:13
-msgid "Sunday"
-msgstr "Sunday"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:16
-#, fuzzy
-#| msgid "Month"
-msgid "Mon"
-msgstr "شهر"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:17
-msgid "Tue"
-msgstr "Tue"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:18
-msgid "Wed"
-msgstr "Wed"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:19
-msgid "Thu"
-msgstr "Thu"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:20
-msgid "Fri"
-msgstr "Fri"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:21
-#, fuzzy
-#| msgid "Status"
-msgid "Sat"
-msgstr "الحالة"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:22
-msgid "Sun"
-msgstr "Sun"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:25
-msgid "January"
-msgstr "January"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:26
-msgid "February"
-msgstr "February"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:27
-msgid "March"
-msgstr "March"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:28
-msgid "April"
-msgstr "April"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:29
-#, fuzzy
-#| msgid "Day"
-msgid "May"
-msgstr "يوم"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:30
-msgid "June"
-msgstr "June"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:31
-msgid "July"
-msgstr "July"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:32
-msgid "August"
-msgstr "August"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:33
-msgid "September"
-msgstr "September"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:34
-msgid "October"
-msgstr "October"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:35
-msgid "November"
-msgstr "November"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:36
-msgid "December"
-msgstr "December"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:39
-msgid "jan"
-msgstr "jan"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:40
-msgid "feb"
-msgstr "feb"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:41
-msgid "mar"
-msgstr "mar"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:42
-msgid "apr"
-msgstr "apr"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:43
-#, fuzzy
-#| msgid "Day"
-msgid "may"
-msgstr "يوم"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:44
-msgid "jun"
-msgstr "jun"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:45
-msgid "jul"
-msgstr "jul"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:46
-msgid "aug"
-msgstr "aug"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:47
-msgid "sep"
-msgstr "sep"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:48
-msgid "oct"
-msgstr "oct"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:49
-msgid "nov"
-msgstr "nov"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:50
-msgid "dec"
-msgstr "dec"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:53
-msgctxt "abbrev. month"
-msgid "Jan."
-msgstr "Jan."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:54
-msgctxt "abbrev. month"
-msgid "Feb."
-msgstr "Feb."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:55
-msgctxt "abbrev. month"
-msgid "March"
-msgstr "March"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:56
-msgctxt "abbrev. month"
-msgid "April"
-msgstr "April"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:57
-#, fuzzy
-#| msgid "Day"
-msgctxt "abbrev. month"
-msgid "May"
-msgstr "يوم"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:58
-msgctxt "abbrev. month"
-msgid "June"
-msgstr "June"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:59
-msgctxt "abbrev. month"
-msgid "July"
-msgstr "July"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:60
-msgctxt "abbrev. month"
-msgid "Aug."
-msgstr "Aug."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:61
-msgctxt "abbrev. month"
-msgid "Sept."
-msgstr "Sept."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:62
-msgctxt "abbrev. month"
-msgid "Oct."
-msgstr "Oct."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:63
-msgctxt "abbrev. month"
-msgid "Nov."
-msgstr "Nov."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:64
-msgctxt "abbrev. month"
-msgid "Dec."
-msgstr "Dec."
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:67
-msgctxt "alt. month"
-msgid "January"
-msgstr "January"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:68
-msgctxt "alt. month"
-msgid "February"
-msgstr "February"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:69
-msgctxt "alt. month"
-msgid "March"
-msgstr "March"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:70
-msgctxt "alt. month"
-msgid "April"
-msgstr "April"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:71
-#, fuzzy
-#| msgid "Day"
-msgctxt "alt. month"
-msgid "May"
-msgstr "يوم"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:72
-msgctxt "alt. month"
-msgid "June"
-msgstr "June"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:73
-msgctxt "alt. month"
-msgid "July"
-msgstr "July"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:74
-msgctxt "alt. month"
-msgid "August"
-msgstr "August"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:75
-msgctxt "alt. month"
-msgid "September"
-msgstr "September"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:76
-msgctxt "alt. month"
-msgid "October"
-msgstr "October"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:77
-msgctxt "alt. month"
-msgid "November"
-msgstr "November"
-
-#: myenv/lib/python3.11/site-packages/django/utils/dates.py:78
-msgctxt "alt. month"
-msgid "December"
-msgstr "December"
-
-#: myenv/lib/python3.11/site-packages/django/utils/ipv6.py:20
-msgid "This is not a valid IPv6 address."
-msgstr "This is not a valid IPv6 address."
-
-#: myenv/lib/python3.11/site-packages/django/utils/text.py:76
-#, python-format
-msgctxt "String to return when truncating text"
-msgid "%(truncated_text)s…"
-msgstr "%(truncated_text)s…"
-
-#: myenv/lib/python3.11/site-packages/django/utils/text.py:282
-msgid "or"
-msgstr "or"
-
-#. Translators: This string is used as a separator between list elements
-#: myenv/lib/python3.11/site-packages/django/utils/text.py:301
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:135
-msgid ", "
-msgstr ", "
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:8
-#, python-format
-msgid "%(num)d year"
-msgid_plural "%(num)d years"
-msgstr[0] "%(num)d years"
-msgstr[1] "%(num)d years"
-msgstr[2] "%(num)d years"
-msgstr[3] "%(num)d years"
-msgstr[4] "%(num)d years"
-msgstr[5] "%(num)d years"
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:9
-#, python-format
-msgid "%(num)d month"
-msgid_plural "%(num)d months"
-msgstr[0] "%(num)d months"
-msgstr[1] "%(num)d months"
-msgstr[2] "%(num)d months"
-msgstr[3] "%(num)d months"
-msgstr[4] "%(num)d months"
-msgstr[5] "%(num)d months"
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:10
-#, python-format
-msgid "%(num)d week"
-msgid_plural "%(num)d weeks"
-msgstr[0] "%(num)d weeks"
-msgstr[1] "%(num)d weeks"
-msgstr[2] "%(num)d weeks"
-msgstr[3] "%(num)d weeks"
-msgstr[4] "%(num)d weeks"
-msgstr[5] "%(num)d weeks"
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:11
-#, python-format
-msgid "%(num)d day"
-msgid_plural "%(num)d days"
-msgstr[0] "%(num)d days"
-msgstr[1] "%(num)d days"
-msgstr[2] "%(num)d days"
-msgstr[3] "%(num)d days"
-msgstr[4] "%(num)d days"
-msgstr[5] "%(num)d days"
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:12
-#, python-format
-msgid "%(num)d hour"
-msgid_plural "%(num)d hours"
-msgstr[0] "%(num)d hours"
-msgstr[1] "%(num)d hours"
-msgstr[2] "%(num)d hours"
-msgstr[3] "%(num)d hours"
-msgstr[4] "%(num)d hours"
-msgstr[5] "%(num)d hours"
-
-#: myenv/lib/python3.11/site-packages/django/utils/timesince.py:13
-#, python-format
-msgid "%(num)d minute"
-msgid_plural "%(num)d minutes"
-msgstr[0] "%(num)d minutes"
-msgstr[1] "%(num)d minutes"
-msgstr[2] "%(num)d minutes"
-msgstr[3] "%(num)d minutes"
-msgstr[4] "%(num)d minutes"
-msgstr[5] "%(num)d minutes"
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:29
-msgid "Forbidden"
-msgstr "Forbidden"
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:30
-msgid "CSRF verification failed. Request aborted."
-msgstr "CSRF verification failed. Request aborted."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:34
-msgid ""
-"You are seeing this message because this HTTPS site requires a “Referer "
-"header” to be sent by your web browser, but none was sent. This header is "
-"required for security reasons, to ensure that your browser is not being "
-"hijacked by third parties."
-msgstr "You are seeing this message because this HTTPS site requires a “Referer header” to be sent by your web browser, but none was sent. This header is required for security reasons, to ensure that your browser is not being hijacked by third parties."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:40
-msgid ""
-"If you have configured your browser to disable “Referer” headers, please re-"
-"enable them, at least for this site, or for HTTPS connections, or for “same-"
-"origin” requests."
-msgstr "If you have configured your browser to disable “Referer” headers, please re-enable them, at least for this site, or for HTTPS connections, or for “same-origin” requests."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:45
-msgid ""
-"If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or "
-"including the “Referrer-Policy: no-referrer” header, please remove them. The "
-"CSRF protection requires the “Referer” header to do strict referer checking. "
-"If you’re concerned about privacy, use alternatives like <a "
-"rel=\"noreferrer\" …> for links to third-party sites."
-msgstr "If you are using the <meta name=\"referrer\" content=\"no-referrer\"> tag or including the “Referrer-Policy: no-referrer” header, please remove them. The CSRF protection requires the “Referer” header to do strict referer checking. If you’re concerned about privacy, use alternatives like <a rel=\"noreferrer\" …> for links to third-party sites."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:54
-msgid ""
-"You are seeing this message because this site requires a CSRF cookie when "
-"submitting forms. This cookie is required for security reasons, to ensure "
-"that your browser is not being hijacked by third parties."
-msgstr "You are seeing this message because this site requires a CSRF cookie when submitting forms. This cookie is required for security reasons, to ensure that your browser is not being hijacked by third parties."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:60
-msgid ""
-"If you have configured your browser to disable cookies, please re-enable "
-"them, at least for this site, or for “same-origin” requests."
-msgstr "If you have configured your browser to disable cookies, please re-enable them, at least for this site, or for “same-origin” requests."
-
-#: myenv/lib/python3.11/site-packages/django/views/csrf.py:66
-msgid "More information is available with DEBUG=True."
-msgstr "More information is available with DEBUG=True."
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:44
-msgid "No year specified"
-msgstr "No year specified"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:64
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:115
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:214
-msgid "Date out of range"
-msgstr "Date out of range"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:94
-msgid "No month specified"
-msgstr "No month specified"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:147
-msgid "No day specified"
-msgstr "No day specified"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:194
-msgid "No week specified"
-msgstr "No week specified"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:353
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:384
-#, python-format
-msgid "No %(verbose_name_plural)s available"
-msgstr "No %(verbose_name_plural)s available"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:680
-#, python-format
-msgid ""
-"Future %(verbose_name_plural)s not available because %(class_name)s."
-"allow_future is False."
-msgstr "Future %(verbose_name_plural)s not available because %(class_name)s.allow_future is False."
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/dates.py:720
-#, python-format
-msgid "Invalid date string “%(datestr)s” given format “%(format)s”"
-msgstr "Invalid date string “%(datestr)s” given format “%(format)s”"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/detail.py:56
+#: orders/views.py:129 orders/views.py:269
 #, python-format
-msgid "No %(verbose_name)s found matching the query"
-msgstr "No %(verbose_name)s found matching the query"
+msgid "Patient with MRN %(mrn)s not found"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/generic/list.py:70
-msgid "Page is not “last”, nor can it be converted to an int."
-msgstr "Page is not “last”, nor can it be converted to an int."
+#: orders/views.py:138 orders/views.py:280
+msgid "An order with this accession number already exists"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/generic/list.py:77
-#, python-format
-msgid "Invalid page (%(page_number)s): %(message)s"
-msgstr "Invalid page (%(page_number)s): %(message)s"
-
-#: myenv/lib/python3.11/site-packages/django/views/generic/list.py:173
-#, python-format
-msgid "Empty list and “%(class_name)s.allow_empty” is False."
-msgstr "Empty list and “%(class_name)s.allow_empty” is False."
-
-#: myenv/lib/python3.11/site-packages/django/views/static.py:49
-msgid "Directory indexes are not allowed here."
-msgstr "Directory indexes are not allowed here."
+#: orders/views.py:150 orders/views.py:292
+msgid "Selected device not found"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/static.py:51
+#: orders/views.py:188
 #, python-format
-msgid "“%(path)s” does not exist"
-msgstr "“%(path)s” does not exist"
+msgid "Order created successfully! Accession: %(acc)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/static.py:68
-#: myenv/lib/python3.11/site-packages/django/views/templates/directory_index.html:8
-#: myenv/lib/python3.11/site-packages/django/views/templates/directory_index.html:11
+#: orders/views.py:194
 #, python-format
-msgid "Index of %(directory)s"
-msgstr "Index of %(directory)s"
+msgid "Error creating order: %(error)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:7
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:204
-msgid "The install worked successfully! Congratulations!"
-msgstr "The install worked successfully! Congratulations!"
+#: orders/views.py:328
+msgid "Order updated successfully!"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:206
+#: orders/views.py:332
 #, python-format
-msgid ""
-"View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" "
-"target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
-msgstr "View <a href=\"https://docs.djangoproject.com/en/%(version)s/releases/\" target=\"_blank\" rel=\"noopener\">release notes</a> for Django %(version)s"
-
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:208
-#, python-format
-msgid ""
-"You are seeing this page because <a href=\"https://docs.djangoproject.com/en/"
-"%(version)s/ref/settings/#debug\" target=\"_blank\" "
-"rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not "
-"configured any URLs."
-msgstr "You are seeing this page because <a href=\"https://docs.djangoproject.com/en/%(version)s/ref/settings/#debug\" target=\"_blank\" rel=\"noopener\">DEBUG=True</a> is in your settings file and you have not configured any URLs."
-
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:217
-msgid "Django Documentation"
-msgstr "Django Documentation"
-
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:218
-msgid "Topics, references, &amp; how-to’s"
-msgstr "Topics, references, &amp; how-to’s"
+msgid "Error updating order: %(error)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:226
-msgid "Tutorial: A Polling App"
-msgstr "Tutorial: A Polling App"
+#: orders/views.py:372
+msgid "Order deleted successfully!"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:227
-msgid "Get started with Django"
-msgstr "Get started with Django"
-
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:235
-msgid "Django Community"
-msgstr "Django Community"
-
-#: myenv/lib/python3.11/site-packages/django/views/templates/default_urlconf.html:236
-msgid "Connect, get help, or contribute"
-msgstr "Connect, get help, or contribute"
-
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:24
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:32
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:32
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:40
+#: orders/views.py:376
 #, python-format
-msgid "Models in the %(name)s application"
-msgstr "Models in the %(name)s application"
-
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:26
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:34
-msgid "Not available for this type of schema"
-msgstr "Not available for this type of schema"
+msgid "Error deleting order: %(error)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:26
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:34
-msgid "Not available for global schema"
-msgstr "Not available for global schema"
+#: patients/views.py:73 patients/views.py:210
+msgid "MRN is required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:43
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:51
-msgid "Add"
-msgstr "Add"
+#: patients/views.py:77 patients/views.py:214
+msgid "English first name and last name are required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:50
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:58
-msgid "View"
-msgstr "View"
+#: patients/views.py:81 patients/views.py:218
+msgid "Date of birth is required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/app_list.html:64
-msgid "You don’t have permission to view or edit anything."
-msgstr "You don’t have permission to view or edit anything."
+#: patients/views.py:85 patients/views.py:222
+msgid "Gender is required"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/django_tenants/tenant/change_form.html:10
-msgid ""
-"Can't update tenant outside it's own schema or the public schema. Current "
-"schema is "
-msgstr "Can't update tenant outside it's own schema or the public schema. Current schema is "
+#: patients/views.py:97 patients/views.py:228
+msgid "A patient with this MRN already exists in your system"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/django_tenants/templates/admin/index.html:72
-msgid "You don't have permission to view or edit anything."
-msgstr "You don't have permission to view or edit anything."
-
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1404
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1457
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1461
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1465
-msgid "No response body"
-msgstr "No response body"
-
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1429
-#: myenv/lib/python3.11/site-packages/drf_spectacular/openapi.py:1483
-msgid "Unspecified response body"
-msgstr "Unspecified response body"
-
-#: myenv/lib/python3.11/site-packages/drf_spectacular/plumbing.py:488
+#: patients/views.py:127
 #, python-format
-msgid "Token-based authentication with required prefix \"%s\""
-msgstr "Token-based authentication with required prefix \"%s\""
-
-#: myenv/lib/python3.11/site-packages/drf_spectacular/views.py:45
-msgid ""
-"\n"
-"    OpenApi3 schema for this API. Format can be selected via content "
-"negotiation.\n"
-"\n"
-"    - YAML: application/vnd.oai.openapi\n"
-"    - JSON: application/vnd.oai.openapi+json\n"
-"    "
-msgstr "\n    OpenApi3 schema for this API. Format can be selected via content negotiation.\n\n    - YAML: application/vnd.oai.openapi\n    - JSON: application/vnd.oai.openapi+json\n    "
+msgid "Patient added successfully! MRN: %(mrn)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/kombu/transport/qpid.py:1311
+#: patients/views.py:132
 #, python-format
-msgid "Attempting to connect to qpid with SASL mechanism %s"
-msgstr "Attempting to connect to qpid with SASL mechanism %s"
+msgid "Error creating patient: %(error)s"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/kombu/transport/qpid.py:1316
-#, python-format
-msgid "Connected to qpid with SASL mechanism %s"
-msgstr "Connected to qpid with SASL mechanism %s"
+#: patients/views.py:255
+msgid "Patient updated successfully!"
+msgstr ""
 
-#: myenv/lib/python3.11/site-packages/kombu/transport/qpid.py:1334
+#: patients/views.py:259
 #, python-format
-msgid "Unable to connect to qpid with SASL mechanism %s"
-msgstr "Unable to connect to qpid with SASL mechanism %s"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:70
-msgid "Invalid basic header. No credentials provided."
-msgstr "Invalid basic header. No credentials provided."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:73
-msgid "Invalid basic header. Credentials string should not contain spaces."
-msgstr "Invalid basic header. Credentials string should not contain spaces."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:84
-msgid "Invalid basic header. Credentials not correctly base64 encoded."
-msgstr "Invalid basic header. Credentials not correctly base64 encoded."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:101
-msgid "Invalid username/password."
-msgstr "Invalid username/password."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:104
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:206
-msgid "User inactive or deleted."
-msgstr "User inactive or deleted."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:184
-msgid "Invalid token header. No credentials provided."
-msgstr "Invalid token header. No credentials provided."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:187
-msgid "Invalid token header. Token string should not contain spaces."
-msgstr "Invalid token header. Token string should not contain spaces."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:193
-msgid ""
-"Invalid token header. Token string should not contain invalid characters."
-msgstr "Invalid token header. Token string should not contain invalid characters."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authentication.py:203
-msgid "Invalid token."
-msgstr "Invalid token."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/admin.py:29
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/serializers.py:9
-#: templates/users/manage_users.html:20
-msgid "Username"
-msgstr "Username"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/apps.py:7
-msgid "Auth Token"
-msgstr "Auth Token"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:12
-msgid "Key"
-msgstr "Key"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:15
-msgid "User"
-msgstr "User"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:17
-msgid "Created"
-msgstr "Created"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:26
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:62
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/serializers.py:19
-msgid "Token"
-msgstr "Token"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:27
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/models.py:63
-msgid "Tokens"
-msgstr "Tokens"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/serializers.py:13
-#: templates/users/login.html:47
-msgid "Password"
-msgstr "Password"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/serializers.py:35
-msgid "Unable to log in with provided credentials."
-msgstr "Unable to log in with provided credentials."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/authtoken/serializers.py:38
-msgid "Must include \"username\" and \"password\"."
-msgstr "Must include \"username\" and \"password\"."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:105
-msgid "A server error occurred."
-msgstr "A server error occurred."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:145
-msgid "Invalid input."
-msgstr "Invalid input."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:166
-msgid "Malformed request."
-msgstr "Malformed request."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:172
-msgid "Incorrect authentication credentials."
-msgstr "Incorrect authentication credentials."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:178
-msgid "Authentication credentials were not provided."
-msgstr "Authentication credentials were not provided."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:184
-msgid "You do not have permission to perform this action."
-msgstr "You do not have permission to perform this action."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:190
-msgid "Not found."
-msgstr "Not found."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:196
-#, python-brace-format
-msgid "Method \"{method}\" not allowed."
-msgstr "Method \"{method}\" not allowed."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:207
-msgid "Could not satisfy the request Accept header."
-msgstr "Could not satisfy the request Accept header."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:217
-#, python-brace-format
-msgid "Unsupported media type \"{media_type}\" in request."
-msgstr "Unsupported media type \"{media_type}\" in request."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:228
-msgid "Request was throttled."
-msgstr "Request was throttled."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:229
-#, python-brace-format
-msgid "Expected available in {wait} second."
-msgstr "Expected available in {wait} second."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/exceptions.py:230
-#, python-brace-format
-msgid "Expected available in {wait} seconds."
-msgstr "Expected available in {wait} seconds."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:293
-msgid "This field may not be null."
-msgstr "This field may not be null."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:661
-msgid "Must be a valid boolean."
-msgstr "Must be a valid boolean."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:724
-msgid "Not a valid string."
-msgstr "Not a valid string."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:725
-msgid "This field may not be blank."
-msgstr "This field may not be blank."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:726
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1940
-#, python-brace-format
-msgid "Ensure this field has no more than {max_length} characters."
-msgstr "Ensure this field has no more than {max_length} characters."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:727
-#, python-brace-format
-msgid "Ensure this field has at least {min_length} characters."
-msgstr "Ensure this field has at least {min_length} characters."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:785
-msgid "This value does not match the required pattern."
-msgstr "This value does not match the required pattern."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:796
-msgid ""
-"Enter a valid \"slug\" consisting of letters, numbers, underscores or "
-"hyphens."
-msgstr "Enter a valid \"slug\" consisting of letters, numbers, underscores or hyphens."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:797
-msgid ""
-"Enter a valid \"slug\" consisting of Unicode letters, numbers, underscores, "
-"or hyphens."
-msgstr "Enter a valid \"slug\" consisting of Unicode letters, numbers, underscores, or hyphens."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:825
-msgid "Must be a valid UUID."
-msgstr "Must be a valid UUID."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:861
-msgid "Enter a valid IPv4 or IPv6 address."
-msgstr "Enter a valid IPv4 or IPv6 address."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:889
-msgid "A valid integer is required."
-msgstr "A valid integer is required."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:890
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:928
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:949
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:988
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1371
-#, python-brace-format
-msgid "Ensure this value is less than or equal to {max_value}."
-msgstr "Ensure this value is less than or equal to {max_value}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:891
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:929
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:950
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:989
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1372
-#, python-brace-format
-msgid "Ensure this value is greater than or equal to {min_value}."
-msgstr "Ensure this value is greater than or equal to {min_value}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:892
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:930
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:951
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:993
-msgid "String value too large."
-msgstr "String value too large."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:927
-msgid "A valid biginteger is required."
-msgstr "A valid biginteger is required."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:948
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:987
-msgid "A valid number is required."
-msgstr "A valid number is required."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:952
-msgid "Integer value too large to convert to float"
-msgstr "Integer value too large to convert to float"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:990
-#, python-brace-format
-msgid "Ensure that there are no more than {max_digits} digits in total."
-msgstr "Ensure that there are no more than {max_digits} digits in total."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:991
-#, python-brace-format
-msgid "Ensure that there are no more than {max_decimal_places} decimal places."
-msgstr "Ensure that there are no more than {max_decimal_places} decimal places."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:992
-#, python-brace-format
-msgid ""
-"Ensure that there are no more than {max_whole_digits} digits before the "
-"decimal point."
-msgstr "Ensure that there are no more than {max_whole_digits} digits before the decimal point."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1151
-#, python-brace-format
-msgid "Datetime has wrong format. Use one of these formats instead: {format}."
-msgstr "Datetime has wrong format. Use one of these formats instead: {format}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1152
-msgid "Expected a datetime but got a date."
-msgstr "Expected a datetime but got a date."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1153
-#, python-brace-format
-msgid "Invalid datetime for the timezone \"{timezone}\"."
-msgstr "Invalid datetime for the timezone \"{timezone}\"."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1154
-msgid "Datetime value out of range."
-msgstr "Datetime value out of range."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1241
-#, python-brace-format
-msgid "Date has wrong format. Use one of these formats instead: {format}."
-msgstr "Date has wrong format. Use one of these formats instead: {format}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1242
-msgid "Expected a date but got a datetime."
-msgstr "Expected a date but got a datetime."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1308
-#, python-brace-format
-msgid "Time has wrong format. Use one of these formats instead: {format}."
-msgstr "Time has wrong format. Use one of these formats instead: {format}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1370
-#, python-brace-format
-msgid "Duration has wrong format. Use one of these formats instead: {format}."
-msgstr "Duration has wrong format. Use one of these formats instead: {format}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1440
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1500
-#, python-brace-format
-msgid "\"{input}\" is not a valid choice."
-msgstr "\"{input}\" is not a valid choice."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1443
-#, python-brace-format
-msgid "More than {count} items..."
-msgstr "More than {count} items..."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1501
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1655
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:486
-#: myenv/lib/python3.11/site-packages/rest_framework/serializers.py:607
-#, python-brace-format
-msgid "Expected a list of items but got type \"{input_type}\"."
-msgstr "Expected a list of items but got type \"{input_type}\"."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1502
-msgid "This selection may not be empty."
-msgstr "This selection may not be empty."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1546
-#, python-brace-format
-msgid "\"{input}\" is not a valid path choice."
-msgstr "\"{input}\" is not a valid path choice."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1567
-msgid "The submitted data was not a file. Check the encoding type on the form."
-msgstr "The submitted data was not a file. Check the encoding type on the form."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1568
-msgid "No filename could be determined."
-msgstr "No filename could be determined."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1570
-#, python-brace-format
-msgid ""
-"Ensure this filename has at most {max_length} characters (it has {length})."
-msgstr "Ensure this filename has at most {max_length} characters (it has {length})."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1656
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:487
-#: myenv/lib/python3.11/site-packages/rest_framework/serializers.py:608
-msgid "This list may not be empty."
-msgstr "This list may not be empty."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1657
-#: myenv/lib/python3.11/site-packages/rest_framework/serializers.py:610
-#, python-brace-format
-msgid "Ensure this field has at least {min_length} elements."
-msgstr "Ensure this field has at least {min_length} elements."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1658
-#: myenv/lib/python3.11/site-packages/rest_framework/serializers.py:609
-#, python-brace-format
-msgid "Ensure this field has no more than {max_length} elements."
-msgstr "Ensure this field has no more than {max_length} elements."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1736
-#, python-brace-format
-msgid "Expected a dictionary of items but got type \"{input_type}\"."
-msgstr "Expected a dictionary of items but got type \"{input_type}\"."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/fields.py:1737
-msgid "This dictionary may not be empty."
-msgstr "This dictionary may not be empty."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:62
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/filters/search.html:2
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/filters/search.html:8
-msgid "Search"
-msgstr "Search"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:63
-msgid "A search term."
-msgstr "A search term."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:197
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/filters/ordering.html:3
-msgid "Ordering"
-msgstr "Ordering"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:198
-msgid "Which field to use when ordering the results."
-msgstr "Which field to use when ordering the results."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:318
-msgid "ascending"
-msgstr "ascending"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/filters.py:319
-msgid "descending"
-msgstr "descending"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:171
-msgid "A page number within the paginated result set."
-msgstr "A page number within the paginated result set."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:176
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:343
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:534
-msgid "Number of results to return per page."
-msgstr "Number of results to return per page."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:186
-msgid "Invalid page."
-msgstr "Invalid page."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:345
-msgid "The initial index from which to return the results."
-msgstr "The initial index from which to return the results."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:525
-msgid "The pagination cursor value."
-msgstr "The pagination cursor value."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/pagination.py:527
-msgid "Invalid cursor"
-msgstr "Invalid cursor"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:241
-#, python-brace-format
-msgid "Invalid pk \"{pk_value}\" - object does not exist."
-msgstr "Invalid pk \"{pk_value}\" - object does not exist."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:242
-#, python-brace-format
-msgid "Incorrect type. Expected pk value, received {data_type}."
-msgstr "Incorrect type. Expected pk value, received {data_type}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:277
-msgid "Invalid hyperlink - No URL match."
-msgstr "Invalid hyperlink - No URL match."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:278
-msgid "Invalid hyperlink - Incorrect URL match."
-msgstr "Invalid hyperlink - Incorrect URL match."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:279
-msgid "Invalid hyperlink - Object does not exist."
-msgstr "Invalid hyperlink - Object does not exist."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:280
-#, python-brace-format
-msgid "Incorrect type. Expected URL string, received {data_type}."
-msgstr "Incorrect type. Expected URL string, received {data_type}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:445
-#, python-brace-format
-msgid "Object with {slug_name}={value} does not exist."
-msgstr "Object with {slug_name}={value} does not exist."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/relations.py:446
-msgid "Invalid value."
-msgstr "Invalid value."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/schemas/utils.py:32
-msgid "unique integer value"
-msgstr "unique integer value"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/schemas/utils.py:34
-msgid "UUID string"
-msgstr "UUID string"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/schemas/utils.py:36
-msgid "unique value"
-msgstr "unique value"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/schemas/utils.py:38
-#, python-brace-format
-msgid "A {value_type} identifying this {name}."
-msgstr "A {value_type} identifying this {name}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/serializers.py:354
-#, python-brace-format
-msgid "Invalid data. Expected a dictionary, but got {datatype}."
-msgstr "Invalid data. Expected a dictionary, but got {datatype}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/admin.html:116
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:136
-msgid "Extra Actions"
-msgstr "Extra Actions"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/admin.html:130
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:150
-msgid "Filters"
-msgstr "Filters"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:37
-msgid "navbar"
-msgstr "navbar"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:75
-msgid "content"
-msgstr "content"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:78
-msgid "request form"
-msgstr "request form"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:157
-msgid "main content"
-msgstr "main content"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:173
-msgid "request info"
-msgstr "request info"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/base.html:177
-msgid "response info"
-msgstr "response info"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/horizontal/radio.html:4
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/inline/radio.html:3
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/vertical/radio.html:3
-msgid "None"
-msgstr "None"
-
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/horizontal/select_multiple.html:4
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/inline/select_multiple.html:3
-#: myenv/lib/python3.11/site-packages/rest_framework/templates/rest_framework/vertical/select_multiple.html:3
-msgid "No items to select."
-msgstr "No items to select."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:52
-msgid "This field must be unique."
-msgstr "This field must be unique."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:111
-#, python-brace-format
-msgid "The fields {field_names} must make a unique set."
-msgstr "The fields {field_names} must make a unique set."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:227
-#, python-brace-format
-msgid "Surrogate characters are not allowed: U+{code_point:X}."
-msgstr "Surrogate characters are not allowed: U+{code_point:X}."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:317
-#, python-brace-format
-msgid "This field must be unique for the \"{date_field}\" date."
-msgstr "This field must be unique for the \"{date_field}\" date."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:332
-#, python-brace-format
-msgid "This field must be unique for the \"{date_field}\" month."
-msgstr "This field must be unique for the \"{date_field}\" month."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/validators.py:345
-#, python-brace-format
-msgid "This field must be unique for the \"{date_field}\" year."
-msgstr "This field must be unique for the \"{date_field}\" year."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/versioning.py:40
-msgid "Invalid version in \"Accept\" header."
-msgstr "Invalid version in \"Accept\" header."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/versioning.py:71
-msgid "Invalid version in URL path."
-msgstr "Invalid version in URL path."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/versioning.py:118
-msgid "Invalid version in URL path. Does not match any version namespace."
-msgstr "Invalid version in URL path. Does not match any version namespace."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/versioning.py:150
-msgid "Invalid version in hostname."
-msgstr "Invalid version in hostname."
-
-#: myenv/lib/python3.11/site-packages/rest_framework/versioning.py:172
-msgid "Invalid version in query parameter."
-msgstr "Invalid version in query parameter."
-
-#: templates/layout.html:189 templates/layout.html:190
-msgid "Toggle Theme"
-msgstr "Toggle Theme"
-
-#: templates/layout.html:245
-msgid "Doctors"
-msgstr "Doctors"
-
-#: templates/layout.html:257 templates/users/manage_users.html:3
-#: templates/users/manage_users.html:8
-msgid "Manage Users"
-msgstr "Manage Users"
-
-#: templates/layout.html:268
-msgid "System Settings"
-msgstr "System Settings"
-
-#: templates/layout.html:279
-msgid "Modalities"
-msgstr "Modalities"
-
-#: templates/layout.html:290
-msgid "Manage Prices"
-msgstr "Manage Prices"
-
-#: templates/layout.html:303
-msgid "Sign Out"
-msgstr "Sign Out"
-
-#: templates/layout.html:313
-msgid "Login"
-msgstr "Login"
-
-#: templates/layout.html:359
-msgid "All rights reserved."
-msgstr "All rights reserved."
-
-#: templates/license/home.html:11
-msgid "Schedule Calendar"
-msgstr "تقويم الجدولة"
-
-#: templates/license/home.html:14
-msgid "Filter by Device"
-msgstr "تصفية حسب الجهاز"
-
-#: templates/license/home.html:22
-msgid "Select Devices"
-msgstr "اختر الأجهزة"
-
-#: templates/license/home.html:32
-msgid "No devices configured"
-msgstr "لم يتم تكوين أي أجهزة"
-
-#: templates/license/home.html:37
-msgid "Apply Filter"
-msgstr "تطبيق التصفية"
-
-#: templates/license/home.html:40
-msgid "Select All"
-msgstr "تحديد الكل"
-
-#: templates/license/home.html:43
-msgid "Clear All"
-msgstr "مسح الكل"
-
-#: templates/license/home.html:63
-msgid "Exam Details"
-msgstr "تفاصيل الفحص"
-
-#: templates/license/home.html:69
-#, fuzzy
-#| msgid "Patients"
-msgid "Patient MRN"
-msgstr "الرقم الطبي للمريض"
-
-#: templates/license/home.html:70
-#, fuzzy
-#| msgid "Patients"
-msgid "Patient Name"
-msgstr "اسم المريض"
-
-#| msgid "Patients"
-msgid "Patients"
-msgstr "المرضى"
-
-#: templates/license/home.html:71
-msgid "Accession Number"
-msgstr "رقم الطلب"
-
-#: templates/license/home.html:74
-msgid "Modality"
-msgstr "نوع الجهاز"
-
-#: templates/license/home.html:75
-msgid "Procedure"
-msgstr "الإجراء"
-
-#: templates/license/home.html:76
-msgid "Priority"
-msgstr "الأولوية"
+msgid "Error updating patient: %(error)s"
+msgstr ""
 
-#: templates/license/home.html:77
+#: patients/views.py:281
+msgid "Patient deleted successfully!"
+msgstr ""
+
+#: patients/views.py:285
+#, python-format
+msgid "Error deleting patient: %(error)s"
+msgstr ""
+
+#: reports/views.py:44
+msgid "Report created successfully!"
+msgstr ""
+
+#: reports/views.py:65
+msgid "You don't have permission to edit this report."
+msgstr ""
+
+#: reports/views.py:86
+msgid "Report updated successfully!"
+msgstr ""
+
+#: reports/views.py:141
+msgid "You don't have permission to delete this report."
+msgstr ""
+
+#: reports/views.py:146
+msgid "Report deleted successfully!"
+msgstr ""
+
+#: templates/billing/payer_detail.html:16 templates/billing/payer_list.html:178
+#: templates/orders/order_detail.html:336 templates/orders/worklist.html:192
+#: templates/patients/patient_detail.html:24
+#: templates/reports/report_detail.html:23
+msgid "Edit"
+msgstr ""
+
+#: templates/billing/payer_detail.html:19
+#: templates/reports/report_form.html:196
+msgid "Back"
+msgstr ""
+
+#: templates/billing/payer_detail.html:30 templates/billing/payer_form.html:79
+msgid "Contact Information"
+msgstr ""
+
+#: templates/billing/payer_detail.html:35
+#: templates/patients/add_patient.html:131
+#: templates/patients/patient_detail.html:144
+msgid "Address"
+msgstr ""
+
+#: templates/billing/payer_detail.html:44
+msgid "Communication"
+msgstr ""
+
+#: templates/billing/payer_detail.html:59 templates/billing/payer_form.html:160
+msgid "EDI Configuration"
+msgstr ""
+
+#: templates/billing/payer_detail.html:64 templates/billing/payer_form.html:165
+msgid "EDI Qualifier"
+msgstr ""
+
+#: templates/billing/payer_detail.html:68 templates/billing/payer_form.html:173
+msgid "EDI Receiver ID"
+msgstr ""
+
+#: templates/billing/payer_detail.html:72 templates/billing/payer_form.html:180
+msgid "Clearinghouse"
+msgstr ""
+
+#: templates/billing/payer_detail.html:86 templates/billing/payer_list.html:42
+#: templates/billing/payer_list.html:134 templates/orders/delete_order.html:74
+#: templates/orders/edit_order.html:141 templates/orders/order_detail.html:48
+#: templates/orders/worklist.html:36 templates/orders/worklist.html:126
+#: templates/reports/report_detail.html:36
+#: templates/reports/study_reports.html:40
+#: templates/reports/study_reports.html:70
 msgid "Status"
-msgstr "الحالة"
+msgstr ""
 
-#: templates/license/home.html:78
-msgid "Device/Room"
-msgstr "الجهاز/الغرفة"
+#: templates/billing/payer_detail.html:88 templates/billing/payer_form.html:68
+#: templates/billing/payer_list.html:45 templates/billing/payer_list.html:81
+#: templates/billing/payer_list.html:169 templates/users/manage_users.html:23
+msgid "Active"
+msgstr ""
 
-#: templates/license/home.html:83
-msgid "Scheduled Time"
-msgstr "وقت الجدولة"
+#: templates/billing/payer_detail.html:90 templates/billing/payer_list.html:46
+#: templates/billing/payer_list.html:171
+msgid "Inactive"
+msgstr ""
 
-#: templates/license/home.html:90
-#, fuzzy
-#| msgid "Worklist"
-msgid "Worklist"
-msgstr "قائمة العمل"
+#: templates/billing/payer_detail.html:94 templates/billing/payer_form.html:44
+#: templates/billing/payer_list.html:29
+msgid "Payer Type"
+msgstr ""
 
-#: templates/license/home.html:92
-msgid "Close"
-msgstr "إغلاق"
+#: templates/billing/payer_detail.html:98
+msgid "Patients Insured"
+msgstr ""
 
-#: templates/license/home.html:123
-msgid "Today"
-msgstr "اليوم"
+#: templates/billing/payer_detail.html:107
+#: templates/billing/payer_form.html:193
+msgid "Financial Settings"
+msgstr ""
 
-#: templates/license/home.html:124
-msgid "Month"
-msgstr "شهر"
+#: templates/billing/payer_detail.html:111
+#: templates/billing/payer_form.html:198 templates/billing/payer_list.html:133
+msgid "Fee Schedule"
+msgstr ""
 
-#: templates/license/home.html:125
-msgid "Week"
-msgstr "أسبوع"
+#: templates/billing/payer_detail.html:119
+#: templates/billing/payer_form.html:205
+msgid "Default Copay"
+msgstr ""
 
-#: templates/license/home.html:126
-msgid "Day"
-msgstr "يوم"
+#: templates/billing/payer_form.html:4 templates/billing/payer_form.html:15
+msgid "Edit Payer"
+msgstr ""
 
-#: templates/license/home.html:127
-msgid "List"
-msgstr "قائمة"
+#: templates/billing/payer_form.html:4 templates/billing/payer_list.html:15
+msgid "Add Payer"
+msgstr ""
 
-#: templates/license/home.html:182
-#, fuzzy
-#| msgid "Device/Room"
+#: templates/billing/payer_form.html:15
+msgid "Add New Payer"
+msgstr ""
+
+#: templates/billing/payer_form.html:17
+msgid "Insurance company/payer information"
+msgstr ""
+
+#: templates/billing/payer_form.html:20
+msgid "Back to List"
+msgstr ""
+
+#: templates/billing/payer_form.html:31
+msgid "Basic Information"
+msgstr ""
+
+#: templates/billing/payer_form.html:36 templates/billing/payer_list.html:129
+msgid "Payer ID"
+msgstr ""
+
+#: templates/billing/payer_form.html:41
+msgid "EDI payer identifier"
+msgstr ""
+
+#: templates/billing/payer_form.html:51
+msgid "Full Name"
+msgstr ""
+
+#: templates/billing/payer_form.html:58
+msgid "Short Name"
+msgstr ""
+
+#: templates/billing/payer_form.html:84
+msgid "Address Line 1"
+msgstr ""
+
+#: templates/billing/payer_form.html:91
+msgid "Address Line 2"
+msgstr ""
+
+#: templates/billing/payer_form.html:98
+msgid "City"
+msgstr ""
+
+#: templates/billing/payer_form.html:105
+msgid "State/Province"
+msgstr ""
+
+#: templates/billing/payer_form.html:112
+msgid "Postal Code"
+msgstr ""
+
+#: templates/billing/payer_form.html:119
+msgid "Country"
+msgstr ""
+
+#: templates/billing/payer_form.html:126 templates/orders/add_order.html:126
+#: templates/orders/order_detail.html:172
+#: templates/patients/add_patient.html:115
+#: templates/patients/patient_detail.html:128
+#: templates/patients/patient_list.html:76
+msgid "Phone"
+msgstr ""
+
+#: templates/billing/payer_form.html:133
+msgid "Fax"
+msgstr ""
+
+#: templates/billing/payer_form.html:140
+#: templates/patients/add_patient.html:122
+#: templates/patients/patient_detail.html:136 templates/users/login.html:31
+#: templates/users/manage_users.html:21
+msgid "Email"
+msgstr ""
+
+#: templates/billing/payer_form.html:147
+msgid "Website"
+msgstr ""
+
+#: templates/billing/payer_form.html:170
+msgid "e.g., PI, XV"
+msgstr ""
+
+#: templates/billing/payer_form.html:221 templates/orders/edit_order.html:462
+#: templates/patients/add_patient.html:207
+#: templates/reports/report_confirm_delete.html:33
+msgid "Cancel"
+msgstr ""
+
+#: templates/billing/payer_form.html:224
+msgid "Update Payer"
+msgstr ""
+
+#: templates/billing/payer_form.html:224
+msgid "Create Payer"
+msgstr ""
+
+#: templates/billing/payer_list.html:4 templates/billing/payer_list.html:11
+#: templates/billing/payer_list.html:121
+msgid "Insurance Payers"
+msgstr ""
+
+#: templates/billing/payer_list.html:12
+msgid "Manage insurance companies and payers"
+msgstr ""
+
+#: templates/billing/payer_list.html:24 templates/orders/worklist.html:26
+msgid "Search"
+msgstr ""
+
+#: templates/billing/payer_list.html:26
+msgid "Name or Payer ID"
+msgstr ""
+
+#: templates/billing/payer_list.html:31
+msgid "All Types"
+msgstr ""
+
+#: templates/billing/payer_list.html:32 templates/billing/payer_list.html:94
+msgid "Commercial"
+msgstr ""
+
+#: templates/billing/payer_list.html:33
+msgid "Medicare"
+msgstr ""
+
+#: templates/billing/payer_list.html:34
+msgid "Medicaid"
+msgstr ""
+
+#: templates/billing/payer_list.html:35
+msgid "Self Pay"
+msgstr ""
+
+#: templates/billing/payer_list.html:36
+msgid "Workers' Comp"
+msgstr ""
+
+#: templates/billing/payer_list.html:37
+msgid "Tricare"
+msgstr ""
+
+#: templates/billing/payer_list.html:38 templates/patients/add_patient.html:60
+#: templates/patients/add_patient.html:109
+#: templates/patients/patient_detail.html:113
+#: templates/patients/patient_list.html:107
+msgid "Other"
+msgstr ""
+
+#: templates/billing/payer_list.html:44
+msgid "All"
+msgstr ""
+
+#: templates/billing/payer_list.html:51 templates/orders/worklist.html:88
+msgid "Filter"
+msgstr ""
+
+#: templates/billing/payer_list.html:54
+msgid "Clear"
+msgstr ""
+
+#: templates/billing/payer_list.html:68
+msgid "Total Payers"
+msgstr ""
+
+#: templates/billing/payer_list.html:107
+msgid "Government"
+msgstr ""
+
+#: templates/billing/payer_list.html:122
+msgid "records"
+msgstr ""
+
+#: templates/billing/payer_list.html:130
+msgid "Name"
+msgstr ""
+
+#: templates/billing/payer_list.html:131
+msgid "Type"
+msgstr ""
+
+#: templates/billing/payer_list.html:132
+msgid "Contact"
+msgstr ""
+
+#: templates/billing/payer_list.html:135 templates/orders/worklist.html:128
+#: templates/patients/patient_list.html:79
+#: templates/reports/study_reports.html:73 templates/users/manage_users.html:25
+msgid "Actions"
+msgstr ""
+
+#: templates/billing/payer_list.html:175 templates/reports/report_form.html:192
+msgid "View"
+msgstr ""
+
+#: templates/billing/payer_list.html:187
+msgid "No payers found"
+msgstr ""
+
+#: templates/layout.html:294 templates/layout.html:295
+msgid "Toggle Theme"
+msgstr ""
+
+#: templates/layout.html:351
+msgid "Admin panel"
+msgstr ""
+
+#: templates/layout.html:364
+msgid "Sign Out"
+msgstr ""
+
+#: templates/layout.html:374
+msgid "Login"
+msgstr ""
+
+#: templates/layout.html:420
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/orders/_device_options.html:5
+msgid "Select a device"
+msgstr ""
+
+#: templates/orders/_device_options.html:12
+msgid "No devices available"
+msgstr ""
+
+#: templates/orders/add_order.html:10
+msgid "Reserve Exam Order"
+msgstr ""
+
+#: templates/orders/add_order.html:29 templates/patients/add_patient.html:27
+msgid "Patient Information"
+msgstr ""
+
+#: templates/orders/add_order.html:38
+msgid "Medical Record Number (MRN)"
+msgstr ""
+
+#: templates/orders/add_order.html:47 templates/orders/edit_order.html:46
+msgid "Enter patient MRN"
+msgstr ""
+
+#: templates/orders/add_order.html:72 templates/orders/delete_order.html:61
+#: templates/reports/report_form.html:228
+msgid "Patient Name"
+msgstr ""
+
+#: templates/orders/add_order.html:90 templates/orders/order_detail.html:155
+#: templates/patients/add_patient.html:96
+#: templates/patients/patient_detail.html:92
+msgid "Date of Birth"
+msgstr ""
+
+#: templates/orders/add_order.html:108 templates/orders/order_detail.html:161
+#: templates/patients/add_patient.html:103
+#: templates/patients/patient_detail.html:100
+#: templates/patients/patient_list.html:75
+msgid "Gender"
+msgstr ""
+
+#: templates/orders/add_order.html:144
+msgid "Order Details"
+msgstr ""
+
+#: templates/orders/add_order.html:153 templates/orders/delete_order.html:52
+#: templates/orders/edit_order.html:95 templates/orders/order_detail.html:40
+msgid "Accession Number"
+msgstr ""
+
+#: templates/orders/add_order.html:161 templates/orders/edit_order.html:105
+msgid "Enter accession number"
+msgstr ""
+
+#: templates/orders/add_order.html:172 templates/orders/edit_order.html:112
+#: templates/orders/order_detail.html:84 templates/orders/worklist.html:62
+#: templates/orders/worklist.html:125
+msgid "Priority"
+msgstr ""
+
+#: templates/orders/add_order.html:182 templates/orders/order_detail.html:97
+#: templates/orders/worklist.html:150
+msgid "Routine"
+msgstr ""
+
+#: templates/orders/add_order.html:185 templates/orders/order_detail.html:93
+#: templates/orders/worklist.html:148
+msgid "Urgent"
+msgstr ""
+
+#: templates/orders/add_order.html:188
+msgid "Stat"
+msgstr ""
+
+#: templates/orders/add_order.html:199
 msgid "Device"
-msgstr "الجهاز"
+msgstr ""
+
+#: templates/orders/add_order.html:213
+msgid "Loading devices..."
+msgstr ""
+
+#: templates/orders/add_order.html:224 templates/orders/edit_order.html:227
+#: templates/orders/order_detail.html:202
+msgid "Procedure Code"
+msgstr ""
+
+#: templates/orders/add_order.html:234
+msgid "Select procedure code"
+msgstr ""
+
+#: templates/orders/add_order.html:244
+msgid "CT Head with contrast"
+msgstr ""
+
+#: templates/orders/add_order.html:251
+msgid "CT Chest with contrast"
+msgstr ""
+
+#: templates/orders/add_order.html:274
+msgid "CT Angiography"
+msgstr ""
+
+#: templates/orders/add_order.html:277
+msgid "MR Procedures"
+msgstr ""
+
+#: templates/orders/add_order.html:312
+msgid "MR Angiography"
+msgstr ""
+
+#: templates/orders/add_order.html:315
+msgid "X-Ray Procedures"
+msgstr ""
+
+#: templates/orders/add_order.html:318
+msgid "Chest X-Ray"
+msgstr ""
+
+#: templates/orders/add_order.html:321
+msgid "X-Ray Skull"
+msgstr ""
+
+#: templates/orders/add_order.html:324
+msgid "X-Ray Ribs"
+msgstr ""
+
+#: templates/orders/add_order.html:327
+msgid "X-Ray Cervical spine"
+msgstr ""
+
+#: templates/orders/add_order.html:330
+msgid "X-Ray Thoracic spine"
+msgstr ""
+
+#: templates/orders/add_order.html:333
+msgid "X-Ray Lumbar spine"
+msgstr ""
+
+#: templates/orders/add_order.html:336
+msgid "X-Ray Pelvis"
+msgstr ""
+
+#: templates/orders/add_order.html:339
+msgid "X-Ray Hip"
+msgstr ""
+
+#: templates/orders/add_order.html:342
+msgid "X-Ray Femur"
+msgstr ""
+
+#: templates/orders/add_order.html:345
+msgid "X-Ray Knee"
+msgstr ""
+
+#: templates/orders/add_order.html:348
+msgid "X-Ray Tibia/Fibula"
+msgstr ""
+
+#: templates/orders/add_order.html:351
+msgid "X-Ray Ankle"
+msgstr ""
+
+#: templates/orders/add_order.html:354
+msgid "X-Ray Foot"
+msgstr ""
+
+#: templates/orders/add_order.html:357
+msgid "X-Ray Shoulder"
+msgstr ""
+
+#: templates/orders/add_order.html:360
+msgid "X-Ray Humerus"
+msgstr ""
+
+#: templates/orders/add_order.html:363
+msgid "X-Ray Elbow"
+msgstr ""
+
+#: templates/orders/add_order.html:366
+msgid "X-Ray Forearm"
+msgstr ""
+
+#: templates/orders/add_order.html:369
+msgid "X-Ray Wrist"
+msgstr ""
+
+#: templates/orders/add_order.html:372
+msgid "X-Ray Hand"
+msgstr ""
+
+#: templates/orders/add_order.html:375
+msgid "X-Ray Finger"
+msgstr ""
+
+#: templates/orders/add_order.html:378
+msgid "Mammography"
+msgstr ""
+
+#: templates/orders/add_order.html:385
+msgid "Ultrasound Abdomen"
+msgstr ""
+
+#: templates/orders/add_order.html:388
+msgid "Ultrasound Pelvis"
+msgstr ""
+
+#: templates/orders/add_order.html:391
+msgid "Ultrasound Obstetric"
+msgstr ""
+
+#: templates/orders/add_order.html:394
+msgid "Ultrasound Thyroid"
+msgstr ""
+
+#: templates/orders/add_order.html:397
+msgid "Ultrasound Breast"
+msgstr ""
+
+#: templates/orders/add_order.html:400
+msgid "Ultrasound Scrotal"
+msgstr ""
+
+#: templates/orders/add_order.html:403
+msgid "Ultrasound Doppler"
+msgstr ""
+
+#: templates/orders/add_order.html:406
+msgid "Echocardiography"
+msgstr ""
+
+#: templates/orders/add_order.html:413
+msgid "Bone Scan"
+msgstr ""
+
+#: templates/orders/add_order.html:416
+msgid "Cardiac Stress Test"
+msgstr ""
+
+#: templates/orders/add_order.html:419
+msgid "Thyroid Scan"
+msgstr ""
+
+#: templates/orders/add_order.html:426
+msgid "Renal Scan"
+msgstr ""
+
+#: templates/orders/add_order.html:429
+msgid "Hepatobiliary Scan"
+msgstr ""
+
+#: templates/orders/add_order.html:432
+msgid "PET Procedures"
+msgstr ""
+
+#: templates/orders/add_order.html:435
+msgid "PET-CT Whole Body"
+msgstr ""
+
+#: templates/orders/add_order.html:438
+msgid "PET Brain"
+msgstr ""
+
+#: templates/orders/add_order.html:445
+msgid "Barium Swallow/Meal"
+msgstr ""
+
+#: templates/orders/add_order.html:448
+msgid "Barium Enema"
+msgstr ""
+
+#: templates/orders/add_order.html:451
+msgid "IVP/Urogram"
+msgstr ""
+
+#: templates/orders/add_order.html:454
+msgid "Hysterosalpingography"
+msgstr ""
+
+#: templates/orders/add_order.html:457
+msgid "VCUG"
+msgstr ""
+
+#: templates/orders/add_order.html:464
+msgid "Image-guided Biopsy"
+msgstr ""
+
+#: templates/orders/add_order.html:467
+msgid "Image-guided Drainage"
+msgstr ""
+
+#: templates/orders/add_order.html:470
+msgid "Image-guided Injection"
+msgstr ""
+
+#: templates/orders/add_order.html:482 templates/orders/edit_order.html:261
+#: templates/orders/order_detail.html:208
+msgid "Procedure Name (English)"
+msgstr ""
+
+#: templates/orders/add_order.html:490 templates/orders/edit_order.html:271
+msgid "Enter procedure name in English"
+msgstr ""
+
+#: templates/orders/add_order.html:502 templates/orders/order_detail.html:215
+msgid "Procedure Name (Arabic)"
+msgstr ""
+
+#: templates/orders/add_order.html:510 templates/orders/edit_order.html:289
+msgid "أدخل اسم الإجراء بالعربية"
+msgstr ""
+
+#: templates/orders/add_order.html:521 templates/orders/edit_order.html:299
+#: templates/orders/order_detail.html:269
+#: templates/reports/report_detail.html:88
+msgid "Referring Physician"
+msgstr ""
+
+#: templates/orders/add_order.html:528
+msgid "Enter physician name"
+msgstr ""
+
+#: templates/orders/add_order.html:538 templates/orders/edit_order.html:314
+#: templates/orders/order_detail.html:222
+msgid "Laterality"
+msgstr ""
+
+#: templates/orders/add_order.html:546
+msgid "Not Applicable"
+msgstr ""
+
+#: templates/orders/add_order.html:549 templates/orders/edit_order.html:334
+msgid "Left"
+msgstr ""
+
+#: templates/orders/add_order.html:552 templates/orders/edit_order.html:346
+msgid "Right"
+msgstr ""
+
+#: templates/orders/add_order.html:555 templates/orders/edit_order.html:358
+msgid "Bilateral"
+msgstr ""
+
+#: templates/orders/add_order.html:566 templates/orders/edit_order.html:366
+#: templates/orders/order_detail.html:233
+msgid "Body Part"
+msgstr ""
+
+#: templates/orders/add_order.html:573
+msgid "e.g., Head, Knee, Chest"
+msgstr ""
+
+#: templates/orders/add_order.html:580 templates/orders/edit_order.html:381
+#: templates/orders/order_detail.html:239
+msgid "Contrast Required"
+msgstr ""
+
+#: templates/orders/add_order.html:593
+msgid "Yes, contrast is required"
+msgstr ""
+
+#: templates/orders/add_order.html:604
+msgid "Clinical Information"
+msgstr ""
+
+#: templates/orders/add_order.html:621
+msgid "Describe clinical symptoms, diagnosis, or reason for examination..."
+msgstr ""
+
+#: templates/orders/add_order.html:631
+msgid "Scheduling"
+msgstr ""
+
+#: templates/orders/add_order.html:640
+msgid "Scheduled Date & Time"
+msgstr ""
+
+#: templates/orders/add_order.html:656 templates/orders/edit_order.html:423
+#: templates/orders/order_detail.html:297
+msgid "Duration (minutes)"
+msgstr ""
+
+#: templates/orders/add_order.html:675
+msgid "Room / Station"
+msgstr ""
+
+#: templates/orders/add_order.html:683
+msgid "Auto-assign"
+msgstr ""
+
+#: templates/orders/add_order.html:686
+msgid "Room 1"
+msgstr ""
+
+#: templates/orders/add_order.html:689
+msgid "Room 2"
+msgstr ""
+
+#: templates/orders/add_order.html:692
+msgid "Room 3"
+msgstr ""
+
+#: templates/orders/delete_order.html:16 templates/orders/edit_order.html:15
+#: templates/orders/order_detail.html:17
+msgid "Order List"
+msgstr ""
+
+#: templates/orders/delete_order.html:31
+#: templates/reports/report_confirm_delete.html:26
+msgid "Warning:"
+msgstr ""
+
+#: templates/orders/delete_order.html:47
+msgid "Order Summary"
+msgstr ""
+
+#: templates/orders/delete_order.html:57 templates/orders/edit_order.html:36
+msgid "Patient MRN"
+msgstr ""
+
+#: templates/orders/delete_order.html:66 templates/orders/worklist.html:124
+#: templates/reports/report_detail.html:84
+#: templates/reports/report_form.html:236
+#: templates/reports/study_reports.html:36
+msgid "Procedure"
+msgstr ""
+
+#: templates/orders/delete_order.html:70 templates/orders/order_detail.html:192
+#: templates/orders/worklist.html:49 templates/orders/worklist.html:123
+#: templates/reports/report_detail.html:80
+#: templates/reports/report_form.html:240
+#: templates/reports/study_reports.html:32
+msgid "Modality"
+msgstr ""
+
+#: templates/orders/delete_order.html:77 templates/orders/order_detail.html:53
+#: templates/orders/worklist.html:155
+msgid "Registered"
+msgstr ""
+
+#: templates/orders/delete_order.html:81 templates/orders/order_detail.html:57
+#: templates/orders/worklist.html:127 templates/orders/worklist.html:157
+msgid "Scheduled"
+msgstr ""
+
+#: templates/orders/delete_order.html:85 templates/orders/order_detail.html:61
+#: templates/orders/worklist.html:159
+msgid "In Progress"
+msgstr ""
+
+#: templates/orders/delete_order.html:89 templates/orders/order_detail.html:65
+#: templates/orders/worklist.html:161
+msgid "Completed"
+msgstr ""
+
+#: templates/orders/delete_order.html:93 templates/orders/order_detail.html:69
+#: templates/orders/worklist.html:163
+msgid "Reported"
+msgstr ""
+
+#: templates/orders/delete_order.html:97 templates/orders/order_detail.html:73
+#: templates/orders/worklist.html:165 templates/reports/report_detail.html:55
+msgid "Finalized"
+msgstr ""
+
+#: templates/orders/delete_order.html:101 templates/orders/order_detail.html:77
+#: templates/orders/worklist.html:167
+msgid "Cancelled"
+msgstr ""
+
+#: templates/orders/delete_order.html:106
+#: templates/orders/order_detail.html:104
+msgid "Created At"
+msgstr ""
+
+#: templates/orders/edit_order.html:9 templates/orders/order_detail.html:23
+msgid "Edit Order"
+msgstr ""
+
+#: templates/orders/edit_order.html:170 templates/orders/order_detail.html:275
+msgid "Facility"
+msgstr ""
+
+#: templates/orders/edit_order.html:178
+msgid "Select Facility"
+msgstr ""
+
+#: templates/orders/edit_order.html:200
+msgid "Device/Room"
+msgstr ""
+
+#: templates/orders/edit_order.html:211
+msgid "Select Device"
+msgstr ""
+
+#: templates/orders/edit_order.html:237
+msgid "Select Procedure"
+msgstr ""
+
+#: templates/orders/edit_order.html:307
+msgid "Enter referring physician name"
+msgstr ""
+
+#: templates/orders/edit_order.html:322 templates/patients/add_patient.html:53
+#: templates/patients/add_patient.html:106
+msgid "Select"
+msgstr ""
+
+#: templates/orders/edit_order.html:374
+msgid "Enter body part"
+msgstr ""
+
+#: templates/orders/edit_order.html:399 templates/orders/order_detail.html:244
+#: templates/patients/patient_detail.html:265
+msgid "Yes"
+msgstr ""
+
+#: templates/orders/edit_order.html:409 templates/orders/order_detail.html:287
+msgid "Scheduled DateTime"
+msgstr ""
+
+#: templates/orders/edit_order.html:441 templates/orders/order_detail.html:310
+msgid "Clinical Indication"
+msgstr ""
+
+#: templates/orders/edit_order.html:448
+msgid "Enter clinical indication or reason for exam"
+msgstr ""
+
+#: templates/orders/edit_order.html:468 templates/orders/order_detail.html:342
+#: templates/orders/worklist.html:197 templates/patients/patient_detail.html:30
+msgid "Delete"
+msgstr ""
+
+#: templates/orders/edit_order.html:493
+msgid "Please enter an MRN"
+msgstr ""
+
+#: templates/orders/edit_order.html:510
+msgid "Patient not found"
+msgstr ""
+
+#: templates/orders/edit_order.html:519
+msgid "Error looking up patient"
+msgstr ""
+
+#: templates/orders/order_detail.html:89 templates/orders/worklist.html:146
+msgid "STAT"
+msgstr ""
+
+#: templates/orders/order_detail.html:124
+#: templates/patients/add_patient.html:33
+#: templates/patients/patient_detail.html:57
+#: templates/patients/patient_list.html:71
+#: templates/reports/report_detail.html:76
+#: templates/reports/report_form.html:232
+msgid "MRN"
+msgstr ""
+
+#: templates/orders/order_detail.html:135
+msgid "Name (English)"
+msgstr ""
+
+#: templates/orders/order_detail.html:145
+msgid "Name (Arabic)"
+msgstr ""
+
+#: templates/orders/order_detail.html:166
+#: templates/patients/add_patient.html:108
+#: templates/patients/patient_detail.html:109
+#: templates/patients/patient_list.html:103
+msgid "Female"
+msgstr ""
+
+#: templates/orders/order_detail.html:248
+#: templates/patients/patient_detail.html:269
+msgid "No"
+msgstr ""
+
+#: templates/orders/order_detail.html:281
+msgid "Room/Station"
+msgstr ""
+
+#: templates/orders/order_detail.html:303
+msgid "Billing Status"
+msgstr ""
+
+#: templates/orders/worklist.html:4 templates/orders/worklist.html:13
+msgid "Worklist"
+msgstr ""
+
+#: templates/orders/worklist.html:16
+msgid "Add New Order"
+msgstr ""
+
+#: templates/orders/worklist.html:30
+msgid "Accession, MRN, Patient, Procedure"
+msgstr ""
+
+#: templates/orders/worklist.html:38
+msgid "All Statuses"
+msgstr ""
+
+#: templates/orders/worklist.html:51
+msgid "All Modalities"
+msgstr ""
+
+#: templates/orders/worklist.html:64
+msgid "All Priorities"
+msgstr ""
+
+#: templates/orders/worklist.html:75
+msgid "From Date"
+msgstr ""
+
+#: templates/orders/worklist.html:81
+msgid "To Date"
+msgstr ""
+
+#: templates/orders/worklist.html:97
+msgid "Clear All Filters"
+msgstr ""
+
+#: templates/orders/worklist.html:100
+msgid "Active filters:"
+msgstr ""
+
+#: templates/orders/worklist.html:121
+msgid "Accession #"
+msgstr ""
+
+#: templates/orders/worklist.html:122 templates/reports/report_detail.html:72
+#: templates/reports/study_reports.html:28
+msgid "Patient"
+msgstr ""
+
+#: templates/orders/worklist.html:182 templates/patients/patient_list.html:119
+msgid "View Details"
+msgstr ""
+
+#: templates/orders/worklist.html:187
+msgid "View Reports"
+msgstr ""
+
+#: templates/orders/worklist.html:209
+msgid "No orders found"
+msgstr ""
+
+#: templates/orders/worklist.html:212
+msgid "Try adjusting your filter criteria"
+msgstr ""
+
+#: templates/orders/worklist.html:214
+msgid "Get started by adding your first order"
+msgstr ""
+
+#: templates/orders/worklist.html:219
+msgid "Add Order"
+msgstr ""
+
+#: templates/orders/worklist.html:231
+#, python-format
+msgid ""
+"\n"
+"                        Showing %(counter)s order\n"
+"                    "
+msgid_plural ""
+"\n"
+"                        Showing %(counter)s orders\n"
+"                    "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/patients/add_patient.html:4
+msgid "Add Patient"
+msgstr ""
+
+#: templates/patients/add_patient.html:13
+msgid "Add New Patient"
+msgstr ""
+
+#: templates/patients/add_patient.html:16
+#: templates/patients/patient_list.html:9
+msgid "Patient List"
+msgstr ""
+
+#: templates/patients/add_patient.html:36
+msgid "Enter MRN"
+msgstr ""
+
+#: templates/patients/add_patient.html:44
+#: templates/patients/partials/search_results.html:11
+#: templates/patients/patient_detail.html:65
+#: templates/patients/patient_list.html:77
+msgid "National ID"
+msgstr ""
+
+#: templates/patients/add_patient.html:46
+msgid "Enter National ID"
+msgstr ""
+
+#: templates/patients/add_patient.html:51
+#: templates/patients/patient_detail.html:120
+msgid "Nationality"
+msgstr ""
+
+#: templates/patients/add_patient.html:54
+msgid "Saudi Arabia"
+msgstr ""
+
+#: templates/patients/add_patient.html:55
+msgid "Egypt"
+msgstr ""
+
+#: templates/patients/add_patient.html:56
+msgid "India"
+msgstr ""
+
+#: templates/patients/add_patient.html:57
+msgid "Pakistan"
+msgstr ""
+
+#: templates/patients/add_patient.html:58
+msgid "Philippines"
+msgstr ""
+
+#: templates/patients/add_patient.html:59
+msgid "Bangladesh"
+msgstr ""
+
+#: templates/patients/add_patient.html:66
+msgid "First Name (English)"
+msgstr ""
+
+#: templates/patients/add_patient.html:69
+msgid "First Name"
+msgstr ""
+
+#: templates/patients/add_patient.html:74
+msgid "Last Name (English)"
+msgstr ""
+
+#: templates/patients/add_patient.html:77
+msgid "Last Name"
+msgstr ""
+
+#: templates/patients/add_patient.html:82
+msgid "First Name (Arabic)"
+msgstr ""
+
+#: templates/patients/add_patient.html:84
+msgid "الاسم الأول"
+msgstr ""
+
+#: templates/patients/add_patient.html:89
+msgid "Last Name (Arabic)"
+msgstr ""
+
+#: templates/patients/add_patient.html:91
+msgid "اسم العائلة"
+msgstr ""
+
+#: templates/patients/add_patient.html:107
+#: templates/patients/patient_detail.html:105
+#: templates/patients/patient_list.html:99
+msgid "Male"
+msgstr ""
+
+#: templates/patients/add_patient.html:117
+msgid "Enter phone number"
+msgstr ""
+
+#: templates/patients/add_patient.html:124
+msgid "Enter email address"
+msgstr ""
+
+#: templates/patients/add_patient.html:133
+msgid "Enter full address"
+msgstr ""
+
+#: templates/patients/add_patient.html:142
+msgid "Emergency Contact"
+msgstr ""
+
+#: templates/patients/add_patient.html:147
+#: templates/patients/patient_detail.html:168
+msgid "Contact Name"
+msgstr ""
+
+#: templates/patients/add_patient.html:149
+msgid "Enter contact name"
+msgstr ""
+
+#: templates/patients/add_patient.html:152
+#: templates/patients/patient_detail.html:178
+msgid "Contact Phone"
+msgstr ""
+
+#: templates/patients/add_patient.html:154
+msgid "Enter contact phone"
+msgstr ""
+
+#: templates/patients/add_patient.html:163
+msgid "Insurance Information"
+msgstr ""
+
+#: templates/patients/add_patient.html:168
+msgid "Insurance Provider"
+msgstr ""
+
+#: templates/patients/add_patient.html:170
+msgid "Enter insurance provider"
+msgstr ""
+
+#: templates/patients/add_patient.html:173
+#: templates/patients/patient_detail.html:212
+msgid "Policy Number"
+msgstr ""
+
+#: templates/patients/add_patient.html:175
+msgid "Enter policy number"
+msgstr ""
+
+#: templates/patients/add_patient.html:184
+msgid "Additional Options"
+msgstr ""
+
+#: templates/patients/add_patient.html:192
+msgid "Consent to Data Sharing"
+msgstr ""
+
+#: templates/patients/add_patient.html:197
+#: templates/patients/patient_detail.html:250
+msgid "Data Retention Until"
+msgstr ""
+
+#: templates/patients/add_patient.html:210
+msgid "Save Patient"
+msgstr ""
+
+#: templates/patients/edit_patient.html:10
+msgid "Edit Patient"
+msgstr ""
+
+#: templates/patients/partials/search_results.html:17
+#: templates/patients/patient_list.html:140
+msgid "No patients found"
+msgstr ""
+
+#: templates/patients/patient_detail.html:2
+msgid "Patient Details"
+msgstr ""
+
+#: templates/patients/patient_detail.html:83
+msgid "Full Name (Arabic)"
+msgstr ""
+
+#: templates/patients/patient_detail.html:204
+msgid "Provider"
+msgstr ""
+
+#: templates/patients/patient_detail.html:234
+msgid "Data Sharing Consent"
+msgstr ""
+
+#: templates/patients/patient_detail.html:239
+msgid "Granted"
+msgstr ""
+
+#: templates/patients/patient_detail.html:243
+msgid "Not Granted"
+msgstr ""
+
+#: templates/patients/patient_detail.html:260
+msgid "Deceased"
+msgstr ""
+
+#: templates/patients/patient_detail.html:288
+#: templates/reports/report_detail.html:46
+#: templates/reports/study_reports.html:71
+msgid "Created"
+msgstr ""
+
+#: templates/patients/patient_detail.html:296
+#: templates/reports/report_detail.html:50
+msgid "Last Updated"
+msgstr ""
+
+#: templates/patients/patient_list.html:38
+msgid "Search by MRN, Name, National ID, or Phone"
+msgstr ""
+
+#: templates/patients/patient_list.html:72
+msgid "Name (EN)"
+msgstr ""
+
+#: templates/patients/patient_list.html:73
+msgid "Name (AR)"
+msgstr ""
+
+#: templates/patients/patient_list.html:74
+msgid "DOB"
+msgstr ""
+
+#: templates/patients/patient_list.html:126
+msgid "Create Order"
+msgstr ""
+
+#: templates/patients/patient_list.html:165
+#, python-format
+msgid ""
+" Showing {{\n"
+"                    counter }} patient "
+msgid_plural ""
+" Showing %(counter)s\n"
+"                    patients "
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/reports/report_confirm_delete.html:4
+#: templates/reports/report_confirm_delete.html:36
+msgid "Delete Report"
+msgstr ""
+
+#: templates/reports/report_confirm_delete.html:13
+msgid "Confirm Delete"
+msgstr ""
+
+#: templates/reports/report_confirm_delete.html:18
+#, python-format
+msgid ""
+"\n"
+"                    Are you sure you want to delete report #%(report_id)s "
+"for order %(order_accession)s?\n"
+"                    This action cannot be undone.\n"
+"                    "
+msgstr ""
+
+#: templates/reports/report_confirm_delete.html:26
+msgid ""
+"All report data including findings and impressions will be permanently "
+"deleted."
+msgstr ""
+
+#: templates/reports/report_detail.html:4
+msgid "Report"
+msgstr ""
+
+#: templates/reports/report_detail.html:16
+msgid "Radiology Report"
+msgstr ""
+
+#: templates/reports/report_detail.html:27
+msgid "Back to Reports"
+msgstr ""
+
+#: templates/reports/report_detail.html:42
+#: templates/reports/study_reports.html:69
+msgid "Radiologist"
+msgstr ""
+
+#: templates/reports/report_detail.html:63
+msgid "CRITICAL FINDING"
+msgstr ""
+
+#: templates/reports/report_detail.html:98
+msgid "Findings"
+msgstr ""
+
+#: templates/reports/report_detail.html:111
+msgid "النتائج"
+msgstr ""
+
+#: templates/reports/report_detail.html:124
+msgid "Impression / Conclusion"
+msgstr ""
+
+#: templates/reports/report_detail.html:137
+msgid "الانطباع / الخلاصة"
+msgstr ""
+
+#: templates/reports/report_detail.html:149
+#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
+msgid "Edit Report"
+msgstr ""
+
+#: templates/reports/report_detail.html:153
+msgid "All Reports"
+msgstr ""
+
+#: templates/reports/report_detail.html:156
+#: templates/reports/report_form.html:188
+msgid "Print"
+msgstr ""
+
+#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
+#: templates/reports/report_form.html:262
+#: templates/reports/study_reports.html:126
+msgid "Create Report"
+msgstr ""
+
+#: templates/reports/report_form.html:185
+msgid "Export to PDF"
+msgstr ""
+
+#: templates/reports/report_form.html:212
+msgid "Report Editor"
+msgstr ""
+
+#: templates/reports/report_form.html:249
+msgid "Report Content"
+msgstr ""
+
+#: templates/reports/report_form.html:253
+msgid "Impression:"
+msgstr ""
+
+#: templates/reports/report_form.html:262
+msgid "Update Report"
+msgstr ""
+
+#: templates/reports/report_form.html:266
+msgid "Save Draft"
+msgstr ""
+
+#: templates/reports/report_form.html:270
+msgid "Templates"
+msgstr ""
+
+#: templates/reports/report_form.html:274
+msgid "Normal Report"
+msgstr ""
+
+#: templates/reports/report_form.html:310
+msgid "Report Templates"
+msgstr ""
+
+#: templates/reports/report_form.html:330
+#: templates/reports/report_form.html:403
+msgid "Draft saved"
+msgstr ""
+
+#: templates/reports/report_form.html:384
+msgid "Saving..."
+msgstr ""
+
+#: templates/reports/report_form.html:412
+msgid "Save failed"
+msgstr ""
+
+#: templates/reports/study_reports.html:4
+#: templates/reports/study_reports.html:16
+msgid "Study Reports"
+msgstr ""
+
+#: templates/reports/study_reports.html:21
+msgid "Back to Worklist"
+msgstr ""
+
+#: templates/reports/study_reports.html:55
+msgid "Reports"
+msgstr ""
+
+#: templates/reports/study_reports.html:58
+msgid "New Report"
+msgstr ""
+
+#: templates/reports/study_reports.html:68
+msgid "Report ID"
+msgstr ""
+
+#: templates/reports/study_reports.html:72
+msgid "Updated"
+msgstr ""
+
+#: templates/reports/study_reports.html:123
+msgid "No reports yet"
+msgstr ""
+
+#: templates/reports/study_reports.html:124
+msgid "Create the first report for this study."
+msgstr ""
 
 #: templates/users/login.html:20
 msgid "Sign in to your account"
-msgstr "Sign in to your account"
-
-#: templates/users/login.html:31 templates/users/manage_users.html:21
-msgid "Email"
-msgstr "Email"
+msgstr ""
 
 #: templates/users/login.html:38
 msgid "Enter your email"
-msgstr "Enter your email"
+msgstr ""
+
+#: templates/users/login.html:47
+msgid "Password"
+msgstr ""
 
 #: templates/users/login.html:54
 msgid "Enter your password"
-msgstr "Enter your password"
+msgstr ""
 
 #: templates/users/login.html:71
 msgid "Remember me"
-msgstr "Remember me"
+msgstr ""
 
 #: templates/users/login.html:75
 msgid "Forgot password?"
-msgstr "Forgot password?"
+msgstr ""
 
 #: templates/users/login.html:91
 msgid "Need help?"
-msgstr "Need help?"
+msgstr ""
 
 #: templates/users/login.html:93
 msgid "Contact support"
-msgstr "Contact support"
+msgstr ""
+
+#: templates/users/manage_users.html:3 templates/users/manage_users.html:8
+msgid "Manage Users"
+msgstr ""
 
 #: templates/users/manage_users.html:10
 msgid "Add User"
-msgstr "Add User"
+msgstr ""
+
+#: templates/users/manage_users.html:20
+msgid "Username"
+msgstr ""
 
 #: templates/users/manage_users.html:22
 msgid "Role"
-msgstr "Role"
-
-#: templates/users/manage_users.html:23
-msgid "Active"
-msgstr "Active"
+msgstr ""
 
 #: templates/users/manage_users.html:24
 msgid "Last Login"
-msgstr "Last Login"
-
-#: templates/users/manage_users.html:25
-msgid "Actions"
-msgstr "Actions"
+msgstr ""
 
 #: templates/users/manage_users.html:58
 msgid "No users found."
-msgstr "No users found."
+msgstr ""
 
 #: users/views.py:24
 #, python-format
 msgid "Welcome back, %(username)s!"
-msgstr "Welcome back, %(username)s!"
+msgstr ""
 
 #: users/views.py:28
 msgid "Invalid email or password."
-msgstr "Invalid email or password."
+msgstr ""
 
 #: users/views.py:47
 msgid "You have been logged out."
-msgstr "You have been logged out."
+msgstr ""
