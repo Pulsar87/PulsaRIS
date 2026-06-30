@@ -7,8 +7,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q, Sum, Count
 from django.urls import reverse_lazy
 from django.utils import timezone
-from .models import FeeSchedule, FeeScheduleItem
-from .forms import FeeScheduleForm, FeeScheduleItemForm, FeeScheduleItemFormSet
+from .models import FeeSchedule, FeeScheduleItem, InsurancePayer, Clearinghouse, PatientInsurance, Authorization, PatientAccount
+from .forms import FeeScheduleForm, FeeScheduleItemForm, FeeScheduleItemFormSet, InsurancePayerForm, ClearinghouseForm, PatientInsuranceForm, AuthorizationForm, PatientAccountForm
 from tenants.middleware import tenant_helper
 
 
@@ -368,3 +368,300 @@ def fee_calculate_api(request):
         'currency': 'USD',
         'calculated_at': timezone.now().isoformat(),
     })
+
+
+# ============================================================================
+# INSURANCE PAYER VIEWS
+# ============================================================================
+
+class InsurancePayerListView(LoginRequiredMixin, ListView):
+    """List all insurance payers with filtering and search"""
+    model = InsurancePayer
+    template_name = 'billing/payer_list.html'
+    context_object_name = 'payers'
+    paginate_by = 25
+    
+    def get_queryset(self):
+        queryset = InsurancePayer.objects.filter(tenant=self.request.tenant)
+        
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status == 'active':
+            queryset = queryset.filter(is_active=True)
+        elif status == 'inactive':
+            queryset = queryset.filter(is_active=False)
+        
+        # Filter by type
+        payer_type = self.request.GET.get('payer_type')
+        if payer_type:
+            queryset = queryset.filter(payer_type=payer_type)
+        
+        # Search by name or payer_id
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) |
+                Q(payer_id__icontains=search) |
+                Q(short_name__icontains=search)
+            )
+        
+        return queryset.order_by('name')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tenant = self.request.tenant
+        
+        context['total_payers'] = InsurancePayer.objects.filter(tenant=tenant).count()
+        context['active_count'] = InsurancePayer.objects.filter(tenant=tenant, is_active=True).count()
+        context['commercial_count'] = InsurancePayer.objects.filter(
+            tenant=tenant, payer_type='COMMERCIAL'
+        ).count()
+        context['government_count'] = InsurancePayer.objects.filter(
+            tenant=tenant, payer_type__in=['MEDICARE', 'MEDICAID', 'TRICARE', 'CHAMPVA']
+        ).count()
+        return context
+
+
+class InsurancePayerDetailView(LoginRequiredMixin, DetailView):
+    """Detail view of an insurance payer"""
+    model = InsurancePayer
+    template_name = 'billing/payer_detail.html'
+    context_object_name = 'payer'
+    
+    def get_queryset(self):
+        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payer = self.object
+        
+        # Get related data
+        context['insurance_count'] = PatientInsurance.objects.filter(
+            tenant=self.request.tenant, payer=payer
+        ).count()
+        context['fee_schedules'] = FeeSchedule.objects.filter(
+            tenant=self.request.tenant, payer=payer
+        )
+        
+        return context
+
+
+class InsurancePayerCreateView(LoginRequiredMixin, CreateView):
+    """Create a new insurance payer"""
+    model = InsurancePayer
+    form_class = InsurancePayerForm
+    template_name = 'billing/payer_form.html'
+    success_url = reverse_lazy('billing:payer_list')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class InsurancePayerUpdateView(LoginRequiredMixin, UpdateView):
+    """Update an insurance payer"""
+    model = InsurancePayer
+    form_class = InsurancePayerForm
+    template_name = 'billing/payer_form.html'
+    success_url = reverse_lazy('billing:payer_list')
+    
+    def get_queryset(self):
+        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+
+
+class InsurancePayerDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete an insurance payer (soft delete)"""
+    model = InsurancePayer
+    template_name = 'billing/payer_confirm_delete.html'
+    success_url = reverse_lazy('billing:payer_list')
+    
+    def get_queryset(self):
+        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+    
+    def delete(self, request, *args, **kwargs):
+        payer = self.get_object()
+        payer.is_active = False
+        payer.save()
+        return redirect(self.success_url)
+
+
+# ============================================================================
+# CLEARINGHOUSE VIEWS
+# ============================================================================
+
+class ClearinghouseListView(LoginRequiredMixin, ListView):
+    """List all clearinghouses"""
+    model = Clearinghouse
+    template_name = 'billing/clearinghouse_list.html'
+    context_object_name = 'clearinghouses'
+    
+    def get_queryset(self):
+        return Clearinghouse.objects.filter(tenant=self.request.tenant).order_by('name')
+
+
+class ClearinghouseDetailView(LoginRequiredMixin, DetailView):
+    """Detail view of a clearinghouse"""
+    model = Clearinghouse
+    template_name = 'billing/clearinghouse_detail.html'
+    context_object_name = 'clearinghouse'
+    
+    def get_queryset(self):
+        return Clearinghouse.objects.filter(tenant=self.request.tenant)
+
+
+class ClearinghouseCreateView(LoginRequiredMixin, CreateView):
+    """Create a new clearinghouse"""
+    model = Clearinghouse
+    form_class = ClearinghouseForm
+    template_name = 'billing/clearinghouse_form.html'
+    success_url = reverse_lazy('billing:clearinghouse_list')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class ClearinghouseUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a clearinghouse"""
+    model = Clearinghouse
+    form_class = ClearinghouseForm
+    template_name = 'billing/clearinghouse_form.html'
+    success_url = reverse_lazy('billing:clearinghouse_list')
+    
+    def get_queryset(self):
+        return Clearinghouse.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# PATIENT INSURANCE VIEWS
+# ============================================================================
+
+class PatientInsuranceCreateView(LoginRequiredMixin, CreateView):
+    """Add insurance to a patient"""
+    model = PatientInsurance
+    form_class = PatientInsuranceForm
+    template_name = 'billing/patient_insurance_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('patients:patient_detail', kwargs={'pk': self.object.patient.pk})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class PatientInsuranceUpdateView(LoginRequiredMixin, UpdateView):
+    """Update patient insurance"""
+    model = PatientInsurance
+    form_class = PatientInsuranceForm
+    template_name = 'billing/patient_insurance_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('patients:patient_detail', kwargs={'pk': self.object.patient.pk})
+    
+    def get_queryset(self):
+        return PatientInsurance.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# AUTHORIZATION VIEWS
+# ============================================================================
+
+class AuthorizationCreateView(LoginRequiredMixin, CreateView):
+    """Create a new authorization"""
+    model = Authorization
+    form_class = AuthorizationForm
+    template_name = 'billing/authorization_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('orders:exam_detail', kwargs={'pk': self.object.exam_order.pk})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class AuthorizationUpdateView(LoginRequiredMixin, UpdateView):
+    """Update an authorization"""
+    model = Authorization
+    form_class = AuthorizationForm
+    template_name = 'billing/authorization_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('orders:exam_detail', kwargs={'pk': self.object.exam_order.pk})
+    
+    def get_queryset(self):
+        return Authorization.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# PATIENT ACCOUNT VIEWS
+# ============================================================================
+
+class PatientAccountDetailView(LoginRequiredMixin, DetailView):
+    """Detail view of a patient account"""
+    model = PatientAccount
+    template_name = 'billing/patient_account_detail.html'
+    context_object_name = 'account'
+    
+    def get_queryset(self):
+        return PatientAccount.objects.filter(tenant=self.request.tenant)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        account = self.object
+        
+        # Get recent service lines
+        context['recent_charges'] = account.service_lines.all()[:10]
+        
+        # Get payments
+        from .models import Payment
+        context['recent_payments'] = Payment.objects.filter(
+            tenant=self.request.tenant,
+            patient_account=account
+        ).order_by('-payment_date')[:10]
+        
+        return context
+
+
+class PatientAccountCreateView(LoginRequiredMixin, CreateView):
+    """Create a patient account"""
+    model = PatientAccount
+    form_class = PatientAccountForm
+    template_name = 'billing/patient_account_form.html'
+    
+    def get_success_url(self):
+        return reverse_lazy('billing:patient_account_detail', kwargs={'pk': self.object.pk})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        # Generate account number if not provided
+        if not form.instance.account_number:
+            import uuid
+            form.instance.account_number = f"ACC-{uuid.uuid4().hex[:8].upper()}"
+        return super().form_valid(form)
