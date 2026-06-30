@@ -1,23 +1,104 @@
-```
-# Python
-__pycache__/
+# Compiled and build artifacts
 *.pyc
-*.pyo
-*.pyd
-.Python
-env/
-venv/
+__pycache__/
+*.mo
+*.pot
+*.po~
+
+# Dependencies
 .venv/
+venv/
+env/
 pip-log.txt
-pip-delete-this-directory.txt
-.tox/
+pip-selfcheck.json
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swo
+*.swn
+
+# Python specific
+*.py[co]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
 .coverage
+htmlcov/
 .coverage.*
-.cache
+.tox/
+.nox/
+.pytest_cache/
+.mypy_cache/
+
+# Django specific
+*.mo~
+*.po~
+local_settings.py
+db.sqlite3
+media/
+staticfiles/
+celerybeat-schedule
+*.pot~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Coverage reports
+coverage/
+htmlcov/
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
 nosetests.xml
 coverage.xml
 *.cover
-*.log
-.DS_Store
-Thumbs.db
-```
+.hypothesis/
+
+# Translations
+*.mo~
+*.po~
+
+# Django locale files
+locale/*/LC_MESSAGES/*.mo
+locale/*/LC_MESSAGES/*.pot~
