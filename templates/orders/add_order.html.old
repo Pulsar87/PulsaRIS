@@ -1,4 +1,4 @@
-{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Edit
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Add
 Order' %}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
@@ -6,7 +6,8 @@ Order' %}{% endblock %} {% block content %}
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-edit me-2"></i>{% trans 'Edit Order' %}
+                    <i class="fas fa-file-medical-plus me-2"></i>{% trans 'Add
+                    New Order' %}
                 </h2>
                 <a
                     href="{% url 'orders:worklist' %}"
@@ -42,7 +43,6 @@ Order' %}{% endblock %} {% block content %}
                                     id="patient_mrn"
                                     name="patient_mrn"
                                     required
-                                    value="{{ order.patient.mrn }}"
                                     placeholder="{% trans 'Enter patient MRN' %}"
                                 />
                                 <div class="form-text">
@@ -101,7 +101,6 @@ Order' %}{% endblock %} {% block content %}
                                     id="accession_number"
                                     name="accession_number"
                                     required
-                                    value="{{ order.accession_number }}"
                                     placeholder="{% trans 'Enter accession number' %}"
                                 />
                             </div>
@@ -119,45 +118,7 @@ Order' %}{% endblock %} {% block content %}
                                     required
                                 >
                                     {% for value, label in priority_choices %}
-                                    <option
-                                        value="{{ value }}"
-                                        {%
-                                        if
-                                        order.priority=""
-                                        ="value"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
-                                        {{ label }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Status -->
-                            <div class="col-md-6">
-                                <label for="status" class="form-label"
-                                    >{% trans 'Status' %}
-                                    <span class="text-danger">*</span></label
-                                >
-                                <select
-                                    class="form-select"
-                                    id="status"
-                                    name="status"
-                                    required
-                                >
-                                    {% for value, label in status_choices %}
-                                    <option
-                                        value="{{ value }}"
-                                        {%
-                                        if
-                                        order.status=""
-                                        ="value"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
+                                    <option value="{{ value }}">
                                         {{ label }}
                                     </option>
                                     {% endfor %}
@@ -178,16 +139,7 @@ Order' %}{% endblock %} {% block content %}
                                         -- {% trans 'Select Facility' %} --
                                     </option>
                                     {% for facility in facilities %}
-                                    <option
-                                        value="{{ facility.id }}"
-                                        {%
-                                        if
-                                        order.facility.id=""
-                                        ="facility.id"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
+                                    <option value="{{ facility.id }}">
                                         {{ facility.name }}
                                     </option>
                                     {% endfor %}
@@ -204,20 +156,12 @@ Order' %}{% endblock %} {% block content %}
                                     id="device"
                                     name="device"
                                     hx-get="{% url 'orders:get_devices' %}"
-                                    hx-trigger="load"
+                                    hx-trigger="load, change"
                                     hx-target="#device"
                                 >
                                     <option value="">
                                         -- {% trans 'Select Device' %} --
                                     </option>
-                                    {% if order.room_station %}
-                                    <option
-                                        value="{{ order.room_station.id }}"
-                                        selected
-                                    >
-                                        {{ order.room_station.name }}
-                                    </option>
-                                    {% endif %}
                                 </select>
                             </div>
 
@@ -236,19 +180,21 @@ Order' %}{% endblock %} {% block content %}
                                     <option value="">
                                         -- {% trans 'Select Procedure' %} --
                                     </option>
-                                    {% for value, label in procedure_choices %}
-                                    <option
-                                        value="{{ value }}"
-                                        {%
-                                        if
-                                        order.procedure_code=""
-                                        ="value"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
-                                        {{ label }}
-                                    </option>
+                                    {%regroup procedures by modality_type as
+                                    procedure_groups%} {%for group in
+                                    procedure_groups%}
+                                    <optgroup label="{{ group.grouper }}">
+                                        {% for procedure in group.list %}
+                                        <option
+                                            value="{{ procedure.code }}"
+                                            data-name-en="{{ procedure.name_en }}"
+                                            data-name-ar="{{ procedure.name_ar }}"
+                                        >
+                                            {{procedure.code}} -
+                                            {{procedure.name_en}}
+                                        </option>
+                                        {% endfor %}
+                                    </optgroup>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -267,8 +213,8 @@ Order' %}{% endblock %} {% block content %}
                                     id="procedure_name_en"
                                     name="procedure_name_en"
                                     required
-                                    value="{{ order.procedure_name_en }}"
                                     placeholder="{% trans 'Enter procedure name in English' %}"
+                                    readonly
                                 />
                             </div>
 
@@ -285,9 +231,9 @@ Order' %}{% endblock %} {% block content %}
                                     class="form-control"
                                     id="procedure_name_ar"
                                     name="procedure_name_ar"
-                                    value="{{ order.procedure_name_ar }}"
                                     placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
                                     dir="rtl"
+                                    readonly
                                 />
                             </div>
 
@@ -303,7 +249,6 @@ Order' %}{% endblock %} {% block content %}
                                     class="form-control"
                                     id="referring_physician"
                                     name="referring_physician"
-                                    value="{{ order.referring_physician }}"
                                     placeholder="{% trans 'Enter referring physician name' %}"
                                 />
                             </div>
@@ -321,40 +266,13 @@ Order' %}{% endblock %} {% block content %}
                                     <option value="">
                                         -- {% trans 'Select' %} --
                                     </option>
-                                    <option
-                                        value="L"
-                                        {%
-                                        if
-                                        order.laterality=""
-                                        ="L"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
+                                    <option value="L">
                                         {% trans 'Left' %}
                                     </option>
-                                    <option
-                                        value="R"
-                                        {%
-                                        if
-                                        order.laterality=""
-                                        ="R"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
+                                    <option value="R">
                                         {% trans 'Right' %}
                                     </option>
-                                    <option
-                                        value="B"
-                                        {%
-                                        if
-                                        order.laterality=""
-                                        ="B"
-                                        %}selected{%
-                                        endif
-                                        %}
-                                    >
+                                    <option value="B">
                                         {% trans 'Bilateral' %}
                                     </option>
                                 </select>
@@ -370,7 +288,6 @@ Order' %}{% endblock %} {% block content %}
                                     class="form-control"
                                     id="body_part"
                                     name="body_part"
-                                    value="{{ order.body_part }}"
                                     placeholder="{% trans 'Enter body part' %}"
                                 />
                             </div>
@@ -386,12 +303,6 @@ Order' %}{% endblock %} {% block content %}
                                         type="checkbox"
                                         id="contrast_required"
                                         name="contrast_required"
-                                        {%
-                                        if
-                                        order.contrast_required
-                                        %}checked{%
-                                        endif
-                                        %}
                                     />
                                     <label
                                         class="form-check-label"
@@ -413,7 +324,6 @@ Order' %}{% endblock %} {% block content %}
                                     class="form-control"
                                     id="scheduled_datetime"
                                     name="scheduled_datetime"
-                                    value="{% if order.scheduled_datetime %}{{ order.scheduled_datetime|date:'Y-m-d\TH:i' }}{% endif %}"
                                 />
                             </div>
 
@@ -427,7 +337,7 @@ Order' %}{% endblock %} {% block content %}
                                     class="form-control"
                                     id="duration_minutes"
                                     name="duration_minutes"
-                                    value="{{ order.duration_minutes }}"
+                                    value="15"
                                     min="5"
                                     max="240"
                                 />
@@ -446,8 +356,7 @@ Order' %}{% endblock %} {% block content %}
                                     name="clinical_indication"
                                     rows="3"
                                     placeholder="{% trans 'Enter clinical indication or reason for exam' %}"
-                                >
-{{ order.clinical_indication }}</textarea>
+                                ></textarea>
                             </div>
                         </div>
                     </div>
@@ -461,15 +370,8 @@ Order' %}{% endblock %} {% block content %}
                     >
                         <i class="fas fa-times me-1"></i>{% trans 'Cancel' %}
                     </a>
-                    <a
-                        href="{% url 'orders:delete_order' order.pk %}"
-                        class="btn btn-danger"
-                    >
-                        <i class="fas fa-trash me-1"></i>{% trans 'Delete' %}
-                    </a>
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>{% trans 'Save Changes'
-                        %}
+                        <i class="fas fa-save me-1"></i>{% trans 'Save Order' %}
                     </button>
                 </div>
             </form>
@@ -523,17 +425,13 @@ Order' %}{% endblock %} {% block content %}
             });
         }
 
-        // Auto-fill procedure name when code is selected
-        const procedureCodeSelect = document.getElementById("procedure_code");
-        const procedureNameInput = document.getElementById("procedure_name_en");
-
-        if (procedureCodeSelect && procedureNameInput) {
-            procedureCodeSelect.addEventListener("change", function () {
-                const selectedOption = this.options[this.selectedIndex];
-                if (selectedOption.value && selectedOption.text) {
-                    procedureNameInput.value = selectedOption.text;
-                }
-            });
+        // Auto-generate accession number if empty
+        const accessionInput = document.getElementById("accession_number");
+        if (accessionInput && !accessionInput.value) {
+            // Generate a simple accession format: ACC + timestamp
+            const now = new Date();
+            const timestamp = now.getTime().toString().slice(-8);
+            accessionInput.value = "ACC" + timestamp;
         }
     });
 </script>

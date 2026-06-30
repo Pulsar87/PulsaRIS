@@ -1,9 +1,5 @@
-{% extends 'layout.html' %}
-{% load i18n %}
-
-{% block title %}{% trans 'Patients' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Patients'
+%}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
@@ -12,28 +8,50 @@
                 <h2 class="mb-0">
                     <i class="fas fa-users me-2"></i>{% trans 'Patient List' %}
                 </h2>
-                <a href="{% url 'patients:add_patient' %}" class="btn btn-primary">
-                    <i class="fas fa-plus me-1"></i>{% trans 'Add New Patient' %}
+                <a
+                    href="{% url 'patients:add_patient' %}"
+                    class="btn btn-primary"
+                >
+                    <i class="fas fa-plus me-1"></i>{% trans 'Add New Patient'
+                    %}
                 </a>
             </div>
 
             <!-- Search Bar -->
             <div class="card mb-4">
                 <div class="card-body">
-                    <form method="get" action="{% url 'patients:patient_list' %}" class="row g-3">
+                    <form
+                        method="get"
+                        action="{% url 'patients:patient_list' %}"
+                        class="row g-3"
+                    >
                         <div class="col-md-8">
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-search"></i></span>
-                                <input type="text" class="form-control" name="q" value="{{ query }}" 
-                                       placeholder="{% trans 'Search by MRN, Name, National ID, or Phone' %}">
+                                <span class="input-group-text"
+                                    ><i class="fas fa-search"></i
+                                ></span>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="q"
+                                    value="{{ query }}"
+                                    placeholder="{% trans 'Search by MRN, Name, National ID, or Phone' %}"
+                                />
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <button type="submit" class="btn btn-outline-primary">
-                                <i class="fas fa-filter me-1"></i>{% trans 'Search' %}
+                            <button
+                                type="submit"
+                                class="btn btn-outline-primary"
+                            >
+                                <i class="fas fa-filter me-1"></i>{% trans
+                                'Search' %}
                             </button>
                             {% if query %}
-                            <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
+                            <a
+                                href="{% url 'patients:patient_list' %}"
+                                class="btn btn-outline-secondary"
+                            >
                                 <i class="fas fa-times"></i>
                             </a>
                             {% endif %}
@@ -57,36 +75,56 @@
                                     <th>{% trans 'Gender' %}</th>
                                     <th>{% trans 'Phone' %}</th>
                                     <th>{% trans 'National ID' %}</th>
-                                    <th class="text-end">{% trans 'Actions' %}</th>
+                                    <th class="text-end">
+                                        {% trans 'Actions' %}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for patient in patients %}
                                 <tr>
                                     <td><strong>{{ patient.mrn }}</strong></td>
-                                    <td>{{ patient.first_name_en }} {{ patient.last_name_en }}</td>
-                                    <td dir="rtl">{{ patient.first_name_ar }} {{ patient.last_name_ar }}</td>
+                                    <td>
+                                        {{ patient.first_name_en }} {{
+                                        patient.last_name_en }}
+                                    </td>
+                                    <td dir="rtl">
+                                        {{ patient.first_name_ar }} {{
+                                        patient.last_name_ar }}
+                                    </td>
                                     <td>{{ patient.dob|date:"Y-m-d" }}</td>
                                     <td>
                                         {% if patient.gender == 'M' %}
-                                            <span class="badge bg-primary">{% trans 'Male' %}</span>
+                                        <span class="badge bg-primary"
+                                            >{% trans 'Male' %}</span
+                                        >
                                         {% elif patient.gender == 'F' %}
-                                            <span class="badge bg-danger">{% trans 'Female' %}</span>
+                                        <span class="badge bg-danger"
+                                            >{% trans 'Female' %}</span
+                                        >
                                         {% else %}
-                                            <span class="badge bg-secondary">{% trans 'Other' %}</span>
+                                        <span class="badge bg-secondary"
+                                            >{% trans 'Other' %}</span
+                                        >
                                         {% endif %}
                                     </td>
                                     <td>{{ patient.phone|default:"-" }}</td>
-                                    <td>{{ patient.national_id|default:"-" }}</td>
+                                    <td>
+                                        {{ patient.national_id|default:"-" }}
+                                    </td>
                                     <td class="text-end">
-                                        <a href="{% url 'patients:patient_detail' patient.pk %}" 
-                                           class="btn btn-sm btn-outline-primary" 
-                                           title="{% trans 'View Details' %}">
+                                        <a
+                                            href="{% url 'patients:patient_detail' patient.pk %}"
+                                            class="btn btn-sm btn-outline-primary"
+                                            title="{% trans 'View Details' %}"
+                                        >
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{% url 'orders:reserve_order' %}?mrn={{ patient.mrn }}" 
-                                           class="btn btn-sm btn-outline-success" 
-                                           title="{% trans 'Create Order' %}">
+                                        <a
+                                            href="{% url 'orders:add_order' %}?mrn={{ patient.mrn }}"
+                                            class="btn btn-sm btn-outline-success"
+                                            title="{% trans 'Create Order' %}"
+                                        >
                                             <i class="fas fa-file-medical"></i>
                                         </a>
                                     </td>
@@ -98,17 +136,21 @@
                     {% else %}
                     <div class="text-center py-5">
                         <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                        <h4 class="text-muted">{% trans 'No patients found' %}</h4>
+                        <h4 class="text-muted">
+                            {% trans 'No patients found' %}
+                        </h4>
                         <p class="text-muted">
-                            {% if query %}
-                                {% trans 'Try adjusting your search criteria' %}
-                            {% else %}
-                                {% trans 'Get started by adding your first patient' %}
-                            {% endif %}
+                            {% if query %} {% trans 'Try adjusting your search
+                            criteria' %} {% else %} {% trans 'Get started by
+                            adding your first patient' %} {% endif %}
                         </p>
                         {% if not query %}
-                        <a href="{% url 'patients:add_patient' %}" class="btn btn-primary">
-                            <i class="fas fa-plus me-1"></i>{% trans 'Add Patient' %}
+                        <a
+                            href="{% url 'patients:add_patient' %}"
+                            class="btn btn-primary"
+                        >
+                            <i class="fas fa-plus me-1"></i>{% trans 'Add
+                            Patient' %}
                         </a>
                         {% endif %}
                     </div>
@@ -120,11 +162,9 @@
             {% if patients %}
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">
-                    {% blocktrans count counter=patients.count %}
-                        Showing {{ counter }} patient
-                    {% plural %}
-                        Showing {{ counter }} patients
-                    {% endblocktrans %}
+                    {% blocktrans count counter=patients.count %} Showing {{
+                    counter }} patient {% plural %} Showing {{ counter }}
+                    patients {% endblocktrans %}
                 </small>
             </div>
             {% endif %}

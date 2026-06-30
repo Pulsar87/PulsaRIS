@@ -1,238 +1,513 @@
-{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Add
-Order' %}{% endblock %} {% block content %}
-<div class="container-fluid py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <!-- Page Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="mb-0">
-                    <i class="fas fa-file-medical-plus me-2"></i>{% trans 'Add
-                    New Order' %}
-                </h2>
-                <a
-                    href="{% url 'orders:worklist' %}"
-                    class="btn btn-outline-secondary"
-                >
-                    <i class="fas fa-list me-1"></i>{% trans 'Order List' %}
-                </a>
+{% extends 'layout.html' %} {% load i18n static %} {% block title %}{% trans
+"Order Reservation" %} - Pulsar RIS{% endblock %} {% block content %}
+<div class="row justify-content-center">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="fw-bold mb-0">
+                        <i class="bi bi-calendar-plus me-2 text-info"></i>
+                        {% trans "Reserve Exam Order" %}
+                    </h3>
+                    <a
+                        href="/worklist"
+                        class="btn btn-outline-secondary btn-sm"
+                    >
+                        <i class="bi bi-arrow-left me-1"></i> {% trans "Back to
+                        Worklist" %}
+                    </a>
+                </div>
             </div>
+            <div class="card-body p-4">
+                <form method="post" action="{% url 'orders:add_order' %}">
+                    {% csrf_token %}
 
-            <!-- Order Form -->
-            <form method="post" id="orderForm">
-                {% csrf_token %}
-
-                <!-- Patient Information Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-user me-2"></i>{% trans 'Patient
-                            Information' %}
+                    <!-- Patient Information Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-person-fill me-2"></i>
+                            {% trans "Patient Information" %}
                         </h5>
-                    </div>
-                    <div class="card-body">
                         <div class="row g-3">
-                            <!-- MRN -->
+                            <!-- MRN Lookup -->
                             <div class="col-md-6">
-                                <label for="patient_mrn" class="form-label"
-                                    >{% trans 'Patient MRN' %}
-                                    <span class="text-danger">*</span></label
+                                <label
+                                    for="patient_mrn"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Medical Record Number (MRN)" %}
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        class="form-control form-control-lg"
+                                        id="patient_mrn"
+                                        name="patient_mrn"
+                                        placeholder="{% trans 'Enter patient MRN' %}"
+                                        required
+                                        autofocus
+                                    />
+                                    <button
+                                        class="btn btn-outline-primary"
+                                        type="button"
+                                        id="btnLookupPatient"
+                                        hx-get="/api/patients/lookup/"
+                                        hx-target="#patientResults"
+                                        hx-trigger="click"
+                                    >
+                                        <i class="bi bi-search"></i> {% trans
+                                        "Lookup" %}
+                                    </button>
+                                </div>
+                                <div id="patientResults" class="mt-2"></div>
+                            </div>
+
+                            <!-- Patient Name (Auto-filled) -->
+                            <div class="col-md-6">
+                                <label
+                                    for="patient_name"
+                                    class="form-label fw-medium"
+                                >
+                                    {% trans "Patient Name" %}
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control form-control-lg"
+                                    id="patient_name"
+                                    name="patient_name"
+                                    readonly
+                                    style="background-color: #f8f9fa"
+                                />
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="col-md-4">
+                                <label
+                                    for="patient_dob"
+                                    class="form-label fw-medium"
+                                >
+                                    {% trans "Date of Birth" %}
+                                </label>
                                 <input
                                     type="text"
                                     class="form-control"
-                                    id="patient_mrn"
-                                    name="patient_mrn"
-                                    required
-                                    placeholder="{% trans 'Enter patient MRN' %}"
+                                    id="patient_dob"
+                                    name="patient_dob"
+                                    readonly
+                                    style="background-color: #f8f9fa"
                                 />
-                                <div class="form-text">
-                                    {% trans 'Enter the patient MRN to lookup'
-                                    %}
-                                </div>
                             </div>
-                            <div class="col-md-6 d-flex align-items-end">
-                                <button
-                                    type="button"
-                                    class="btn btn-outline-primary"
-                                    id="lookupPatientBtn"
+
+                            <!-- Gender -->
+                            <div class="col-md-4">
+                                <label
+                                    for="patient_gender"
+                                    class="form-label fw-medium"
                                 >
-                                    <i class="fas fa-search me-1"></i>{% trans
-                                    'Lookup Patient' %}
-                                </button>
+                                    {% trans "Gender" %}
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="patient_gender"
+                                    name="patient_gender"
+                                    readonly
+                                    style="background-color: #f8f9fa"
+                                />
                             </div>
-                        </div>
 
-                        <!-- Patient Lookup Results (hidden by default) -->
-                        <div
-                            id="patientLookupResults"
-                            class="mt-3"
-                            style="display: none"
-                        >
-                            <div class="alert alert-info">
-                                <strong id="patientNameDisplay"></strong>
-                                <span
-                                    id="patientDobDisplay"
-                                    class="ms-2"
-                                ></span>
+                            <!-- Phone -->
+                            <div class="col-md-4">
+                                <label
+                                    for="patient_phone"
+                                    class="form-label fw-medium"
+                                >
+                                    {% trans "Phone" %}
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="patient_phone"
+                                    name="patient_phone"
+                                    readonly
+                                    style="background-color: #f8f9fa"
+                                />
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Order Details Card -->
-                <div class="card mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="fas fa-clipboard-list me-2"></i>{% trans
-                            'Order Details' %}
+                    <!-- Order Details Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-file-earmark-medical-fill me-2"></i>
+                            {% trans "Order Details" %}
                         </h5>
-                    </div>
-                    <div class="card-body">
                         <div class="row g-3">
                             <!-- Accession Number -->
                             <div class="col-md-6">
-                                <label for="accession_number" class="form-label"
-                                    >{% trans 'Accession Number' %}
-                                    <span class="text-danger">*</span></label
+                                <label
+                                    for="accession_number"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Accession Number" %}
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="accession_number"
                                     name="accession_number"
-                                    required
                                     placeholder="{% trans 'Enter accession number' %}"
+                                    required
                                 />
                             </div>
 
                             <!-- Priority -->
                             <div class="col-md-6">
-                                <label for="priority" class="form-label"
-                                    >{% trans 'Priority' %}
-                                    <span class="text-danger">*</span></label
+                                <label
+                                    for="priority"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Priority" %}
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <select
-                                    class="form-select"
+                                    class="form-select form-select-lg"
                                     id="priority"
                                     name="priority"
                                     required
                                 >
-                                    {% for value, label in priority_choices %}
-                                    <option value="{{ value }}">
-                                        {{ label }}
+                                    <option value="ROUTINE" selected>
+                                        {% trans "Routine" %}
                                     </option>
-                                    {% endfor %}
+                                    <option value="URGENT">
+                                        {% trans "Urgent" %}
+                                    </option>
+                                    <option value="STAT">
+                                        {% trans "Stat" %}
+                                    </option>
                                 </select>
                             </div>
 
-                            <!-- Facility -->
+                            <!-- Device (replaces Modality) -->
                             <div class="col-md-6">
-                                <label for="facility" class="form-label"
-                                    >{% trans 'Facility' %}</label
+                                <label
+                                    for="device"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Device" %}
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <select
-                                    class="form-select"
-                                    id="facility"
-                                    name="facility"
-                                >
-                                    <option value="">
-                                        -- {% trans 'Select Facility' %} --
-                                    </option>
-                                    {% for facility in facilities %}
-                                    <option value="{{ facility.id }}">
-                                        {{ facility.name }}
-                                    </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Device/Room Station -->
-                            <div class="col-md-6">
-                                <label for="device" class="form-label"
-                                    >{% trans 'Device/Room' %}</label
-                                >
-                                <select
-                                    class="form-select"
+                                    class="form-select form-select-lg"
                                     id="device"
                                     name="device"
+                                    required
                                     hx-get="{% url 'orders:get_devices' %}"
-                                    hx-trigger="load, change"
+                                    hx-trigger="load once"
                                     hx-target="#device"
+                                    hx-swap="innerHTML"
                                 >
-                                    <option value="">
-                                        -- {% trans 'Select Device' %} --
+                                    <option value="" selected disabled>
+                                        {% trans "Loading devices..." %}
                                     </option>
                                 </select>
                             </div>
 
                             <!-- Procedure Code -->
                             <div class="col-md-6">
-                                <label for="procedure_code" class="form-label"
-                                    >{% trans 'Procedure Code' %}
-                                    <span class="text-danger">*</span></label
+                                <label
+                                    for="procedure_code"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Procedure Code" %}
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <select
-                                    class="form-select"
+                                    class="form-select form-select-lg"
                                     id="procedure_code"
                                     name="procedure_code"
                                     required
                                 >
-                                    <option value="">
-                                        -- {% trans 'Select Procedure' %} --
+                                    <option value="" selected disabled>
+                                        {% trans "Select procedure code" %}
                                     </option>
-                                    {%regroup procedures by modality_type as
-                                    procedure_groups%} {%for group in
-                                    procedure_groups%}
-                                    <optgroup label="{{ group.grouper }}">
-                                        {% for procedure in group.list %}
-                                        <option
-                                            value="{{ procedure.code }}"
-                                            data-name-en="{{ procedure.name_en }}"
-                                            data-name-ar="{{ procedure.name_ar }}"
-                                        >
-                                            {{procedure.code}} -
-                                            {{procedure.name_en}}
+                                    {% load i18n %} {% trans "CT Procedures" as
+                                    ct_group %}
+                                    <optgroup label="{{ ct_group }}">
+                                        <option value="CT_HEAD">
+                                            {% trans "CT Head without contrast"
+                                            %}
                                         </option>
-                                        {% endfor %}
+                                        <option value="CT_HEAD_C">
+                                            {% trans "CT Head with contrast" %}
+                                        </option>
+                                        <option value="CT_CHEST">
+                                            {% trans "CT Chest without contrast"
+                                            %}
+                                        </option>
+                                        <option value="CT_CHEST_C">
+                                            {% trans "CT Chest with contrast" %}
+                                        </option>
+                                        <option value="CT_ABD">
+                                            {% trans "CT Abdomen without
+                                            contrast" %}
+                                        </option>
+                                        <option value="CT_ABD_C">
+                                            {% trans "CT Abdomen with contrast"
+                                            %}
+                                        </option>
+                                        <option value="CT_PELVIS">
+                                            {% trans "CT Pelvis without
+                                            contrast" %}
+                                        </option>
+                                        <option value="CT_PELVIS_C">
+                                            {% trans "CT Pelvis with contrast"
+                                            %}
+                                        </option>
+                                        <option value="CT_SPINE_C">
+                                            {% trans "CT Cervical spine with
+                                            contrast" %}
+                                        </option>
+                                        <option value="CT_ANGIO">
+                                            {% trans "CT Angiography" %}
+                                        </option>
                                     </optgroup>
-                                    {% endfor %}
+                                    {% trans "MR Procedures" as mr_group %}
+                                    <optgroup label="{{ mr_group }}">
+                                        <option value="MR_BRAIN">
+                                            {% trans "MRI Brain without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_BRAIN_C">
+                                            {% trans "MRI Brain with contrast"
+                                            %}
+                                        </option>
+                                        <option value="MR_SPINE_C">
+                                            {% trans "MRI Cervical spine without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_SPINE_T">
+                                            {% trans "MRI Thoracic spine without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_SPINE_L">
+                                            {% trans "MRI Lumbar spine without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_KNEE">
+                                            {% trans "MRI Knee without contrast"
+                                            %}
+                                        </option>
+                                        <option value="MR_SHOULDER">
+                                            {% trans "MRI Shoulder without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_JOINT">
+                                            {% trans "MRI Joint without
+                                            contrast" %}
+                                        </option>
+                                        <option value="MR_ANGIO">
+                                            {% trans "MR Angiography" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "X-Ray Procedures" as xr_group %}
+                                    <optgroup label="{{ xr_group }}">
+                                        <option value="CXR">
+                                            {% trans "Chest X-Ray" %}
+                                        </option>
+                                        <option value="XR_SKULL">
+                                            {% trans "X-Ray Skull" %}
+                                        </option>
+                                        <option value="XR_RIBS">
+                                            {% trans "X-Ray Ribs" %}
+                                        </option>
+                                        <option value="XR_SPINE_C">
+                                            {% trans "X-Ray Cervical spine" %}
+                                        </option>
+                                        <option value="XR_SPINE_T">
+                                            {% trans "X-Ray Thoracic spine" %}
+                                        </option>
+                                        <option value="XR_SPINE_L">
+                                            {% trans "X-Ray Lumbar spine" %}
+                                        </option>
+                                        <option value="XR_PELVIS">
+                                            {% trans "X-Ray Pelvis" %}
+                                        </option>
+                                        <option value="XR_HIP">
+                                            {% trans "X-Ray Hip" %}
+                                        </option>
+                                        <option value="XR_FEMUR">
+                                            {% trans "X-Ray Femur" %}
+                                        </option>
+                                        <option value="XR_KNEE">
+                                            {% trans "X-Ray Knee" %}
+                                        </option>
+                                        <option value="XR_TIBIA">
+                                            {% trans "X-Ray Tibia/Fibula" %}
+                                        </option>
+                                        <option value="XR_ANKLE">
+                                            {% trans "X-Ray Ankle" %}
+                                        </option>
+                                        <option value="XR_FOOT">
+                                            {% trans "X-Ray Foot" %}
+                                        </option>
+                                        <option value="XR_SHOULDER">
+                                            {% trans "X-Ray Shoulder" %}
+                                        </option>
+                                        <option value="XR_HUMERUS">
+                                            {% trans "X-Ray Humerus" %}
+                                        </option>
+                                        <option value="XR_ELBOW">
+                                            {% trans "X-Ray Elbow" %}
+                                        </option>
+                                        <option value="XR_FOREARM">
+                                            {% trans "X-Ray Forearm" %}
+                                        </option>
+                                        <option value="XR_WRIST">
+                                            {% trans "X-Ray Wrist" %}
+                                        </option>
+                                        <option value="XR_HAND">
+                                            {% trans "X-Ray Hand" %}
+                                        </option>
+                                        <option value="XR_FINGER">
+                                            {% trans "X-Ray Finger" %}
+                                        </option>
+                                        <option value="XR_MAMMO">
+                                            {% trans "Mammography" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "Ultrasound Procedures" as us_group
+                                    %}
+                                    <optgroup label="{{ us_group }}">
+                                        <option value="US_ABD">
+                                            {% trans "Ultrasound Abdomen" %}
+                                        </option>
+                                        <option value="US_PELVIS">
+                                            {% trans "Ultrasound Pelvis" %}
+                                        </option>
+                                        <option value="US_OBST">
+                                            {% trans "Ultrasound Obstetric" %}
+                                        </option>
+                                        <option value="US_THYROID">
+                                            {% trans "Ultrasound Thyroid" %}
+                                        </option>
+                                        <option value="US_BREAST">
+                                            {% trans "Ultrasound Breast" %}
+                                        </option>
+                                        <option value="US_SCROTAL">
+                                            {% trans "Ultrasound Scrotal" %}
+                                        </option>
+                                        <option value="US_DOPPLER">
+                                            {% trans "Ultrasound Doppler" %}
+                                        </option>
+                                        <option value="US_ECHO">
+                                            {% trans "Echocardiography" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "Nuclear Medicine Procedures" as
+                                    nm_group %}
+                                    <optgroup label="{{ nm_group }}">
+                                        <option value="NM_BONE">
+                                            {% trans "Bone Scan" %}
+                                        </option>
+                                        <option value="NM_CARDIAC">
+                                            {% trans "Cardiac Stress Test" %}
+                                        </option>
+                                        <option value="NM_THYROID">
+                                            {% trans "Thyroid Scan" %}
+                                        </option>
+                                        <option value="NM_LUNG">
+                                            {% trans "Lung
+                                            Perfusion/Ventilation" %}
+                                        </option>
+                                        <option value="NM_RENAL">
+                                            {% trans "Renal Scan" %}
+                                        </option>
+                                        <option value="NM_HEPATOBILIARY">
+                                            {% trans "Hepatobiliary Scan" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "PET Procedures" as pet_group %}
+                                    <optgroup label="{{ pet_group }}">
+                                        <option value="PET_CT">
+                                            {% trans "PET-CT Whole Body" %}
+                                        </option>
+                                        <option value="PET_BRAIN">
+                                            {% trans "PET Brain" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "Fluoroscopy Procedures" as
+                                    fluoro_group %}
+                                    <optgroup label="{{ fluoro_group }}">
+                                        <option value="FLUORO_BARIUM">
+                                            {% trans "Barium Swallow/Meal" %}
+                                        </option>
+                                        <option value="FLUORO_ENEMA">
+                                            {% trans "Barium Enema" %}
+                                        </option>
+                                        <option value="FLUORO_IVP">
+                                            {% trans "IVP/Urogram" %}
+                                        </option>
+                                        <option value="FLUORO_HSG">
+                                            {% trans "Hysterosalpingography" %}
+                                        </option>
+                                        <option value="FLUORO_VCUG">
+                                            {% trans "VCUG" %}
+                                        </option>
+                                    </optgroup>
+                                    {% trans "Interventional Procedures" as
+                                    int_group %}
+                                    <optgroup label="{{ int_group }}">
+                                        <option value="INT_BIOPSY">
+                                            {% trans "Image-guided Biopsy" %}
+                                        </option>
+                                        <option value="INT_DRAINAGE">
+                                            {% trans "Image-guided Drainage" %}
+                                        </option>
+                                        <option value="INT_INJECTION">
+                                            {% trans "Image-guided Injection" %}
+                                        </option>
+                                    </optgroup>
                                 </select>
                             </div>
 
-                            <!-- Procedure Name English -->
+                            <!-- Procedure Name (English) -->
                             <div class="col-md-6">
                                 <label
                                     for="procedure_name_en"
-                                    class="form-label"
-                                    >{% trans 'Procedure Name (English)' %}
-                                    <span class="text-danger">*</span></label
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Procedure Name (English)" %}
+                                    <span class="text-danger">*</span>
+                                </label>
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="procedure_name_en"
                                     name="procedure_name_en"
-                                    required
                                     placeholder="{% trans 'Enter procedure name in English' %}"
+                                    required
                                     readonly
                                 />
                             </div>
 
-                            <!-- Procedure Name Arabic -->
+                            <!-- Procedure Name (Arabic) -->
                             <div class="col-md-6">
                                 <label
                                     for="procedure_name_ar"
-                                    class="form-label"
-                                    >{% trans 'Procedure Name (Arabic)'
-                                    %}</label
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Procedure Name (Arabic)" %}
+                                </label>
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="procedure_name_ar"
                                     name="procedure_name_ar"
-                                    placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
                                     dir="rtl"
+                                    placeholder="{% trans 'أدخل اسم الإجراء بالعربية' %}"
                                     readonly
                                 />
                             </div>
@@ -241,62 +516,69 @@ Order' %}{% endblock %} {% block content %}
                             <div class="col-md-6">
                                 <label
                                     for="referring_physician"
-                                    class="form-label"
-                                    >{% trans 'Referring Physician' %}</label
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Referring Physician" %}
+                                </label>
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="referring_physician"
                                     name="referring_physician"
-                                    placeholder="{% trans 'Enter referring physician name' %}"
+                                    placeholder="{% trans 'Enter physician name' %}"
                                 />
                             </div>
 
                             <!-- Laterality -->
                             <div class="col-md-6">
-                                <label for="laterality" class="form-label"
-                                    >{% trans 'Laterality' %}</label
+                                <label
+                                    for="laterality"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Laterality" %}
+                                </label>
                                 <select
-                                    class="form-select"
+                                    class="form-select form-select-lg"
                                     id="laterality"
                                     name="laterality"
                                 >
-                                    <option value="">
-                                        -- {% trans 'Select' %} --
+                                    <option value="" selected>
+                                        {% trans "Not Applicable" %}
                                     </option>
                                     <option value="L">
-                                        {% trans 'Left' %}
+                                        {% trans "Left" %}
                                     </option>
                                     <option value="R">
-                                        {% trans 'Right' %}
+                                        {% trans "Right" %}
                                     </option>
                                     <option value="B">
-                                        {% trans 'Bilateral' %}
+                                        {% trans "Bilateral" %}
                                     </option>
                                 </select>
                             </div>
 
                             <!-- Body Part -->
                             <div class="col-md-6">
-                                <label for="body_part" class="form-label"
-                                    >{% trans 'Body Part' %}</label
+                                <label
+                                    for="body_part"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Body Part" %}
+                                </label>
                                 <input
                                     type="text"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="body_part"
                                     name="body_part"
-                                    placeholder="{% trans 'Enter body part' %}"
+                                    placeholder="{% trans 'e.g., Head, Knee, Chest' %}"
                                 />
                             </div>
 
                             <!-- Contrast Required -->
                             <div class="col-md-6">
-                                <label class="form-label"
-                                    >{% trans 'Contrast Required' %}</label
-                                >
+                                <label class="form-label fw-medium d-block">
+                                    {% trans "Contrast Required" %}
+                                </label>
                                 <div class="form-check form-switch mt-2">
                                     <input
                                         class="form-check-input"
@@ -307,34 +589,75 @@ Order' %}{% endblock %} {% block content %}
                                     <label
                                         class="form-check-label"
                                         for="contrast_required"
-                                        >{% trans 'Yes' %}</label
                                     >
+                                        {% trans "Yes, contrast is required" %}
+                                    </label>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
+                    <!-- Clinical Information Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-clipboard-data-fill me-2"></i>
+                            {% trans "Clinical Information" %}
+                        </h5>
+                        <div class="row g-3">
+                            <!-- Clinical Indication -->
+                            <div class="col-12">
+                                <label
+                                    for="clinical_indication"
+                                    class="form-label fw-medium"
+                                >
+                                    {% trans "Clinical Indication / Reason for
+                                    Exam" %}
+                                </label>
+                                <textarea
+                                    class="form-control"
+                                    id="clinical_indication"
+                                    name="clinical_indication"
+                                    rows="3"
+                                    placeholder="{% trans 'Describe clinical symptoms, diagnosis, or reason for examination...' %}"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Scheduling Section -->
+                    <div class="mb-4">
+                        <h5 class="fw-semibold mb-3 text-primary">
+                            <i class="bi bi-clock-fill me-2"></i>
+                            {% trans "Scheduling" %}
+                        </h5>
+                        <div class="row g-3">
                             <!-- Scheduled DateTime -->
                             <div class="col-md-6">
                                 <label
                                     for="scheduled_datetime"
-                                    class="form-label"
-                                    >{% trans 'Scheduled DateTime' %}</label
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Scheduled Date & Time" %}
+                                </label>
                                 <input
                                     type="datetime-local"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="scheduled_datetime"
                                     name="scheduled_datetime"
                                 />
                             </div>
 
-                            <!-- Duration Minutes -->
+                            <!-- Duration -->
                             <div class="col-md-6">
-                                <label for="duration_minutes" class="form-label"
-                                    >{% trans 'Duration (minutes)' %}</label
+                                <label
+                                    for="duration_minutes"
+                                    class="form-label fw-medium"
                                 >
+                                    {% trans "Duration (minutes)" %}
+                                </label>
                                 <input
                                     type="number"
-                                    class="form-control"
+                                    class="form-control form-control-lg"
                                     id="duration_minutes"
                                     name="duration_minutes"
                                     value="15"
@@ -343,96 +666,343 @@ Order' %}{% endblock %} {% block content %}
                                 />
                             </div>
 
-                            <!-- Clinical Indication -->
-                            <div class="col-12">
+                            <!-- Room/Station -->
+                            <div class="col-md-6">
                                 <label
-                                    for="clinical_indication"
-                                    class="form-label"
-                                    >{% trans 'Clinical Indication' %}</label
+                                    for="room_station"
+                                    class="form-label fw-medium"
                                 >
-                                <textarea
-                                    class="form-control"
-                                    id="clinical_indication"
-                                    name="clinical_indication"
-                                    rows="3"
-                                    placeholder="{% trans 'Enter clinical indication or reason for exam' %}"
-                                ></textarea>
+                                    {% trans "Room / Station" %}
+                                </label>
+                                <select
+                                    class="form-select form-select-lg"
+                                    id="room_station"
+                                    name="room_station"
+                                >
+                                    <option value="" selected>
+                                        {% trans "Auto-assign" %}
+                                    </option>
+                                    <option value="1">
+                                        {% trans "Room 1" %}
+                                    </option>
+                                    <option value="2">
+                                        {% trans "Room 2" %}
+                                    </option>
+                                    <option value="3">
+                                        {% trans "Room 3" %}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Form Actions -->
-                <div class="d-flex justify-content-end gap-2">
-                    <a
-                        href="{% url 'orders:worklist' %}"
-                        class="btn btn-secondary"
+                    <!-- Form Actions -->
+                    <div
+                        class="d-flex justify-content-between gap-2 mt-5 pt-3 border-top"
                     >
-                        <i class="fas fa-times me-1"></i>{% trans 'Cancel' %}
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i>{% trans 'Save Order' %}
-                    </button>
-                </div>
-            </form>
+                        <button
+                            type="reset"
+                            class="btn btn-outline-secondary btn-lg"
+                        >
+                            <i class="bi bi-x-circle me-2"></i> {% trans "Clear
+                            Form" %}
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-check-circle me-2"></i> {% trans
+                            "Reserve Order" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %} {% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Auto-generate accession number if empty
+        const accessionField = document.getElementById("accession_number");
+        if (!accessionField.value) {
+            const timestamp = new Date().getTime();
+            const random = Math.floor(Math.random() * 1000);
+            accessionField.value = "ACC-" + timestamp + "-" + random;
+        }
+
+        // Form validation
+        const form = document.querySelector("form");
+        form.addEventListener("submit", function (e) {
+            const mrn = document.getElementById("patient_mrn").value.trim();
+            if (!mrn) {
+                e.preventDefault();
+                alert('{% trans "Please enter a valid MRN" %}');
+                document.getElementById("patient_mrn").focus();
+                return false;
+            }
+        });
+
         // Patient lookup functionality
-        const lookupBtn = document.getElementById("lookupPatientBtn");
-        const mrnInput = document.getElementById("patient_mrn");
-        const resultsDiv = document.getElementById("patientLookupResults");
-        const nameDisplay = document.getElementById("patientNameDisplay");
-        const dobDisplay = document.getElementById("patientDobDisplay");
+        const btnLookup = document.getElementById("btnLookupPatient");
+        const patientResultsDiv = document.getElementById("patientResults");
 
-        if (lookupBtn && mrnInput) {
-            lookupBtn.addEventListener("click", function () {
-                const mrn = mrnInput.value.trim();
-                if (!mrn) {
-                    alert('{% trans "Please enter an MRN" %}');
-                    return;
+        // Procedure code to name mapping
+        const procedureNames = {
+            CT_HEAD: [
+                "CT Head without contrast",
+                "الأشعة المقطعية للرأس بدون صبغة",
+            ],
+            CT_HEAD_C: [
+                "CT Head with contrast",
+                "الأشعة المقطعية للرأس مع صبغة",
+            ],
+            CT_CHEST: [
+                "CT Chest without contrast",
+                "الأشعة المقطعية للصدر بدون صبغة",
+            ],
+            CT_CHEST_C: [
+                "CT Chest with contrast",
+                "الأشعة المقطعية للصدر مع صبغة",
+            ],
+            CT_ABD: [
+                "CT Abdomen without contrast",
+                "الأشعة المقطعية للبطن بدون صبغة",
+            ],
+            CT_ABD_C: [
+                "CT Abdomen with contrast",
+                "الأشعة المقطعية للبطن مع صبغة",
+            ],
+            CT_PELVIS: [
+                "CT Pelvis without contrast",
+                "الأشعة المقطعية للحوض بدون صبغة",
+            ],
+            CT_PELVIS_C: [
+                "CT Pelvis with contrast",
+                "الأشعة المقطعية للحوض مع صبغة",
+            ],
+            CT_SPINE_C: [
+                "CT Cervical spine with contrast",
+                "الأشعة المقطعية للعمود الفقري العنقي مع صبغة",
+            ],
+            CT_ANGIO: ["CT Angiography", "تصوير الأوعية بالأشعة المقطعية"],
+            MR_BRAIN: [
+                "MRI Brain without contrast",
+                "الرنين المغناطيسي للدماغ بدون صبغة",
+            ],
+            MR_BRAIN_C: [
+                "MRI Brain with contrast",
+                "الرنين المغناطيسي للدماغ مع صبغة",
+            ],
+            MR_SPINE_C: [
+                "MRI Cervical spine without contrast",
+                "الرنين المغناطيسي للعمود الفقري العنقي بدون صبغة",
+            ],
+            MR_SPINE_T: [
+                "MRI Thoracic spine without contrast",
+                "الرنين المغناطيسي للعمود الفقري الصدري بدون صبغة",
+            ],
+            MR_SPINE_L: [
+                "MRI Lumbar spine without contrast",
+                "الرنين المغناطيسي للعمود الفقري القطني بدون صبغة",
+            ],
+            MR_KNEE: [
+                "MRI Knee without contrast",
+                "الرنين المغناطيسي للركبة بدون صبغة",
+            ],
+            MR_SHOULDER: [
+                "MRI Shoulder without contrast",
+                "الرنين المغناطيسي للكتف بدون صبغة",
+            ],
+            MR_JOINT: [
+                "MRI Joint without contrast",
+                "الرنين المغناطيسي للمفصل بدون صبغة",
+            ],
+            MR_ANGIO: ["MR Angiography", "تصوير الأوعية بالرنين المغناطيسي"],
+            CXR: ["Chest X-Ray", "أشعة سينية للصدر"],
+            XR_SKULL: ["X-Ray Skull", "أشعة سينية للجمجمة"],
+            XR_RIBS: ["X-Ray Ribs", "أشعة سينية للأضلاع"],
+            XR_SPINE_C: [
+                "X-Ray Cervical spine",
+                "أشعة سينية للعمود الفقري العنقي",
+            ],
+            XR_SPINE_T: [
+                "X-Ray Thoracic spine",
+                "أشعة سينية للعمود الفقري الصدري",
+            ],
+            XR_SPINE_L: [
+                "X-Ray Lumbar spine",
+                "أشعة سينية للعمود الفقري القطني",
+            ],
+            XR_PELVIS: ["X-Ray Pelvis", "أشعة سينية للحوض"],
+            XR_HIP: ["X-Ray Hip", "أشعة سينية للورك"],
+            XR_FEMUR: ["X-Ray Femur", "أشعة سينية لعظم الفخذ"],
+            XR_KNEE: ["X-Ray Knee", "أشعة سينية للركبة"],
+            XR_TIBIA: [
+                "X-Ray Tibia/Fibula",
+                "أشعة سينية للساق (الظنبوب/الشظية)",
+            ],
+            XR_ANKLE: ["X-Ray Ankle", "أشعة سينية للكاحل"],
+            XR_FOOT: ["X-Ray Foot", "أشعة سينية للقدم"],
+            XR_SHOULDER: ["X-Ray Shoulder", "أشعة سينية للكتف"],
+            XR_HUMERUS: ["X-Ray Humerus", "أشعة سينية لعضد"],
+            XR_ELBOW: ["X-Ray Elbow", "أشعة سينية للكوع"],
+            XR_FOREARM: ["X-Ray Forearm", "أشعة سينية للساعد"],
+            XR_WRIST: ["X-Ray Wrist", "أشعة سينية للمعصم"],
+            XR_HAND: ["X-Ray Hand", "أشعة سينية لليد"],
+            XR_FINGER: ["X-Ray Finger", "أشعة سينية للإصبع"],
+            XR_MAMMO: ["Mammography", "تصوير الثدي الشعاعي"],
+            US_ABD: ["Ultrasound Abdomen", "الموجات فوق الصوتية للبطن"],
+            US_PELVIS: ["Ultrasound Pelvis", "الموجات فوق الصوتية للحوض"],
+            US_OBST: ["Ultrasound Obstetric", "الموجات فوق الصوتية للولادة"],
+            US_THYROID: [
+                "Ultrasound Thyroid",
+                "الموجات فوق الصوتية للغدة الدرقية",
+            ],
+            US_BREAST: ["Ultrasound Breast", "الموجات فوق الصوتية للثدي"],
+            US_SCROTAL: ["Ultrasound Scrotal", "الموجات فوق الصوتية للصفن"],
+            US_DOPPLER: ["Ultrasound Doppler", "دوبلر بالموجات فوق الصوتية"],
+            US_ECHO: ["Echocardiography", "تخطيط صدى القلب"],
+            NM_BONE: ["Bone Scan", "فحص العظام"],
+            NM_CARDIAC: ["Cardiac Stress Test", "اختبار إجهاد القلب"],
+            NM_THYROID: ["Thyroid Scan", "فحص الغدة الدرقية"],
+            NM_LUNG: ["Lung Perfusion/Ventilation", "تروية/تهوية الرئة"],
+            NM_RENAL: ["Renal Scan", "فحص الكلى"],
+            NM_HEPATOBILIARY: [
+                "Hepatobiliary Scan",
+                "فحص الكبد والقنوات الصفراوية",
+            ],
+            PET_CT: [
+                "PET-CT Whole Body",
+                "التصوير المقطعي بالإصدار البوزيتروني للجسم كامل",
+            ],
+            PET_BRAIN: [
+                "PET Brain",
+                "التصوير المقطعي بالإصدار البوزيتروني للدماغ",
+            ],
+            FLUORO_BARIUM: ["Barium Swallow/Meal", "ابتلاع الباريوم/الوجبة"],
+            FLUORO_ENEMA: ["Barium Enema", "حقنة الباريوم الشرجية"],
+            FLUORO_IVP: ["IVP/Urogram", "تصوير الوريد بالصبغة"],
+            FLUORO_HSG: ["Hysterosalpingography", "تصوير الرحم وقنوات فالوب"],
+            FLUORO_VCUG: ["VCUG", "تصوير المثانة والإحليل أثناء التبول"],
+            INT_BIOPSY: ["Image-guided Biopsy", "خزعة موجهة بالتصوير"],
+            INT_DRAINAGE: ["Image-guided Drainage", "تصريف موجه بالتصوير"],
+            INT_INJECTION: ["Image-guided Injection", "حقن موجه بالتصوير"],
+        };
+
+        // Auto-populate procedure names when code is selected
+        const procedureCodeSelect = document.getElementById("procedure_code");
+        const procedureNameEnInput =
+            document.getElementById("procedure_name_en");
+        const procedureNameArInput =
+            document.getElementById("procedure_name_ar");
+
+        if (procedureCodeSelect) {
+            procedureCodeSelect.addEventListener("change", function () {
+                const selectedCode = this.value;
+                if (selectedCode && procedureNames[selectedCode]) {
+                    procedureNameEnInput.value =
+                        procedureNames[selectedCode][0];
+                    procedureNameArInput.value =
+                        procedureNames[selectedCode][1];
+                } else {
+                    procedureNameEnInput.value = "";
+                    procedureNameArInput.value = "";
                 }
-
-                fetch(`/patients/api/lookup/?q=${encodeURIComponent(mrn)}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.patients && data.patients.length > 0) {
-                            const patient = data.patients[0];
-                            nameDisplay.textContent = `${patient.mrn} - ${patient.name_en}`;
-                            dobDisplay.textContent = patient.dob
-                                ? `(${patient.dob})`
-                                : "";
-                            resultsDiv.style.display = "block";
-                            resultsDiv.className = "alert alert-success";
-                        } else {
-                            nameDisplay.textContent =
-                                '{% trans "Patient not found" %}';
-                            dobDisplay.textContent = "";
-                            resultsDiv.style.display = "block";
-                            resultsDiv.className = "alert alert-danger";
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                        nameDisplay.textContent =
-                            '{% trans "Error looking up patient" %}';
-                        resultsDiv.style.display = "block";
-                        resultsDiv.className = "alert alert-danger";
-                    });
             });
         }
 
-        // Auto-generate accession number if empty
-        const accessionInput = document.getElementById("accession_number");
-        if (accessionInput && !accessionInput.value) {
-            // Generate a simple accession format: ACC + timestamp
-            const now = new Date();
-            const timestamp = now.getTime().toString().slice(-8);
-            accessionInput.value = "ACC" + timestamp;
+        if (btnLookup) {
+            btnLookup.addEventListener("click", function () {
+                const mrnInput = document.getElementById("patient_mrn");
+                const query = mrnInput.value.trim();
+
+                if (!query) {
+                    patientResultsDiv.innerHTML =
+                        '<div class="alert alert-warning">Please enter an MRN, name, or ID to search</div>';
+                    return;
+                }
+
+                // Fetch patients from API
+                fetch(`/patients/api/lookup/?q=${encodeURIComponent(query)}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.error) {
+                            patientResultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+                            return;
+                        }
+
+                        if (!data.patients || data.patients.length === 0) {
+                            patientResultsDiv.innerHTML =
+                                '<div class="alert alert-info">No patients found. <a href="/patients/add/" target="_blank">Add new patient?</a></div>';
+                            return;
+                        }
+
+                        // Build results HTML
+                        let html = '<div class="list-group">';
+                        data.patients.forEach((patient) => {
+                            const displayName = patient.name_ar
+                                ? `${patient.name_en} / ${patient.name_ar}`
+                                : patient.name_en;
+                            const genderDisplay =
+                                patient.gender === "M"
+                                    ? "Male"
+                                    : patient.gender === "F"
+                                      ? "Female"
+                                      : "Other";
+
+                            html += `
+                            <button type="button" class="list-group-item list-group-item-action"
+                                onclick="selectPatient('${patient.id}', '${patient.mrn.replace(/'/g, "\\'")}', '${displayName.replace(/'/g, "\\'")}', '${patient.dob}', '${genderDisplay}', '${(patient.phone || "").replace(/'/g, "\\'")}')">
+                                <div class="d-flex w-100 justify-content-between align-items-center">
+                                    <div>
+                                        <strong>${patient.mrn}</strong> - ${displayName}
+                                        <br>
+                                        <small class="text-muted">DOB: ${patient.dob} | Gender: ${genderDisplay}</small>
+                                        ${patient.phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${patient.phone}</small>` : ""}
+                                    </div>
+                                    <i class="bi bi-chevron-right text-muted"></i>
+                                </div>
+                            </button>
+                        `;
+                        });
+                        html += "</div>";
+                        patientResultsDiv.innerHTML = html;
+                    })
+                    .catch((error) => {
+                        console.error("Error:", error);
+                        patientResultsDiv.innerHTML =
+                            '<div class="alert alert-danger">Error searching for patients</div>';
+                    });
+            });
         }
     });
+
+    function selectPatient(id, mrn, name, dob, gender, phone) {
+        document.getElementById("patient_mrn").value = mrn;
+        document.getElementById("patient_name").value = name;
+        document.getElementById("patient_dob").value = dob;
+        document.getElementById("patient_gender").value = gender;
+        document.getElementById("patient_phone").value = phone;
+
+        // Clear the results
+        document.getElementById("patientResults").innerHTML = "";
+    }
+
+    // Auto-fill procedure names when procedure code is selected
+    const procedureCodeSelect = document.getElementById("procedure_code");
+    const procedureNameEnInput = document.getElementById("procedure_name_en");
+    const procedureNameArInput = document.getElementById("procedure_name_ar");
+
+    if (procedureCodeSelect && procedureNameEnInput && procedureNameArInput) {
+        procedureCodeSelect.addEventListener("change", function () {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                const nameEn =
+                    selectedOption.getAttribute("data-name-en") || "";
+                const nameAr =
+                    selectedOption.getAttribute("data-name-ar") || "";
+                procedureNameEnInput.value = nameEn;
+                procedureNameArInput.value = nameAr;
+            }
+        });
+    }
 </script>
 {% endblock %}

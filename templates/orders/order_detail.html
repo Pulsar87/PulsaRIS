@@ -1,22 +1,25 @@
-{% extends 'layout.html' %}
-{% load i18n %}
-
-{% block title %}{% trans 'Order Details' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Order
+Details' %}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-file-medical me-2"></i>{% trans 'Order Details' %}
+                    <i class="fas fa-file-medical me-2"></i>{% trans 'Order
+                    Details' %}
                 </h2>
                 <div>
-                    <a href="{% url 'orders:order_list' %}" class="btn btn-outline-secondary">
+                    <a
+                        href="{% url 'orders:worklist' %}"
+                        class="btn btn-outline-secondary"
+                    >
                         <i class="fas fa-list me-1"></i>{% trans 'Order List' %}
                     </a>
-                    <a href="{% url 'orders:edit_order' order.pk %}" class="btn btn-warning">
+                    <a
+                        href="{% url 'orders:edit_order' order.pk %}"
+                        class="btn btn-warning"
+                    >
                         <i class="fas fa-edit me-1"></i>{% trans 'Edit Order' %}
                     </a>
                 </div>
@@ -25,48 +28,81 @@
             <!-- Order Information Card -->
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{% trans 'Order Information' %}</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>{% trans 'Order
+                        Information' %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Accession Number' %}</label>
-                            <p class="fs-5 fw-bold">{{ order.accession_number }}</p>
+                            <label class="text-muted small"
+                                >{% trans 'Accession Number' %}</label
+                            >
+                            <p class="fs-5 fw-bold">
+                                {{ order.accession_number }}
+                            </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Status' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Status' %}</label
+                            >
                             <p>
                                 {% if order.status == 'REGISTERED' %}
-                                    <span class="badge bg-primary">{% trans 'Registered' %}</span>
+                                <span class="badge bg-primary"
+                                    >{% trans 'Registered' %}</span
+                                >
                                 {% elif order.status == 'SCHEDULED' %}
-                                    <span class="badge bg-info">{% trans 'Scheduled' %}</span>
+                                <span class="badge bg-info"
+                                    >{% trans 'Scheduled' %}</span
+                                >
                                 {% elif order.status == 'IN_PROGRESS' %}
-                                    <span class="badge bg-warning text-dark">{% trans 'In Progress' %}</span>
+                                <span class="badge bg-warning text-dark"
+                                    >{% trans 'In Progress' %}</span
+                                >
                                 {% elif order.status == 'COMPLETED' %}
-                                    <span class="badge bg-success">{% trans 'Completed' %}</span>
+                                <span class="badge bg-success"
+                                    >{% trans 'Completed' %}</span
+                                >
                                 {% elif order.status == 'REPORTED' %}
-                                    <span class="badge bg-success">{% trans 'Reported' %}</span>
+                                <span class="badge bg-success"
+                                    >{% trans 'Reported' %}</span
+                                >
                                 {% elif order.status == 'FINALIZED' %}
-                                    <span class="badge bg-dark">{% trans 'Finalized' %}</span>
+                                <span class="badge bg-dark"
+                                    >{% trans 'Finalized' %}</span
+                                >
                                 {% elif order.status == 'CANCELLED' %}
-                                    <span class="badge bg-secondary">{% trans 'Cancelled' %}</span>
+                                <span class="badge bg-secondary"
+                                    >{% trans 'Cancelled' %}</span
+                                >
                                 {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Priority' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Priority' %}</label
+                            >
                             <p>
                                 {% if order.priority == 'STAT' %}
-                                    <span class="badge bg-danger">{% trans 'STAT' %}</span>
+                                <span class="badge bg-danger"
+                                    >{% trans 'STAT' %}</span
+                                >
                                 {% elif order.priority == 'URGENT' %}
-                                    <span class="badge bg-warning text-dark">{% trans 'Urgent' %}</span>
+                                <span class="badge bg-warning text-dark"
+                                    >{% trans 'Urgent' %}</span
+                                >
                                 {% else %}
-                                    <span class="badge bg-secondary">{% trans 'Routine' %}</span>
+                                <span class="badge bg-secondary"
+                                    >{% trans 'Routine' %}</span
+                                >
                                 {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Created At' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Created At' %}</label
+                            >
                             <p>{{ order.created_at|date:"Y-m-d H:i" }}</p>
                         </div>
                     </div>
@@ -76,42 +112,65 @@
             <!-- Patient Information Card -->
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>{% trans 'Patient Information' %}</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>{% trans 'Patient
+                        Information' %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'MRN' %}</label>
-                            <p><a href="{% url 'patients:patient_detail' order.patient.pk %}">{{ order.patient.mrn }}</a></p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Name (English)' %}</label>
-                            <p>{{ order.patient.first_name_en }} {{ order.patient.last_name_en }}</p>
-                        </div>
-                        {% if order.patient.first_name_ar %}
-                        <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Name (Arabic)' %}</label>
-                            <p dir="rtl">{{ order.patient.first_name_ar }} {{ order.patient.last_name_ar }}</p>
-                        </div>
-                        {% endif %}
-                        <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Date of Birth' %}</label>
-                            <p>{{ order.patient.dob|date:"Y-m-d" }}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Gender' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'MRN' %}</label
+                            >
                             <p>
-                                {% if order.patient.gender == 'M' %}
-                                    {% trans 'Male' %}
-                                {% elif order.patient.gender == 'F' %}
-                                    {% trans 'Female' %}
-                                {% else %}
-                                    {% trans 'Other' %}
-                                {% endif %}
+                                <a
+                                    href="{% url 'patients:patient_detail' order.patient.pk %}"
+                                    >{{ order.patient.mrn }}</a
+                                >
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Phone' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Name (English)' %}</label
+                            >
+                            <p>
+                                {{ order.patient.first_name_en }} {{
+                                order.patient.last_name_en }}
+                            </p>
+                        </div>
+                        {% if order.patient.first_name_ar %}
+                        <div class="col-md-6">
+                            <label class="text-muted small"
+                                >{% trans 'Name (Arabic)' %}</label
+                            >
+                            <p dir="rtl">
+                                {{ order.patient.first_name_ar }} {{
+                                order.patient.last_name_ar }}
+                            </p>
+                        </div>
+                        {% endif %}
+                        <div class="col-md-6">
+                            <label class="text-muted small"
+                                >{% trans 'Date of Birth' %}</label
+                            >
+                            <p>{{ order.patient.dob|date:"Y-m-d" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small"
+                                >{% trans 'Gender' %}</label
+                            >
+                            <p>
+                                {% if order.patient.gender == 'M' %} {% trans
+                                'Male' %} {% elif order.patient.gender == 'F' %}
+                                {% trans 'Female' %} {% else %} {% trans 'Other'
+                                %} {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small"
+                                >{% trans 'Phone' %}</label
+                            >
                             <p>{{ order.patient.phone|default:"-" }}</p>
                         </div>
                     </div>
@@ -121,53 +180,73 @@
             <!-- Procedure Information Card -->
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>{% trans 'Procedure Information' %}</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-stethoscope me-2"></i>{% trans
+                        'Procedure Information' %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Modality' %}</label>
-                            <p>{{ order.modality.name|default:order.modality.code }}</p>
+                            <label class="text-muted small"
+                                >{% trans 'Modality' %}</label
+                            >
+                            <p>
+                                {{
+                                order.modality.name|default:order.modality.code
+                                }}
+                            </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Procedure Code' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Procedure Code' %}</label
+                            >
                             <p>{{ order.procedure_code }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Procedure Name (English)' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Procedure Name (English)' %}</label
+                            >
                             <p>{{ order.procedure_name_en }}</p>
                         </div>
                         {% if order.procedure_name_ar %}
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Procedure Name (Arabic)' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Procedure Name (Arabic)' %}</label
+                            >
                             <p dir="rtl">{{ order.procedure_name_ar }}</p>
                         </div>
                         {% endif %}
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Laterality' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Laterality' %}</label
+                            >
                             <p>
-                                {% if order.laterality == 'L' %}
-                                    {% trans 'Left' %}
-                                {% elif order.laterality == 'R' %}
-                                    {% trans 'Right' %}
-                                {% elif order.laterality == 'B' %}
-                                    {% trans 'Bilateral' %}
-                                {% else %}
-                                    -
-                                {% endif %}
+                                {% if order.laterality == 'L' %} {% trans 'Left'
+                                %} {% elif order.laterality == 'R' %} {% trans
+                                'Right' %} {% elif order.laterality == 'B' %} {%
+                                trans 'Bilateral' %} {% else %} - {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Body Part' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Body Part' %}</label
+                            >
                             <p>{{ order.body_part|default:"-" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Contrast Required' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Contrast Required' %}</label
+                            >
                             <p>
                                 {% if order.contrast_required %}
-                                    <span class="badge bg-warning text-dark">{% trans 'Yes' %}</span>
+                                <span class="badge bg-warning text-dark"
+                                    >{% trans 'Yes' %}</span
+                                >
                                 {% else %}
-                                    <span class="badge bg-secondary">{% trans 'No' %}</span>
+                                <span class="badge bg-secondary"
+                                    >{% trans 'No' %}</span
+                                >
                                 {% endif %}
                             </p>
                         </div>
@@ -178,43 +257,58 @@
             <!-- Additional Information Card -->
             <div class="card mb-4">
                 <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-notes-medical me-2"></i>{% trans 'Additional Information' %}</h5>
+                    <h5 class="mb-0">
+                        <i class="fas fa-notes-medical me-2"></i>{% trans
+                        'Additional Information' %}
+                    </h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Referring Physician' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Referring Physician' %}</label
+                            >
                             <p>{{ order.referring_physician|default:"-" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Facility' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Facility' %}</label
+                            >
                             <p>{{ order.facility.name|default:"-" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Room/Station' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Room/Station' %}</label
+                            >
                             <p>{{ order.room_station.name|default:"-" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Scheduled DateTime' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Scheduled DateTime' %}</label
+                            >
                             <p>
-                                {% if order.scheduled_datetime %}
-                                    {{ order.scheduled_datetime|date:"Y-m-d H:i" }}
-                                {% else %}
-                                    -
-                                {% endif %}
+                                {% if order.scheduled_datetime %} {{
+                                order.scheduled_datetime|date:"Y-m-d H:i" }} {%
+                                else %} - {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Duration (minutes)' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Duration (minutes)' %}</label
+                            >
                             <p>{{ order.duration_minutes }}</p>
                         </div>
                         <div class="col-md-6">
-                            <label class="text-muted small">{% trans 'Billing Status' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Billing Status' %}</label
+                            >
                             <p>{{ order.billing_status }}</p>
                         </div>
                         {% if order.clinical_indication %}
                         <div class="col-12">
-                            <label class="text-muted small">{% trans 'Clinical Indication' %}</label>
+                            <label class="text-muted small"
+                                >{% trans 'Clinical Indication' %}</label
+                            >
                             <p>{{ order.clinical_indication }}</p>
                         </div>
                         {% endif %}
@@ -224,16 +318,27 @@
 
             <!-- Action Buttons -->
             <div class="d-flex justify-content-end gap-2">
-                <a href="{% url 'orders:order_list' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to List' %}
+                <a href="{% url 'orders:worklist' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to
+                    List' %}
                 </a>
-                <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-info text-white">
-                    <i class="fas fa-file-medical-alt me-1"></i>{% trans 'View Reports' %}
+                <a
+                    href="{% url 'reports:study_reports' order.id %}"
+                    class="btn btn-info text-white"
+                >
+                    <i class="fas fa-file-medical-alt me-1"></i>{% trans 'View
+                    Reports' %}
                 </a>
-                <a href="{% url 'orders:edit_order' order.pk %}" class="btn btn-warning">
+                <a
+                    href="{% url 'orders:edit_order' order.pk %}"
+                    class="btn btn-warning"
+                >
                     <i class="fas fa-edit me-1"></i>{% trans 'Edit' %}
                 </a>
-                <a href="{% url 'orders:delete_order' order.pk %}" class="btn btn-danger">
+                <a
+                    href="{% url 'orders:delete_order' order.pk %}"
+                    class="btn btn-danger"
+                >
                     <i class="fas fa-trash me-1"></i>{% trans 'Delete' %}
                 </a>
             </div>

@@ -1,29 +1,40 @@
-{% extends 'layout.html' %}
-{% load i18n %}
-
-{% block title %}{{ patient.mrn }} - {% trans 'Patient Details' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{{ patient.mrn }} -
+{% trans 'Patient Details' %}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
             <!-- Page Header -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2 class="mb-0">
-                    <i class="fas fa-user-circle me-2"></i>{{ patient.first_name_en }} {{ patient.last_name_en }}
+                    <i class="fas fa-user-circle me-2"></i>{{
+                    patient.first_name_en }} {{ patient.last_name_en }}
                 </h2>
                 <div class="btn-group">
-                    <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to List' %}
+                    <a
+                        href="{% url 'patients:patient_list' %}"
+                        class="btn btn-outline-secondary"
+                    >
+                        <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to
+                        List' %}
                     </a>
-                    <a href="{% url 'patients:edit_patient' patient.pk %}" class="btn btn-warning">
+                    <a
+                        href="{% url 'patients:edit_patient' patient.pk %}"
+                        class="btn btn-warning"
+                    >
                         <i class="fas fa-edit me-1"></i>{% trans 'Edit' %}
                     </a>
-                    <a href="{% url 'patients:delete_patient' patient.pk %}" class="btn btn-danger">
+                    <a
+                        href="{% url 'patients:delete_patient' patient.pk %}"
+                        class="btn btn-danger"
+                    >
                         <i class="fas fa-trash me-1"></i>{% trans 'Delete' %}
                     </a>
-                    <a href="{% url 'orders:reserve_order' %}?mrn={{ patient.mrn }}" class="btn btn-primary">
-                        <i class="fas fa-file-medical me-1"></i>{% trans 'Create Order' %}
+                    <a
+                        href="{% url 'orders:add_order' %}?mrn={{ patient.mrn }}"
+                        class="btn btn-primary"
+                    >
+                        <i class="fas fa-file-medical me-1"></i>{% trans 'Create
+                        Order' %}
                     </a>
                 </div>
             </div>
@@ -34,57 +45,109 @@
                     <!-- Patient Info Card -->
                     <div class="card mb-4">
                         <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>{% trans 'Patient Information' %}</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-id-card me-2"></i>{% trans
+                                'Patient Information' %}
+                            </h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'MRN' %}</label>
-                                    <p class="mb-0 fs-5"><strong>{{ patient.mrn }}</strong></p>
+                                    <label class="text-muted small"
+                                        >{% trans 'MRN' %}</label
+                                    >
+                                    <p class="mb-0 fs-5">
+                                        <strong>{{ patient.mrn }}</strong>
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'National ID' %}</label>
-                                    <p class="mb-0">{{ patient.national_id|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'National ID' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.national_id|default:"-" }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Full Name (English)' %}</label>
-                                    <p class="mb-0">{{ patient.first_name_en }} {{ patient.last_name_en }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Full Name (English)'
+                                        %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.first_name_en }} {{
+                                        patient.last_name_en }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Full Name (Arabic)' %}</label>
-                                    <p class="mb-0" dir="rtl">{{ patient.first_name_ar }} {{ patient.last_name_ar }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Full Name (Arabic)' %}</label
+                                    >
+                                    <p class="mb-0" dir="rtl">
+                                        {{ patient.first_name_ar }} {{
+                                        patient.last_name_ar }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Date of Birth' %}</label>
-                                    <p class="mb-0">{{ patient.dob|date:"Y-m-d" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Date of Birth' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.dob|date:"Y-m-d" }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Gender' %}</label>
+                                    <label class="text-muted small"
+                                        >{% trans 'Gender' %}</label
+                                    >
                                     <p class="mb-0">
                                         {% if patient.gender == 'M' %}
-                                            <span class="badge bg-primary">{% trans 'Male' %}</span>
+                                        <span class="badge bg-primary"
+                                            >{% trans 'Male' %}</span
+                                        >
                                         {% elif patient.gender == 'F' %}
-                                            <span class="badge bg-danger">{% trans 'Female' %}</span>
+                                        <span class="badge bg-danger"
+                                            >{% trans 'Female' %}</span
+                                        >
                                         {% else %}
-                                            <span class="badge bg-secondary">{% trans 'Other' %}</span>
+                                        <span class="badge bg-secondary"
+                                            >{% trans 'Other' %}</span
+                                        >
                                         {% endif %}
                                     </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Nationality' %}</label>
-                                    <p class="mb-0">{{ patient.nationality|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Nationality' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.nationality|default:"-" }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Phone' %}</label>
-                                    <p class="mb-0">{{ patient.phone|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Phone' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.phone|default:"-" }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Email' %}</label>
-                                    <p class="mb-0">{{ patient.email|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Email' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{ patient.email|default:"-" }}
+                                    </p>
                                 </div>
                                 <div class="col-12">
-                                    <label class="text-muted small">{% trans 'Address' %}</label>
-                                    <p class="mb-0">{{ patient.address|default:"-"|linebreaksbr }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Address' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{
+                                        patient.address|default:"-"|linebreaksbr
+                                        }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -93,17 +156,32 @@
                     <!-- Emergency Contact Card -->
                     <div class="card mb-4">
                         <div class="card-header bg-warning">
-                            <h5 class="mb-0"><i class="fas fa-phone-alt me-2"></i>{% trans 'Emergency Contact' %}</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-phone-alt me-2"></i>{% trans
+                                'Emergency Contact' %}
+                            </h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Contact Name' %}</label>
-                                    <p class="mb-0">{{ patient.emergency_contact_name|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Contact Name' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{
+                                        patient.emergency_contact_name|default:"-"
+                                        }}
+                                    </p>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="text-muted small">{% trans 'Contact Phone' %}</label>
-                                    <p class="mb-0">{{ patient.emergency_contact_phone|default:"-" }}</p>
+                                    <label class="text-muted small"
+                                        >{% trans 'Contact Phone' %}</label
+                                    >
+                                    <p class="mb-0">
+                                        {{
+                                        patient.emergency_contact_phone|default:"-"
+                                        }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -115,16 +193,29 @@
                     <!-- Insurance Card -->
                     <div class="card mb-4">
                         <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>{% trans 'Insurance' %}</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-shield-alt me-2"></i>{% trans
+                                'Insurance' %}
+                            </h5>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="text-muted small">{% trans 'Provider' %}</label>
-                                <p class="mb-0">{{ patient.insurance_provider|default:"-" }}</p>
+                                <label class="text-muted small"
+                                    >{% trans 'Provider' %}</label
+                                >
+                                <p class="mb-0">
+                                    {{ patient.insurance_provider|default:"-" }}
+                                </p>
                             </div>
                             <div>
-                                <label class="text-muted small">{% trans 'Policy Number' %}</label>
-                                <p class="mb-0">{{ patient.insurance_policy_number|default:"-" }}</p>
+                                <label class="text-muted small"
+                                    >{% trans 'Policy Number' %}</label
+                                >
+                                <p class="mb-0">
+                                    {{
+                                    patient.insurance_policy_number|default:"-"
+                                    }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -132,30 +223,51 @@
                     <!-- Additional Info Card -->
                     <div class="card mb-4">
                         <div class="card-header bg-info text-white">
-                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{% trans 'Additional Info' %}</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>{% trans
+                                'Additional Info' %}
+                            </h5>
                         </div>
                         <div class="card-body">
                             <div class="mb-3">
-                                <label class="text-muted small">{% trans 'Data Sharing Consent' %}</label>
+                                <label class="text-muted small"
+                                    >{% trans 'Data Sharing Consent' %}</label
+                                >
                                 <p class="mb-0">
                                     {% if patient.consent_data_sharing %}
-                                        <span class="badge bg-success">{% trans 'Granted' %}</span>
+                                    <span class="badge bg-success"
+                                        >{% trans 'Granted' %}</span
+                                    >
                                     {% else %}
-                                        <span class="badge bg-danger">{% trans 'Not Granted' %}</span>
+                                    <span class="badge bg-danger"
+                                        >{% trans 'Not Granted' %}</span
+                                    >
                                     {% endif %}
                                 </p>
                             </div>
                             <div class="mb-3">
-                                <label class="text-muted small">{% trans 'Data Retention Until' %}</label>
-                                <p class="mb-0">{{ patient.data_retention_until|date:"Y-m-d"|default:"-" }}</p>
+                                <label class="text-muted small"
+                                    >{% trans 'Data Retention Until' %}</label
+                                >
+                                <p class="mb-0">
+                                    {{
+                                    patient.data_retention_until|date:"Y-m-d"|default:"-"
+                                    }}
+                                </p>
                             </div>
                             <div class="mb-3">
-                                <label class="text-muted small">{% trans 'Deceased' %}</label>
+                                <label class="text-muted small"
+                                    >{% trans 'Deceased' %}</label
+                                >
                                 <p class="mb-0">
                                     {% if patient.is_deceased %}
-                                        <span class="badge bg-dark">{% trans 'Yes' %}</span>
+                                    <span class="badge bg-dark"
+                                        >{% trans 'Yes' %}</span
+                                    >
                                     {% else %}
-                                        <span class="badge bg-light text-dark">{% trans 'No' %}</span>
+                                    <span class="badge bg-light text-dark"
+                                        >{% trans 'No' %}</span
+                                    >
                                     {% endif %}
                                 </p>
                             </div>
@@ -165,16 +277,27 @@
                     <!-- Metadata Card -->
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="mb-0"><i class="fas fa-clock me-2"></i>{% trans 'Record Metadata' %}</h5>
+                            <h5 class="mb-0">
+                                <i class="fas fa-clock me-2"></i>{% trans
+                                'Record Metadata' %}
+                            </h5>
                         </div>
                         <div class="card-body">
                             <div class="mb-2">
-                                <label class="text-muted small">{% trans 'Created' %}</label>
-                                <p class="mb-0 small">{{ patient.created_at|date:"Y-m-d H:i" }}</p>
+                                <label class="text-muted small"
+                                    >{% trans 'Created' %}</label
+                                >
+                                <p class="mb-0 small">
+                                    {{ patient.created_at|date:"Y-m-d H:i" }}
+                                </p>
                             </div>
                             <div>
-                                <label class="text-muted small">{% trans 'Last Updated' %}</label>
-                                <p class="mb-0 small">{{ patient.updated_at|date:"Y-m-d H:i" }}</p>
+                                <label class="text-muted small"
+                                    >{% trans 'Last Updated' %}</label
+                                >
+                                <p class="mb-0 small">
+                                    {{ patient.updated_at|date:"Y-m-d H:i" }}
+                                </p>
                             </div>
                         </div>
                     </div>

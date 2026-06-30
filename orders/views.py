@@ -1,9 +1,10 @@
+import logging
+
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
-import logging
 
 from orders.models import ExamOrder
 from patients.views import get_tenant
@@ -224,7 +225,7 @@ def edit_order(request, pk):
 
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:order_list")
+        return redirect("orders:worklist")
 
     if request.method == "POST":
         # Get form data
@@ -363,13 +364,13 @@ def delete_order(request, pk):
 
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:order_list")
+        return redirect("orders:worklist")
 
     if request.method == "POST":
         try:
             order.delete()
             messages.success(request, _("Order deleted successfully!"))
-            return redirect("orders:order_list")
+            return redirect("orders:worklist")
         except Exception as e:
             messages.error(
                 request, _("Error deleting order: %(error)s") % {"error": str(e)}
@@ -382,127 +383,127 @@ def delete_order(request, pk):
     return render(request, "orders/delete_order.html", context)
 
 
-def reserve_order(request):
-    """Handle order reservation page and form submission."""
-    if request.method == "POST":
-        # Get form data
-        patient_mrn = request.POST.get("patient_mrn", "").strip()
-        accession_number = request.POST.get("accession_number", "").strip()
-        priority = request.POST.get("priority", "ROUTINE")
-        device_id = request.POST.get("device", "")
-        procedure_code = request.POST.get("procedure_code", "").strip()
-        procedure_name_en = request.POST.get("procedure_name_en", "").strip()
-        procedure_name_ar = request.POST.get("procedure_name_ar", "").strip()
-        referring_physician = request.POST.get("referring_physician", "").strip()
-        laterality = request.POST.get("laterality", "")
-        body_part = request.POST.get("body_part", "").strip()
-        contrast_required = request.POST.get("contrast_required") == "on"
-        clinical_indication = request.POST.get("clinical_indication", "").strip()
-        scheduled_datetime = request.POST.get("scheduled_datetime", "")
-        duration_minutes = request.POST.get("duration_minutes", 15)
+# def reserve_order(request):
+#     """Handle order reservation page and form submission."""
+#     if request.method == "POST":
+#         # Get form data
+#         patient_mrn = request.POST.get("patient_mrn", "").strip()
+#         accession_number = request.POST.get("accession_number", "").strip()
+#         priority = request.POST.get("priority", "ROUTINE")
+#         device_id = request.POST.get("device", "")
+#         procedure_code = request.POST.get("procedure_code", "").strip()
+#         procedure_name_en = request.POST.get("procedure_name_en", "").strip()
+#         procedure_name_ar = request.POST.get("procedure_name_ar", "").strip()
+#         referring_physician = request.POST.get("referring_physician", "").strip()
+#         laterality = request.POST.get("laterality", "")
+#         body_part = request.POST.get("body_part", "").strip()
+#         contrast_required = request.POST.get("contrast_required") == "on"
+#         clinical_indication = request.POST.get("clinical_indication", "").strip()
+#         scheduled_datetime = request.POST.get("scheduled_datetime", "")
+#         duration_minutes = request.POST.get("duration_minutes", 15)
 
-        # Basic validation
-        if not patient_mrn:
-            messages.error(request, _("Please enter a valid MRN"))
-            return redirect("orders:reserve_order")
+#         # Basic validation
+#         if not patient_mrn:
+#             messages.error(request, _("Please enter a valid MRN"))
+#             return redirect("orders:reserve_order")
 
-        if not accession_number:
-            messages.error(request, _("Accession number is required"))
-            return redirect("orders:reserve_order")
+#         if not accession_number:
+#             messages.error(request, _("Accession number is required"))
+#             return redirect("orders:reserve_order")
 
-        if not device_id:
-            messages.error(request, _("Please select a device"))
-            return redirect("orders:reserve_order")
+#         if not device_id:
+#             messages.error(request, _("Please select a device"))
+#             return redirect("orders:reserve_order")
 
-        if not procedure_code or not procedure_name_en:
-            messages.error(request, _("Procedure code and name are required"))
-            return redirect("orders:reserve_order")
+#         if not procedure_code or not procedure_name_en:
+#             messages.error(request, _("Procedure code and name are required"))
+#             return redirect("orders:reserve_order")
 
-        # Get tenant
-        tenant = get_tenant(request)
-        if not tenant:
-            messages.error(request, _("Tenant not found. Please select a tenant."))
-            return redirect("license:home")
+#         # Get tenant
+#         tenant = get_tenant(request)
+#         if not tenant:
+#             messages.error(request, _("Tenant not found. Please select a tenant."))
+#             return redirect("license:home")
 
-        # Look up patient by MRN
-        from patients.models import Patient
+#         # Look up patient by MRN
+#         from patients.models import Patient
 
-        try:
-            patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
-        except Patient.DoesNotExist:
-            messages.error(
-                request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
-            )
-            return redirect("orders:reserve_order")
+#         try:
+#             patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
+#         except Patient.DoesNotExist:
+#             messages.error(
+#                 request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
+#             )
+#             return redirect("orders:reserve_order")
 
-        # Check for duplicate accession number within tenant
-        if ExamOrder.objects.filter(
-            tenant=tenant, accession_number=accession_number
-        ).exists():
-            messages.error(
-                request, _("An order with this accession number already exists")
-            )
-            return redirect("orders:reserve_order")
+#         # Check for duplicate accession number within tenant
+#         if ExamOrder.objects.filter(
+#             tenant=tenant, accession_number=accession_number
+#         ).exists():
+#             messages.error(
+#                 request, _("An order with this accession number already exists")
+#             )
+#             return redirect("orders:reserve_order")
 
-        # Get modality from device
-        try:
-            device = Device.objects.get(id=device_id, tenant=tenant)
-            modality = device.modality
-        except Device.DoesNotExist:
-            messages.error(request, _("Selected device not found"))
-            return redirect("orders:reserve_order")
+#         # Get modality from device
+#         try:
+#             device = Device.objects.get(id=device_id, tenant=tenant)
+#             modality = device.modality
+#         except Device.DoesNotExist:
+#             messages.error(request, _("Selected device not found"))
+#             return redirect("orders:reserve_order")
 
-        # Create order
-        try:
-            order = ExamOrder.objects.create(
-                tenant=tenant,
-                patient=patient,
-                accession_number=accession_number,
-                referring_physician=referring_physician,
-                modality=modality,
-                procedure_code=procedure_code,
-                procedure_name_en=procedure_name_en,
-                procedure_name_ar=procedure_name_ar,
-                priority=priority,
-                clinical_indication=clinical_indication,
-                laterality=laterality,
-                body_part=body_part,
-                contrast_required=contrast_required,
-                status=ExamOrder.Status.REGISTERED,
-                scheduled_datetime=scheduled_datetime if scheduled_datetime else None,
-                duration_minutes=int(duration_minutes),
-                room_station=device,
-                created_by=request.user if request.user.is_authenticated else None,
-            )
-            messages.success(
-                request,
-                _("Order reserved successfully! Accession: %(acc)s")
-                % {"acc": accession_number},
-            )
-            return redirect("orders:order_detail", pk=order.pk)
-        except Exception as e:
-            messages.error(
-                request, _("Error creating order: %(error)s") % {"error": str(e)}
-            )
-            return redirect("orders:reserve_order")
+#         # Create order
+#         try:
+#             order = ExamOrder.objects.create(
+#                 tenant=tenant,
+#                 patient=patient,
+#                 accession_number=accession_number,
+#                 referring_physician=referring_physician,
+#                 modality=modality,
+#                 procedure_code=procedure_code,
+#                 procedure_name_en=procedure_name_en,
+#                 procedure_name_ar=procedure_name_ar,
+#                 priority=priority,
+#                 clinical_indication=clinical_indication,
+#                 laterality=laterality,
+#                 body_part=body_part,
+#                 contrast_required=contrast_required,
+#                 status=ExamOrder.Status.REGISTERED,
+#                 scheduled_datetime=scheduled_datetime if scheduled_datetime else None,
+#                 duration_minutes=int(duration_minutes),
+#                 room_station=device,
+#                 created_by=request.user if request.user.is_authenticated else None,
+#             )
+#             messages.success(
+#                 request,
+#                 _("Order reserved successfully! Accession: %(acc)s")
+#                 % {"acc": accession_number},
+#             )
+#             return redirect("orders:order_detail", pk=order.pk)
+#         except Exception as e:
+#             messages.error(
+#                 request, _("Error creating order: %(error)s") % {"error": str(e)}
+#             )
+#             return redirect("orders:reserve_order")
 
-    # GET request - pre-fill MRN if provided
-    prefill_mrn = request.GET.get("mrn", "")
-    tenant = get_tenant(request)
+#     # GET request - pre-fill MRN if provided
+#     prefill_mrn = request.GET.get("mrn", "")
+#     tenant = get_tenant(request)
 
-    # Get active procedures from database
-    from orders.models import Procedure
+#     # Get active procedures from database
+#     from orders.models import Procedure
 
-    procedures = Procedure.objects.filter(is_active=True).order_by(
-        "modality_type", "code"
-    )
+#     procedures = Procedure.objects.filter(is_active=True).order_by(
+#         "modality_type", "code"
+#     )
 
-    context = {
-        "prefill_mrn": prefill_mrn,
-        "procedures": procedures,
-        "priority_choices": ExamOrder.Priority.choices,
-    }
-    return render(request, "orders/reserve_order.html", context)
+#     context = {
+#         "prefill_mrn": prefill_mrn,
+#         "procedures": procedures,
+#         "priority_choices": ExamOrder.Priority.choices,
+#     }
+#     return render(request, "orders/reserve_order.html", context)
 
 
 def get_devices(request):
@@ -580,40 +581,38 @@ def update_order_status(request, pk):
 def send_order_worklist(request, pk):
     """
     API endpoint to send worklist for a specific order to configured DICOM devices.
-    
+
     This endpoint triggers sending the worklist entry for an order to all
     relevant DICOM modality devices.
-    
+
     Args:
         pk: Primary key of the ExamOrder
-        
+
     Returns:
         JSON response with success status and details
     """
     from django.http import JsonResponse
+
     from integrations.dicom import send_worklist_for_order
-    
+
     try:
         order = ExamOrder.objects.select_related(
-            'patient', 'modality', 'room_station', 'tenant'
+            "patient", "modality", "room_station", "tenant"
         ).get(pk=pk)
-        
+
         # Check if order has required information
         if not order.room_station or not order.room_station.dicom_host:
-            return JsonResponse({
-                "success": False,
-                "error": "No DICOM device configured for this order"
-            })
-        
+            return JsonResponse(
+                {"success": False, "error": "No DICOM device configured for this order"}
+            )
+
         # Send worklist to device(s)
         success, message, results = send_worklist_for_order(order)
-        
-        return JsonResponse({
-            "success": success,
-            "message": message,
-            "details": results
-        })
-        
+
+        return JsonResponse(
+            {"success": success, "message": message, "details": results}
+        )
+
     except ExamOrder.DoesNotExist:
         return JsonResponse({"success": False, "error": "Order not found"})
     except Exception as e:
@@ -625,44 +624,46 @@ def send_order_worklist(request, pk):
 def test_dicom_connection(request, device_id):
     """
     API endpoint to test DICOM connection to a specific device.
-    
+
     Args:
         device_id: UUID of the Device to test
-        
+
     Returns:
         JSON response with connection status
     """
     from django.http import JsonResponse
+
     from integrations.dicom import verify_dicom_connection
-    
+
     try:
         device = Device.objects.get(id=device_id)
-        
+
         if not device.dicom_host:
-            return JsonResponse({
-                "success": False,
-                "error": "Device has no DICOM host configured"
-            })
-        
+            return JsonResponse(
+                {"success": False, "error": "Device has no DICOM host configured"}
+            )
+
         success, message = verify_dicom_connection(
             ae_title=device.dicom_ae_title,
             host=device.dicom_host,
             port=device.dicom_port,
             calling_ae_title="RIS_SYSTEM",
-            timeout=10
+            timeout=10,
         )
-        
-        return JsonResponse({
-            "success": success,
-            "message": message,
-            "device": {
-                "name": device.name,
-                "ae_title": device.dicom_ae_title,
-                "host": device.dicom_host,
-                "port": device.dicom_port
+
+        return JsonResponse(
+            {
+                "success": success,
+                "message": message,
+                "device": {
+                    "name": device.name,
+                    "ae_title": device.dicom_ae_title,
+                    "host": device.dicom_host,
+                    "port": device.dicom_port,
+                },
             }
-        })
-        
+        )
+
     except Device.DoesNotExist:
         return JsonResponse({"success": False, "error": "Device not found"})
     except Exception as e:
