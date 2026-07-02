@@ -16,7 +16,8 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
+"&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: orders/views.py:105 orders/views.py:251 templates/orders/add_order.html:720
 msgid "Please enter a valid MRN"
@@ -1337,6 +1338,10 @@ msgid_plural ""
 "                    "
 msgstr[0] ""
 msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+msgstr[4] ""
+msgstr[5] ""
 
 #: templates/patients/add_patient.html:4
 #: templates/patients/patient_list.html:153
@@ -1682,6 +1687,10 @@ msgid_plural ""
 "                    patients "
 msgstr[0] ""
 msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+msgstr[4] ""
+msgstr[5] ""
 
 #: templates/reports/report_confirm_delete.html:4
 #: templates/reports/report_confirm_delete.html:36
@@ -1878,6 +1887,10 @@ msgid_plural ""
 "                    "
 msgstr[0] ""
 msgstr[1] ""
+msgstr[2] ""
+msgstr[3] ""
+msgstr[4] ""
+msgstr[5] ""
 
 #: templates/reports/study_reports.html:58
 msgid "New Report"
@@ -1963,3 +1976,4 @@ msgstr ""
 #: users/views.py:47
 msgid "You have been logged out."
 msgstr ""
+

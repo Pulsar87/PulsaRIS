@@ -224,9 +224,8 @@ Management - Billing{% endblock %} {% block content %}
                                 }}
                             </td>
                             <td>
-                                {% if schedule.is_active %} {% if
-                                schedule.expiration_date %} {% if
-                                schedule.expiration_date < now %}
+                                {% if schedule.is_active %} {% if schedule.expiration_date %}
+                                {% if schedule.expiration_date < now %}
                                 <span class="badge bg-danger">Expired</span>
                                 {% else %}
                                 <span class="badge bg-success">Active</span>

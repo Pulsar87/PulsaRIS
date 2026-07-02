@@ -138,8 +138,7 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Name (English)' %}</label
                             >
                             <p>
-                                {{ order.patient.first_name_en }} {{
-                                order.patient.last_name_en }}
+                                {{ order.patient.first_name_en }} {{ order.patient.last_name_en }}
                             </p>
                         </div>
                         {% if order.patient.first_name_ar %}
@@ -148,8 +147,7 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Name (Arabic)' %}</label
                             >
                             <p dir="rtl">
-                                {{ order.patient.first_name_ar }} {{
-                                order.patient.last_name_ar }}
+                                {{ order.patient.first_name_ar }} {{ order.patient.last_name_ar }}
                             </p>
                         </div>
                         {% endif %}
@@ -164,8 +162,7 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Gender' %}</label
                             >
                             <p>
-                                {% if order.patient.gender == 'M' %} {% trans
-                                'Male' %} {% elif order.patient.gender == 'F' %}
+                                {% if order.patient.gender == 'M' %} {% trans 'Male' %} {% elif order.patient.gender == 'F' %}
                                 {% trans 'Female' %} {% else %} {% trans 'Other'
                                 %} {% endif %}
                             </p>
@@ -196,9 +193,7 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Modality' %}</label
                             >
                             <p>
-                                {{
-                                order.modality.name|default:order.modality.code
-                                }}
+                                {{ order.modality.name|default:order.modality.code }}
                             </p>
                         </div>
                         <div class="col-md-6">
@@ -226,10 +221,8 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Laterality' %}</label
                             >
                             <p>
-                                {% if order.laterality == 'L' %} {% trans 'Left'
-                                %} {% elif order.laterality == 'R' %} {% trans
-                                'Right' %} {% elif order.laterality == 'B' %} {%
-                                trans 'Bilateral' %} {% else %} - {% endif %}
+                                {% if order.laterality == 'L' %} {% trans 'Left' %} {% elif order.laterality == 'R' %} {% trans 'Right' %}
+                                {% elif order.laterality == 'B' %} {% trans 'Bilateral' %} {% else %} - {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">
@@ -292,9 +285,8 @@ Details' %}{% endblock %} {% block content %}
                                 >{% trans 'Scheduled DateTime' %}</label
                             >
                             <p>
-                                {% if order.scheduled_datetime %} {{
-                                order.scheduled_datetime|date:"Y-m-d H:i" }} {%
-                                else %} - {% endif %}
+                                {% if order.scheduled_datetime %}
+                                {{ order.scheduled_datetime|date:"Y-m-d H:i" }} {% else %} - {% endif %}
                             </p>
                         </div>
                         <div class="col-md-6">

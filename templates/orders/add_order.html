@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% load i18n static %} {% block title %}{% trans
-"Order Reservation" %} - Pulsar RIS{% endblock %} {% block content %}
+{% extends 'layout.html' %} {% load i18n static %} {% block title %}{% trans "Order Reservation" %} - Pulsar RIS{% endblock %} {% block content %}
 <div class="row justify-content-center">
     <div class="col-12">
         <div class="card shadow-sm border-0 rounded-4">
@@ -235,42 +234,34 @@
                                     <option value="" selected disabled>
                                         {% trans "Select procedure code" %}
                                     </option>
-                                    {% load i18n %} {% trans "CT Procedures" as
-                                    ct_group %}
+                                    {% load i18n %} {% trans "CT Procedures" as ct_group %}
                                     <optgroup label="{{ ct_group }}">
                                         <option value="CT_HEAD">
-                                            {% trans "CT Head without contrast"
-                                            %}
+                                            {% trans "CT Head without contrast" %}
                                         </option>
                                         <option value="CT_HEAD_C">
                                             {% trans "CT Head with contrast" %}
                                         </option>
                                         <option value="CT_CHEST">
-                                            {% trans "CT Chest without contrast"
-                                            %}
+                                            {% trans "CT Chest without contrast" %}
                                         </option>
                                         <option value="CT_CHEST_C">
                                             {% trans "CT Chest with contrast" %}
                                         </option>
                                         <option value="CT_ABD">
-                                            {% trans "CT Abdomen without
-                                            contrast" %}
+                                            {% trans "CT Abdomen without contrast" %}
                                         </option>
                                         <option value="CT_ABD_C">
-                                            {% trans "CT Abdomen with contrast"
-                                            %}
+                                            {% trans "CT Abdomen with contrast" %}
                                         </option>
                                         <option value="CT_PELVIS">
-                                            {% trans "CT Pelvis without
-                                            contrast" %}
+                                            {% trans "CT Pelvis without contrast" %}
                                         </option>
                                         <option value="CT_PELVIS_C">
-                                            {% trans "CT Pelvis with contrast"
-                                            %}
+                                            {% trans "CT Pelvis with contrast" %}
                                         </option>
                                         <option value="CT_SPINE_C">
-                                            {% trans "CT Cervical spine with
-                                            contrast" %}
+                                            {% trans "CT Cervical spine with contrast" %}
                                         </option>
                                         <option value="CT_ANGIO">
                                             {% trans "CT Angiography" %}
@@ -279,36 +270,28 @@
                                     {% trans "MR Procedures" as mr_group %}
                                     <optgroup label="{{ mr_group }}">
                                         <option value="MR_BRAIN">
-                                            {% trans "MRI Brain without
-                                            contrast" %}
+                                            {% trans "MRI Brain without contrast" %}
                                         </option>
                                         <option value="MR_BRAIN_C">
-                                            {% trans "MRI Brain with contrast"
-                                            %}
+                                            {% trans "MRI Brain with contrast" %}
                                         </option>
                                         <option value="MR_SPINE_C">
-                                            {% trans "MRI Cervical spine without
-                                            contrast" %}
+                                            {% trans "MRI Cervical spine without contrast" %}
                                         </option>
                                         <option value="MR_SPINE_T">
-                                            {% trans "MRI Thoracic spine without
-                                            contrast" %}
+                                            {% trans "MRI Thoracic spine without contrast" %}
                                         </option>
                                         <option value="MR_SPINE_L">
-                                            {% trans "MRI Lumbar spine without
-                                            contrast" %}
+                                            {% trans "MRI Lumbar spine without contrast" %}
                                         </option>
                                         <option value="MR_KNEE">
-                                            {% trans "MRI Knee without contrast"
-                                            %}
+                                            {% trans "MRI Knee without contrast" %}
                                         </option>
                                         <option value="MR_SHOULDER">
-                                            {% trans "MRI Shoulder without
-                                            contrast" %}
+                                            {% trans "MRI Shoulder without contrast" %}
                                         </option>
                                         <option value="MR_JOINT">
-                                            {% trans "MRI Joint without
-                                            contrast" %}
+                                            {% trans "MRI Joint without contrast" %}
                                         </option>
                                         <option value="MR_ANGIO">
                                             {% trans "MR Angiography" %}
@@ -380,8 +363,7 @@
                                             {% trans "Mammography" %}
                                         </option>
                                     </optgroup>
-                                    {% trans "Ultrasound Procedures" as us_group
-                                    %}
+                                    {% trans "Ultrasound Procedures" as us_group %}
                                     <optgroup label="{{ us_group }}">
                                         <option value="US_ABD">
                                             {% trans "Ultrasound Abdomen" %}
@@ -408,8 +390,7 @@
                                             {% trans "Echocardiography" %}
                                         </option>
                                     </optgroup>
-                                    {% trans "Nuclear Medicine Procedures" as
-                                    nm_group %}
+                                    {% trans "Nuclear Medicine Procedures" as nm_group %}
                                     <optgroup label="{{ nm_group }}">
                                         <option value="NM_BONE">
                                             {% trans "Bone Scan" %}
@@ -459,8 +440,7 @@
                                             {% trans "VCUG" %}
                                         </option>
                                     </optgroup>
-                                    {% trans "Interventional Procedures" as
-                                    int_group %}
+                                    {% trans "Interventional Procedures" as int_group %}
                                     <optgroup label="{{ int_group }}">
                                         <option value="INT_BIOPSY">
                                             {% trans "Image-guided Biopsy" %}

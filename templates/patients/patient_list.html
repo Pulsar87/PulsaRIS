@@ -87,12 +87,10 @@
                                 <tr>
                                     <td><strong>{{ patient.mrn }}</strong></td>
                                     <td>
-                                        {{ patient.first_name_en }} {{
-                                        patient.last_name_en }}
+                                        {{ patient.first_name_en }} {{ patient.last_name_en }}
                                     </td>
                                     <td dir="rtl">
-                                        {{ patient.first_name_ar }} {{
-                                        patient.last_name_ar }}
+                                        {{ patient.first_name_ar }} {{ patient.last_name_ar }}
                                     </td>
                                     <td>{{ patient.dob|date:"Y-m-d" }}</td>
                                     <td>
@@ -165,8 +163,8 @@
             {% if patients %}
             <div class="d-flex justify-content-between align-items-center mt-3">
                 <small class="text-muted">
-                    {% blocktrans count counter=patients.count %} Showing {{
-                    counter }} patient {% plural %} Showing {{ counter }}
+                    {% blocktrans count counter=patients.count %} Showing
+                    {{ counter }} patient {% plural %} Showing {{ counter }}
                     patients {% endblocktrans %}
                 </small>
             </div>

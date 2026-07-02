@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% load static %} {% block title %}{% if object.pk
-%}Edit{% else %}Create{% endif %} Fee Schedule{% endblock %} {% block content %}
+{% extends 'layout.html' %} {% load static %} {% block title %}{% if object.pk %}Edit{% else %}Create{% endif %} Fee Schedule{% endblock %} {% block content %}
 <div class="container-fluid">
     <div class="row mb-4">
         <div class="col-md-12">
@@ -16,8 +15,7 @@
                 </ol>
             </nav>
             <h2>
-                <i class="fas fa-file-invoice-dollar"></i> {% if object.pk
-                %}Edit{% else %}Create{% endif %} Fee Schedule
+                <i class="fas fa-file-invoice-dollar"></i> {% if object.pk %}Edit{% else %}Create{% endif %} Fee Schedule
             </h2>
         </div>
     </div>
@@ -68,8 +66,7 @@
                                 class="form-label"
                                 >Description</label
                             >
-                            {{ form.description }} {% if form.description.errors
-                            %}
+                            {{ form.description }} {% if form.description.errors %}
                             <div class="text-danger small">
                                 {{ form.description.errors }}
                             </div>
@@ -83,8 +80,7 @@
                                     class="form-label"
                                     >Schedule Type *</label
                                 >
-                                {{ form.schedule_type }} {% if
-                                form.schedule_type.errors %}
+                                {{ form.schedule_type }} {% if form.schedule_type.errors %}
                                 <div class="text-danger small">
                                     {{ form.schedule_type.errors }}
                                 </div>
@@ -111,8 +107,7 @@
                                     class="form-label"
                                     >Currency</label
                                 >
-                                {{ form.currency }} {% if form.currency.errors
-                                %}
+                                {{ form.currency }} {% if form.currency.errors %}
                                 <div class="text-danger small">
                                     {{ form.currency.errors }}
                                 </div>
@@ -127,8 +122,7 @@
                                     class="form-label"
                                     >Effective Date *</label
                                 >
-                                {{ form.effective_date }} {% if
-                                form.effective_date.errors %}
+                                {{ form.effective_date }} {% if form.effective_date.errors %}
                                 <div class="text-danger small">
                                     {{ form.effective_date.errors }}
                                 </div>
@@ -140,8 +134,7 @@
                                     class="form-label"
                                     >Expiration Date</label
                                 >
-                                {{ form.expiration_date }} {% if
-                                form.expiration_date.errors %}
+                                {{ form.expiration_date }} {% if form.expiration_date.errors %}
                                 <div class="text-danger small">
                                     {{ form.expiration_date.errors }}
                                 </div>
@@ -169,8 +162,7 @@
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {% if object.pk
-                                %}Update{% else %}Create{% endif %} Schedule
+                                <i class="fas fa-save"></i> {% if object.pk %}Update{% else %}Create{% endif %} Schedule
                             </button>
                             <a
                                 href="{% url 'billing:fee_schedule_list' %}"

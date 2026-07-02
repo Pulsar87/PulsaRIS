@@ -1,5 +1,4 @@
-{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Delete
-Patient' %}{% endblock %} {% block content %}
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Delete Patient' %}{% endblock %} {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
@@ -35,9 +34,7 @@ Patient' %}{% endblock %} {% block content %}
                     </div>
 
                     <p class="lead mb-4">
-                        <strong
-                            >{% trans "Are you sure you want to delete
-                            patient"%}
+                        <strong>{% trans "Are you sure you want to delete patient"%}
                         </strong>
                     </p>
 
@@ -54,16 +51,13 @@ Patient' %}{% endblock %} {% block content %}
                                 </div>
                                 <div class="col-md-6">
                                     <strong>{% trans 'Patient Name' %}:</strong>
-                                    {{ patient.first_name_en }} {{
-                                    patient.last_name_en }}
+                                    {{ patient.first_name_en }} {{ patient.last_name_en }}
                                 </div>
                                 <div class="col-md-6">
                                     <strong
                                         >{% trans 'Date of Birth' %}:</strong
                                     >
-                                    {{
-                                    patient.date_of_birth|date:"Y-m-d"|default:"-"
-                                    }}
+                                    {{ patient.date_of_birth|date:"Y-m-d"|default:"-" }}
                                 </div>
                                 <div class="col-md-6">
                                     <strong>{% trans 'Gender' %}:</strong>
