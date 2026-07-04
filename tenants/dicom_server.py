@@ -21,6 +21,9 @@ from pydicom.dataset import Dataset
 from pydicom.sequence import Sequence
 from pynetdicom import AE, debug_logger, evt
 from pynetdicom.status import STATUS_PENDING, STATUS_SUCCESS
+from pynetdicom.sop_class import Verification
+from pynetdicom.sop_class import ModalityWorklistInformationFind
+
 
 from orders.models import ExamOrder  # Import from orders app
 from tenants.models import Device, Modality, Tenant  # Import related models
@@ -163,18 +166,21 @@ def handle_find(event):
 def main():
     # Configuration
     AE_TITLE = "RIS_SCP"
-    PORT = 11112
-    HOST = "127.0.0.1"  # Listen on all interfaces
+    #PORT = 11112
+    #HOST = "0.0.0.0"  # Listen on all interfaces
 
     # Initialize Application Entity
-    ae = AE(ae_title=AE_TITLE)
+    ae = AE(AE_TITLE)
+    handlers = [(evt.EVT_C_FIND, handle_find)]
 
     # Add supported context for Modality Worklist Information Find
-    mwlsop = "1.2.840.10008.5.1.4.31"
-    ae.add_supported_context(mwlsop)
+    #mwlsop = "1.2.840.10008.5.1.4.31"
+    ae.add_supported_context(Verification)
+    ae.add_supported_context(ModalityWorklistInformationFind)
+    ae.start_server(("0.0.0.0",11112), evt_handlers=handlers)
 
     # Define event handlers
-    handlers = [(evt.EVT_C_FIND, handle_find)]
+
 
     print(f"Starting DICOM Modality Worklist SCP server...")
     print(f"AE Title: {AE_TITLE}")

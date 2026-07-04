@@ -820,6 +820,11 @@
                 );
                 modal.show();
             },
+            dateClick: function (info) {
+                // Redirect to add order page with selected date and time
+                var clickedDate = new Date(info.dateStr).toISOString().substring(0, 16);
+                window.location.href = "/orders/add/?datetime=" + encodeURIComponent(clickedDate);
+            },
             height: "100%",
             expandRows: true,
             nowIndicator: true,

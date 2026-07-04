@@ -210,10 +210,13 @@ def add_order(request):
         "modality_type", "code"
     )
 
+    # Get scheduled_datetime from query parameter (from calendar click)
+    datetime = request.GET.get("datetime", "")
     context = {
         "facilities": facilities,
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
+        "datetime": datetime,
     }
     return render(request, "orders/add_order.html", context)
 

@@ -604,7 +604,6 @@
                             </div>
                         </div>
                     </div>
-
                     <!-- Scheduling Section -->
                     <div class="mb-4">
                         <h5 class="fw-semibold mb-3 text-primary">
@@ -627,7 +626,6 @@
                                     name="scheduled_datetime"
                                 />
                             </div>
-
                             <!-- Duration -->
                             <div class="col-md-6">
                                 <label
@@ -710,6 +708,18 @@
             const random = Math.floor(Math.random() * 1000);
             accessionField.value = "ACC-" + timestamp + "-" + random;
         }
+
+        // const formattedDate = datetime.toISOString();
+
+        // document.getElementById("scheduled_datetime").value = datetime;
+        // 1. Create a Date object from the string
+        // const dateObj = new Date(scheduled_datetime);
+
+
+        // 3. Slice the ISO string to format as 'YYYY-MM-DDTHH:mm'
+        // const formattedDate = new Date(datetime);
+
+        // 4. Assign directly to the HTML datetime-local input
 
         // Form validation
         const form = document.querySelector("form");
