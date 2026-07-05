@@ -131,7 +131,7 @@
                         <!-- Billing Dropdown -->
                         <li class="nav-item dropdown">
                             <a
-                                class="nav-link dropdown-toggle {% if 'payer' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name or 'service-line' in request.resolver_match.url_name or 'claim' in request.resolver_match.url_name or 'payment' in request.resolver_match.url_name or 'statement' in request.resolver_match.url_name or 'denial' in request.resolver_match.url_name or 'appeal' in request.resolver_match.url_name or 'report' in request.resolver_match.url_name %}active{% endif %}"
+                                class="nav-link dropdown-toggle {% if 'payer' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name or 'service-line' in request.resolver_match.url_name or 'claim' in request.resolver_match.url_name or 'payment' in request.resolver_match.url_name or 'statement' in request.resolver_match.url_name or 'denial' in request.resolver_match.url_name or 'appeal' in request.resolver_match.url_name or 'clearinghouse' in request.resolver_match.url_name or 'patient-insurance' in request.resolver_match.url_name or 'patient-account' in request.resolver_match.url_name or 'authorization' in request.resolver_match.url_name %}active{% endif %}"
                                 href="#"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
@@ -146,13 +146,32 @@
                                 <!-- Setup -->
                                 <li><h6 class="dropdown-header">Setup</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/payers">
+                                    <a class="dropdown-item" href="{% url 'billing:payer_list' %}">
                                         <i class="bi bi-building me-2"></i>{% trans "Payers" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/fee-schedules">
+                                    <a class="dropdown-item" href="{% url 'billing:fee_schedule_list' %}">
                                         <i class="bi bi-table me-2"></i>{% trans "Fee Schedules" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'billing:clearinghouse_list' %}">
+                                        <i class="bi bi-cloud me-2"></i>{% trans "Clearinghouses" %}
+                                    </a>
+                                </li>
+                                
+                                <!-- Patient Insurance & Authorizations -->
+                                <li><hr class="dropdown-divider"/></li>
+                                <li><h6 class="dropdown-header">Patient Insurance & Authorizations</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'billing:patient_insurance_add' %}">
+                                        <i class="bi bi-shield-check me-2"></i>{% trans "Patient Insurance" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'billing:authorization_add' %}">
+                                        <i class="bi bi-file-earmark-check me-2"></i>{% trans "Authorizations" %}
                                     </a>
                                 </li>
                                 
@@ -160,13 +179,13 @@
                                 <li><hr class="dropdown-divider"/></li>
                                 <li><h6 class="dropdown-header">Charge Capture & Claims</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/service-lines">
-                                        <i class="bi bi-list-task me-2"></i>Service Lines
+                                    <a class="dropdown-item" href="{% url 'billing:service_line_list' %}">
+                                        <i class="bi bi-list-task me-2"></i>{% trans "Service Lines" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/claims">
-                                        <i class="bi bi-file-earmark-text me-2"></i>Claims
+                                    <a class="dropdown-item" href="{% url 'billing:claim_list' %}">
+                                        <i class="bi bi-file-earmark-text me-2"></i>{% trans "Claims" %}
                                     </a>
                                 </li>
                                 
@@ -174,23 +193,23 @@
                                 <li><hr class="dropdown-divider"/></li>
                                 <li><h6 class="dropdown-header">Payment Processing</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/payment-postings">
-                                        <i class="bi bi-cash-stack me-2"></i>Payment Postings
+                                    <a class="dropdown-item" href="{% url 'billing:payment_posting_list' %}">
+                                        <i class="bi bi-cash-stack me-2"></i>{% trans "Payment Postings" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/payments">
-                                        <i class="bi bi-credit-card me-2"></i>Patient Payments
+                                    <a class="dropdown-item" href="{% url 'billing:payment_list' %}">
+                                        <i class="bi bi-credit-card me-2"></i>{% trans "Patient Payments" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/statements">
-                                        <i class="bi bi-receipt me-2"></i>Patient Statements
+                                    <a class="dropdown-item" href="{% url 'billing:statement_list' %}">
+                                        <i class="bi bi-receipt me-2"></i>{% trans "Patient Statements" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/payment-plans">
-                                        <i class="bi bi-calendar-check me-2"></i>Payment Plans
+                                    <a class="dropdown-item" href="{% url 'billing:payment_plan_list' %}">
+                                        <i class="bi bi-calendar-check me-2"></i>{% trans "Payment Plans" %}
                                     </a>
                                 </li>
                                 
@@ -198,13 +217,13 @@
                                 <li><hr class="dropdown-divider"/></li>
                                 <li><h6 class="dropdown-header">Denial Management</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/denial-reasons">
-                                        <i class="bi bi-exclamation-triangle me-2"></i>Denial Reasons
+                                    <a class="dropdown-item" href="{% url 'billing:denial_reason_list' %}">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Denial Reasons" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/claim-appeals">
-                                        <i class="bi bi-arrow-repeat me-2"></i>Claim Appeals
+                                    <a class="dropdown-item" href="{% url 'billing:claim_appeal_list' %}">
+                                        <i class="bi bi-arrow-repeat me-2"></i>{% trans "Claim Appeals" %}
                                     </a>
                                 </li>
                                 
@@ -212,38 +231,38 @@
                                 <li><hr class="dropdown-divider"/></li>
                                 <li><h6 class="dropdown-header">Reports & Analytics</h6></li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/charge-capture">
-                                        <i class="bi bi-graph-up me-2"></i>Charge Capture Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_charge_capture' %}">
+                                        <i class="bi bi-graph-up me-2"></i>{% trans "Charge Capture Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/claim-submission">
-                                        <i class="bi bi-file-earmark-arrow-up me-2"></i>Claim Submission Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_claim_submission' %}">
+                                        <i class="bi bi-file-earmark-arrow-up me-2"></i>{% trans "Claim Submission Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/payment-posting">
-                                        <i class="bi bi-cash-coin me-2"></i>Payment Posting Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_payment_posting' %}">
+                                        <i class="bi bi-cash-coin me-2"></i>{% trans "Payment Posting Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/ar-aging">
-                                        <i class="bi bi-calendar-check me-2"></i>A/R Aging Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_ar_aging' %}">
+                                        <i class="bi bi-calendar-check me-2"></i>{% trans "A/R Aging Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/denial-management">
-                                        <i class="bi bi-exclamation-octagon me-2"></i>Denial Management Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_denial_management' %}">
+                                        <i class="bi bi-exclamation-octagon me-2"></i>{% trans "Denial Management Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/revenue-analysis">
-                                        <i class="bi bi-graph-up-arrow me-2"></i>Revenue Analysis Report
+                                    <a class="dropdown-item" href="{% url 'billing:report_revenue_analysis' %}">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>{% trans "Revenue Analysis Report" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="/billing/reports/collection-metrics">
-                                        <i class="bi bi-speedometer2 me-2"></i>Collection Metrics
+                                    <a class="dropdown-item" href="{% url 'billing:report_collection_metrics' %}">
+                                        <i class="bi bi-speedometer2 me-2"></i>{% trans "Collection Metrics" %}
                                     </a>
                                 </li>
                             </ul>
