@@ -1,20 +1,38 @@
-```gitignore
+```
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Django/Python build artifacts
-*.pyc
-__pycache__/
-*.py.class
+# Reports build artifacts (if any)
+reports/build/
+reports/dist/
 
 # Logs
 *.log
 
-# Environment variables
+# Temporary files
+*.tmp
+*.swp
+
+# Environment files
 .env
 .env.local
-.env.*
+*.env.*
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# IDE specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

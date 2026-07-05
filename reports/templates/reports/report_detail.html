@@ -155,6 +155,9 @@
                     <button onclick="window.print()" class="btn btn-outline-primary">
                         <i class="bi bi-printer me-1"></i> {% trans "Print" %}
                     </button>
+                    <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success">
+                        <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
+                    </a>
                 </div>
             </div>
         </div>
