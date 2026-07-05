@@ -1,47 +1,243 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
-{% block title %}{% trans 'Insurance Payer' %}{% endblock %}
+{% block title %}{% if form.instance.pk %}{% trans "Edit Payer" %}{% else %}{% trans "Add Payer" %}{% endif %} - Pulsar RIS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h1>{% if form.instance.pk %}{% trans 'Edit Payer' %}{% else %}{% trans 'Create Payer' %}{% endif %}</h1>
-    
-    <div class="card">
-        <div class="card-body">
-            <form method="post" class="form">
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="bi bi-building me-2"></i>
+                        {% if form.instance.pk %}{% trans "Edit Payer" %}{% else %}{% trans "Add New Payer" %}{% endif %}
+                    </h2>
+                    <p class="text-muted mb-0">{% trans "Insurance company/payer information" %}</p>
+                </div>
+                <a href="{% url 'billing:payer_list' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i>{% trans "Back to List" %}
+                </a>
+            </div>
+
+            <!-- Form -->
+            <form method="post" novalidate>
                 {% csrf_token %}
                 
-                <div class="form-group">
-                    <label>{{ form.name.label }}</label>
-                    {{ form.name }}
+                <!-- Basic Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>{% trans "Basic Information" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Payer ID" %} <span class="text-danger">*</span></label>
+                                {{ form.payer_id }}
+                                {% if form.payer_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.payer_id.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted">{% trans "EDI payer identifier" %}</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Payer Type" %}</label>
+                                {{ form.payer_type }}
+                                {% if form.payer_type.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.payer_type.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label">{% trans "Full Name" %} <span class="text-danger">*</span></label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Short Name" %}</label>
+                                {{ form.short_name }}
+                                {% if form.short_name.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.short_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check form-switch">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                                        {% trans "Active" %}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label>{{ form.payer_id.label }}</label>
-                    {{ form.payer_id }}
+
+                <!-- Contact Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>{% trans "Contact Information" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <label class="form-label">{% trans "Address Line 1" %}</label>
+                                {{ form.address_line1 }}
+                                {% if form.address_line1.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.address_line1.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Address Line 2" %}</label>
+                                {{ form.address_line2 }}
+                                {% if form.address_line2.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.address_line2.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "City" %}</label>
+                                {{ form.city }}
+                                {% if form.city.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.city.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "State/Province" %}</label>
+                                {{ form.state_province }}
+                                {% if form.state_province.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.state_province.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Postal Code" %}</label>
+                                {{ form.postal_code }}
+                                {% if form.postal_code.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.postal_code.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Country" %}</label>
+                                {{ form.country }}
+                                {% if form.country.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.country.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Phone" %}</label>
+                                {{ form.phone }}
+                                {% if form.phone.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.phone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Fax" %}</label>
+                                {{ form.fax }}
+                                {% if form.fax.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.fax.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Email" %}</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Website" %}</label>
+                                {{ form.website }}
+                                {% if form.website.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.website.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label>{{ form.payer_type.label }}</label>
-                    {{ form.payer_type }}
+
+                <!-- EDI Configuration -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-hdd-network me-2"></i>{% trans "EDI Configuration" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "EDI Qualifier" %}</label>
+                                {{ form.edi_qualifier }}
+                                {% if form.edi_qualifier.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.edi_qualifier.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted">{% trans "e.g., PI, XV" %}</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "EDI Receiver ID" %}</label>
+                                {{ form.edi_receiver_id }}
+                                {% if form.edi_receiver_id.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.edi_receiver_id.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Clearinghouse" %}</label>
+                                {{ form.clearinghouse }}
+                                {% if form.clearinghouse.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.clearinghouse.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label>{{ form.email.label }}</label>
-                    {{ form.email }}
+
+                <!-- Financial Settings -->
+                <div class="card mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-currency-dollar me-2"></i>{% trans "Financial Settings" %}</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Fee Schedule" %}</label>
+                                {{ form.fee_schedule }}
+                                {% if form.fee_schedule.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.fee_schedule.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Default Copay" %}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    {{ form.default_copay }}
+                                </div>
+                                {% if form.default_copay.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.default_copay.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label>{{ form.phone.label }}</label>
-                    {{ form.phone }}
-                </div>
-                
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+
+                <!-- Submit Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'billing:payer_list' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-lg me-1"></i>{% trans "Cancel" %}
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-lg me-1"></i>{% if form.instance.pk %}{% trans "Update Payer" %}{% else %}{% trans "Create Payer" %}{% endif %}
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+</style>
 {% endblock %}

@@ -1,74 +1,126 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
-{% block title %}{{ payer.name }}{% endblock %}
+{% block title %}{{ payer.name }} - Pulsar RIS{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-md-8">
-            <h1>{{ payer.name }}</h1>
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1"><i class="bi bi-building me-2"></i>{{ payer.name }}</h2>
+            <p class="text-muted mb-0">{{ payer.get_payer_type_display }} • {{ payer.payer_id }}</p>
         </div>
-        <div class="col-md-4 text-right">
-            <a href="{% url 'billing:payer_update' payer.pk %}" class="btn btn-warning">{% trans 'Edit' %}</a>
-            <a href="{% url 'billing:payer_list' %}" class="btn btn-secondary">{% trans 'Back' %}</a>
-        </div>
-    </div>
-    
-    <!-- Payer Information -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>{% trans 'Payer Details' %}</h5>
-        </div>
-        <div class="card-body">
-            <p><strong>{% trans 'Payer ID:' %}</strong> {{ payer.payer_id }}</p>
-            <p><strong>{% trans 'Type:' %}</strong> {{ payer.get_payer_type_display }}</p>
-            <p><strong>{% trans 'Email:' %}</strong> {{ payer.email|default:"—" }}</p>
-            <p><strong>{% trans 'Phone:' %}</strong> {{ payer.phone|default:"—" }}</p>
-            <p><strong>{% trans 'Website:' %}</strong> {{ payer.website|default:"—" }}</p>
+        <div>
+            <a href="{% url 'billing:payer_update' payer.pk %}" class="btn btn-primary">
+                <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}
+            </a>
+            <a href="{% url 'billing:payer_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "Back" %}
+            </a>
         </div>
     </div>
-    
-    <!-- Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
+
+    <div class="row g-4">
+        <!-- Main Info -->
+        <div class="col-lg-8">
+            <!-- Contact Information -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>{% trans "Contact Information" %}</h5>
+                </div>
                 <div class="card-body">
-                    <h6 class="card-title">{% trans 'Patient Insurance' %}</h6>
-                    <h3>{{ insurance_count }}</h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <small class="text-muted">{% trans "Address" %}</small>
+                            <p class="mb-0">
+                                {{ payer.address_line1 }}<br>
+                                {% if payer.address_line2 %}{{ payer.address_line2 }}<br>{% endif %}
+                                {{ payer.city }}, {{ payer.state_province }} {{ payer.postal_code }}<br>
+                                {{ payer.country }}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <small class="text-muted">{% trans "Communication" %}</small>
+                            <p class="mb-0">
+                                {% if payer.phone %}<i class="bi bi-telephone me-1"></i>{{ payer.phone }}<br>{% endif %}
+                                {% if payer.fax %}<i class="bi bi-printer me-1"></i>{{ payer.fax }}<br>{% endif %}
+                                {% if payer.email %}<i class="bi bi-envelope me-1"></i>{{ payer.email }}<br>{% endif %}
+                                {% if payer.website %}<i class="bi bi-globe me-1"></i><a href="{{ payer.website }}" target="_blank">{{ payer.website }}</a>{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EDI Configuration -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-hdd-network me-2"></i>{% trans "EDI Configuration" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted">{% trans "EDI Qualifier" %}</small>
+                            <p class="mb-0">{{ payer.edi_qualifier|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">{% trans "EDI Receiver ID" %}</small>
+                            <p class="mb-0">{{ payer.edi_receiver_id|default:"-" }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <small class="text-muted">{% trans "Clearinghouse" %}</small>
+                            <p class="mb-0">{{ payer.clearinghouse|default:"-" }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Fee Schedules -->
-    <div class="card">
-        <div class="card-header">
-            <h5>{% trans 'Associated Fee Schedules' %}</h5>
-        </div>
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>{% trans 'Name' %}</th>
-                        <th>{% trans 'Type' %}</th>
-                        <th>{% trans 'Effective Date' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for schedule in fee_schedules %}
-                    <tr>
-                        <td>{{ schedule.name }}</td>
-                        <td>{{ schedule.get_schedule_type_display }}</td>
-                        <td>{{ schedule.effective_date }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center">{% trans 'No fee schedules' %}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Status Card -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">{% trans "Status" %}</small>
+                        {% if payer.is_active %}
+                        <div class="text-success"><i class="bi bi-check-circle-fill me-1"></i>{% trans "Active" %}</div>
+                        {% else %}
+                        <div class="text-danger"><i class="bi bi-x-circle-fill me-1"></i>{% trans "Inactive" %}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">{% trans "Payer Type" %}</small>
+                        <div>{{ payer.get_payer_type_display }}</div>
+                    </div>
+                    <div class="mb-3">
+                        <small class="text-muted">{% trans "Patients Insured" %}</small>
+                        <div class="fs-5">{{ insurance_count }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Settings -->
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">{% trans "Financial Settings" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">{% trans "Fee Schedule" %}</small>
+                        {% if payer.fee_schedule %}
+                        <div><a href="{% url 'billing:fee_schedule_detail' payer.fee_schedule.pk %}">{{ payer.fee_schedule.name }}</a></div>
+                        {% else %}
+                        <div class="text-muted">-</div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <small class="text-muted">{% trans "Default Copay" %}</small>
+                        <div class="fs-5">${{ payer.default_copay }}</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

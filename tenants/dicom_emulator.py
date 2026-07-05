@@ -21,7 +21,7 @@ def get_modality_worklist():
     step_seq.ScheduledStationAETitle = ""
     step_seq.ScheduledProcedureStepStartDate = ""  # Current date
     step_seq.ScheduledProcedureStepStartTime = ""
-    step_seq.Modality = "MR"  # Filter by modality (e.g., CT, MR, CR)
+    step_seq.Modality = ""  # Filter by modality (e.g., CT, MR, CR)
     step_seq.ScheduledProcedureStepDescription = ""
     step_seq.ScheduledPerformingPhysicianName = ""
 

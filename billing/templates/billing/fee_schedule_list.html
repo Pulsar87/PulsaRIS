@@ -1,81 +1,318 @@
-{% extends 'base.html' %}
-{% load i18n %}
-
-{% block title %}{% trans 'Fee Schedules' %}{% endblock %}
-
-{% block content %}
+{% extends 'layout.html' %} {% load static %} {% block title %}Fee Schedule
+Management - Billing{% endblock %} {% block content %}
 <div class="container-fluid">
-    <h1>{% trans 'Fee Schedules' %}</h1>
-    
-    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-file-invoice-dollar"></i> Fee Schedules</h2>
+            <p class="text-muted">Manage procedure pricing and fee schedules</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a
+                href="{% url 'billing:fee_schedule_create' %}"
+                class="btn btn-primary"
+            >
+                <i class="fas fa-plus"></i> New Fee Schedule
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="card">
+            <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h6 class="card-title">{% trans 'Total Schedules' %}</h6>
-                    <h3>{{ total_schedules }}</h3>
+                    <h5 class="card-title">Total Schedules</h5>
+                    <h2>{{ total_schedules }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card">
+            <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h6 class="card-title">{% trans 'Active' %}</h6>
-                    <h3>{{ active_count }}</h3>
+                    <h5 class="card-title">Active Schedules</h5>
+                    <h2>{{ active_count }}</h2>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Filters & Search -->
+
+    <!-- Filters -->
     <div class="card mb-4">
         <div class="card-body">
-            <form method="get" class="form-inline">
-                <input type="text" name="search" placeholder="{% trans 'Search...' %}" class="form-control mr-2" value="{{ query }}">
-                <button type="submit" class="btn btn-primary">{% trans 'Search' %}</button>
-                <a href="{% url 'billing:fee_schedule_create' %}" class="btn btn-success ml-2">{% trans 'Add Schedule' %}</a>
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Search</label>
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control"
+                        placeholder="Name, code, or description"
+                        value="{{ request.GET.search }}"
+                    />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">All</option>
+                        <option
+                            value="active"
+                            {%
+                            if
+                            request.GET.status=""
+                            ="active"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Active
+                        </option>
+                        <option
+                            value="expired"
+                            {%
+                            if
+                            request.GET.status=""
+                            ="expired"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Expired
+                        </option>
+                        <option
+                            value="inactive"
+                            {%
+                            if
+                            request.GET.status=""
+                            ="inactive"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Inactive
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Schedule Type</label>
+                    <select name="schedule_type" class="form-select">
+                        <option value="">All Types</option>
+                        <option
+                            value="CHARGEMASTER"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="CHARGEMASTER"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Chargemaster
+                        </option>
+                        <option
+                            value="MEDICARE"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="MEDICARE"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Medicare
+                        </option>
+                        <option
+                            value="MEDICAID"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="MEDICAID"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Medicaid
+                        </option>
+                        <option
+                            value="COMMERCIAL"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="COMMERCIAL"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Commercial
+                        </option>
+                        <option
+                            value="CONTRACT"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="CONTRACT"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Contract
+                        </option>
+                        <option
+                            value="SELF_PAY"
+                            {%
+                            if
+                            request.GET.schedule_type=""
+                            ="SELF_PAY"
+                            %}selected{%
+                            endif
+                            %}
+                        >
+                            Self-Pay
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <a
+                        href="{% url 'billing:fee_schedule_list' %}"
+                        class="btn btn-outline-secondary w-100"
+                    >
+                        <i class="fas fa-redo"></i> Reset
+                    </a>
+                </div>
             </form>
         </div>
     </div>
-    
-    <!-- Fee Schedules Table -->
+
+    <!-- Fee Schedule List -->
     <div class="card">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>{% trans 'Name' %}</th>
-                        <th>{% trans 'Type' %}</th>
-                        <th>{% trans 'Effective Date' %}</th>
-                        <th>{% trans 'Status' %}</th>
-                        <th>{% trans 'Actions' %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for schedule in fee_schedules %}
-                    <tr>
-                        <td>{{ schedule.name }}</td>
-                        <td>{{ schedule.get_schedule_type_display }}</td>
-                        <td>{{ schedule.effective_date }}</td>
-                        <td>
-                            {% if schedule.is_active %}
-                                <span class="badge badge-success">{% trans 'Active' %}</span>
-                            {% else %}
-                                <span class="badge badge-danger">{% trans 'Inactive' %}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a href="{% url 'billing:fee_schedule_detail' schedule.pk %}" class="btn btn-sm btn-info">{% trans 'View' %}</a>
-                            <a href="{% url 'billing:fee_schedule_update' schedule.pk %}" class="btn btn-sm btn-warning">{% trans 'Edit' %}</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">{% trans 'No fee schedules found' %}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Payer</th>
+                            <th>Effective Date</th>
+                            <th>Expiration</th>
+                            <th>Status</th>
+                            <th>Items</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for schedule in fee_schedules %}
+                        <tr>
+                            <td><strong>{{ schedule.code }}</strong></td>
+                            <td>{{ schedule.name }}</td>
+                            <td>
+                                <span
+                                    class="badge bg-{% if schedule.schedule_type == 'CHARGEMASTER' %}secondary{% elif schedule.schedule_type == 'MEDICARE' %}primary{% elif schedule.schedule_type == 'CONTRACT' %}success{% else %}info{% endif %}"
+                                >
+                                    {{ schedule.get_schedule_type_display }}
+                                </span>
+                            </td>
+                            <td>{{ schedule.payer.name|default:"N/A" }}</td>
+                            <td>{{ schedule.effective_date }}</td>
+                            <td>
+                                {{ schedule.expiration_date|default:"No expiry"
+                                }}
+                            </td>
+                            <td>
+                                {% if schedule.is_active %} {% if schedule.expiration_date %}
+                                {% if schedule.expiration_date < now %}
+                                <span class="badge bg-danger">Expired</span>
+                                {% else %}
+                                <span class="badge bg-success">Active</span>
+                                {% endif %} {% else %}
+                                <span class="badge bg-success">Active</span>
+                                {% endif %} {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ schedule.items.count }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a
+                                        href="{% url 'billing:fee_schedule_detail' schedule.pk %}"
+                                        class="btn btn-outline-primary"
+                                        title="View"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a
+                                        href="{% url 'billing:fee_schedule_update' schedule.pk %}"
+                                        class="btn btn-outline-warning"
+                                        title="Edit"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a
+                                        href="{% url 'billing:fee_schedule_delete' schedule.pk %}"
+                                        class="btn btn-outline-danger"
+                                        title="Deactivate"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-3x mb-3"></i>
+                                <p>
+                                    No fee schedules found. Create your first
+                                    fee schedule to get started.
+                                </p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.previous_page_number }}"
+                            >&laquo; Previous</a
+                        >
+                    </li>
+                    {% endif %} {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > page_obj.number|add:'-3' and num <
+                    page_obj.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}"
+                            >{{ num }}</a
+                        >
+                    </li>
+                    {% endif %} {% endfor %} {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a
+                            class="page-link"
+                            href="?page={{ page_obj.next_page_number }}"
+                            >Next &raquo;</a
+                        >
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </div>
 </div>
