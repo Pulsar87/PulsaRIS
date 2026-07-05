@@ -34,6 +34,7 @@ from .models import (
     InsurancePayer,
     PatientAccount,
     PatientInsurance,
+    Payment,
 )
 
 
@@ -104,10 +105,10 @@ class FeeScheduleDetailView(LoginRequiredMixin, DetailView):
         # Get statistics
         context["item_count"] = fee_schedule.items.count()
         context["professional_avg"] = fee_schedule.items.aggregate(
-            avg=Sum("professional_fee") / Count("id")
+            avg=Sum("professional_component") / Count("id")
         )["avg"] or Decimal("0.00")
         context["technical_avg"] = fee_schedule.items.aggregate(
-            avg=Sum("technical_fee") / Count("id")
+            avg=Sum("technical_component") / Count("id")
         )["avg"] or Decimal("0.00")
         context["global_avg"] = fee_schedule.items.aggregate(
             avg=Sum("global_fee") / Count("id")
@@ -292,28 +293,26 @@ def fee_lookup_api(request):
     for item in queryset:
         # Determine which fee to use based on modifier
         if modifier == "26":  # Professional component
-            fee = item.professional_fee
+            fee = item.professional_component
         elif modifier == "TC":  # Technical component
-            fee = item.technical_fee
+            fee = item.technical_component
         else:  # Global or no modifier
-            fee = item.global_fee or item.professional_fee + item.technical_fee
+            fee = item.global_fee or item.professional_component + item.technical_component
 
         results.append(
             {
                 "id": str(item.id),
                 "procedure_code": item.procedure_code,
-                "procedure_name": item.procedure_name,
-                "modifier": item.modifier,
+                "procedure_description": item.procedure_description,
                 "fee_schedule_name": item.fee_schedule.name,
                 "fee_schedule_type": item.fee_schedule.schedule_type,
                 "payer_name": item.fee_schedule.payer.name
                 if item.fee_schedule.payer
                 else None,
-                "professional_fee": str(item.professional_fee),
-                "technical_fee": str(item.technical_fee),
+                "professional_component": str(item.professional_component),
+                "technical_component": str(item.technical_component),
                 "global_fee": str(item.global_fee) if item.global_fee else None,
                 "calculated_fee": str(fee),
-                "unit_of_service": item.unit_of_service,
                 "effective_date": str(item.fee_schedule.effective_date),
                 "expiration_date": str(item.fee_schedule.expiration_date)
                 if item.fee_schedule.expiration_date
@@ -382,12 +381,12 @@ def fee_calculate_api(request):
         if fee_item:
             # Calculate fee based on modifier
             if modifier == "26":
-                unit_fee = fee_item.professional_fee
+                unit_fee = fee_item.professional_component
             elif modifier == "TC":
-                unit_fee = fee_item.technical_fee
+                unit_fee = fee_item.technical_component
             else:
                 unit_fee = fee_item.global_fee or (
-                    fee_item.professional_fee + fee_item.technical_fee
+                    fee_item.professional_component + fee_item.technical_component
                 )
 
             line_total = unit_fee * units
@@ -719,8 +718,6 @@ class PatientAccountDetailView(LoginRequiredMixin, DetailView):
         context["recent_charges"] = account.service_lines.all()[:10]
 
         # Get payments
-        from .models import Payment
-
         context["recent_payments"] = Payment.objects.filter(
             tenant=self.request.tenant, patient_account=account
         ).order_by("-payment_date")[:10]
