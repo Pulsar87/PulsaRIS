@@ -5,7 +5,111 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1>{% trans 'Claims' %}</h1>
-    <!-- TODO: Implement claim list view -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-file-invoice"></i> {% trans 'Insurance Claims' %}</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2"><div class="card bg-primary text-white"><div class="card-body"><h5>{% trans 'Total' %}</h5><h2>{{ total_claims }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-secondary text-white"><div class="card-body"><h5>{% trans 'Draft' %}</h5><h2>{{ draft_count }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-info text-white"><div class="card-body"><h5>{% trans 'Submitted' %}</h5><h2>{{ submitted_count }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-success text-white"><div class="card-body"><h5>{% trans 'Paid' %}</h5><h2>{{ paid_count }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-danger text-white"><div class="card-body"><h5>{% trans 'Denied' %}</h5><h2>{{ denied_count }}</h2></div></div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">{% trans 'Status' %}</label>
+                    <select name="status" class="form-select">
+                        <option value="">{% trans 'All Statuses' %}</option>
+                        {% for value, label in model|default:'' %}
+                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                        <option value="DRAFT" {% if request.GET.status == 'DRAFT' %}selected{% endif %}>{% trans 'Draft' %}</option>
+                        <option value="SUBMITTED" {% if request.GET.status == 'SUBMITTED' %}selected{% endif %}>{% trans 'Submitted' %}</option>
+                        <option value="ACCEPTED" {% if request.GET.status == 'ACCEPTED' %}selected{% endif %}>{% trans 'Accepted' %}</option>
+                        <option value="PAID" {% if request.GET.status == 'PAID' %}selected{% endif %}>{% trans 'Paid' %}</option>
+                        <option value="DENIED" {% if request.GET.status == 'DENIED' %}selected{% endif %}>{% trans 'Denied' %}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{% trans 'From Date' %}</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{% trans 'To Date' %}</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{% trans 'Search' %}</label>
+                    <input type="text" name="search" class="form-control" placeholder="{% trans 'Claim number' %}" value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> {% trans 'Filter' %}</button>
+                    <a href="{% url 'billing:claim_list' %}" class="btn btn-outline-secondary"><i class="fas fa-redo"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'billing:claim_create' %}" class="btn btn-success"><i class="fas fa-plus"></i> {% trans 'Create Claim' %}</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Claim Number' %}</th>
+                        <th>{% trans 'Patient Account' %}</th>
+                        <th>{% trans 'Payer' %}</th>
+                        <th>{% trans 'DOS From' %}</th>
+                        <th>{% trans 'DOS To' %}</th>
+                        <th>{% trans 'Total Charges' %}</th>
+                        <th>{% trans 'Status' %}</th>
+                        <th>{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for claim in claims %}
+                    <tr>
+                        <td><strong>{{ claim.claim_number }}</strong></td>
+                        <td>{{ claim.patient_account.account_number }}</td>
+                        <td>{{ claim.payer.name }}</td>
+                        <td>{{ claim.date_of_service_from|date:"M d, Y" }}</td>
+                        <td>{{ claim.date_of_service_to|date:"M d, Y" }}</td>
+                        <td>${{ claim.total_charges }}</td>
+                        <td><span class="badge bg-{% if claim.status == 'DRAFT' %}secondary{% elif claim.status == 'SUBMITTED' %}info{% elif claim.status == 'PAID' %}success{% elif claim.status == 'DENIED' %}danger{% else %}warning{% endif %}">{{ claim.get_status_display }}</span></td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'billing:claim_detail' claim.pk %}" class="btn btn-outline-primary"><i class="fas fa-eye"></i></a>
+                                <a href="{% url 'billing:claim_update' claim.pk %}" class="btn btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                                <a href="{% url 'billing:claim_delete' claim.pk %}" class="btn btn-outline-danger"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted">{% trans 'No claims found.' %}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% if is_paginated %}
+    <nav class="mt-4"><ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&status={{ request.GET.status }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}&search={{ request.GET.search }}">{% trans 'Previous' %}</a></li>{% endif %}
+        {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&status={{ request.GET.status }}&date_from={{ request.GET.date_from }}&date_to={{ request.GET.date_to }}&search={{ request.GET.search }}">{% trans 'Next' %}</a></li>{% endif %}
+    </ul></nav>
+    {% endif %}
 </div>
 {% endblock %}

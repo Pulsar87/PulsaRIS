@@ -1,0 +1,154 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-file-earmark-arrow-up me-2"></i>{{ title }}</h2>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" 
+                           value="{{ start_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" 
+                           value="{{ end_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i>Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Claims</h6>
+                    <h3>{{ data.summary.total_claims }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Billed</h6>
+                    <h3>${{ data.summary.total_billed|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Average Claim Value</h6>
+                    <h3>${{ data.summary.average_claim_value|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-pie-chart me-2"></i>Status Breakdown
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Count</th>
+                                <th>Total Billed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.status_breakdown %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ item.claim_status }}</span></td>
+                                <td>{{ item.count }}</td>
+                                <td>${{ item.total_billed|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-building me-2"></i>Payer Breakdown
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Payer</th>
+                                <th>Count</th>
+                                <th>Total Billed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.payer_breakdown %}
+                            <tr>
+                                <td>{{ item.payer__name|default:"Unknown" }}</td>
+                                <td>{{ item.count }}</td>
+                                <td>${{ item.total_billed|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Method -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-send me-2"></i>Submission Method Breakdown
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% for item in data.submission_breakdown %}
+                <div class="col-md-4 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h5>{{ item.submission_method|default:"Manual" }}</h5>
+                            <h3 class="text-primary">{{ item.count }}</h3>
+                            <small class="text-muted">claims</small>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center text-muted">No data available</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

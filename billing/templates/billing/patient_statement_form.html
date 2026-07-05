@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% if object.pk %}{% trans 'Edit Statement' %}{% else %}{% trans 'Create Statement' %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-file-invoice-dollar"></i> {% if object.pk %}{% trans 'Edit Patient Statement' %}{% else %}{% trans 'Create Patient Statement' %}{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Patient Account' %} *</label>
+                        {{ form.patient_account }}
+                        {% if form.patient_account.errors %}<div class="text-danger small">{{ form.patient_account.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Statement Date' %} *</label>
+                        {{ form.statement_date }}
+                        {% if form.statement_date.errors %}<div class="text-danger small">{{ form.statement_date.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Due Date' %} *</label>
+                        {{ form.due_date }}
+                        {% if form.due_date.errors %}<div class="text-danger small">{{ form.due_date.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Service Date From' %} *</label>
+                        {{ form.service_date_from }}
+                        {% if form.service_date_from.errors %}<div class="text-danger small">{{ form.service_date_from.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Service Date To' %} *</label>
+                        {{ form.service_date_to }}
+                        {% if form.service_date_to.errors %}<div class="text-danger small">{{ form.service_date_to.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Delivery Method' %}</label>
+                        {{ form.delivery_method }}
+                        {% if form.delivery_method.errors %}<div class="text-danger small">{{ form.delivery_method.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Status' %}</label>
+                        {{ form.status }}
+                        {% if form.status.errors %}<div class="text-danger small">{{ form.status.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h5 class="mb-3">{% trans 'Financial Summary' %}</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Previous Balance' %}</label>
+                        {{ form.previous_balance }}
+                        {% if form.previous_balance.errors %}<div class="text-danger small">{{ form.previous_balance.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Charges This Period' %}</label>
+                        {{ form.charges_this_period }}
+                        {% if form.charges_this_period.errors %}<div class="text-danger small">{{ form.charges_this_period.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Payments This Period' %}</label>
+                        {{ form.payments_this_period }}
+                        {% if form.payments_this_period.errors %}<div class="text-danger small">{{ form.payments_this_period.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Adjustments This Period' %}</label>
+                        {{ form.adjustments_this_period }}
+                        {% if form.adjustments_this_period.errors %}<div class="text-danger small">{{ form.adjustments_this_period.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">{% trans 'Current Balance' %}</label>
+                        {{ form.current_balance }}
+                        {% if form.current_balance.errors %}<div class="text-danger small">{{ form.current_balance.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Minimum Payment Due' %}</label>
+                        {{ form.minimum_payment_due }}
+                        {% if form.minimum_payment_due.errors %}<div class="text-danger small">{{ form.minimum_payment_due.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label class="form-label">{% trans 'Notes' %}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'billing:statement_list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> {% trans 'Cancel' %}</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% trans 'Save Statement' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

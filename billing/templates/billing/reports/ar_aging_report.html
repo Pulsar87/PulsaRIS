@@ -1,0 +1,136 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-calendar-check me-2"></i>{{ title }}</h2>
+            <p class="text-muted">As of {{ as_of_date }}</p>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">As Of Date</label>
+                    <input type="date" name="as_of_date" class="form-control" 
+                           value="{{ as_of_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i>Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Card -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Accounts Receivable</h6>
+                    <h2>${{ data.summary.total_ar|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aging Buckets -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="bi bi-bar-chart-steps me-2"></i>A/R Aging Buckets
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Bucket</th>
+                            <th>Claim Count</th>
+                            <th>Amount</th>
+                            <th>% of Total</th>
+                            <th>Visual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bucket_name, bucket_data in data.aging_buckets.items %}
+                        <tr>
+                            <td>
+                                {% if bucket_name == 'current' %}Current (0-30 days)
+                                {% elif bucket_name == 'days_31_60' %}31-60 days
+                                {% elif bucket_name == 'days_61_90' %}61-90 days
+                                {% elif bucket_name == 'days_91_120' %}91-120 days
+                                {% else %}Over 120 days{% endif %}
+                            </td>
+                            <td>{{ bucket_data.count }}</td>
+                            <td class="{% if bucket_name == 'over_120' %}text-danger fw-bold{% endif %}">
+                                ${{ bucket_data.amount|floatformat:2 }}
+                            </td>
+                            <td>
+                                {% widthratio bucket_data.amount data.summary.total_ar 100 %}%
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px; min-width: 150px;">
+                                    <div class="progress-bar {% if bucket_name == 'over_120' %}bg-danger{% elif bucket_name == 'days_91_120' %}bg-warning{% elif bucket_name == 'days_61_90' %}bg-info{% elif bucket_name == 'days_31_60' %}bg-primary{% else %}bg-success{% endif %}" 
+                                         role="progressbar" 
+                                         style="width: {% widthratio bucket_data.amount data.summary.total_ar 100 %}%">
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr class="fw-bold">
+                            <td>Total</td>
+                            <td>{{ data.aging_buckets.current.count|add:data.aging_buckets.days_31_60.count|add:data.aging_buckets.days_61_90.count|add:data.aging_buckets.days_91_120.count|add:data.aging_buckets.over_120.count }}</td>
+                            <td>${{ data.summary.total_ar|floatformat:2 }}</td>
+                            <td>100%</td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payer Breakdown -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-building me-2"></i>A/R by Payer
+        </div>
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Payer</th>
+                        <th>A/R Balance</th>
+                        <th>% of Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in data.payer_breakdown %}
+                    <tr>
+                        <td>{{ item.payer__name|default:"Unknown" }}</td>
+                        <td class="text-primary">${{ item.ar_balance|floatformat:2 }}</td>
+                        <td>
+                            {% widthratio item.ar_balance data.summary.total_ar 100 %}%
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted">No data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

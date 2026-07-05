@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% if object %}{% trans 'Edit Service Line' %}{% else %}{% trans 'Add Service Line' %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-file-invoice-dollar"></i> {% if object %}{% trans 'Edit Service Line' %}{% else %}{% trans 'Add Service Line' %}{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Exam Order' %}</label>
+                        {{ form.exam_order }}
+                        {{ form.exam_order.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Patient Account' %}</label>
+                        {{ form.patient_account }}
+                        {{ form.patient_account.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Service Date' %}</label>
+                        {{ form.service_date }}
+                        {{ form.service_date.errors }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Procedure Code' %}</label>
+                        {{ form.procedure_code }}
+                        {{ form.procedure_code.errors }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Procedure Name' %}</label>
+                        {{ form.procedure_name }}
+                        {{ form.procedure_name.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.diagnosis_code_1.label }}</label>
+                        {{ form.diagnosis_code_1 }}
+                        {{ form.diagnosis_code_1.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.diagnosis_code_2.label }}</label>
+                        {{ form.diagnosis_code_2 }}
+                        {{ form.diagnosis_code_2.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.diagnosis_code_3.label }}</label>
+                        {{ form.diagnosis_code_3 }}
+                        {{ form.diagnosis_code_3.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.diagnosis_code_4.label }}</label>
+                        {{ form.diagnosis_code_4 }}
+                        {{ form.diagnosis_code_4.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.modifier_1.label }}</label>
+                        {{ form.modifier_1 }}
+                        {{ form.modifier_1.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.modifier_2.label }}</label>
+                        {{ form.modifier_2 }}
+                        {{ form.modifier_2.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.modifier_3.label }}</label>
+                        {{ form.modifier_3 }}
+                        {{ form.modifier_3.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{{ form.modifier_4.label }}</label>
+                        {{ form.modifier_4 }}
+                        {{ form.modifier_4.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Quantity' %}</label>
+                        {{ form.quantity }}
+                        {{ form.quantity.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Units of Service' %}</label>
+                        {{ form.units_of_service }}
+                        {{ form.units_of_service.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Unit Price' %}</label>
+                        {{ form.unit_price }}
+                        {{ form.unit_price.errors }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Total Charge' %}</label>
+                        {{ form.total_charge }}
+                        {{ form.total_charge.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Rendering Provider' %}</label>
+                        {{ form.rendering_provider }}
+                        {{ form.rendering_provider.errors }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Supervising Provider' %}</label>
+                        {{ form.supervising_provider }}
+                        {{ form.supervising_provider.errors }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Place of Service' %}</label>
+                        {{ form.place_of_service }}
+                        {{ form.place_of_service.errors }}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Facility' %}</label>
+                        {{ form.facility }}
+                        {{ form.facility.errors }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Billing Status' %}</label>
+                        {{ form.billing_status }}
+                        {{ form.billing_status.errors }}
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">{% trans 'Audit Notes' %}</label>
+                    {{ form.audit_notes }}
+                    {{ form.audit_notes.errors }}
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'billing:service_line_list' %}" class="btn btn-secondary">{% trans 'Cancel' %}</a>
+                    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

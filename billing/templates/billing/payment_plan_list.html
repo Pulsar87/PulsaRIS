@@ -5,7 +5,154 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1>{% trans 'Payment Plans' %}</h1>
-    <!-- TODO: Implement payment plan list view -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-calendar-alt"></i> {% trans 'Patient Payment Plans' %}</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><h5>{% trans 'Total Plans' %}</h5><h2>{{ total_plans }}</h2></div></div></div>
+        <div class="col-md-3"><div class="card bg-success text-white"><div class="card-body"><h5>{% trans 'Active' %}</h5><h2>{{ active_count }}</h2></div></div></div>
+        <div class="col-md-3"><div class="card bg-info text-white"><div class="card-body"><h5>{% trans 'Completed' %}</h5><h2>{{ completed_count }}</h2></div></div></div>
+        <div class="col-md-3"><div class="card bg-danger text-white"><div class="card-body"><h5>{% trans 'Defaulted' %}</h5><h2>{{ defaulted_count }}</h2></div></div></div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h5>{% trans 'Total Remaining Balance' %}</h5>
+                    <h2>${{ total_remaining|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">{% trans 'Status' %}</label>
+                    <select name="status" class="form-select">
+                        <option value="">{% trans 'All Statuses' %}</option>
+                        <option value="ACTIVE" {% if request.GET.status == 'ACTIVE' %}selected{% endif %}>{% trans 'Active' %}</option>
+                        <option value="COMPLETED" {% if request.GET.status == 'COMPLETED' %}selected{% endif %}>{% trans 'Completed' %}</option>
+                        <option value="DEFAULTED" {% if request.GET.status == 'DEFAULTED' %}selected{% endif %}>{% trans 'Defaulted' %}</option>
+                        <option value="CANCELLED" {% if request.GET.status == 'CANCELLED' %}selected{% endif %}>{% trans 'Cancelled' %}</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{% trans 'Search' %}</label>
+                    <input type="text" name="search" class="form-control" placeholder="{% trans 'Patient MRN or Name' %}" value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> {% trans 'Filter' %}</button>
+                    <a href="{% url 'billing:payment_plan_list' %}" class="btn btn-outline-secondary"><i class="fas fa-redo"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'billing:payment_plan_create' %}" class="btn btn-success"><i class="fas fa-plus"></i> {% trans 'Create Payment Plan' %}</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if payment_plans %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Patient Account' %}</th>
+                        <th>{% trans 'Created' %}</th>
+                        <th>{% trans 'Total Amount' %}</th>
+                        <th>{% trans 'Monthly Payment' %}</th>
+                        <th>{% trans 'Remaining' %}</th>
+                        <th>{% trans 'Progress' %}</th>
+                        <th>{% trans 'First Payment' %}</th>
+                        <th>{% trans 'Status' %}</th>
+                        <th>{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for plan in payment_plans %}
+                    <tr>
+                        <td>
+                            {{ plan.patient_account.account_number }}<br>
+                            <small class="text-muted">{{ plan.patient_account.patient.mrn }}</small>
+                        </td>
+                        <td>{{ plan.created_at|date:"M d, Y" }}</td>
+                        <td class="text-end">${{ plan.total_amount|floatformat:2 }}</td>
+                        <td class="text-end">${{ plan.monthly_payment|floatformat:2 }}</td>
+                        <td class="text-end fw-bold text-danger">${{ plan.remaining_balance|floatformat:2 }}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                {% widthratio plan.payments_made plan.number_of_payments 100 as percentage %}
+                                <div class="progress-bar {% if percentage < 50 %}bg-warning{% elif percentage < 75 %}bg-info{% else %}bg-success{% endif %}" 
+                                     role="progressbar" 
+                                     style="width: {{ percentage }}%;" 
+                                     aria-valuenow="{{ percentage }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                    {{ plan.payments_made }}/{{ plan.number_of_payments }}
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ plan.first_payment_date|date:"M d, Y" }}</td>
+                        <td>
+                            {% if plan.status == 'ACTIVE' %}
+                                <span class="badge bg-success">{{ plan.get_status_display }}</span>
+                            {% elif plan.status == 'COMPLETED' %}
+                                <span class="badge bg-info">{{ plan.get_status_display }}</span>
+                            {% elif plan.status == 'DEFAULTED' %}
+                                <span class="badge bg-danger">{{ plan.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ plan.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'billing:payment_plan_detail' pk=plan.pk %}" class="btn btn-outline-primary" title="{% trans 'View' %}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'billing:payment_plan_update' pk=plan.pk %}" class="btn btn-outline-secondary" title="{% trans 'Edit' %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'billing:payment_plan_delete' pk=plan.pk %}" class="btn btn-outline-danger" title="{% trans 'Delete' %}">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+            <nav aria-label="Payment plan pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans 'Previous' %}</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans 'Next' %}</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> {% trans 'No payment plans found.' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

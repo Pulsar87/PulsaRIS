@@ -1,0 +1,175 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-graph-up-arrow me-2"></i>{{ title }}</h2>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" 
+                           value="{{ start_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" 
+                           value="{{ end_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i>Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Revenue</h6>
+                    <h3>${{ data.summary.total_revenue|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Payments</h6>
+                    <h3>{{ data.summary.total_payments }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Average Payment</h6>
+                    <h3>${{ data.summary.average_payment|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Method Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-credit-card me-2"></i>Payment Method Breakdown
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Count</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.method_breakdown %}
+                            <tr>
+                                <td>{{ item.payment_method|default:"Unknown" }}</td>
+                                <td>{{ item.count }}</td>
+                                <td>${{ item.total|floatformat:2 }}</td>
+                                <td>${{ item.total|divide:item.count|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-building me-2"></i>Revenue by Payer
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Payer</th>
+                                <th>Payment</th>
+                                <th>Adjustment</th>
+                                <th>Net</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.payer_revenue %}
+                            <tr>
+                                <td>{{ item.payer__name|default:"Unknown" }}</td>
+                                <td class="text-success">${{ item.total_payment|floatformat:2 }}</td>
+                                <td class="text-warning">${{ item.total_adjustment|floatformat:2 }}</td>
+                                <td class="fw-bold">${{ item.total_payment|add:item.total_adjustment|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trend Chart -->
+    <div class="card">
+        <div class="card-header">
+            <i class="bi bi-calendar3 me-2"></i>Monthly Revenue Trend
+        </div>
+        <div class="card-body">
+            <canvas id="monthlyTrendChart" height="80"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Trend Chart
+const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
+const monthlyData = {{ data.monthly_trend|safe }};
+
+new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: monthlyData.map(item => item.month),
+        datasets: [{
+            label: 'Total Revenue',
+            data: monthlyData.map(item => item.total),
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgb(75, 192, 192)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

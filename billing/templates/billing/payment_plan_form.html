@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% if object.pk %}{% trans 'Edit Payment Plan' %}{% else %}{% trans 'Create Payment Plan' %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-calendar-alt"></i> {% if object.pk %}{% trans 'Edit Payment Plan' %}{% else %}{% trans 'Create Payment Plan' %}{% endif %}</h1>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                <h5 class="mb-3">{% trans 'Plan Details' %}</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans 'Patient Account' %} *</label>
+                        {{ form.patient_account }}
+                        {% if form.patient_account.errors %}<div class="text-danger small">{{ form.patient_account.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'First Payment Date' %} *</label>
+                        {{ form.first_payment_date }}
+                        {% if form.first_payment_date.errors %}<div class="text-danger small">{{ form.first_payment_date.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans 'Payment Day of Month' %} *</label>
+                        {{ form.payment_day }}
+                        <small class="text-muted">{% trans 'Day (1-28)' %}</small>
+                        {% if form.payment_day.errors %}<div class="text-danger small">{{ form.payment_day.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                <h5 class="mb-3">{% trans 'Financial Terms' %}</h5>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Total Amount' %} *</label>
+                        {{ form.total_amount }}
+                        {% if form.total_amount.errors %}<div class="text-danger small">{{ form.total_amount.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Remaining Balance' %} *</label>
+                        {{ form.remaining_balance }}
+                        {% if form.remaining_balance.errors %}<div class="text-danger small">{{ form.remaining_balance.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Monthly Payment' %} *</label>
+                        {{ form.monthly_payment }}
+                        {% if form.monthly_payment.errors %}<div class="text-danger small">{{ form.monthly_payment.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Number of Payments' %} *</label>
+                        {{ form.number_of_payments }}
+                        {% if form.number_of_payments.errors %}<div class="text-danger small">{{ form.number_of_payments.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Agreement Signed' %}</label>
+                        <div class="form-check mt-2">
+                            {{ form.agreement_signed }}
+                            <label class="form-check-label" for="{{ form.agreement_signed.id_for_label }}">
+                                {% trans 'Patient has signed the agreement' %}
+                            </label>
+                        </div>
+                        {% if form.agreement_signed.errors %}<div class="text-danger small">{{ form.agreement_signed.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans 'Agreement Date' %}</label>
+                        {{ form.agreement_date }}
+                        {% if form.agreement_date.errors %}<div class="text-danger small">{{ form.agreement_date.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <label class="form-label">{% trans 'Notes' %}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}<div class="text-danger small">{{ form.notes.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i> 
+                    {% trans 'Installments will be automatically generated based on the plan terms when you create the payment plan.' %}
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'billing:payment_plan_list' %}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left"></i> {% trans 'Cancel' %}</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> {% trans 'Save Payment Plan' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
