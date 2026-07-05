@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{{ account.account_number }}{% endblock %}
@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container-fluid">
     <h1>{{ account.account_number }}</h1>
-    
+
     <!-- Account Summary -->
     <div class="row mb-4">
         <div class="col-md-3">
@@ -42,7 +42,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Recent Charges -->
     <div class="card mb-4">
         <div class="card-header">
@@ -75,7 +75,7 @@
             </table>
         </div>
     </div>
-    
+
     <!-- Recent Payments -->
     <div class="card">
         <div class="card-header">

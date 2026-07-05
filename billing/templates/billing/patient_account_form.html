@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Patient Account' %}{% endblock %}
@@ -6,22 +6,22 @@
 {% block content %}
 <div class="container-fluid">
     <h1>{% if form.instance.pk %}{% trans 'Edit Account' %}{% else %}{% trans 'Create Account' %}{% endif %}</h1>
-    
+
     <div class="card">
         <div class="card-body">
             <form method="post" class="form">
                 {% csrf_token %}
-                
+
                 <div class="form-group">
                     <label>{{ form.patient.label }}</label>
                     {{ form.patient }}
                 </div>
-                
+
                 <div class="form-group">
                     <label>{{ form.account_status.label }}</label>
                     {{ form.account_status }}
                 </div>
-                
+
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
                 </div>

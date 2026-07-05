@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% if object.pk %}{% trans 'Edit Statement' %}{% else %}{% trans 'Create Statement' %}{% endif %}{% endblock %}
@@ -15,7 +15,7 @@
         <div class="card-body">
             <form method="post" novalidate>
                 {% csrf_token %}
-                
+
                 <div class="row mb-3">
                     <div class="col-md-6">
                         <label class="form-label">{% trans 'Patient Account' %} *</label>

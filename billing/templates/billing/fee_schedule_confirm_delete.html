@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Delete Fee Schedule' %}{% endblock %}
@@ -9,7 +9,7 @@
         <div class="card-body">
             <h5>{% trans 'Delete Fee Schedule' %}</h5>
             <p>{% blocktrans with name=object.name %}Are you sure you want to delete "{{ name }}"?{% endblocktrans %}</p>
-            
+
             <form method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-danger">{% trans 'Delete' %}</button>

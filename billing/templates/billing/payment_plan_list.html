@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Payment Plans' %}{% endblock %}
@@ -93,11 +93,11 @@
                         <td>
                             <div class="progress" style="height: 20px;">
                                 {% widthratio plan.payments_made plan.number_of_payments 100 as percentage %}
-                                <div class="progress-bar {% if percentage < 50 %}bg-warning{% elif percentage < 75 %}bg-info{% else %}bg-success{% endif %}" 
-                                     role="progressbar" 
-                                     style="width: {{ percentage }}%;" 
-                                     aria-valuenow="{{ percentage }}" 
-                                     aria-valuemin="0" 
+                                <div class="progress-bar {% if percentage < 50 %}bg-warning{% elif percentage < 75 %}bg-info{% else %}bg-success{% endif %}"
+                                     role="progressbar"
+                                     style="width: {{ percentage }}%;"
+                                     aria-valuenow="{{ percentage }}"
+                                     aria-valuemin="0"
                                      aria-valuemax="100">
                                     {{ plan.payments_made }}/{{ plan.number_of_payments }}
                                 </div>

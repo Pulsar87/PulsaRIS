@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% trans 'Clearinghouses' %}{% endblock %}
@@ -13,7 +13,7 @@
             <a href="{% url 'billing:clearinghouse_create' %}" class="btn btn-primary">{% trans 'Add Clearinghouse' %}</a>
         </div>
     </div>
-    
+
     <div class="card">
         <div class="table-responsive">
             <table class="table table-hover">

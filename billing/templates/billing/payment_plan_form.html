@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'layout.html' %}
 {% load i18n %}
 
 {% block title %}{% if object.pk %}{% trans 'Edit Payment Plan' %}{% else %}{% trans 'Create Payment Plan' %}{% endif %}{% endblock %}
@@ -15,7 +15,7 @@
         <div class="card-body">
             <form method="post" novalidate>
                 {% csrf_token %}
-                
+
                 <h5 class="mb-3">{% trans 'Plan Details' %}</h5>
 
                 <div class="row mb-3">
@@ -90,7 +90,7 @@
                 </div>
 
                 <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle"></i> 
+                    <i class="fas fa-info-circle"></i>
                     {% trans 'Installments will be automatically generated based on the plan terms when you create the payment plan.' %}
                 </div>
 
