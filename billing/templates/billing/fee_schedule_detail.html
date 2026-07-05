@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ fee_schedule.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ fee_schedule.name }}</h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'billing:fee_schedule_update' fee_schedule.pk %}" class="btn btn-warning">{% trans 'Edit' %}</a>
+            <a href="{% url 'billing:fee_schedule_list' %}" class="btn btn-secondary">{% trans 'Back' %}</a>
+        </div>
+    </div>
+    
+    <!-- Schedule Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>{% trans 'Schedule Details' %}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>{% trans 'Type:' %}</strong> {{ fee_schedule.get_schedule_type_display }}</p>
+            <p><strong>{% trans 'Effective Date:' %}</strong> {{ fee_schedule.effective_date }}</p>
+            <p><strong>{% trans 'Expiration Date:' %}</strong> {{ fee_schedule.expiration_date|default:"—" }}</p>
+            <p><strong>{% trans 'Status:' %}</strong>
+                {% if is_currently_active %}
+                    <span class="badge badge-success">{% trans 'Currently Active' %}</span>
+                {% else %}
+                    <span class="badge badge-danger">{% trans 'Inactive' %}</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Total Items' %}</h6>
+                    <h3>{{ item_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Avg Prof Component' %}</h6>
+                    <h3>${{ professional_avg }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Avg Tech Component' %}</h6>
+                    <h3>${{ technical_avg }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Avg Global Fee' %}</h6>
+                    <h3>${{ global_avg }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Items Section -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5>{% trans 'Fee Schedule Items' %}</h5>
+            <a href="{% url 'billing:fee_schedule_item_add' fee_schedule.pk %}" class="btn btn-sm btn-primary">{% trans 'Add Item' %}</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans 'CPT Code' %}</th>
+                        <th>{% trans 'Description' %}</th>
+                        <th>{% trans 'Prof Component' %}</th>
+                        <th>{% trans 'Tech Component' %}</th>
+                        <th>{% trans 'Global Fee' %}</th>
+                        <th>{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in fee_schedule.items.all %}
+                    <tr>
+                        <td>{{ item.procedure_code }}</td>
+                        <td>{{ item.procedure_description }}</td>
+                        <td>${{ item.professional_component }}</td>
+                        <td>${{ item.technical_component }}</td>
+                        <td>${{ item.global_fee }}</td>
+                        <td>
+                            <a href="{% url 'billing:fee_schedule_item_update' item.pk %}" class="btn btn-sm btn-warning">{% trans 'Edit' %}</a>
+                            <a href="{% url 'billing:fee_schedule_item_delete' item.pk %}" class="btn btn-sm btn-danger">{% trans 'Delete' %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center">{% trans 'No items in this schedule' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Insurance Payers' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>{% trans 'Insurance Payers' %}</h1>
+    
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Total Payers' %}</h6>
+                    <h3>{{ total_payers }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Active' %}</h6>
+                    <h3>{{ active_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Commercial' %}</h6>
+                    <h3>{{ commercial_count }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Government' %}</h6>
+                    <h3>{{ government_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters & Search -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <input type="text" name="search" placeholder="{% trans 'Search...' %}" class="form-control mr-2" value="{{ query }}">
+                <button type="submit" class="btn btn-primary">{% trans 'Search' %}</button>
+                <a href="{% url 'billing:payer_create' %}" class="btn btn-success ml-2">{% trans 'Add Payer' %}</a>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Payers Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Name' %}</th>
+                        <th>{% trans 'Payer ID' %}</th>
+                        <th>{% trans 'Type' %}</th>
+                        <th>{% trans 'Status' %}</th>
+                        <th>{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payer in payers %}
+                    <tr>
+                        <td>{{ payer.name }}</td>
+                        <td>{{ payer.payer_id }}</td>
+                        <td>{{ payer.get_payer_type_display }}</td>
+                        <td>
+                            {% if payer.is_active %}
+                                <span class="badge badge-success">{% trans 'Active' %}</span>
+                            {% else %}
+                                <span class="badge badge-danger">{% trans 'Inactive' %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'billing:payer_detail' payer.pk %}" class="btn btn-sm btn-info">{% trans 'View' %}</a>
+                            <a href="{% url 'billing:payer_update' payer.pk %}" class="btn btn-sm btn-warning">{% trans 'Edit' %}</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">{% trans 'No payers found' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

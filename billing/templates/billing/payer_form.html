@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Insurance Payer' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>{% if form.instance.pk %}{% trans 'Edit Payer' %}{% else %}{% trans 'Create Payer' %}{% endif %}</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>{{ form.name.label }}</label>
+                    {{ form.name }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.payer_id.label }}</label>
+                    {{ form.payer_id }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.payer_type.label }}</label>
+                    {{ form.payer_type }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.email.label }}</label>
+                    {{ form.email }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.phone.label }}</label>
+                    {{ form.phone }}
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

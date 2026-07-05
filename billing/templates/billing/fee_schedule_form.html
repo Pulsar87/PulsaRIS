@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% if form.instance.pk %}{% trans 'Edit' %}{% else %}{% trans 'Create' %}{% endif %} {% trans 'Fee Schedule' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{% if form.instance.pk %}{% trans 'Edit Fee Schedule' %}{% else %}{% trans 'Create Fee Schedule' %}{% endif %}</h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'billing:fee_schedule_list' %}" class="btn btn-secondary">{% trans 'Cancel' %}</a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.schedule_type.label }}</label>
+                    {{ form.schedule_type }}
+                    {% if form.schedule_type.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.schedule_type.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.effective_date.label }}</label>
+                    {{ form.effective_date }}
+                    {% if form.effective_date.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.effective_date.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.expiration_date.label }}</label>
+                    {{ form.expiration_date }}
+                    {% if form.expiration_date.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.expiration_date.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.description.label }}</label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <div class="alert alert-danger mt-2">{{ form.description.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ clearinghouse.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ clearinghouse.name }}</h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'billing:clearinghouse_update' clearinghouse.pk %}" class="btn btn-warning">{% trans 'Edit' %}</a>
+            <a href="{% url 'billing:clearinghouse_list' %}" class="btn btn-secondary">{% trans 'Back' %}</a>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>{% trans 'Clearinghouse Details' %}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>{% trans 'Sender ID:' %}</strong> {{ clearinghouse.sender_id }}</p>
+            <p><strong>{% trans 'Receiver ID:' %}</strong> {{ clearinghouse.receiver_id }}</p>
+            <p><strong>{% trans 'API Endpoint:' %}</strong> {{ clearinghouse.api_endpoint|default:"—" }}</p>
+            <p><strong>{% trans 'Status:' %}</strong>
+                {% if clearinghouse.is_active %}
+                    <span class="badge badge-success">{% trans 'Active' %}</span>
+                {% else %}
+                    <span class="badge badge-danger">{% trans 'Inactive' %}</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

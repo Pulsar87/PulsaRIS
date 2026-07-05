@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ account.account_number }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>{{ account.account_number }}</h1>
+    
+    <!-- Account Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Current Balance' %}</h6>
+                    <h3>${{ account.current_balance }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Total Charges' %}</h6>
+                    <h3>${{ account.total_charges }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Total Payments' %}</h6>
+                    <h3>${{ account.total_payments }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Status' %}</h6>
+                    <p>{{ account.get_account_status_display }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Charges -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>{% trans 'Recent Charges' %}</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Service Date' %}</th>
+                        <th>{% trans 'Procedure' %}</th>
+                        <th>{% trans 'Amount' %}</th>
+                        <th>{% trans 'Status' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for charge in recent_charges %}
+                    <tr>
+                        <td>{{ charge.service_date }}</td>
+                        <td>{{ charge.procedure_name }}</td>
+                        <td>${{ charge.total_charge }}</td>
+                        <td>{{ charge.get_billing_status_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">{% trans 'No charges' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Recent Payments -->
+    <div class="card">
+        <div class="card-header">
+            <h5>{% trans 'Recent Payments' %}</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Date' %}</th>
+                        <th>{% trans 'Amount' %}</th>
+                        <th>{% trans 'Method' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in recent_payments %}
+                    <tr>
+                        <td>{{ payment.payment_date }}</td>
+                        <td>${{ payment.amount }}</td>
+                        <td>{{ payment.get_payment_method_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">{% trans 'No payments' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

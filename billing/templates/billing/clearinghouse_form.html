@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Clearinghouse' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>{% if form.instance.pk %}{% trans 'Edit Clearinghouse' %}{% else %}{% trans 'Create Clearinghouse' %}{% endif %}</h1>
+    
+    <div class="card">
+        <div class="card-body">
+            <form method="post" class="form">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label>{{ form.name.label }}</label>
+                    {{ form.name }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.sender_id.label }}</label>
+                    {{ form.sender_id }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.receiver_id.label }}</label>
+                    {{ form.receiver_id }}
+                </div>
+                
+                <div class="form-group">
+                    <label>{{ form.api_endpoint.label }}</label>
+                    {{ form.api_endpoint }}
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">{% trans 'Save' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

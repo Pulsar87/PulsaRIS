@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ payer.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>{{ payer.name }}</h1>
+        </div>
+        <div class="col-md-4 text-right">
+            <a href="{% url 'billing:payer_update' payer.pk %}" class="btn btn-warning">{% trans 'Edit' %}</a>
+            <a href="{% url 'billing:payer_list' %}" class="btn btn-secondary">{% trans 'Back' %}</a>
+        </div>
+    </div>
+    
+    <!-- Payer Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>{% trans 'Payer Details' %}</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>{% trans 'Payer ID:' %}</strong> {{ payer.payer_id }}</p>
+            <p><strong>{% trans 'Type:' %}</strong> {{ payer.get_payer_type_display }}</p>
+            <p><strong>{% trans 'Email:' %}</strong> {{ payer.email|default:"—" }}</p>
+            <p><strong>{% trans 'Phone:' %}</strong> {{ payer.phone|default:"—" }}</p>
+            <p><strong>{% trans 'Website:' %}</strong> {{ payer.website|default:"—" }}</p>
+        </div>
+    </div>
+    
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">{% trans 'Patient Insurance' %}</h6>
+                    <h3>{{ insurance_count }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Fee Schedules -->
+    <div class="card">
+        <div class="card-header">
+            <h5>{% trans 'Associated Fee Schedules' %}</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Name' %}</th>
+                        <th>{% trans 'Type' %}</th>
+                        <th>{% trans 'Effective Date' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for schedule in fee_schedules %}
+                    <tr>
+                        <td>{{ schedule.name }}</td>
+                        <td>{{ schedule.get_schedule_type_display }}</td>
+                        <td>{{ schedule.effective_date }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">{% trans 'No fee schedules' %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

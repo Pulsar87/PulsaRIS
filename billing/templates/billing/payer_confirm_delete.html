@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Delete Payer' %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5>{% trans 'Delete Payer' %}</h5>
+            <p>{% blocktrans with name=object.name %}Are you sure you want to delete "{{ name }}"?{% endblocktrans %}</p>
+            
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">{% trans 'Delete' %}</button>
+                <a href="{% url 'billing:payer_list' %}" class="btn btn-secondary">{% trans 'Cancel' %}</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
