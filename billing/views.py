@@ -1,9 +1,10 @@
 import json
 from decimal import Decimal
+from datetime import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, Q, Sum
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -18,24 +19,60 @@ from django.views.generic import (
 
 from .forms import (
     AuthorizationForm,
+    ClaimAppealForm,
+    ClaimForm,
+    ClaimLineForm,
     ClearinghouseForm,
+    DenialReasonForm,
     FeeScheduleForm,
     FeeScheduleItemForm,
     FeeScheduleItemFormSet,
     InsurancePayerForm,
     PatientAccountForm,
     PatientInsuranceForm,
+    PaymentAllocationForm,
+    PaymentDetailForm,
+    PaymentForm,
+    PaymentPlanForm,
+    PaymentPlanInstallmentForm,
+    PaymentPlanInstallmentFormSet,
+    PaymentPostingForm,
+    PatientStatementForm,
+    ServiceLineForm,
 )
 from .models import (
     Authorization,
+    Claim,
+    ClaimAppeal,
+    ClaimLine,
     Clearinghouse,
+    DenialReason,
     FeeSchedule,
     FeeScheduleItem,
     InsurancePayer,
     PatientAccount,
     PatientInsurance,
+    PatientStatement,
     Payment,
+    PaymentAllocation,
+    PaymentDetail,
+    PaymentPosting,
+    PaymentPlan,
+    PaymentPlanInstallment,
+    ServiceLine,
+    PaymentPosting,
 )
+
+# Import EDI services
+try:
+    from .edi_services import (
+        generate_claim_837,
+        process_era_file,
+        submit_claim_to_clearinghouse,
+    )
+    EDI_AVAILABLE = True
+except ImportError:
+    EDI_AVAILABLE = False
 
 
 class FeeScheduleListView(LoginRequiredMixin, ListView):
@@ -750,3 +787,1525 @@ class PatientAccountCreateView(LoginRequiredMixin, CreateView):
 
             form.instance.account_number = f"ACC-{uuid.uuid4().hex[:8].upper()}"
         return super().form_valid(form)
+
+
+# ============================================================================
+# SERVICE LINE VIEWS (CHARGE CAPTURE)
+# ============================================================================
+
+class ServiceLineListView(LoginRequiredMixin, ListView):
+    """List all service lines with filtering and search"""
+    
+    model = ServiceLine
+    template_name = "billing/service_line_list.html"
+    context_object_name = "service_lines"
+    paginate_by = 25
+    
+    def get_queryset(self):
+        queryset = ServiceLine.objects.filter(tenant=self.request.tenant).select_related(
+            'exam_order', 'patient_account', 'rendering_provider', 'claim'
+        )
+        
+        # Filter by billing status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(billing_status=status)
+        
+        # Filter by date range
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        if date_from:
+            queryset = queryset.filter(service_date__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(service_date__lte=date_to)
+        
+        # Search by procedure code
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(procedure_code__icontains=search) |
+                Q(procedure_name__icontains=search)
+            )
+        
+        return queryset.order_by('-service_date')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tenant = self.request.tenant
+        
+        context['total_lines'] = ServiceLine.objects.filter(tenant=tenant).count()
+        context['pending_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='PENDING').count()
+        context['ready_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='READY').count()
+        context['billed_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='BILLED').count()
+        context['denied_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='DENIED').count()
+        
+        return context
+
+
+class ServiceLineDetailView(LoginRequiredMixin, DetailView):
+    """Detail view of a service line item"""
+    
+    model = ServiceLine
+    template_name = "billing/service_line_detail.html"
+    context_object_name = "service_line"
+    
+    def get_queryset(self):
+        return ServiceLine.objects.filter(tenant=self.request.tenant).select_related(
+            'exam_order', 'patient_account', 'rendering_provider', 'facility', 'claim'
+        )
+
+
+class ServiceLineCreateView(LoginRequiredMixin, CreateView):
+    """Create a new service line (charge capture)"""
+    
+    model = ServiceLine
+    form_class = ServiceLineForm
+    template_name = "billing/service_line_form.html"
+    success_url = reverse_lazy('billing:service_line_list')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        # Auto-calculate total charge if not provided
+        if not form.instance.total_charge:
+            form.instance.total_charge = form.instance.unit_price * form.instance.quantity
+        return super().form_valid(form)
+
+
+class ServiceLineUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a service line item"""
+    
+    model = ServiceLine
+    form_class = ServiceLineForm
+    template_name = "billing/service_line_form.html"
+    success_url = reverse_lazy('billing:service_line_list')
+    
+    def get_queryset(self):
+        return ServiceLine.objects.filter(tenant=self.request.tenant)
+    
+    def form_valid(self, form):
+        # Auto-calculate total charge
+        if form.cleaned_data.get('unit_price') and form.cleaned_data.get('quantity'):
+            form.instance.total_charge = form.instance.unit_price * form.instance.quantity
+        return super().form_valid(form)
+
+
+class ServiceLineDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a service line item"""
+    
+    model = ServiceLine
+    template_name = "billing/service_line_confirm_delete.html"
+    success_url = reverse_lazy('billing:service_line_list')
+    
+    def get_queryset(self):
+        return ServiceLine.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# CLAIM VIEWS
+# ============================================================================
+
+class ClaimListView(LoginRequiredMixin, ListView):
+    """List all claims with filtering and search"""
+    
+    model = Claim
+    template_name = "billing/claim_list.html"
+    context_object_name = "claims"
+    paginate_by = 25
+    
+    def get_queryset(self):
+        queryset = Claim.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'payer'
+        )
+        
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        # Filter by claim type
+        claim_type = self.request.GET.get('claim_type')
+        if claim_type:
+            queryset = queryset.filter(claim_type=claim_type)
+        
+        # Filter by date range
+        date_from = self.request.GET.get('date_from')
+        date_to = self.request.GET.get('date_to')
+        if date_from:
+            queryset = queryset.filter(date_of_service_from__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(date_of_service_to__lte=date_to)
+        
+        # Search by claim number
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(claim_number__icontains=search) |
+                Q(internal_claim_id__icontains=search)
+            )
+        
+        return queryset.order_by('-date_of_service_from')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        tenant = self.request.tenant
+        
+        context['total_claims'] = Claim.objects.filter(tenant=tenant).count()
+        context['draft_count'] = Claim.objects.filter(tenant=tenant, status='DRAFT').count()
+        context['submitted_count'] = Claim.objects.filter(tenant=tenant, status='SUBMITTED').count()
+        context['accepted_count'] = Claim.objects.filter(tenant=tenant, status='ACCEPTED').count()
+        context['paid_count'] = Claim.objects.filter(tenant=tenant, status='PAID').count()
+        context['denied_count'] = Claim.objects.filter(tenant=tenant, status='DENIED').count()
+        
+        return context
+
+
+class ClaimDetailView(LoginRequiredMixin, DetailView):
+    """Detail view of a claim with all line items"""
+    
+    model = Claim
+    template_name = "billing/claim_detail.html"
+    context_object_name = "claim"
+    
+    def get_queryset(self):
+        return Claim.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'payer'
+        ).prefetch_related('lines', 'service_lines')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        claim = self.object
+        
+        context['line_count'] = claim.lines.count()
+        context['total_charges'] = claim.lines.aggregate(total=Sum('charge_amount'))['total'] or Decimal('0.00')
+        context['total_paid'] = claim.lines.aggregate(total=Sum('paid_amount'))['total'] or Decimal('0.00')
+        context['total_adjustments'] = claim.lines.aggregate(total=Sum('adjustment_amount'))['total'] or Decimal('0.00')
+        
+        return context
+
+
+class ClaimCreateView(LoginRequiredMixin, CreateView):
+    """Create a new insurance claim"""
+    
+    model = Claim
+    form_class = ClaimForm
+    template_name = "billing/claim_form.html"
+    success_url = reverse_lazy('billing:claim_list')
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        # Generate claim number if not provided
+        if not form.instance.claim_number:
+            import uuid
+            form.instance.claim_number = f"CLM-{uuid.uuid4().hex[:10].upper()}"
+        if not form.instance.internal_claim_id:
+            import uuid
+            form.instance.internal_claim_id = f"INT-{uuid.uuid4().hex[:10].upper()}"
+        return super().form_valid(form)
+
+
+class ClaimUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a claim"""
+    
+    model = Claim
+    form_class = ClaimForm
+    template_name = "billing/claim_form.html"
+    success_url = reverse_lazy('billing:claim_list')
+    
+    def get_queryset(self):
+        return Claim.objects.filter(tenant=self.request.tenant)
+
+
+class ClaimDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a claim (only drafts can be deleted)"""
+    
+    model = Claim
+    template_name = "billing/claim_confirm_delete.html"
+    success_url = reverse_lazy('billing:claim_list')
+    
+    def get_queryset(self):
+        return Claim.objects.filter(tenant=self.request.tenant)
+    
+    def delete(self, request, *args, **kwargs):
+        claim = self.get_object()
+        if claim.status != 'DRAFT':
+            # Only draft claims can be deleted
+            return render(request, 'billing/claim_error.html', {
+                'message': 'Only draft claims can be deleted.'
+            })
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# CLAIM LINE VIEWS
+# ============================================================================
+
+class ClaimLineCreateView(LoginRequiredMixin, CreateView):
+    """Add a line item to a claim"""
+    
+    model = ClaimLine
+    form_class = ClaimLineForm
+    template_name = "billing/claim_line_form.html"
+    
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_detail', kwargs={'pk': self.kwargs['claim_pk']})
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+    
+    def form_valid(self, form):
+        claim = get_object_or_404(Claim.objects.filter(tenant=self.request.tenant), pk=self.kwargs['claim_pk'])
+        form.instance.claim = claim
+        
+        # Auto-set line number
+        last_line = ClaimLine.objects.filter(claim=claim).order_by('-line_number').first()
+        form.instance.line_number = (last_line.line_number + 1) if last_line else 1
+        
+        return super().form_valid(form)
+
+
+class ClaimLineUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a claim line item"""
+    
+    model = ClaimLine
+    form_class = ClaimLineForm
+    template_name = "billing/claim_line_form.html"
+    
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_detail', kwargs={'pk': self.object.claim.pk})
+    
+    def get_queryset(self):
+        return ClaimLine.objects.filter(claim__tenant=self.request.tenant)
+
+
+class ClaimLineDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a claim line item"""
+    
+    model = ClaimLine
+    template_name = "billing/claim_line_confirm_delete.html"
+    
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_detail', kwargs={'pk': self.object.claim.pk})
+    
+    def get_queryset(self):
+        return ClaimLine.objects.filter(claim__tenant=self.request.tenant)
+
+
+# ============================================================================
+# PAYMENT POSTING VIEWS
+# ============================================================================
+
+class PaymentPostingListView(LoginRequiredMixin, ListView):
+    """List all payment postings"""
+
+    model = PaymentPosting
+    template_name = "billing/payment_posting_list.html"
+    context_object_name = "payment_postings"
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = PaymentPosting.objects.filter(tenant=self.request.tenant).select_related(
+            'claim', 'payer', 'posted_by'
+        ).order_by('-posting_date')
+        
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+        
+        # Filter by payment method
+        payment_method = self.request.GET.get('payment_method')
+        if payment_method:
+            queryset = queryset.filter(payment_method=payment_method)
+        
+        # Search by check number or ERA trace
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(check_number__icontains=search) |
+                Q(era_trace_number__icontains=search)
+            )
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['statuses'] = ['UNPOSTED', 'POSTED', 'REVERSED']
+        context['payment_methods'] = ['ERA', 'CHECK', 'EFT', 'CASH', 'CREDIT_CARD']
+        
+        # Summary stats
+        context['total_unposted'] = PaymentPosting.objects.filter(
+            tenant=self.request.tenant, status='UNPOSTED'
+        ).count()
+        context['total_posted'] = PaymentPosting.objects.filter(
+            tenant=self.request.tenant, status='POSTED'
+        ).count()
+        
+        return context
+
+
+class PaymentPostingDetailView(LoginRequiredMixin, DetailView):
+    """View payment posting details with all payment details"""
+
+    model = PaymentPosting
+    template_name = "billing/payment_posting_detail.html"
+    context_object_name = "payment_posting"
+
+    def get_queryset(self):
+        return PaymentPosting.objects.filter(tenant=self.request.tenant).select_related(
+            'claim', 'payer'
+        ).prefetch_related('details__claim_line')
+
+
+class PaymentPostingCreateView(LoginRequiredMixin, CreateView):
+    """Create a new payment posting (manual or from ERA)"""
+
+    model = PaymentPosting
+    form_class = PaymentPostingForm
+    template_name = "billing/payment_posting_form.html"
+    success_url = reverse_lazy('billing:payment_posting_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        kwargs['initial']['posting_date'] = timezone.now().date()
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class PaymentPostingUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a payment posting"""
+
+    model = PaymentPosting
+    form_class = PaymentPostingForm
+    template_name = "billing/payment_posting_form.html"
+    success_url = reverse_lazy('billing:payment_posting_list')
+
+    def get_queryset(self):
+        return PaymentPosting.objects.filter(tenant=self.request.tenant)
+
+
+class PaymentPostingDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a payment posting (only unposted can be deleted)"""
+
+    model = PaymentPosting
+    template_name = "billing/payment_posting_confirm_delete.html"
+    success_url = reverse_lazy('billing:payment_posting_list')
+
+    def get_queryset(self):
+        return PaymentPosting.objects.filter(tenant=self.request.tenant)
+
+    def delete(self, request, *args, **kwargs):
+        posting = self.get_object()
+        if posting.status == 'POSTED':
+            return render(request, 'billing/payment_posting_error.html', {
+                'message': 'Posted payment postings cannot be deleted. Please reverse instead.'
+            })
+        return super().delete(request, *args, **kwargs)
+
+
+# ============================================================================
+# PAYMENT DETAIL VIEWS
+# ============================================================================
+
+class PaymentDetailCreateView(LoginRequiredMixin, CreateView):
+    """Add a payment detail to a payment posting"""
+
+    model = PaymentDetail
+    form_class = PaymentDetailForm
+    template_name = "billing/payment_detail_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_posting_detail', kwargs={'pk': self.kwargs['posting_pk']})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+
+    def form_valid(self, form):
+        posting = get_object_or_404(
+            PaymentPosting.objects.filter(tenant=self.request.tenant),
+            pk=self.kwargs['posting_pk']
+        )
+        form.instance.payment_posting = posting
+        return super().form_valid(form)
+
+
+class PaymentDetailUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a payment detail"""
+
+    model = PaymentDetail
+    form_class = PaymentDetailForm
+    template_name = "billing/payment_detail_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_posting_detail', kwargs={'pk': self.object.payment_posting.pk})
+
+    def get_queryset(self):
+        return PaymentDetail.objects.filter(payment_posting__tenant=self.request.tenant)
+
+
+class PaymentDetailDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a payment detail"""
+
+    model = PaymentDetail
+    template_name = "billing/payment_detail_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_posting_detail', kwargs={'pk': self.object.payment_posting.pk})
+
+    def get_queryset(self):
+        return PaymentDetail.objects.filter(payment_posting__tenant=self.request.tenant)
+
+
+# ============================================================================
+# PATIENT PAYMENT VIEWS
+# ============================================================================
+
+class PaymentListView(LoginRequiredMixin, ListView):
+    """List all patient payments"""
+
+    model = Payment
+    template_name = "billing/payment_list.html"
+    context_object_name = "payments"
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = Payment.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'received_by'
+        ).order_by('-payment_date')
+        
+        # Filter by payment method
+        payment_method = self.request.GET.get('payment_method')
+        if payment_method:
+            queryset = queryset.filter(payment_method=payment_method)
+        
+        # Search by check number or transaction ID
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(check_number__icontains=search) |
+                Q(transaction_id__icontains=search)
+            )
+        
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['payment_methods'] = ['CASH', 'CHECK', 'CREDIT_CARD', 'DEBIT_CARD', 'EFT', 'ONLINE', 'PAYMENT_PLAN']
+        
+        # Summary stats
+        today = timezone.now().date()
+        context['today_total'] = Payment.objects.filter(
+            tenant=self.request.tenant, payment_date__date=today
+        ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        
+        return context
+
+
+class PaymentDetailView(LoginRequiredMixin, DetailView):
+    """View payment details with allocations"""
+
+    model = Payment
+    template_name = "billing/payment_detail.html"
+    context_object_name = "payment"
+
+    def get_queryset(self):
+        return Payment.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account'
+        ).prefetch_related('allocations__service_line')
+
+
+class PaymentCreateView(LoginRequiredMixin, CreateView):
+    """Create a new patient payment"""
+
+    model = Payment
+    form_class = PaymentForm
+    template_name = "billing/payment_form.html"
+    success_url = reverse_lazy('billing:payment_list')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        kwargs['initial']['payment_date'] = timezone.now()
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        form.instance.received_by = self.request.user
+        return super().form_valid(form)
+
+
+class PaymentUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a patient payment"""
+
+    model = Payment
+    form_class = PaymentForm
+    template_name = "billing/payment_form.html"
+    success_url = reverse_lazy('billing:payment_list')
+
+    def get_queryset(self):
+        return Payment.objects.filter(tenant=self.request.tenant)
+
+
+class PaymentDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a patient payment"""
+
+    model = Payment
+    template_name = "billing/payment_confirm_delete.html"
+    success_url = reverse_lazy('billing:payment_list')
+
+    def get_queryset(self):
+        return Payment.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# PAYMENT ALLOCATION VIEWS
+# ============================================================================
+
+class PaymentAllocationCreateView(LoginRequiredMixin, CreateView):
+    """Allocate a payment to a service line"""
+
+    model = PaymentAllocation
+    form_class = PaymentAllocationForm
+    template_name = "billing/payment_allocation_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_detail', kwargs={'pk': self.kwargs['payment_pk']})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['initial']['tenant'] = self.request.tenant
+        return kwargs
+
+    def form_valid(self, form):
+        payment = get_object_or_404(
+            Payment.objects.filter(tenant=self.request.tenant),
+            pk=self.kwargs['payment_pk']
+        )
+        form.instance.payment = payment
+        return super().form_valid(form)
+
+
+class PaymentAllocationUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a payment allocation"""
+
+    model = PaymentAllocation
+    form_class = PaymentAllocationForm
+    template_name = "billing/payment_allocation_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_detail', kwargs={'pk': self.object.payment.pk})
+
+    def get_queryset(self):
+        return PaymentAllocation.objects.filter(payment__tenant=self.request.tenant)
+
+
+class PaymentAllocationDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a payment allocation"""
+
+    model = PaymentAllocation
+    template_name = "billing/payment_allocation_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_detail', kwargs={'pk': self.object.payment.pk})
+
+    def get_queryset(self):
+        return PaymentAllocation.objects.filter(payment__tenant=self.request.tenant)
+
+
+# ============================================================================
+# PATIENT STATEMENT VIEWS
+# ============================================================================
+
+class PatientStatementListView(LoginRequiredMixin, ListView):
+    """List all patient statements with filtering and search"""
+
+    model = PatientStatement
+    template_name = "billing/patient_statement_list.html"
+    context_object_name = "statements"
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = PatientStatement.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'patient_account__patient'
+        )
+
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Filter by delivery method
+        delivery_method = self.request.GET.get('delivery_method')
+        if delivery_method:
+            queryset = queryset.filter(delivery_method=delivery_method)
+
+        # Search by statement number or patient
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                models.Q(statement_number__icontains=search) |
+                models.Q(patient_account__patient__mrn__icontains=search) |
+                models.Q(patient_account__patient__first_name__icontains=search) |
+                models.Q(patient_account__patient__last_name__icontains=search)
+            )
+
+        # Date range filter
+        date_from = self.request.GET.get('date_from')
+        if date_from:
+            queryset = queryset.filter(statement_date__gte=date_from)
+
+        date_to = self.request.GET.get('date_to')
+        if date_to:
+            queryset = queryset.filter(statement_date__lte=date_to)
+
+        return queryset.order_by('-statement_date')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_statements'] = PatientStatement.objects.filter(
+            tenant=self.request.tenant
+        ).count()
+        context['draft_count'] = PatientStatement.objects.filter(
+            tenant=self.request.tenant, status='DRAFT'
+        ).count()
+        context['sent_count'] = PatientStatement.objects.filter(
+            tenant=self.request.tenant, status='SENT'
+        ).count()
+        context['overdue_count'] = PatientStatement.objects.filter(
+            tenant=self.request.tenant, status='OVERDUE'
+        ).count()
+        context['total_balance'] = PatientStatement.objects.filter(
+            tenant=self.request.tenant
+        ).aggregate(total=models.Sum('current_balance'))['total'] or Decimal('0.00')
+        return context
+
+
+class PatientStatementDetailView(LoginRequiredMixin, DetailView):
+    """View details of a patient statement"""
+
+    model = PatientStatement
+    template_name = "billing/patient_statement_detail.html"
+    context_object_name = "statement"
+
+    def get_queryset(self):
+        return PatientStatement.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'patient_account__patient'
+        ).prefetch_related('patient_account__service_lines')
+
+
+class PatientStatementCreateView(LoginRequiredMixin, CreateView):
+    """Create a new patient billing statement"""
+
+    model = PatientStatement
+    form_class = PatientStatementForm
+    template_name = "billing/patient_statement_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:statement_detail', kwargs={'pk': self.object.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        # Generate unique statement number
+        prefix = "STMT"
+        timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
+        random_suffix = str(uuid.uuid4())[:6].upper()
+        form.instance.statement_number = f"{prefix}-{timestamp}-{random_suffix}"
+        return super().form_valid(form)
+
+
+class PatientStatementUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a patient statement"""
+
+    model = PatientStatement
+    form_class = PatientStatementForm
+    template_name = "billing/patient_statement_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:statement_detail', kwargs={'pk': self.object.pk})
+
+    def get_queryset(self):
+        return PatientStatement.objects.filter(tenant=self.request.tenant)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+class PatientStatementDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a patient statement"""
+
+    model = PatientStatement
+    template_name = "billing/patient_statement_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:statement_list')
+
+    def get_queryset(self):
+        return PatientStatement.objects.filter(tenant=self.request.tenant)
+
+
+# ============================================================================
+# PAYMENT PLAN VIEWS
+# ============================================================================
+
+class PaymentPlanListView(LoginRequiredMixin, ListView):
+    """List all payment plans with filtering and search"""
+
+    model = PaymentPlan
+    template_name = "billing/payment_plan_list.html"
+    context_object_name = "payment_plans"
+    paginate_by = 25
+
+    def get_queryset(self):
+        queryset = PaymentPlan.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'patient_account__patient'
+        )
+
+        # Filter by status
+        status = self.request.GET.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Search by patient
+        search = self.request.GET.get('search')
+        if search:
+            queryset = queryset.filter(
+                models.Q(patient_account__patient__mrn__icontains=search) |
+                models.Q(patient_account__patient__first_name__icontains=search) |
+                models.Q(patient_account__patient__last_name__icontains=search)
+            )
+
+        return queryset.order_by('-created_at')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total_plans'] = PaymentPlan.objects.filter(
+            tenant=self.request.tenant
+        ).count()
+        context['active_count'] = PaymentPlan.objects.filter(
+            tenant=self.request.tenant, status='ACTIVE'
+        ).count()
+        context['completed_count'] = PaymentPlan.objects.filter(
+            tenant=self.request.tenant, status='COMPLETED'
+        ).count()
+        context['defaulted_count'] = PaymentPlan.objects.filter(
+            tenant=self.request.tenant, status='DEFAULTED'
+        ).count()
+        context['total_remaining'] = PaymentPlan.objects.filter(
+            tenant=self.request.tenant, status='ACTIVE'
+        ).aggregate(total=models.Sum('remaining_balance'))['total'] or Decimal('0.00')
+        return context
+
+
+class PaymentPlanDetailView(LoginRequiredMixin, DetailView):
+    """View details of a payment plan including installments"""
+
+    model = PaymentPlan
+    template_name = "billing/payment_plan_detail.html"
+    context_object_name = "payment_plan"
+
+    def get_queryset(self):
+        return PaymentPlan.objects.filter(tenant=self.request.tenant).select_related(
+            'patient_account', 'patient_account__patient'
+        ).prefetch_related('installments', 'installments__payment')
+
+
+class PaymentPlanCreateView(LoginRequiredMixin, CreateView):
+    """Create a new payment plan for a patient"""
+
+    model = PaymentPlan
+    form_class = PaymentPlanForm
+    template_name = "billing/payment_plan_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_plan_detail', kwargs={'pk': self.object.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        response = super().form_valid(form)
+        
+        # Auto-generate installments after plan creation
+        self._generate_installments(form.instance)
+        
+        # Update patient account to mark as having payment plan
+        account = form.instance.patient_account
+        account.has_payment_plan = True
+        account.payment_plan_balance = form.instance.remaining_balance
+        account.monthly_payment = form.instance.monthly_payment
+        account.save()
+        
+        return response
+
+    def _generate_installments(self, payment_plan):
+        """Generate installment records based on plan terms"""
+        from datetime import timedelta
+        import calendar
+        
+        current_date = payment_plan.first_payment_date
+        monthly_payment = payment_plan.monthly_payment
+        remaining = payment_plan.total_amount
+        
+        for i in range(1, payment_plan.number_of_payments + 1):
+            # Calculate amount for this installment (last one gets remainder)
+            if i == payment_plan.number_of_payments:
+                amount = remaining
+            else:
+                amount = min(monthly_payment, remaining)
+            
+            PaymentPlanInstallment.objects.create(
+                payment_plan=payment_plan,
+                installment_number=i,
+                due_date=current_date,
+                amount_due=amount,
+                status='PENDING'
+            )
+            
+            remaining -= amount
+            
+            # Move to next month, adjusting for day of month
+            next_month = current_date.month + 1
+            next_year = current_date.year
+            if next_month > 12:
+                next_month = 1
+                next_year += 1
+            
+            # Handle months with fewer days (e.g., Feb 30 -> Feb 28)
+            day = min(payment_plan.payment_day, calendar.monthrange(next_year, next_month)[1])
+            current_date = current_date.replace(year=next_year, month=next_month, day=day)
+
+
+class PaymentPlanUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a payment plan"""
+
+    model = PaymentPlan
+    form_class = PaymentPlanForm
+    template_name = "billing/payment_plan_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_plan_detail', kwargs={'pk': self.object.pk})
+
+    def get_queryset(self):
+        return PaymentPlan.objects.filter(tenant=self.request.tenant)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+class PaymentPlanDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a payment plan"""
+
+    model = PaymentPlan
+    template_name = "billing/payment_plan_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_plan_list')
+
+    def get_queryset(self):
+        return PaymentPlan.objects.filter(tenant=self.request.tenant)
+
+    def delete(self, request, *args, **kwargs):
+        """Also update the patient account when deleting a plan"""
+        self.object = self.get_object()
+        account = self.object.patient_account
+        account.has_payment_plan = False
+        account.payment_plan_balance = None
+        account.monthly_payment = None
+        account.save()
+        return super().delete(request, *args, **kwargs)
+
+
+class PaymentPlanInstallmentUpdateView(LoginRequiredMixin, UpdateView):
+    """Update a payment plan installment"""
+
+    model = PaymentPlanInstallment
+    form_class = PaymentPlanInstallmentForm
+    template_name = "billing/payment_plan_installment_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:payment_plan_detail', kwargs={'pk': self.object.payment_plan.pk})
+
+    def get_queryset(self):
+        return PaymentPlanInstallment.objects.filter(
+            payment_plan__tenant=self.request.tenant
+        )
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        
+        # Update payment plan stats if installment was paid
+        if form.instance.status == 'PAID' and form.instance.payment:
+            plan = form.instance.payment_plan
+            plan.payments_made += 1
+            plan.remaining_balance -= form.instance.amount_paid
+            if plan.payments_made >= plan.number_of_payments:
+                plan.status = 'COMPLETED'
+            plan.save()
+            
+            # Update patient account
+            account = plan.patient_account
+            account.payment_plan_balance = plan.remaining_balance
+            if plan.status == 'COMPLETED':
+                account.has_payment_plan = False
+                account.payment_plan_balance = None
+                account.monthly_payment = None
+            account.save()
+        
+        return response
+from datetime import timedelta
+
+
+# Denial Reason Views
+
+class DenialReasonListView(LoginRequiredMixin, ListView):
+    """List all denial reasons"""
+
+    model = DenialReason
+    template_name = "billing/denial_reason_list.html"
+    context_object_name = "denial_reasons"
+
+    def get_queryset(self):
+        return DenialReason.objects.filter(tenant=self.request.tenant)
+
+
+class DenialReasonDetailView(LoginRequiredMixin, DetailView):
+    """View details of a denial reason"""
+
+    model = DenialReason
+    template_name = "billing/denial_reason_detail.html"
+    context_object_name = "denial_reason"
+
+    def get_queryset(self):
+        return DenialReason.objects.filter(tenant=self.request.tenant)
+
+
+class DenialReasonCreateView(LoginRequiredMixin, CreateView):
+    """Create a new denial reason"""
+
+    model = DenialReason
+    form_class = DenialReasonForm
+    template_name = "billing/denial_reason_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:denial_reason_list')
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        return super().form_valid(form)
+
+
+class DenialReasonUpdateView(LoginRequiredMixin, UpdateView):
+    """Update an existing denial reason"""
+
+    model = DenialReason
+    form_class = DenialReasonForm
+    template_name = "billing/denial_reason_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:denial_reason_list')
+
+    def get_queryset(self):
+        return DenialReason.objects.filter(tenant=self.request.tenant)
+
+
+class DenialReasonDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a denial reason"""
+
+    model = DenialReason
+    template_name = "billing/denial_reason_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:denial_reason_list')
+
+    def get_queryset(self):
+        return DenialReason.objects.filter(tenant=self.request.tenant)
+
+
+# Claim Appeal Views
+
+class ClaimAppealListView(LoginRequiredMixin, ListView):
+    """List all claim appeals"""
+
+    model = ClaimAppeal
+    template_name = "billing/claim_appeal_list.html"
+    context_object_name = "appeals"
+
+    def get_queryset(self):
+        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant).select_related('claim', 'claim_line')
+
+
+class ClaimAppealDetailView(LoginRequiredMixin, DetailView):
+    """View details of a claim appeal"""
+
+    model = ClaimAppeal
+    template_name = "billing/claim_appeal_detail.html"
+    context_object_name = "appeal"
+
+    def get_queryset(self):
+        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant).select_related('claim', 'claim_line')
+
+
+class ClaimAppealCreateView(LoginRequiredMixin, CreateView):
+    """Create a new claim appeal"""
+
+    model = ClaimAppeal
+    form_class = ClaimAppealForm
+    template_name = "billing/claim_appeal_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_appeal_list')
+
+    def form_valid(self, form):
+        form.instance.tenant = self.request.tenant
+        # Auto-set filed_date if not provided
+        if not form.instance.filed_date:
+            form.instance.filed_date = timezone.now().date()
+        # Auto-calculate due_date based on denial reason if not provided
+        if not form.instance.due_date and form.instance.claim:
+            denial_reason = form.instance.claim.denial_reason
+            if denial_reason:
+                form.instance.due_date = form.instance.filed_date + timedelta(days=denial_reason.appeal_deadline_days)
+            else:
+                form.instance.due_date = form.instance.filed_date + timedelta(days=30)
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+class ClaimAppealUpdateView(LoginRequiredMixin, UpdateView):
+    """Update an existing claim appeal"""
+
+    model = ClaimAppeal
+    form_class = ClaimAppealForm
+    template_name = "billing/claim_appeal_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_appeal_detail', kwargs={'pk': self.object.pk})
+
+    def get_queryset(self):
+        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+
+class ClaimAppealDeleteView(LoginRequiredMixin, DeleteView):
+    """Delete a claim appeal"""
+
+    model = ClaimAppeal
+    template_name = "billing/claim_appeal_confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse_lazy('billing:claim_appeal_list')
+
+    def get_queryset(self):
+        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant)
+
+
+# ============================================================================
+# EDI & CLEARINGHOUSE VIEWS
+# ============================================================================
+
+class ClaimGenerate837View(LoginRequiredMixin, View):
+    """Generate 837 EDI file for a claim"""
+    
+    def get(self, request, claim_id):
+        if not EDI_AVAILABLE:
+            return JsonResponse({'error': 'EDI services not available'}, status=503)
+        
+        try:
+            claim = get_object_or_404(Claim.objects.filter(tenant=request.tenant), id=claim_id)
+            
+            # Generate 837 content
+            edi_content = generate_claim_837(claim_id)
+            
+            if not edi_content:
+                return JsonResponse({'error': 'Failed to generate 837 file'}, status=400)
+            
+            # Return as downloadable file
+            response = HttpResponse(edi_content, content_type='application/x12')
+            response['Content-Disposition'] = f'attachment; filename="claim_{claim.claim_number}.837"'
+            return response
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+class ClaimSubmitToClearinghouseView(LoginRequiredMixin, View):
+    """Submit claim to clearinghouse"""
+    
+    def post(self, request, claim_id):
+        if not EDI_AVAILABLE:
+            return JsonResponse({'error': 'EDI services not available'}, status=503)
+        
+        try:
+            result = submit_claim_to_clearinghouse(claim_id)
+            
+            if result.get('success'):
+                return JsonResponse({
+                    'success': True,
+                    'message': result.get('message', 'Claim submitted successfully'),
+                    'transmission_id': result.get('transmission_id'),
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'error': result.get('error', 'Unknown error'),
+                }, status=400)
+                
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+class ERAUploadView(LoginRequiredMixin, View):
+    """Upload and process ERA file"""
+    
+    def get(self, request):
+        return render(request, 'billing/era_upload.html')
+    
+    def post(self, request):
+        if not EDI_AVAILABLE:
+            return JsonResponse({'error': 'EDI services not available'}, status=503)
+        
+        try:
+            era_file = request.FILES.get('era_file')
+            
+            if not era_file:
+                return JsonResponse({'error': 'No file uploaded'}, status=400)
+            
+            # Read file content
+            file_content = era_file.read().decode('utf-8')
+            
+            # Process ERA
+            postings = process_era_file(file_content, request.tenant)
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Successfully processed {len(postings)} payment posting(s)',
+                'postings_count': len(postings),
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+class ClaimStatusCheckView(LoginRequiredMixin, View):
+    """Check claim status via clearinghouse (276/271)"""
+    
+    def get(self, request, claim_id):
+        if not EDI_AVAILABLE:
+            return JsonResponse({'error': 'EDI services not available'}, status=503)
+        
+        try:
+            from .edi_services import ClearinghouseClient
+            
+            claim = get_object_or_404(Claim.objects.filter(tenant=request.tenant), id=claim_id)
+            
+            if not claim.payer or not claim.payer.clearinghouse:
+                return JsonResponse({
+                    'error': 'No clearinghouse configured for this claim\'s payer'
+                }, status=400)
+            
+            client = ClearinghouseClient(claim.payer.clearinghouse)
+            status_result = client.check_claim_status(claim.claim_number)
+            
+            if 'error' in status_result:
+                return JsonResponse({'error': status_result['error']}, status=400)
+            
+            return JsonResponse(status_result)
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+class FetchERAFilesView(LoginRequiredMixin, View):
+    """Fetch ERA files from clearinghouse"""
+    
+    def get(self, request):
+        if not EDI_AVAILABLE:
+            return JsonResponse({'error': 'EDI services not available'}, status=503)
+        
+        try:
+            from .edi_services import ClearinghouseClient
+            
+            # Get optional date range
+            start_date_str = request.GET.get('start_date')
+            end_date_str = request.GET.get('end_date')
+            
+            start_date = None
+            end_date = None
+            
+            if start_date_str:
+                start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+            if end_date_str:
+                end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+            
+            # Get active clearinghouses
+            clearinghouses = Clearinghouse.objects.filter(
+                tenant=request.tenant,
+                is_active=True
+            )
+            
+            all_files = []
+            
+            for ch in clearinghouses:
+                client = ClearinghouseClient(ch)
+                files = client.fetch_era(start_date, end_date)
+                all_files.extend(files)
+            
+            return JsonResponse({
+                'success': True,
+                'files_count': len(all_files),
+                'message': f'Fetched {len(all_files)} ERA file(s)'
+            })
+            
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+
+# =============================================================================
+# REPORTING VIEWS
+# =============================================================================
+
+class ChargeCaptureReportView(LoginRequiredMixin, View):
+    """Daily Charge Capture Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_charge_capture_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Charge Capture Report'
+        }
+        return render(request, 'billing/reports/charge_capture_report.html', context)
+
+
+class ClaimSubmissionReportView(LoginRequiredMixin, View):
+    """Claim Submission Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_claim_submission_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Claim Submission Report'
+        }
+        return render(request, 'billing/reports/claim_submission_report.html', context)
+
+
+class PaymentPostingReportView(LoginRequiredMixin, View):
+    """Payment Posting Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_payment_posting_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Payment Posting Report'
+        }
+        return render(request, 'billing/reports/payment_posting_report.html', context)
+
+
+class ARAgingReportView(LoginRequiredMixin, View):
+    """Accounts Receivable Aging Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        as_of_date_str = request.GET.get('as_of_date')
+        
+        if not as_of_date_str:
+            as_of_date = timezone.now().date()
+        else:
+            as_of_date = datetime.strptime(as_of_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_ar_aging_report(as_of_date)
+        
+        context = {
+            'data': data,
+            'as_of_date': as_of_date,
+            'title': 'A/R Aging Report'
+        }
+        return render(request, 'billing/reports/ar_aging_report.html', context)
+
+
+class DenialManagementReportView(LoginRequiredMixin, View):
+    """Denial Management Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_denial_management_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Denial Management Report'
+        }
+        return render(request, 'billing/reports/denial_management_report.html', context)
+
+
+class RevenueAnalysisReportView(LoginRequiredMixin, View):
+    """Revenue Analysis Report"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_revenue_analysis_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Revenue Analysis Report'
+        }
+        return render(request, 'billing/reports/revenue_analysis_report.html', context)
+
+
+class CollectionMetricsReportView(LoginRequiredMixin, View):
+    """Collection Metrics Dashboard"""
+    
+    def get(self, request):
+        from .reporting_service import ReportingService
+        
+        start_date_str = request.GET.get('start_date')
+        end_date_str = request.GET.get('end_date')
+        
+        if not start_date_str:
+            start_date = timezone.now().date() - timedelta(days=30)
+        else:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        
+        if not end_date_str:
+            end_date = timezone.now().date()
+        else:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        
+        service = ReportingService(request.tenant)
+        data = service.get_collection_metrics_report(start_date, end_date)
+        
+        context = {
+            'data': data,
+            'start_date': start_date,
+            'end_date': end_date,
+            'title': 'Collection Metrics'
+        }
+        return render(request, 'billing/reports/collection_metrics_report.html', context)

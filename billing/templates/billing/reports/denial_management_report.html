@@ -1,0 +1,156 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ title }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="bi bi-exclamation-triangle me-2"></i>{{ title }}</h2>
+        </div>
+    </div>
+
+    <!-- Date Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" name="start_date" class="form-control" 
+                           value="{{ start_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">End Date</label>
+                    <input type="date" name="end_date" class="form-control" 
+                           value="{{ end_date|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-funnel me-1"></i>Apply Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Denied Claims</h6>
+                    <h3>{{ data.summary.total_denied_claims }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark">
+                <div class="card-body">
+                    <h6 class="card-title">Denied Amount</h6>
+                    <h3>${{ data.summary.total_denied_amount|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Denial Rate</h6>
+                    <h3>{{ data.summary.denial_rate }}%</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h6 class="card-title">Total Claims</h6>
+                    <h3>{{ data.summary.total_claims }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Denial Reason Breakdown -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-list-ul me-2"></i>Denial Reasons
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Reason Code</th>
+                                <th>Count</th>
+                                <th>Total Amount</th>
+                                <th>% of Denials</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in data.reason_breakdown %}
+                            <tr>
+                                <td><span class="badge bg-danger">{{ item.denial_reason__code|default:"Unknown" }}</span></td>
+                                <td>{{ item.count }}</td>
+                                <td>${{ item.total_amount|floatformat:2 }}</td>
+                                <td>
+                                    {% widthratio item.count data.summary.total_denied_claims 100 %}%
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No data available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="bi bi-arrow-repeat me-2"></i>Appeals Status
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for item in data.appeals_status %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ item.appeal_status|default:"Pending" }}
+                            <span class="badge bg-primary rounded-pill">{{ item.count }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="list-group-item text-center text-muted">
+                            No appeals filed
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card bg-light">
+        <div class="card-header">
+            <i class="bi bi-lightbulb me-2"></i>Recommendations
+        </div>
+        <div class="card-body">
+            {% if data.summary.denial_rate > 10 %}
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                <strong>High Denial Rate:</strong> Your denial rate ({{ data.summary.denial_rate }}%) is above the industry average of 5-10%. Consider reviewing claim submission processes.
+            </div>
+            {% endif %}
+            
+            {% if data.reason_breakdown %}
+            <p class="mb-2"><strong>Top denial reasons to address:</strong></p>
+            <ul>
+                {% for item in data.reason_breakdown|slice:":3" %}
+                <li>Code {{ item.denial_reason__code|default:"Unknown" }} - {{ item.count }} claims (${{ item.total_amount|floatformat:2 }})</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

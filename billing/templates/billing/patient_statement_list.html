@@ -5,7 +5,173 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h1>{% trans 'Patient Statements' %}</h1>
-    <!-- TODO: Implement patient statement list view -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1><i class="fas fa-file-invoice-dollar"></i> {% trans 'Patient Billing Statements' %}</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-2"><div class="card bg-primary text-white"><div class="card-body"><h5>{% trans 'Total' %}</h5><h2>{{ total_statements }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-secondary text-white"><div class="card-body"><h5>{% trans 'Draft' %}</h5><h2>{{ draft_count }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-info text-white"><div class="card-body"><h5>{% trans 'Sent' %}</h5><h2>{{ sent_count }}</h2></div></div></div>
+        <div class="col-md-2"><div class="card bg-warning text-dark"><div class="card-body"><h5>{% trans 'Overdue' %}</h5><h2>{{ overdue_count }}</h2></div></div></div>
+        <div class="col-md-4"><div class="card bg-success text-white"><div class="card-body"><h5>{% trans 'Total Balance' %}</h5><h2>${{ total_balance|floatformat:2 }}</h2></div></div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">{% trans 'Status' %}</label>
+                    <select name="status" class="form-select">
+                        <option value="">{% trans 'All Statuses' %}</option>
+                        <option value="DRAFT" {% if request.GET.status == 'DRAFT' %}selected{% endif %}>{% trans 'Draft' %}</option>
+                        <option value="SENT" {% if request.GET.status == 'SENT' %}selected{% endif %}>{% trans 'Sent' %}</option>
+                        <option value="PAID" {% if request.GET.status == 'PAID' %}selected{% endif %}>{% trans 'Paid' %}</option>
+                        <option value="PARTIAL" {% if request.GET.status == 'PARTIAL' %}selected{% endif %}>{% trans 'Partial' %}</option>
+                        <option value="OVERDUE" {% if request.GET.status == 'OVERDUE' %}selected{% endif %}>{% trans 'Overdue' %}</option>
+                        <option value="VOID" {% if request.GET.status == 'VOID' %}selected{% endif %}>{% trans 'Void' %}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{% trans 'Delivery Method' %}</label>
+                    <select name="delivery_method" class="form-select">
+                        <option value="">{% trans 'All Methods' %}</option>
+                        <option value="MAIL" {% if request.GET.delivery_method == 'MAIL' %}selected{% endif %}>{% trans 'Mail' %}</option>
+                        <option value="EMAIL" {% if request.GET.delivery_method == 'EMAIL' %}selected{% endif %}>{% trans 'Email' %}</option>
+                        <option value="PORTAL" {% if request.GET.delivery_method == 'PORTAL' %}selected{% endif %}>{% trans 'Portal' %}</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{% trans 'From Date' %}</label>
+                    <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">{% trans 'To Date' %}</label>
+                    <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">{% trans 'Search' %}</label>
+                    <input type="text" name="search" class="form-control" placeholder="{% trans 'Statement # or Patient' %}" value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-12 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> {% trans 'Filter' %}</button>
+                    <a href="{% url 'billing:statement_list' %}" class="btn btn-outline-secondary"><i class="fas fa-redo"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{% url 'billing:statement_create' %}" class="btn btn-success"><i class="fas fa-plus"></i> {% trans 'Create Statement' %}</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if statements %}
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Statement Number' %}</th>
+                        <th>{% trans 'Patient Account' %}</th>
+                        <th>{% trans 'Statement Date' %}</th>
+                        <th>{% trans 'Due Date' %}</th>
+                        <th>{% trans 'Service Period' %}</th>
+                        <th>{% trans 'Previous Balance' %}</th>
+                        <th>{% trans 'Charges' %}</th>
+                        <th>{% trans 'Payments' %}</th>
+                        <th>{% trans 'Current Balance' %}</th>
+                        <th>{% trans 'Status' %}</th>
+                        <th>{% trans 'Delivery' %}</th>
+                        <th>{% trans 'Actions' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for statement in statements %}
+                    <tr>
+                        <td><strong>{{ statement.statement_number }}</strong></td>
+                        <td>
+                            {{ statement.patient_account.account_number }}<br>
+                            <small class="text-muted">{{ statement.patient_account.patient.mrn }}</small>
+                        </td>
+                        <td>{{ statement.statement_date|date:"M d, Y" }}</td>
+                        <td>
+                            {{ statement.due_date|date:"M d, Y" }}
+                            {% if statement.status == 'OVERDUE' %}
+                                <span class="badge bg-danger ms-1">{% trans 'Overdue' %}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ statement.service_date_from|date:"m/d/Y" }} - {{ statement.service_date_to|date:"m/d/Y" }}</small>
+                        </td>
+                        <td class="text-end">${{ statement.previous_balance|floatformat:2 }}</td>
+                        <td class="text-end text-success">+${{ statement.charges_this_period|floatformat:2 }}</td>
+                        <td class="text-end text-danger">-${{ statement.payments_this_period|floatformat:2 }}</td>
+                        <td class="text-end fw-bold">${{ statement.current_balance|floatformat:2 }}</td>
+                        <td>
+                            {% if statement.status == 'DRAFT' %}
+                                <span class="badge bg-secondary">{{ statement.get_status_display }}</span>
+                            {% elif statement.status == 'SENT' %}
+                                <span class="badge bg-info">{{ statement.get_status_display }}</span>
+                            {% elif statement.status == 'PAID' %}
+                                <span class="badge bg-success">{{ statement.get_status_display }}</span>
+                            {% elif statement.status == 'PARTIAL' %}
+                                <span class="badge bg-warning text-dark">{{ statement.get_status_display }}</span>
+                            {% elif statement.status == 'OVERDUE' %}
+                                <span class="badge bg-danger">{{ statement.get_status_display }}</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">{{ statement.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ statement.get_delivery_method_display }}</small>
+                            {% if statement.sent_date %}
+                                <br><small class="text-muted">{% trans 'Sent:' %} {{ statement.sent_date|date:"m/d/Y" }}</small>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'billing:statement_detail' pk=statement.pk %}" class="btn btn-outline-primary" title="{% trans 'View' %}">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'billing:statement_update' pk=statement.pk %}" class="btn btn-outline-secondary" title="{% trans 'Edit' %}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'billing:statement_delete' pk=statement.pk %}" class="btn btn-outline-danger" title="{% trans 'Delete' %}">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if is_paginated %}
+            <nav aria-label="Statement pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans 'Previous' %}</a></li>
+                    {% endif %}
+                    <li class="page-item active"><span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans 'Next' %}</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> {% trans 'No patient statements found.' %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
 {% endblock %}

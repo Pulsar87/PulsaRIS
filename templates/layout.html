@@ -131,7 +131,7 @@
                         <!-- Billing Dropdown -->
                         <li class="nav-item dropdown">
                             <a
-                                class="nav-link dropdown-toggle {% if 'payer' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name %}active{% endif %}"
+                                class="nav-link dropdown-toggle {% if 'payer' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name or 'service-line' in request.resolver_match.url_name or 'claim' in request.resolver_match.url_name or 'payment' in request.resolver_match.url_name or 'statement' in request.resolver_match.url_name or 'denial' in request.resolver_match.url_name or 'appeal' in request.resolver_match.url_name or 'report' in request.resolver_match.url_name %}active{% endif %}"
                                 href="#"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
@@ -143,24 +143,107 @@
                             <ul
                                 class="dropdown-menu border-0 shadow-sm rounded-3"
                             >
+                                <!-- Setup -->
+                                <li><h6 class="dropdown-header">Setup</h6></li>
                                 <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="/billing/payers"
-                                    >
-                                        <i class="bi bi-building me-2">
-                                            {% trans "Payers" %}</i
-                                        >
+                                    <a class="dropdown-item" href="/billing/payers">
+                                        <i class="bi bi-building me-2"></i>{% trans "Payers" %}
                                     </a>
                                 </li>
                                 <li>
-                                    <a
-                                        class="dropdown-item"
-                                        href="/billing/fee-schedules"
-                                    >
-                                        <i class="bi bi-table me-2">
-                                            {% trans "Fee Schedules" %}</i
-                                        >
+                                    <a class="dropdown-item" href="/billing/fee-schedules">
+                                        <i class="bi bi-table me-2"></i>{% trans "Fee Schedules" %}
+                                    </a>
+                                </li>
+                                
+                                <!-- Charge Capture & Claims -->
+                                <li><hr class="dropdown-divider"/></li>
+                                <li><h6 class="dropdown-header">Charge Capture & Claims</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/service-lines">
+                                        <i class="bi bi-list-task me-2"></i>Service Lines
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/claims">
+                                        <i class="bi bi-file-earmark-text me-2"></i>Claims
+                                    </a>
+                                </li>
+                                
+                                <!-- Payment Processing -->
+                                <li><hr class="dropdown-divider"/></li>
+                                <li><h6 class="dropdown-header">Payment Processing</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/payment-postings">
+                                        <i class="bi bi-cash-stack me-2"></i>Payment Postings
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/payments">
+                                        <i class="bi bi-credit-card me-2"></i>Patient Payments
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/statements">
+                                        <i class="bi bi-receipt me-2"></i>Patient Statements
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/payment-plans">
+                                        <i class="bi bi-calendar-check me-2"></i>Payment Plans
+                                    </a>
+                                </li>
+                                
+                                <!-- Denial Management -->
+                                <li><hr class="dropdown-divider"/></li>
+                                <li><h6 class="dropdown-header">Denial Management</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/denial-reasons">
+                                        <i class="bi bi-exclamation-triangle me-2"></i>Denial Reasons
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/claim-appeals">
+                                        <i class="bi bi-arrow-repeat me-2"></i>Claim Appeals
+                                    </a>
+                                </li>
+                                
+                                <!-- Reports -->
+                                <li><hr class="dropdown-divider"/></li>
+                                <li><h6 class="dropdown-header">Reports & Analytics</h6></li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/charge-capture">
+                                        <i class="bi bi-graph-up me-2"></i>Charge Capture Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/claim-submission">
+                                        <i class="bi bi-file-earmark-arrow-up me-2"></i>Claim Submission Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/payment-posting">
+                                        <i class="bi bi-cash-coin me-2"></i>Payment Posting Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/ar-aging">
+                                        <i class="bi bi-calendar-check me-2"></i>A/R Aging Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/denial-management">
+                                        <i class="bi bi-exclamation-octagon me-2"></i>Denial Management Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/revenue-analysis">
+                                        <i class="bi bi-graph-up-arrow me-2"></i>Revenue Analysis Report
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/billing/reports/collection-metrics">
+                                        <i class="bi bi-speedometer2 me-2"></i>Collection Metrics
                                     </a>
                                 </li>
                             </ul>
