@@ -45,16 +45,6 @@ class LicenseMiddleware:
                 tenant.license_activated = False
                 tenant.save(update_fields=["license_activated"])
                 return redirect("license:activation_required")
-            
-            # Check license by number of orders
-            if tenant.license_max_orders is not None:
-                from orders.models import ExamOrder
-                order_count = ExamOrder.objects.filter(tenant=tenant).count()
-                if order_count >= tenant.license_max_orders:
-                    # License order limit exceeded, deactivate and redirect
-                    tenant.license_activated = False
-                    tenant.save(update_fields=["license_activated"])
-                    return redirect("license:activation_required")
         else:
             # Fallback to session-based check for non-tenant setups or public schema
             if not request.session.get("license_activated"):
