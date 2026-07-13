@@ -29,7 +29,7 @@ def home(request):
         orders = []
         devices = []
     
-    return render(request, 'license/home.html', {'orders': orders, 'devices': devices, 'tenant': tenant})
+    return render(request, 'license/home.html', {'orders': orders, 'devices': devices})
 
 @login_required
 def calendar_events(request):
@@ -108,7 +108,6 @@ def activate(request):
     if request.method == 'POST':
         expiry_date = request.POST.get('expiry_date')
         signature = request.POST.get('signature')
-        max_orders = request.POST.get('max_orders')
         
         # Convert date from YYYY-MM-DD to DDMMYY format
         try:
@@ -126,9 +125,7 @@ def activate(request):
                     tenant.license_activated = True
                     tenant.license_expiry = expiry_date
                     tenant.license_signature = signature.upper()
-                    # Set max orders limit (None means unlimited)
-                    tenant.license_max_orders = int(max_orders) if max_orders and max_orders.strip() else None
-                    tenant.save(update_fields=['license_activated', 'license_expiry', 'license_signature', 'license_max_orders'])
+                    tenant.save(update_fields=['license_activated', 'license_expiry', 'license_signature'])
                 else:
                     # Fallback to session for non-tenant setups
                     request.session['license_activated'] = True
