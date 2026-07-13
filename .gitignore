@@ -1,15 +1,32 @@
-```
+```gitignore
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Django
-*.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
 
 # IDE
 .vscode/
@@ -17,27 +34,9 @@ db.sqlite3-journal
 *.swp
 *.swo
 
-# Environment
-.env
-.env.local
-*.env.*
+# Logs
+*.log
 
-# Dependencies
-venv/
-.venv/
-.env/
-node_modules/
-
-# Build artifacts
-dist/
-build/
-target/
-.coverage
-htmlcov/
-.mypy_cache/
-.pytest_cache/
-
-# OS
-.DS_Store
-Thumbs.db
+# Temp files
+*.tmp
 ```

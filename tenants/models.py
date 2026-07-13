@@ -13,6 +13,7 @@ class Tenant(TenantMixin):
     license_activated = models.BooleanField(default=False)
     license_expiry = models.DateField(null=True, blank=True)
     license_signature = models.CharField(max_length=255, blank=True)
+    license_max_orders = models.PositiveIntegerField(null=True, blank=True, help_text="Maximum number of orders allowed by license (null for unlimited)")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
