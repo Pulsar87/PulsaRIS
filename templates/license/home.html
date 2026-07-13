@@ -7,355 +7,63 @@
         overflow: hidden;
     }
 
-    .calendar-page-container {
-        height: calc(100vh - 140px);
-        max-height: 900px;
-        display: flex;
-        flex-direction: column;
-    }
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- License Info Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-info">
+                <div class="card-header bg-info text-white py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-shield-check me-2"></i>{% trans "License Information" %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>{% trans "Status" %}:</strong>
+                                <span class="badge bg-success">{% trans "Active" %}</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>{% trans "Expiry Date" %}:</strong>
+                                {% if tenant.license_expiry %}
+                                    {{ tenant.license_expiry }}
+                                {% else %}
+                                    <span class="text-muted">{% trans "Not set" %}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>{% trans "Order Limit" %}:</strong>
+                                {% if tenant.license_max_orders %}
+                                    {{ tenant.license_max_orders }} {% trans "orders" %}
+                                    {% with order_count=tenant.examorder_set.count %}
+                                        ({{ order_count }} {% trans "used" %})
+                                    {% endwith %}
+                                {% else %}
+                                    <span class="badge bg-success">{% trans "Unlimited" %}</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    /* Left Sidebar */
-    .calendar-sidebar {
-        width: 280px;
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    /* Numeric Mini Calendar */
-    .mini-calendar-card {
-        background: var(--card-bg);
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        padding: 1rem;
-        border: 1px solid var(--border-color);
-    }
-
-    .mini-calendar-header {
-        text-align: center;
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: var(--text-main);
-        font-size: 0.95rem;
-    }
-
-    .mini-calendar-grid {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 2px;
-    }
-
-    .mini-calendar-day-header {
-        text-align: center;
-        font-size: 0.7rem;
-        font-weight: 600;
-        color: var(--text-muted);
-        padding: 0.25rem;
-        text-transform: uppercase;
-    }
-
-    .mini-calendar-day {
-        aspect-ratio: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 0.8rem;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        color: var(--text-main);
-    }
-
-    .mini-calendar-day:hover {
-        background: rgba(14, 165, 233, 0.1);
-    }
-
-    .mini-calendar-day.selected {
-        background: var(--medical-primary);
-        color: white;
-        font-weight: 600;
-    }
-
-    .mini-calendar-day.other-month {
-        color: var(--text-muted);
-        opacity: 0.5;
-    }
-
-    .mini-calendar-day.today {
-        border: 2px solid var(--medical-primary);
-    }
-
-    .mini-calendar-nav {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.5rem;
-    }
-
-    .mini-calendar-nav button {
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 0.25rem 0.5rem;
-        color: var(--text-muted);
-        border-radius: 6px;
-        transition: all 0.2s ease;
-    }
-
-    .mini-calendar-nav button:hover {
-        background: rgba(14, 165, 233, 0.1);
-        color: var(--medical-primary);
-    }
-
-    /* Device List */
-    .device-list-card {
-        background: var(--card-bg);
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        padding: 1rem;
-        border: 1px solid var(--border-color);
-        flex-grow: 1;
-        overflow-y: auto;
-        max-height: 400px;
-    }
-
-    .device-list-header {
-        font-weight: 600;
-        margin-bottom: 0.75rem;
-        color: var(--text-main);
-        font-size: 0.95rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .device-list-item {
-        display: flex;
-        align-items: center;
-        padding: 0.6rem 0.75rem;
-        border-radius: 10px;
-        margin-bottom: 0.5rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid var(--border-color);
-        background: var(--bg-body);
-    }
-
-    .device-list-item:hover {
-        border-color: var(--medical-primary);
-        background: rgba(14, 165, 233, 0.05);
-        transform: translateX(4px);
-    }
-
-    .device-list-item.active {
-        background: var(--medical-primary);
-        border-color: var(--medical-primary);
-        color: white;
-    }
-
-    .device-list-item input[type="checkbox"] {
-        margin-right: 0.75rem;
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-    }
-
-    .device-modality-badge {
-        font-size: 0.65rem;
-        font-weight: 700;
-        padding: 0.2rem 0.5rem;
-        border-radius: 6px;
-        text-transform: uppercase;
-        margin-right: 0.5rem;
-    }
-
-    .device-name {
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-
-    /* Main Calendar Area */
-    .calendar-main-area {
-        flex-grow: 1;
-        background: var(--card-bg);
-        border-radius: 16px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        border: 1px solid var(--border-color);
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .calendar-main-header {
-        padding: 0.75rem 1rem;
-        border-bottom: 1px solid var(--border-color);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .calendar-main-title {
-        font-weight: 700;
-        font-size: 1.1rem;
-        color: var(--text-main);
-    }
-
-    #calendar {
-        flex-grow: 1;
-        padding: 0.5rem;
-        overflow: hidden;
-    }
-
-    /* FullCalendar Customization for Day View */
-    .fc-theme-standard .fc-scrollgrid {
-        border: none;
-    }
-
-    .fc-theme-standard td,
-    .fc-theme-standard th {
-        border-color: var(--border-color);
-    }
-
-    .fc-toolbar {
-        display: none !important;
-    }
-
-    .fc-col-header-cell {
-        background: rgba(14, 165, 233, 0.05);
-        padding: 0.5rem;
-        font-weight: 600;
-        font-size: 0.85rem;
-        color: var(--text-main);
-    }
-
-    .fc-timegrid-slot {
-        height: 40px !important;
-    }
-
-    .fc-timegrid-slot-label {
-        font-size: 0.75rem;
-        color: var(--text-muted);
-        font-weight: 500;
-    }
-
-    .fc-day-today {
-        background: rgba(14, 165, 233, 0.03) !important;
-    }
-
-    .fc-event {
-        border: none;
-        border-radius: 6px;
-        padding: 2px 6px;
-        font-weight: 600;
-        font-size: 0.75rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        cursor: pointer;
-    }
-
-    .fc-event:hover {
-        transform: scale(1.02);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
-
-    .fc-now-indicator-line {
-        border-top: 2px solid var(--medical-primary);
-    }
-
-    .fc-now-indicator-arrow {
-        border-top-color: var(--medical-primary);
-    }
-
-    /* Modal Enhancement */
-    .modal-content {
-        border: none;
-        border-radius: 20px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
-    }
-
-    .modal-header {
-        background: linear-gradient(
-            135deg,
-            rgba(14, 165, 233, 0.05) 0%,
-            rgba(14, 165, 233, 0.02) 100%
-        );
-        border-bottom: 1px solid var(--border-color);
-        border-radius: 20px 20px 0 0;
-        padding: 1.5rem 2rem;
-    }
-
-    .modal-title {
-        font-weight: 700;
-        color: var(--text-main);
-    }
-
-    .modal-body {
-        padding: 2rem;
-    }
-
-    .detail-item {
-        padding: 0.75rem 0;
-        border-bottom: 1px solid var(--border-color);
-    }
-
-    .detail-item:last-child {
-        border-bottom: none;
-    }
-
-    .detail-label {
-        font-weight: 600;
-        color: var(--text-muted);
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .detail-value {
-        font-weight: 500;
-        color: var(--text-main);
-        font-size: 1rem;
-    }
-
-    /* Modality Colors */
-    .mod-ct {
-        background-color: #eff6ff;
-        color: #1e40af;
-    }
-    .mod-mr {
-        background-color: #f5f3ff;
-        color: #5b21b6;
-    }
-    .mod-xr {
-        background-color: #ecfdf5;
-        color: #065f46;
-    }
-    .mod-us {
-        background-color: #fff7ed;
-        color: #9a3412;
-    }
-    .mod-default {
-        background-color: #f8fafc;
-        color: #475569;
-    }
-</style>
-{% endblock %} {% block content %}
-<div class="calendar-page-container">
-    <div class="d-flex h-100 gap-3">
-        <!-- Left Sidebar -->
-        <div class="calendar-sidebar">
-            <!-- Numeric Mini Calendar -->
-            <div class="mini-calendar-card">
-                <div class="mini-calendar-nav">
-                    <button id="miniCalPrev">
-                        <i class="bi bi-chevron-left"></i>
-                    </button>
-                    <span
-                        class="mini-calendar-header"
-                        id="miniCalMonthYear"
-                    ></span>
-                    <button id="miniCalNext">
-                        <i class="bi bi-chevron-right"></i>
-                    </button>
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 text-primary">
+                            <i class="bi bi-calendar3 me-2"></i>{% trans "Schedule Calendar" %}
+                        </h5>
+                        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#deviceFilterCollapse" aria-expanded="false" aria-controls="deviceFilterCollapse">
+                            <i class="bi bi-funnel me-1"></i> {% trans "Filter by Device" %}
+                        </button>
+                    </div>
                 </div>
                 <div class="mini-calendar-grid">
                     <div class="mini-calendar-day-header">Sun</div>
