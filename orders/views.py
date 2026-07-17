@@ -28,7 +28,7 @@ def worklist(request):
 
         modalities = Modality.objects.filter(tenant=tenant, is_active=True)
 
-        orders = ExamOrder.objects.filter(tenant=tenant).select_related(
+        orders = ExamOrder.objects.filter(tenant=tenant, is_deleted=False).select_related(
             "patient", "modality", "facility", "room_station"
         )
 
@@ -361,7 +361,9 @@ def edit_order(request, pk):
 
 
 def delete_order(request, pk):
-    """Delete an order."""
+    """Delete an order (soft delete with audit logging)."""
+    from audit.models import AuditLog
+    
     order = get_object_or_404(ExamOrder, pk=pk)
     tenant = get_tenant(request)
 
@@ -371,7 +373,32 @@ def delete_order(request, pk):
 
     if request.method == "POST":
         try:
-            order.delete()
+            # Store old values for audit
+            old_values = {
+                'accession_number': order.accession_number,
+                'patient_mrn': order.patient.mrn if order.patient else None,
+                'procedure_code': order.procedure_code,
+                'procedure_name_en': order.procedure_name_en,
+                'priority': order.priority,
+                'status': order.status,
+            }
+            
+            # Soft delete instead of hard delete
+            order.soft_delete()
+            
+            # Create audit log entry
+            AuditLog.objects.create(
+                tenant=tenant,
+                user=request.user if request.user.is_authenticated else None,
+                action='DELETE',
+                entity_type='ExamOrder',
+                entity_id=order.id,
+                old_values=old_values,
+                new_values={'is_deleted': True, 'deleted_at': str(order.deleted_at)},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+            )
+            
             messages.success(request, _("Order deleted successfully!"))
             return redirect("orders:worklist")
         except Exception as e:

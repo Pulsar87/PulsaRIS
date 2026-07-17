@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.db import models
 
@@ -39,6 +40,8 @@ class Report(models.Model):
     structured_data = models.JSONField(
         blank=True, default=dict
     )  # For templates, measurements, DICOM overlays
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -46,8 +49,15 @@ class Report(models.Model):
         indexes = [
             models.Index(fields=["tenant", "status", "finalized_at"]),
             models.Index(fields=["tenant", "critical_finding"]),
+            models.Index(fields=["tenant", "is_deleted"]),
         ]
         ordering = ["-updated_at"]
 
     def __str__(self):
         return f"Report #{self.id} | {self.order.accession_number} | {self.status}"
+
+    def soft_delete(self):
+        """Mark the report as deleted without removing from database."""
+        self.is_deleted = True
+        self.deleted_at = datetime.now()
+        self.save(update_fields=['is_deleted', 'deleted_at'])

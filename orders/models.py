@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.db import models
 
@@ -178,6 +179,8 @@ class ExamOrder(models.Model):
     )
     hl7_message_control_id = models.CharField(max_length=100, blank=True)
     billing_status = models.CharField(max_length=20, default="PENDING", db_index=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey("users.User", on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -192,8 +195,15 @@ class ExamOrder(models.Model):
         indexes = [
             models.Index(fields=["tenant", "status", "scheduled_datetime"]),
             models.Index(fields=["tenant", "modality", "priority"]),
+            models.Index(fields=["tenant", "is_deleted"]),
         ]
         ordering = ["-scheduled_datetime"]
 
     def __str__(self):
         return f"{self.accession_number} | {self.patient.mrn} | {self.modality.code}"
+
+    def soft_delete(self):
+        """Mark the order as deleted without removing from database."""
+        self.is_deleted = True
+        self.deleted_at = datetime.now()
+        self.save(update_fields=['is_deleted', 'deleted_at'])
