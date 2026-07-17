@@ -1,4 +1,6 @@
-{% extends '../layout.html' %} {% block extra_css %}
+{% extends '../layout.html' %}
+
+{% block extra_css %}
 <style>
     /* Main Layout - No Scrolling */
     html,
@@ -6,6 +8,58 @@
         height: 100%;
         overflow: hidden;
     }
+
+    /* Mini Calendar Styles */
+    .mini-cal-header {
+        background-color: #f8f9fa;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .mini-calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        padding: 10px;
+    }
+
+    .mini-calendar-day-header {
+        text-align: center;
+        font-weight: bold;
+        font-size: 0.75rem;
+        color: #6c757d;
+        padding: 5px;
+    }
+
+    .mini-calendar-day {
+        text-align: center;
+        padding: 8px 5px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .mini-calendar-day:hover {
+        background-color: #e9ecef;
+    }
+
+    .mini-calendar-day.today {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+    }
+
+    .mini-calendar-day.selected {
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+    }
+
+    .mini-calendar-day.other-month {
+        color: #dee2e6;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -65,6 +119,17 @@
                         </button>
                     </div>
                 </div>
+                <!-- Mini Calendar Header with Navigation -->
+                <div class="mini-cal-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                    <button id="miniCalPrev" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <span id="miniCalMonthYear" class="fw-semibold"></span>
+                    <button id="miniCalNext" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+                <!-- Day Headers -->
                 <div class="mini-calendar-grid">
                     <div class="mini-calendar-day-header">Sun</div>
                     <div class="mini-calendar-day-header">Mon</div>
@@ -271,7 +336,9 @@
         </div>
     </div>
 </div>
-{% endblock %} {% block extra_js %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // === Mini Calendar Logic ===
@@ -299,8 +366,10 @@
                 "November",
                 "December",
             ];
-            document.getElementById("miniCalMonthYear").textContent =
-                monthNames[month] + " " + year;
+            var monthYearEl = document.getElementById("miniCalMonthYear");
+            if (monthYearEl) {
+                monthYearEl.textContent = monthNames[month] + " " + year;
+            }
 
             // Get first day and days in month
             var firstDay = new Date(year, month, 1).getDay();
@@ -308,6 +377,7 @@
             var daysInPrevMonth = new Date(year, month, 0).getDate();
 
             var container = document.getElementById("miniCalendarDays");
+            if (!container) return;
             container.innerHTML = "";
 
             // Previous month days
@@ -364,8 +434,10 @@
             miniCalDate = new Date(date);
             renderMiniCalendar();
             updateSelectedDateDisplay();
-            calendar.changeView("timeGridDay", date);
-            calendar.refetchEvents();
+            if (typeof calendar !== 'undefined' && calendar) {
+                calendar.changeView("timeGridDay", date);
+                calendar.refetchEvents();
+            }
         }
 
         function updateSelectedDateDisplay() {
@@ -375,27 +447,35 @@
                 month: "long",
                 day: "numeric",
             };
-            document.getElementById("selectedDateDisplay").textContent =
-                selectedDate.toLocaleDateString("en", options);
+            var displayEl = document.getElementById("selectedDateDisplay");
+            if (displayEl) {
+                displayEl.textContent = selectedDate.toLocaleDateString("en", options);
+            }
         }
 
-        document
-            .getElementById("miniCalPrev")
-            .addEventListener("click", function () {
+        var miniCalPrevBtn = document.getElementById("miniCalPrev");
+        if (miniCalPrevBtn) {
+            miniCalPrevBtn.addEventListener("click", function () {
                 miniCalDate.setMonth(miniCalDate.getMonth() - 1);
                 renderMiniCalendar();
-                calendar.changeView("timeGridDay", miniCalDate);
-                calendar.refetchEvents();
+                if (typeof calendar !== 'undefined' && calendar) {
+                    calendar.changeView("timeGridDay", miniCalDate);
+                    calendar.refetchEvents();
+                }
             });
+        }
 
-        document
-            .getElementById("miniCalNext")
-            .addEventListener("click", function () {
+        var miniCalNextBtn = document.getElementById("miniCalNext");
+        if (miniCalNextBtn) {
+            miniCalNextBtn.addEventListener("click", function () {
                 miniCalDate.setMonth(miniCalDate.getMonth() + 1);
                 renderMiniCalendar();
-                calendar.changeView("timeGridDay", miniCalDate);
-                calendar.refetchEvents();
+                if (typeof calendar !== 'undefined' && calendar) {
+                    calendar.changeView("timeGridDay", miniCalDate);
+                    calendar.refetchEvents();
+                }
             });
+        }
 
         // Initialize mini calendar
         renderMiniCalendar();
