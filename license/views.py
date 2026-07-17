@@ -31,7 +31,7 @@ def home(request):
         orders = []
         devices = []
 
-        return render(request, 'license/home.html', {'orders': orders, 'devices': devices, 'tenant': tenant})
+    return render(request, 'license/home.html', {'orders': orders, 'devices': devices, 'tenant': tenant})
 
 @login_required
 def calendar_events(request):
