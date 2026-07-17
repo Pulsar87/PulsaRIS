@@ -143,7 +143,7 @@ def patient_list(request):
 
     patients = Patient.objects.none()
     if tenant:
-        patients = Patient.objects.filter(tenant=tenant)
+        patients = Patient.objects.filter(tenant=tenant, is_deleted=False)
 
         if query:
             patients = patients.filter(
@@ -267,7 +267,9 @@ def edit_patient(request, pk):
 
 
 def delete_patient(request, pk):
-    """Delete a patient."""
+    """Delete a patient (soft delete with audit logging)."""
+    from audit.models import AuditLog
+    
     patient = get_object_or_404(Patient, pk=pk)
     tenant = get_tenant(request)
     
@@ -277,7 +279,33 @@ def delete_patient(request, pk):
     
     if request.method == "POST":
         try:
-            patient.delete()
+            # Store old values for audit
+            old_values = {
+                'mrn': patient.mrn,
+                'first_name_en': patient.first_name_en,
+                'last_name_en': patient.last_name_en,
+                'first_name_ar': patient.first_name_ar,
+                'last_name_ar': patient.last_name_ar,
+                'dob': str(patient.dob),
+                'gender': patient.gender,
+            }
+            
+            # Soft delete instead of hard delete
+            patient.soft_delete()
+            
+            # Create audit log entry
+            AuditLog.objects.create(
+                tenant=tenant,
+                user=request.user if request.user.is_authenticated else None,
+                action='DELETE',
+                entity_type='Patient',
+                entity_id=patient.id,
+                old_values=old_values,
+                new_values={'is_deleted': True, 'deleted_at': str(patient.deleted_at)},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+            )
+            
             messages.success(request, _("Patient deleted successfully!"))
             return redirect("patients:patient_list")
         except Exception as e:

@@ -133,7 +133,9 @@ def study_reports(request, order_id):
 
 
 def delete_report(request, report_id):
-    """Delete a report."""
+    """Delete a report (soft delete with audit logging)."""
+    from audit.models import AuditLog
+    
     tenant = get_tenant(request)
     if not tenant:
         messages.error(request, _("Tenant not found. Please select a tenant."))
@@ -148,9 +150,35 @@ def delete_report(request, report_id):
         return redirect("reports:view_report", report_id=report_id)
 
     if request.method == "POST":
-        report.delete()
-        messages.success(request, _("Report deleted successfully!"))
-        return redirect("reports:study_reports", order_id=order_id)
+        try:
+            # Store old values for audit
+            old_values = {
+                'status': report.status,
+                'findings_en': report.findings_en[:200] if report.findings_en else '',
+                'impression_en': report.impression_en[:200] if report.impression_en else '',
+            }
+            
+            # Soft delete instead of hard delete
+            report.soft_delete()
+            
+            # Create audit log entry
+            AuditLog.objects.create(
+                tenant=tenant,
+                user=request.user if request.user.is_authenticated else None,
+                action='DELETE',
+                entity_type='Report',
+                entity_id=report.id,
+                old_values=old_values,
+                new_values={'is_deleted': True, 'deleted_at': str(report.deleted_at)},
+                ip_address=request.META.get('REMOTE_ADDR'),
+                user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+            )
+        
+            messages.success(request, _("Report deleted successfully!"))
+            return redirect("reports:study_reports", order_id=order_id)
+        except Exception as e:
+            messages.error(request, _("Error deleting report: %(error)s") % {"error": str(e)})
+            return redirect("reports:view_report", report_id=report_id)
 
     context = {
         "report": report,

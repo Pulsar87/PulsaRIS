@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 
 from django.db import models
 
@@ -27,6 +28,8 @@ class Patient(models.Model):
     is_deceased = models.BooleanField(default=False)
     consent_data_sharing = models.BooleanField(default=False)
     data_retention_until = models.DateField(null=True, blank=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -39,8 +42,15 @@ class Patient(models.Model):
         indexes = [
             models.Index(fields=["tenant", "last_name_en", "first_name_en"]),
             models.Index(fields=["tenant", "national_id"]),
+            models.Index(fields=["tenant", "is_deleted"]),
         ]
         ordering = ["-created_at"]
 
     def __str__(self):
         return f"{self.mrn} | {self.first_name_en} {self.last_name_en}"
+
+    def soft_delete(self):
+        """Mark the patient as deleted without removing from database."""
+        self.is_deleted = True
+        self.deleted_at = datetime.now()
+        self.save(update_fields=['is_deleted', 'deleted_at'])
