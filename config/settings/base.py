@@ -30,23 +30,17 @@ LOGOUT_REDIRECT_URL = "users:login"
 # ─────────────────────────────────────────────────────────────
 # Application Definition
 # ─────────────────────────────────────────────────────────────
-SHARED_APPS = [
-    "django_tenants",  # MUST be first
-    "tenants",  # Your tenant model app
-    "license",  # License check - must be in SHARED_APPS to work across all tenants
+INSTALLED_APPS = [
+    "license",  # License check
     "core",  # Core admin registrations including Group
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.admin",
-    "audit",  # Audit logs are shared across all tenants
-    "users",  # Auth is typically shared or synced
-]
-
-TENANT_APPS = [
+    "audit",  # Audit logs
+    "users",  # Auth
     "patients",
-    "auditlog",
     "orders",
     "reports",
     "integrations",
@@ -59,17 +53,11 @@ TENANT_APPS = [
     "whitenoise",
 ]
 
-# django-tenants requires this exact merge
-INSTALLED_APPS = list(SHARED_APPS) + [
-    app for app in TENANT_APPS if app not in SHARED_APPS
-]
-
 
 # ─────────────────────────────────────────────────────────────
 # Middleware
 # ─────────────────────────────────────────────────────────────
 MIDDLEWARE = [
-    "django_tenants.middleware.main.TenantMainMiddleware",  # MUST be first
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -85,22 +73,11 @@ MIDDLEWARE = [
 ]
 
 # ─────────────────────────────────────────────────────────────
-# django-tenants Configuration (CRITICAL)
-# ─────────────────────────────────────────────────────────────
-# Tenant routing config
-TENANT_MODEL = "tenants.Tenant"
-TENANT_DOMAIN_MODEL = "tenants.Domain"
-DATABASE_ROUTERS = ["django_tenants.routers.TenantSyncRouter"]
-PUBLIC_SCHEMA_NAME = "public"  # explicit is better than implicit
-TENANT_CREATION_FAKES_MIGRATIONS = False  # set True only for testing
-SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
-
-# ─────────────────────────────────────────────────────────────
-# Database (Docker-ready with env fallback)
+# Database (Standard PostgreSQL - no tenant routing)
 # ─────────────────────────────────────────────────────────────
 DATABASES = {
     "default": {
-        "ENGINE": "django_tenants.postgresql_backend",  # ← MUST use this engine
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": env("POSTGRES_DB", default="pulsaris"),
         "USER": env("POSTGRES_USER", default="pulsaris"),
         "PASSWORD": env("POSTGRES_PASSWORD", default="pulsaris"),

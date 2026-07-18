@@ -6,7 +6,6 @@ from django.db import models
 
 class Patient(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     mrn = models.CharField(max_length=50, db_index=True)
     first_name_en = models.CharField(max_length=100)
     last_name_en = models.CharField(max_length=100)
@@ -36,13 +35,13 @@ class Patient(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["tenant", "mrn"], name="unique_mrn_per_tenant"
+                fields=["mrn"], name="unique_mrn"
             )
         ]
         indexes = [
-            models.Index(fields=["tenant", "last_name_en", "first_name_en"]),
-            models.Index(fields=["tenant", "national_id"]),
-            models.Index(fields=["tenant", "is_deleted"]),
+            models.Index(fields=["last_name_en", "first_name_en"]),
+            models.Index(fields=["national_id"]),
+            models.Index(fields=["is_deleted"]),
         ]
         ordering = ["-created_at"]
 

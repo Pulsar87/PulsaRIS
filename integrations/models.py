@@ -5,7 +5,6 @@ from django.db import models
 
 class HL7MessageLog(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     message_type = models.CharField(max_length=10, db_index=True)  # ADT, ORM, ORU, ACK
     direction = models.CharField(
         max_length=10, choices=[("IN", "Inbound"), ("OUT", "Outbound")]
@@ -16,13 +15,12 @@ class HL7MessageLog(models.Model):
     received_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        indexes = [models.Index(fields=["tenant", "message_type", "received_at"])]
+        indexes = [models.Index(fields=["message_type", "received_at"])]
         ordering = ["-received_at"]
 
 
 class ModalityWorklistEntry(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     order = models.OneToOneField(
         "orders.ExamOrder", on_delete=models.CASCADE, related_name="mwl_entry"
     )
@@ -31,4 +29,4 @@ class ModalityWorklistEntry(models.Model):
     sync_status = models.CharField(max_length=20, default="PENDING")
 
     class Meta:
-        indexes = [models.Index(fields=["tenant", "sync_status"])]
+        indexes = [models.Index(fields=["sync_status"])]
