@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.db.models import Q
 from orders.models import ExamOrder
 from reports.models import Report
-from patients.views import get_tenant
 import uuid
 from datetime import datetime
 import pydicom
@@ -18,12 +17,7 @@ from pydicom.sequence import Sequence
 
 def create_report(request, order_id):
     """Create a new report for an exam order."""
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
+    order = get_object_or_404(ExamOrder, id=order_id)
 
     if request.method == "POST":
         report_content = request.POST.get("report_content", "").strip()
@@ -35,7 +29,6 @@ def create_report(request, order_id):
 
         # Create new report
         report = Report.objects.create(
-            tenant=tenant,
             order=order,
             radiologist=request.user,
             findings_en=findings_en,
@@ -59,12 +52,7 @@ def create_report(request, order_id):
 
 def edit_report(request, report_id):
     """Edit an existing report."""
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    report = get_object_or_404(Report, id=report_id, tenant=tenant)
+    report = get_object_or_404(Report, id=report_id)
 
     # Check permission - only the author or staff can edit
     if report.radiologist != request.user and not request.user.is_staff:
@@ -101,12 +89,7 @@ def edit_report(request, report_id):
 
 def view_report(request, report_id):
     """View a single report."""
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    report = get_object_or_404(Report, id=report_id, tenant=tenant)
+    report = get_object_or_404(Report, id=report_id)
 
     context = {
         "report": report,
@@ -117,12 +100,7 @@ def view_report(request, report_id):
 
 def study_reports(request, order_id):
     """View all reports for a study/order."""
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
+    order = get_object_or_404(ExamOrder, id=order_id)
     reports = order.reports.all().order_by("-created_at")
 
     context = {
@@ -136,12 +114,7 @@ def delete_report(request, report_id):
     """Delete a report (soft delete with audit logging)."""
     from audit.models import AuditLog
     
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    report = get_object_or_404(Report, id=report_id, tenant=tenant)
+    report = get_object_or_404(Report, id=report_id)
     order_id = report.order.id
 
     # Check permission - only staff can delete
@@ -163,7 +136,6 @@ def delete_report(request, report_id):
             
             # Create audit log entry
             AuditLog.objects.create(
-                tenant=tenant,
                 user=request.user if request.user.is_authenticated else None,
                 action='DELETE',
                 entity_type='Report',
@@ -195,64 +167,53 @@ def report_list(request):
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
     critical_filter = request.GET.get("critical", "")
-    tenant = get_tenant(request)
 
-    reports = Report.objects.none()
-    modalities = []
-    radiologists = []
+    reports = Report.objects.select_related(
+        "order__patient", "order__modality", "radiologist"
+    )
 
-    if tenant:
-        from tenants.models import Modality
-        from users.models import User
-
-        modalities = Modality.objects.filter(tenant=tenant, is_active=True)
-
-        # Get radiologists who have created reports
-        radiologists = User.objects.filter(
-            is_staff=True,
-            report__tenant=tenant
-        ).distinct().order_by("username")
-
-        reports = Report.objects.filter(tenant=tenant).select_related(
-            "order__patient", "order__modality", "radiologist"
+    # Search filter
+    if query:
+        reports = reports.filter(
+            Q(id__icontains=query)
+            | Q(order__accession_number__icontains=query)
+            | Q(order__patient__mrn__icontains=query)
+            | Q(order__patient__first_name_en__icontains=query)
+            | Q(order__patient__last_name_en__icontains=query)
+            | Q(findings_en__icontains=query)
+            | Q(impression_en__icontains=query)
         )
 
-        # Search filter
-        if query:
-            reports = reports.filter(
-                Q(id__icontains=query)
-                | Q(order__accession_number__icontains=query)
-                | Q(order__patient__mrn__icontains=query)
-                | Q(order__patient__first_name_en__icontains=query)
-                | Q(order__patient__last_name_en__icontains=query)
-                | Q(findings_en__icontains=query)
-                | Q(impression_en__icontains=query)
-            )
+    # Status filter
+    if status_filter:
+        reports = reports.filter(status=status_filter)
 
-        # Status filter
-        if status_filter:
-            reports = reports.filter(status=status_filter)
+    # Radiologist filter
+    if radiologist_filter:
+        reports = reports.filter(radiologist_id=radiologist_filter)
 
-        # Radiologist filter
-        if radiologist_filter:
-            reports = reports.filter(radiologist_id=radiologist_filter)
+    # Modality filter (via order)
+    if modality_filter:
+        reports = reports.filter(order__modality__code=modality_filter)
 
-        # Modality filter (via order)
-        if modality_filter:
-            reports = reports.filter(order__modality__code=modality_filter)
+    # Date range filters
+    if date_from:
+        reports = reports.filter(created_at__date__gte=date_from)
 
-        # Date range filters
-        if date_from:
-            reports = reports.filter(created_at__date__gte=date_from)
+    if date_to:
+        reports = reports.filter(created_at__date__lte=date_to)
 
-        if date_to:
-            reports = reports.filter(created_at__date__lte=date_to)
+    # Critical finding filter
+    if critical_filter == "true":
+        reports = reports.filter(critical_finding=True)
+    elif critical_filter == "false":
+        reports = reports.filter(critical_finding=False)
 
-        # Critical finding filter
-        if critical_filter == "true":
-            reports = reports.filter(critical_finding=True)
-        elif critical_filter == "false":
-            reports = reports.filter(critical_finding=False)
+    from users.models import User
+    # Get radiologists who have created reports
+    radiologists = User.objects.filter(
+        is_staff=True,
+    ).distinct().order_by("username")
 
     context = {
         "reports": reports,
@@ -264,7 +225,6 @@ def report_list(request):
         "date_to": date_to,
         "critical_filter": critical_filter,
         "status_choices": Report.Status.choices,
-        "modalities": modalities,
         "radiologists": radiologists,
     }
     return render(request, "reports/report_list.html", context)
@@ -286,15 +246,11 @@ def get_report_templates(request):
 @require_http_methods(["POST"])
 def save_report_draft(request):
     """Save a report as draft via AJAX (auto-save functionality)."""
-    tenant = get_tenant(request)
-    if not tenant:
-        return JsonResponse({"error": "Tenant not found"}, status=400)
-
     order_id = request.POST.get("order_id")
     if not order_id:
         return JsonResponse({"error": "Order ID required"}, status=400)
 
-    order = get_object_or_404(ExamOrder, id=order_id, tenant=tenant)
+    order = get_object_or_404(ExamOrder, id=order_id)
     report_content = request.POST.get("report_content", "")
 
     # Get or create draft report
@@ -303,7 +259,6 @@ def save_report_draft(request):
         radiologist=request.user,
         status=Report.Status.DRAFT,
         defaults={
-            "tenant": tenant,
             "findings_en": report_content,
         }
     )
@@ -321,12 +276,7 @@ def save_report_draft(request):
 
 def export_report_dicom(request, report_id):
     """Export a report as a DICOM SR (Structured Report) file."""
-    tenant = get_tenant(request)
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
-
-    report = get_object_or_404(Report, id=report_id, tenant=tenant)
+    report = get_object_or_404(Report, id=report_id)
 
     try:
         # Create DICOM dataset for Structured Report
