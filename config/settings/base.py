@@ -104,7 +104,7 @@ DATABASES = {
         "NAME": env("POSTGRES_DB", default="pulsaris"),
         "USER": env("POSTGRES_USER", default="pulsaris"),
         "PASSWORD": env("POSTGRES_PASSWORD", default="pulsaris"),
-        "HOST": env("POSTGRES_HOST", default="localhost"),  # use "postgres" in Docker
+        "HOST": env("POSTGRES_HOST", default="postgres"),  # use "postgres" in Docker
         "PORT": env("POSTGRES_PORT", default="5432"),
         "ATOMIC_REQUESTS": True,
     }
@@ -158,8 +158,12 @@ TIME_ZONE = "Asia/Damascus"
 # ─────────────────────────────────────────────────────────────
 # Celery
 # ─────────────────────────────────────────────────────────────
-CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
+#
+CELERY_BROKER_URL = "redis://redis:6379/1"  # Change 'localhost' to 'redis'
+CELERY_RESULT_BACKEND = "redis://redis:6379/2"
+
+#CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="redis://localhost:6379/1")
+#CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/2")
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

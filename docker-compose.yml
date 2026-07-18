@@ -1,48 +1,83 @@
 services:
   postgres:
     image: postgres:16-alpine
-    env_file: .env
     environment:
       POSTGRES_DB: ris_db
       POSTGRES_USER: ris_user
       POSTGRES_PASSWORD: ris_pass
     volumes:
       - pgdata:/var/lib/postgresql/data
-    ports: ["5432:5432"]
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ris_user -d ris_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    ports:
+      - "6379:6379"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
-  django:
+  web:
     build: .
-    env_file: .env # ✅ Passes .env to runtime
-    user: "${UID:-1000}:${GID:-1000}"
-    depends_on: [postgres, redis]
-    ports: ["8000:8000"]
+    # Load .env file automatically
+    env_file:
+      - .env
+    command: >
+          sh -c "python manage.py migrate &&
+                 python manage.py collectstatic --noinput &&
+                 python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+    # No code volume mount here; code is baked in the image
     volumes:
-      - .:/app
       - static_volume:/app/staticfiles
-    # ❌ Removed inline command. Entrypoint.sh handles migrate + collectstatic
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   celery:
-    build: .
-    env_file: .env
-    user: "${UID:-1000}:${GID:-1000}"
-    depends_on: [django, redis]
-    command: celery -A config worker -l info
-    volumes: [.:/app]
+      build: .
+      # Remove the entrypoint if it forces a specific shell behavior that conflicts
+      entrypoint: []
+      command: ["python", "-m", "celery", "-A", "config", "worker", "-l", "info"]
+      environment:
+        - DJANGO_SETTINGS_MODULE=config.settings
+      volumes:
+        - .:/app:Z
+      depends_on:
+        postgres:
+          condition: service_healthy
+        redis:
+          condition: service_started
+        web:
+          condition: service_started
 
   dicom-server:
     build: .
-    env_file: .env
-    user: "${UID:-1000}:${GID:-1000}"
-    depends_on: [django, postgres]
-    ports:
-      - "11112:11112"  # DICOM Modality Worklist port
+    # Load .env file automatically
+    env_file:
+      - .env
     command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
-    volumes:
-      - .:/app
+    ports:
+      - "11112:11112"
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings
+    # No code volume mount here
+    depends_on:
+      postgres:
+        condition: service_healthy
+      web:
+        condition: service_started
 
 volumes:
   pgdata:
