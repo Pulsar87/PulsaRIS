@@ -142,7 +142,6 @@ class ExamOrder(models.Model):
         CANCELLED = "CANCELLED", "Cancelled"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT)
     facility = models.ForeignKey(
         "tenants.Facility", on_delete=models.SET_NULL, null=True
@@ -188,14 +187,14 @@ class ExamOrder(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=["tenant", "accession_number"],
-                name="unique_accession_per_tenant",
+                fields=["accession_number"],
+                name="unique_accession_number",
             )
         ]
         indexes = [
-            models.Index(fields=["tenant", "status", "scheduled_datetime"]),
-            models.Index(fields=["tenant", "modality", "priority"]),
-            models.Index(fields=["tenant", "is_deleted"]),
+            models.Index(fields=["status", "scheduled_datetime"]),
+            models.Index(fields=["modality", "priority"]),
+            models.Index(fields=["is_deleted"]),
         ]
         ordering = ["-scheduled_datetime"]
 

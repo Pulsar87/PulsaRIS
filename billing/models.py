@@ -12,7 +12,6 @@ from django.conf import settings
 class InsurancePayer(models.Model):
     """Insurance company/payer master data"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     
     # Payer Identification
     payer_id = models.CharField(max_length=50, unique=True, db_index=True)  # EDI payer ID
@@ -64,8 +63,8 @@ class InsurancePayer(models.Model):
     class Meta:
         ordering = ['name']
         indexes = [
-            models.Index(fields=['tenant', 'payer_type']),
-            models.Index(fields=['tenant', 'is_active']),
+            models.Index(fields=['payer_type']),
+            models.Index(fields=['is_active']),
         ]
 
     def __str__(self):
@@ -75,7 +74,6 @@ class InsurancePayer(models.Model):
 class Clearinghouse(models.Model):
     """EDI Clearinghouse configuration"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
     
     # Connection Details
@@ -98,7 +96,6 @@ class Clearinghouse(models.Model):
 class PatientInsurance(models.Model):
     """Patient's insurance coverage information"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient = models.ForeignKey("patients.Patient", on_delete=models.CASCADE, related_name='insurances')
     payer = models.ForeignKey(InsurancePayer, on_delete=models.PROTECT)
     
@@ -153,8 +150,8 @@ class PatientInsurance(models.Model):
     class Meta:
         ordering = ['priority']
         indexes = [
-            models.Index(fields=['tenant', 'patient', 'priority']),
-            models.Index(fields=['tenant', 'policy_number']),
+            models.Index(fields=['patient', 'priority']),
+            models.Index(fields=['policy_number']),
         ]
 
     def __str__(self):
@@ -164,7 +161,6 @@ class PatientInsurance(models.Model):
 class Authorization(models.Model):
     """Pre-authorization/certification tracking"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     exam_order = models.OneToOneField("orders.ExamOrder", on_delete=models.CASCADE, related_name='authorization')
     
     auth_number = models.CharField(max_length=50, db_index=True)
@@ -210,7 +206,7 @@ class Authorization(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
+            models.Index(fields=['status']),
             models.Index(fields=['auth_number']),
         ]
 
@@ -225,7 +221,6 @@ class Authorization(models.Model):
 class FeeSchedule(models.Model):
     """Master fee schedule for procedures"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     name = models.CharField(max_length=150)
     description = models.TextField(blank=True)
     
@@ -257,8 +252,8 @@ class FeeSchedule(models.Model):
     class Meta:
         ordering = ['name']
         indexes = [
-            models.Index(fields=['tenant', 'schedule_type']),
-            models.Index(fields=['tenant', 'is_active']),
+            models.Index(fields=['schedule_type']),
+            models.Index(fields=['is_active']),
         ]
 
     def __str__(self):
@@ -308,7 +303,6 @@ class FeeScheduleItem(models.Model):
 class PatientAccount(models.Model):
     """Patient's financial account"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient = models.OneToOneField("patients.Patient", on_delete=models.CASCADE, related_name='financial_account')
     
     # Account Number
@@ -355,7 +349,7 @@ class PatientAccount(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['tenant', 'account_status']),
+            models.Index(fields=['account_status']),
             models.Index(fields=['current_balance']),
         ]
 
@@ -370,7 +364,6 @@ class PatientAccount(models.Model):
 class ServiceLine(models.Model):
     """Individual billable service line item"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     exam_order = models.ForeignKey("orders.ExamOrder", on_delete=models.PROTECT, related_name='service_lines')
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='service_lines')
     
@@ -429,8 +422,8 @@ class ServiceLine(models.Model):
     class Meta:
         ordering = ['-service_date']
         indexes = [
-            models.Index(fields=['tenant', 'billing_status']),
-            models.Index(fields=['tenant', 'service_date']),
+            models.Index(fields=['billing_status']),
+            models.Index(fields=['service_date']),
             models.Index(fields=['procedure_code']),
         ]
 
@@ -441,7 +434,6 @@ class ServiceLine(models.Model):
 class Claim(models.Model):
     """Insurance claim header"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='claims')
     payer = models.ForeignKey(InsurancePayer, on_delete=models.PROTECT)
     
@@ -507,8 +499,8 @@ class Claim(models.Model):
     class Meta:
         ordering = ['-date_of_service_from']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
-            models.Index(fields=['tenant', 'submission_date']),
+            models.Index(fields=['status']),
+            models.Index(fields=['submission_date']),
             models.Index(fields=['claim_number']),
         ]
 
@@ -571,7 +563,6 @@ class ClaimLine(models.Model):
 class PaymentPosting(models.Model):
     """Payment and adjustment posting from ERA/EOB"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     claim = models.ForeignKey(Claim, on_delete=models.PROTECT, related_name='payment_postings')
     
     # Payment Reference
@@ -616,7 +607,7 @@ class PaymentPosting(models.Model):
     class Meta:
         ordering = ['-posting_date']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
+            models.Index(fields=['status']),
             models.Index(fields=['posting_date']),
         ]
 
@@ -661,7 +652,6 @@ class PaymentDetail(models.Model):
 class PatientStatement(models.Model):
     """Patient billing statement"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='statements')
     
     # Statement Details
@@ -715,7 +705,7 @@ class PatientStatement(models.Model):
     class Meta:
         ordering = ['-statement_date']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
+            models.Index(fields=['status']),
             models.Index(fields=['statement_date']),
         ]
 
@@ -730,7 +720,6 @@ class PatientStatement(models.Model):
 class Payment(models.Model):
     """Patient payment transaction"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='payments')
     
     # Payment Details
@@ -767,7 +756,7 @@ class Payment(models.Model):
     class Meta:
         ordering = ['-payment_date']
         indexes = [
-            models.Index(fields=['tenant', 'payment_date']),
+            models.Index(fields=['payment_date']),
             models.Index(fields=['payment_method']),
         ]
 
@@ -795,7 +784,6 @@ class PaymentAllocation(models.Model):
 class PaymentPlan(models.Model):
     """Installment payment plan for patients"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='payment_plans')
     
     # Plan Terms
@@ -832,7 +820,7 @@ class PaymentPlan(models.Model):
     class Meta:
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
+            models.Index(fields=['status']),
         ]
 
     def __str__(self):
@@ -879,7 +867,6 @@ class PaymentPlanInstallment(models.Model):
 class DenialReason(models.Model):
     """Master table for denial reasons and codes"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     
     # Code Systems
     code_system = models.CharField(
@@ -904,7 +891,6 @@ class DenialReason(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ['tenant', 'code_system', 'code']
         ordering = ['code_system', 'code']
 
     def __str__(self):
@@ -914,7 +900,6 @@ class DenialReason(models.Model):
 class ClaimAppeal(models.Model):
     """Track appeals for denied claims"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     claim = models.ForeignKey(Claim, on_delete=models.PROTECT, related_name='appeals')
     claim_line = models.ForeignKey(ClaimLine, on_delete=models.PROTECT, null=True, blank=True, related_name='appeals')
     
@@ -962,7 +947,7 @@ class ClaimAppeal(models.Model):
     class Meta:
         ordering = ['-filed_date']
         indexes = [
-            models.Index(fields=['tenant', 'status']),
+            models.Index(fields=['status']),
             models.Index(fields=['appeal_number']),
         ]
 

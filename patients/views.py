@@ -7,38 +7,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from patients.models import Patient
-from tenants.models import Tenant
-
-
-def get_tenant(request):
-    """Get tenant from request, with fallback to session and user."""
-    # First try to get from request (set by tenant middleware)
-    tenant = getattr(request, "tenant", None)
-    if tenant:
-        # Store in session for future requests if not already there
-        request.session["tenant_id"] = str(tenant.id)
-        return tenant
-
-    # Fallback: try to get from session
-    tenant_id = request.session.get("tenant_id")
-    if tenant_id:
-        try:
-            tenant = Tenant.objects.get(id=tenant_id)
-            return tenant
-        except Tenant.DoesNotExist:
-            # Clear invalid session data
-            if "tenant_id" in request.session:
-                del request.session["tenant_id"]
-
-    # Fallback: try to get from authenticated user's tenant
-    if request.user.is_authenticated and hasattr(request.user, 'tenant'):
-        user_tenant = request.user.tenant
-        if user_tenant:
-            # Store in session for future requests
-            request.session["tenant_id"] = str(user_tenant.id)
-            return user_tenant
-
-    return None
 
 
 def add_patient(request):
@@ -85,14 +53,8 @@ def add_patient(request):
             messages.error(request, _("Gender is required"))
             return redirect("patients:add_patient")
 
-        # Get tenant
-        tenant = get_tenant(request)
-        if not tenant:
-            messages.error(request, _("Tenant not found. Please select a tenant."))
-            return redirect("license:home")
-
-        # Check for duplicate MRN within tenant
-        if Patient.objects.filter(tenant=tenant, mrn=mrn).exists():
+        # Check for duplicate MRN
+        if Patient.objects.filter(mrn=mrn).exists():
             messages.error(
                 request, _("A patient with this MRN already exists in your system")
             )
@@ -101,7 +63,6 @@ def add_patient(request):
         # Create patient
         try:
             patient = Patient.objects.create(
-                tenant=tenant,
                 mrn=mrn,
                 first_name_en=first_name_en,
                 last_name_en=last_name_en,
@@ -139,20 +100,17 @@ def add_patient(request):
 def patient_list(request):
     """Display list of patients with search functionality."""
     query = request.GET.get("q", "")
-    tenant = get_tenant(request)
 
-    patients = Patient.objects.none()
-    if tenant:
-        patients = Patient.objects.filter(tenant=tenant, is_deleted=False)
+    patients = Patient.objects.filter(is_deleted=False)
 
-        if query:
-            patients = patients.filter(
-                Q(mrn__icontains=query)
-                | Q(first_name_en__icontains=query)
-                | Q(last_name_en__icontains=query)
-                | Q(national_id__icontains=query)
-                | Q(phone__icontains=query)
-            )
+    if query:
+        patients = patients.filter(
+            Q(mrn__icontains=query)
+            | Q(first_name_en__icontains=query)
+            | Q(last_name_en__icontains=query)
+            | Q(national_id__icontains=query)
+            | Q(phone__icontains=query)
+        )
 
     context = {
         "patients": patients,
@@ -173,11 +131,6 @@ def patient_detail(request, pk):
 def edit_patient(request, pk):
     """Edit an existing patient."""
     patient = get_object_or_404(Patient, pk=pk)
-    tenant = get_tenant(request)
-    
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("patients:patient_list")
     
     if request.method == "POST":
         # Get form data
@@ -222,8 +175,8 @@ def edit_patient(request, pk):
             messages.error(request, _("Gender is required"))
             return redirect("patients:edit_patient", pk=pk)
 
-        # Check for duplicate MRN within tenant (excluding current patient)
-        if Patient.objects.filter(tenant=tenant, mrn=mrn).exclude(pk=pk).exists():
+        # Check for duplicate MRN (excluding current patient)
+        if Patient.objects.filter(mrn=mrn).exclude(pk=pk).exists():
             messages.error(
                 request, _("A patient with this MRN already exists in your system")
             )
@@ -271,11 +224,6 @@ def delete_patient(request, pk):
     from audit.models import AuditLog
     
     patient = get_object_or_404(Patient, pk=pk)
-    tenant = get_tenant(request)
-    
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("patients:patient_list")
     
     if request.method == "POST":
         try:
@@ -295,7 +243,6 @@ def delete_patient(request, pk):
             
             # Create audit log entry
             AuditLog.objects.create(
-                tenant=tenant,
                 user=request.user if request.user.is_authenticated else None,
                 action='DELETE',
                 entity_type='Patient',
@@ -323,10 +270,9 @@ def delete_patient(request, pk):
 def search_patient(request):
     """HTMX endpoint for searching patients by MRN or name."""
     query = request.GET.get("q", "")
-    tenant = get_tenant(request)
 
     patients = []
-    if tenant and query:
+    if query:
         patients = Patient.objects.filter(
             Q(mrn__icontains=query)
             | Q(first_name_en__icontains=query)
@@ -334,7 +280,6 @@ def search_patient(request):
             | Q(first_name_ar__icontains=query)
             | Q(last_name_ar__icontains=query)
             | Q(national_id__icontains=query),
-            tenant=tenant,
         )[:10]  # Limit to 10 results
 
     context = {
@@ -350,41 +295,35 @@ def patient_lookup(request):
     Search supports: MRN, name (English/Arabic), national ID, phone.
     """
     query = request.GET.get("q", "").strip()
-    tenant = get_tenant(request)
 
     if not query:
         return JsonResponse({"patients": [], "error": "No search query provided"}, status=400)
 
-    patients = []
-    if tenant:
-        patients = Patient.objects.filter(
-            Q(mrn__icontains=query)
-            | Q(first_name_en__icontains=query)
-            | Q(last_name_en__icontains=query)
-            | Q(first_name_ar__icontains=query)
-            | Q(last_name_ar__icontains=query)
-            | Q(national_id__icontains=query)
-            | Q(phone__icontains=query),
-            tenant=tenant,
-        ).values(
-            'id', 'mrn', 'first_name_en', 'last_name_en', 
-            'first_name_ar', 'last_name_ar', 'dob', 'gender', 'phone'
-        )[:20]  # Limit to 20 results
+    patients = Patient.objects.filter(
+        Q(mrn__icontains=query)
+        | Q(first_name_en__icontains=query)
+        | Q(last_name_en__icontains=query)
+        | Q(first_name_ar__icontains=query)
+        | Q(last_name_ar__icontains=query)
+        | Q(national_id__icontains=query)
+        | Q(phone__icontains=query),
+    ).values(
+        'id', 'mrn', 'first_name_en', 'last_name_en', 
+        'first_name_ar', 'last_name_ar', 'dob', 'gender', 'phone'
+    )[:20]  # Limit to 20 results
 
-        # Convert to list of dicts with formatted data
-        patient_list = []
-        for p in patients:
-            patient_list.append({
-                'id': str(p['id']),
-                'mrn': p['mrn'],
-                'name_en': f"{p['first_name_en']} {p['last_name_en']}",
-                'name_ar': f"{p['first_name_ar']} {p['last_name_ar']}".strip(),
-                'dob': p['dob'].isoformat() if p['dob'] else '',
-                'gender': p['gender'],
-                'phone': p['phone'],
-                'display': f"{p['mrn']} - {p['first_name_en']} {p['last_name_en']}"
-            })
-        
-        return JsonResponse({"patients": patient_list})
+    # Convert to list of dicts with formatted data
+    patient_list = []
+    for p in patients:
+        patient_list.append({
+            'id': str(p['id']),
+            'mrn': p['mrn'],
+            'name_en': f"{p['first_name_en']} {p['last_name_en']}",
+            'name_ar': f"{p['first_name_ar']} {p['last_name_ar']}".strip(),
+            'dob': p['dob'].isoformat() if p['dob'] else '',
+            'gender': p['gender'],
+            'phone': p['phone'],
+            'display': f"{p['mrn']} - {p['first_name_en']} {p['last_name_en']}"
+        })
     
-    return JsonResponse({"patients": [], "error": "Tenant not found"}, status=400)
+    return JsonResponse({"patients": patient_list})

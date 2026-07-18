@@ -12,7 +12,6 @@ class Report(models.Model):
         AMENDED = "AMENDED", "Amended"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    tenant = models.ForeignKey("tenants.Tenant", on_delete=models.CASCADE)
     order = models.ForeignKey(
         "orders.ExamOrder", on_delete=models.CASCADE, related_name="reports"
     )
@@ -47,9 +46,9 @@ class Report(models.Model):
 
     class Meta:
         indexes = [
-            models.Index(fields=["tenant", "status", "finalized_at"]),
-            models.Index(fields=["tenant", "critical_finding"]),
-            models.Index(fields=["tenant", "is_deleted"]),
+            models.Index(fields=["status", "finalized_at"]),
+            models.Index(fields=["critical_finding"]),
+            models.Index(fields=["is_deleted"]),
         ]
         ordering = ["-updated_at"]
 
