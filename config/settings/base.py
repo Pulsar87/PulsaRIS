@@ -175,8 +175,8 @@ SPECTACULAR_SETTINGS = {
 # ─────────────────────────────────────────────────────────────
 # Audit Logging (HIPAA Compliance)
 # ─────────────────────────────────────────────────────────────
-# AUDITLOG_CID_GETTER = None
-# AUDITLOG_CID_HEADER = None
+AUDITLOG_CID_GETTER = None
+AUDITLOG_CID_HEADER = None
 AUDITLOG_INCLUDE_ALL_MODELS = True  # explicit is safer
 # AUDITLOG_DISABLE_ON_RAW_SAVE = False
 AUTH_USER_MODEL = "users.User"
