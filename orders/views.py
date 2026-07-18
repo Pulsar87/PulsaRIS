@@ -7,8 +7,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from orders.models import ExamOrder
-from patients.views import get_tenant
-from tenants.models import Device, Tenant
 
 
 def worklist(request):
@@ -19,18 +17,10 @@ def worklist(request):
     priority_filter = request.GET.get("priority", "")
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
-    tenant = get_tenant(request)
 
-    orders = ExamOrder.objects.none()
-    modalities = []
-    if tenant:
-        from tenants.models import Modality
-
-        modalities = Modality.objects.filter(tenant=tenant, is_active=True)
-
-        orders = ExamOrder.objects.filter(tenant=tenant, is_deleted=False).select_related(
-            "patient", "modality", "facility", "room_station"
-        )
+    orders = ExamOrder.objects.filter(is_deleted=False).select_related(
+        "patient", "modality", "facility", "room_station"
+    )
 
         if query:
             orders = orders.filter(
