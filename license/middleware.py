@@ -31,46 +31,21 @@ class LicenseMiddleware:
             if path.startswith(exempt_path):
                 return self.get_response(request)
 
-        # Get tenant from request (set by django_tenants middleware)
-        tenant = getattr(request, 'tenant', None)
-        
-        if tenant and hasattr(tenant, 'license_activated'):
-            # Check license status from tenant model
-            if not tenant.license_activated:
-                return redirect("license:activation_required")
+        # Check license status from session (single-tenant setup)
+        if not request.session.get("license_activated"):
+            return redirect("license:activation_required")
 
-            # Check if license has expired
-            if tenant.license_expiry and tenant.license_expiry < timezone.now().date():
-                # License expired, deactivate and redirect
-                tenant.license_activated = False
-                tenant.save(update_fields=["license_activated"])
-                return redirect("license:activation_required")
-            
-            # Check license by number of orders
-            if tenant.license_max_orders is not None:
-                from orders.models import ExamOrder
-                order_count = ExamOrder.objects.filter(tenant=tenant).count()
-                if order_count >= tenant.license_max_orders:
-                    # License order limit exceeded, deactivate and redirect
-                    tenant.license_activated = False
-                    tenant.save(update_fields=["license_activated"])
+        license_expiry = request.session.get("license_expiry")
+        if license_expiry:
+            try:
+                expiry_date = timezone.datetime.strptime(
+                    license_expiry, "%Y-%m-%d"
+                ).date()
+                if timezone.now().date() > expiry_date:
+                    request.session.flush()
                     return redirect("license:activation_required")
-        else:
-            # Fallback to session-based check for non-tenant setups or public schema
-            if not request.session.get("license_activated"):
-                return redirect("license:activation_required")
-
-            license_expiry = request.session.get("license_expiry")
-            if license_expiry:
-                try:
-                    expiry_date = timezone.datetime.strptime(
-                        license_expiry, "%Y-%m-%d"
-                    ).date()
-                    if timezone.now().date() > expiry_date:
-                        request.session.flush()
-                        return redirect("license:activation_required")
-                except ValueError:
-                    pass
+            except ValueError:
+                pass
 
         response = self.get_response(request)
         return response
