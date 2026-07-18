@@ -22,29 +22,29 @@ def worklist(request):
         "patient", "modality", "facility", "room_station"
     )
 
-        if query:
-            orders = orders.filter(
-                Q(accession_number__icontains=query)
-                | Q(patient__mrn__icontains=query)
-                | Q(patient__first_name_en__icontains=query)
-                | Q(patient__last_name_en__icontains=query)
-                | Q(procedure_name_en__icontains=query)
-            )
+    if query:
+        orders = orders.filter(
+            Q(accession_number__icontains=query)
+            | Q(patient__mrn__icontains=query)
+            | Q(patient__first_name_en__icontains=query)
+            | Q(patient__last_name_en__icontains=query)
+            | Q(procedure_name_en__icontains=query)
+        )
 
-        if status_filter:
-            orders = orders.filter(status=status_filter)
+    if status_filter:
+        orders = orders.filter(status=status_filter)
 
-        if modality_filter:
-            orders = orders.filter(modality__code=modality_filter)
+    if modality_filter:
+        orders = orders.filter(modality__code=modality_filter)
 
-        if priority_filter:
-            orders = orders.filter(priority=priority_filter)
+    if priority_filter:
+        orders = orders.filter(priority=priority_filter)
 
-        if date_from:
-            orders = orders.filter(scheduled_datetime__date__gte=date_from)
+    if date_from:
+        orders = orders.filter(scheduled_datetime__date__gte=date_from)
 
-        if date_to:
-            orders = orders.filter(scheduled_datetime__date__lte=date_to)
+    if date_to:
+        orders = orders.filter(scheduled_datetime__date__lte=date_to)
 
     context = {
         "orders": orders,
@@ -103,26 +103,20 @@ def add_order(request):
             messages.error(request, _("Procedure code and name are required"))
             return redirect("orders:add_order")
 
-        # Get tenant
-        tenant = get_tenant(request)
-        if not tenant:
-            messages.error(request, _("Tenant not found. Please select a tenant."))
-            return redirect("license:home")
-
         # Look up patient by MRN
         from patients.models import Patient
 
         try:
-            patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
+            patient = Patient.objects.get(mrn=patient_mrn)
         except Patient.DoesNotExist:
             messages.error(
                 request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
             )
             return redirect("orders:add_order")
 
-        # Check for duplicate accession number within tenant
+        # Check for duplicate accession number
         if ExamOrder.objects.filter(
-            tenant=tenant, accession_number=accession_number
+            accession_number=accession_number
         ).exists():
             messages.error(
                 request, _("An order with this accession number already exists")
@@ -134,7 +128,7 @@ def add_order(request):
         modality = None
         if device_id:
             try:
-                device = Device.objects.get(id=device_id, tenant=tenant)
+                device = Device.objects.get(id=device_id)
                 modality = device.modality
             except Device.DoesNotExist:
                 messages.error(request, _("Selected device not found"))
@@ -146,14 +140,13 @@ def add_order(request):
             from tenants.models import Facility
 
             try:
-                facility = Facility.objects.get(id=facility_id, tenant=tenant)
+                facility = Facility.objects.get(id=facility_id)
             except Facility.DoesNotExist:
                 pass
 
         # Create order
         try:
             order = ExamOrder.objects.create(
-                tenant=tenant,
                 patient=patient,
                 facility=facility,
                 accession_number=accession_number,
@@ -186,12 +179,8 @@ def add_order(request):
             return redirect("orders:add_order")
 
     # GET request - render form
-    tenant = get_tenant(request)
-    facilities = []
-    if tenant:
-        from tenants.models import Facility
-
-        facilities = Facility.objects.filter(tenant=tenant, is_active=True)
+    from tenants.models import Facility
+    facilities = Facility.objects.filter(is_active=True)
 
     # Get active procedures from database
     from orders.models import Procedure
@@ -214,11 +203,6 @@ def add_order(request):
 def edit_order(request, pk):
     """Edit an existing order."""
     order = get_object_or_404(ExamOrder, pk=pk)
-    tenant = get_tenant(request)
-
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
 
     if request.method == "POST":
         # Get form data
@@ -256,16 +240,16 @@ def edit_order(request, pk):
         from patients.models import Patient
 
         try:
-            patient = Patient.objects.get(tenant=tenant, mrn=patient_mrn)
+            patient = Patient.objects.get(mrn=patient_mrn)
         except Patient.DoesNotExist:
             messages.error(
                 request, _("Patient with MRN %(mrn)s not found") % {"mrn": patient_mrn}
             )
             return redirect("orders:edit_order", pk=pk)
 
-        # Check for duplicate accession number within tenant (excluding current order)
+        # Check for duplicate accession number (excluding current order)
         if (
-            ExamOrder.objects.filter(tenant=tenant, accession_number=accession_number)
+            ExamOrder.objects.filter(accession_number=accession_number)
             .exclude(pk=pk)
             .exists()
         ):
@@ -279,7 +263,7 @@ def edit_order(request, pk):
         modality = None
         if device_id:
             try:
-                device = Device.objects.get(id=device_id, tenant=tenant)
+                device = Device.objects.get(id=device_id)
                 modality = device.modality
             except Device.DoesNotExist:
                 messages.error(request, _("Selected device not found"))
@@ -291,7 +275,7 @@ def edit_order(request, pk):
             from tenants.models import Facility
 
             try:
-                facility = Facility.objects.get(id=facility_id, tenant=tenant)
+                facility = Facility.objects.get(id=facility_id)
             except Facility.DoesNotExist:
                 pass
 
@@ -327,11 +311,8 @@ def edit_order(request, pk):
             return redirect("orders:edit_order", pk=pk)
 
     # GET request - render form
-    facilities = []
-    if tenant:
-        from tenants.models import Facility
-
-        facilities = Facility.objects.filter(tenant=tenant, is_active=True)
+    from tenants.models import Facility
+    facilities = Facility.objects.filter(is_active=True)
 
     # Get active procedures from database
     from orders.models import Procedure
@@ -355,11 +336,6 @@ def delete_order(request, pk):
     from audit.models import AuditLog
     
     order = get_object_or_404(ExamOrder, pk=pk)
-    tenant = get_tenant(request)
-
-    if not tenant:
-        messages.error(request, _("Tenant not found. Please select a tenant."))
-        return redirect("orders:worklist")
 
     if request.method == "POST":
         try:
@@ -378,7 +354,6 @@ def delete_order(request, pk):
             
             # Create audit log entry
             AuditLog.objects.create(
-                tenant=tenant,
                 user=request.user if request.user.is_authenticated else None,
                 action='DELETE',
                 entity_type='ExamOrder',

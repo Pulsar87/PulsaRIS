@@ -41,7 +41,7 @@ class ExamOrderAdmin(admin.ModelAdmin):
         "priority",
         "created_at",
     ]
-    list_filter = ["status", "priority", "modality", "tenant"]
+    list_filter = ["status", "priority", "modality"]
     search_fields = [
         "accession_number",
         "patient__mrn",

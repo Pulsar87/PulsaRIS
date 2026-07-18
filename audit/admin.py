@@ -7,17 +7,15 @@ class AuditLogAdmin(admin.ModelAdmin):
     list_display = [
         "timestamp",
         "user",
-        "tenant",
         "action",
         "entity_type",
         "entity_id",
         "ip_address",
     ]
-    list_filter = ["action", "entity_type", "timestamp", "tenant"]
+    list_filter = ["action", "entity_type", "timestamp"]
     search_fields = ["entity_id", "user__username", "user__email", "ip_address"]
     readonly_fields = [
         "id",
-        "tenant",
         "user",
         "action",
         "entity_type",
