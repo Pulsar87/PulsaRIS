@@ -505,21 +505,23 @@ def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
+    from tenants.models import Device
 
-    tenant = get_tenant(request)
+    # Get facility from request (if using facility-based filtering)
+    facility = getattr(request, 'facility', None)
+    
+    # Debug: log facility info
+    print(f"DEBUG get_devices: facility={facility}")
 
-    # Debug: log tenant info
-    print(f"DEBUG get_devices: tenant={tenant}")
-
-    if not tenant:
+    if not facility:
         html = render_to_string(
-            "orders/_device_options.html", {"devices": [], "error": "Tenant not found"}
+            "orders/_device_options.html", {"devices": [], "error": "Facility not found"}
         )
-        print(f"DEBUG get_devices: no tenant, returning error HTML")
+        print(f"DEBUG get_devices: no facility, returning error HTML")
         return HttpResponse(html)
 
     devices = (
-        Device.objects.filter(tenant=tenant, is_active=True)
+        Device.objects.filter(facility=facility, is_active=True)
         .select_related("modality")
         .order_by("name")
     )
