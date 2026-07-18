@@ -1,34 +1,39 @@
 ```
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+*.pyc
+*.pyo
+*.pyd
 
-# Django
+# Django migrations
+*/migrations/*.py
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
 *.log
-local_settings.py
-db.sqlite3
-db.sqlite3-journal
 
-# IDE
+# Temporary files
+*.tmp
+*.swp
+
+# Dependencies
+.venv/
+venv/
+node_modules/
+
+# Build artifacts
+dist/
+build/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+
+# Editors
 .vscode/
 .idea/
 
