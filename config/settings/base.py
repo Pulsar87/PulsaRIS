@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "django_htmx",
     "whitenoise",
+    "auditlog",  # ← Added: django-auditlog package for HIPAA compliance
 ]
 
 

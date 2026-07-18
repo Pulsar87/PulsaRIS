@@ -351,31 +351,17 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
-                            <p><strong>{% trans "Status" %}:</strong>
-                                <span class="badge bg-success">{% trans "Active" %}</span>
+                        <div class="col-md-6">
+                            <p><strong>{% trans "System Status" %}:</strong>
+                                <span class="badge bg-success">{% trans "Activated" %}</span>
                             </p>
+                            <p class="text-muted small">{% trans "License is valid and system is operational" %}</p>
                         </div>
-                        <div class="col-md-4">
-                            <p><strong>{% trans "Expiry Date" %}:</strong>
-                                {% if tenant.license_expiry %}
-                                    {{ tenant.license_expiry }}
-                                {% else %}
-                                    <span class="text-muted">{% trans "Not set" %}</span>
-                                {% endif %}
+                        <div class="col-md-6">
+                            <p><strong>{% trans "Devices" %}:</strong>
+                                <span class="badge bg-info">{{ devices|length }} {% trans "configured" %}</span>
                             </p>
-                        </div>
-                        <div class="col-md-4">
-                            <p><strong>{% trans "Order Limit" %}:</strong>
-                                {% if tenant.license_max_orders %}
-                                    {{ tenant.license_max_orders }} {% trans "orders" %}
-                                    {% with order_count=tenant.examorder_set.count %}
-                                        ({{ order_count }} {% trans "used" %})
-                                    {% endwith %}
-                                {% else %}
-                                    <span class="badge bg-success">{% trans "Unlimited" %}</span>
-                                {% endif %}
-                            </p>
+                            <p class="text-muted small">{% trans "Active devices ready for scheduling" %}</p>
                         </div>
                     </div>
                 </div>

@@ -10,34 +10,28 @@ from .check import get_hardware_id, verify_key
 def home(request):
     """Home page view with calendar."""
     from orders.models import ExamOrder
+    from tenants.models import Device
 
-    # Get tenant from request
+    # Get tenant from request (now returns None in single-tenant setup)
     tenant = getattr(request, 'tenant', None)
 
-    # Fetch scheduled orders for the calendar
-    if tenant:
-        from tenants.models import Device
-        # Get orders for the next 30 days
-        end_date = timezone.now() + timedelta(days=30)
-        orders = ExamOrder.objects.filter(
-            tenant=tenant,
-            scheduled_datetime__isnull=False,
-            scheduled_datetime__lte=end_date
-        ).exclude(status='CANCELLED')[:100]  # Limit to 100 for performance
+    # Fetch scheduled orders for the calendar (no tenant filtering in single-tenant mode)
+    # Get orders for the next 30 days
+    end_date = timezone.now() + timedelta(days=30)
+    orders = ExamOrder.objects.filter(
+        scheduled_datetime__isnull=False,
+        scheduled_datetime__lte=end_date
+    ).exclude(status='CANCELLED')[:100]  # Limit to 100 for performance
 
-        # Get all active devices for the tenant with modality info
-        devices = Device.objects.filter(tenant=tenant, is_active=True).select_related('modality').order_by('name')
-    else:
-        orders = []
-        devices = []
+    # Get all active devices with modality info (no tenant filtering)
+    devices = Device.objects.filter(is_active=True).select_related('modality').order_by('name')
 
-    return render(request, 'license/home.html', {'orders': orders, 'devices': devices, 'tenant': tenant})
+    return render(request, 'license/home.html', {'orders': orders, 'devices': devices})
 
 @login_required
 def calendar_events(request):
     """API endpoint to return calendar events in FullCalendar format."""
     from orders.models import ExamOrder
-    from tenants.models import Device
     import logging
 
     logger = logging.getLogger(__name__)
@@ -48,15 +42,10 @@ def calendar_events(request):
     end = request.GET.get('end')
     device_ids = request.GET.getlist('devices[]')
 
-    logger.info(f"calendar_events called: start={start}, end={end}, devices={device_ids}, tenant={tenant}")
+    logger.info(f"calendar_events called: start={start}, end={end}, devices={device_ids}")
 
-    if not tenant:
-        logger.warning("No tenant found")
-        return JsonResponse([], safe=False)
-
-    # Filter orders within the date range
+    # Filter orders within the date range (no tenant filtering in single-tenant mode)
     filters = {
-        'tenant': tenant,
         'scheduled_datetime__isnull': False,
     }
 
@@ -99,10 +88,6 @@ def calendar_events(request):
     logger.info(f"Final filters: {filters}")
 
     orders = ExamOrder.objects.filter(**filters).exclude(status='CANCELLED').select_related('room_station', 'modality', 'patient')[:200]
-
-    logger.info(f"Found {orders.count()} orders")
-    for order in orders:
-        logger.info(f"Order: {order.id}, scheduled={order.scheduled_datetime}, device={order.room_station_id}, status={order.status}")
 
     events = []
     color_map = {
@@ -181,21 +166,12 @@ def activate(request):
             provided_key = f"{expiry_str}-{signature.upper()}"
 
             if verify_key(provided_key):
-                # Get tenant from request
-                tenant = getattr(request, 'tenant', None)
-
-                if tenant:
-                    # Store license in tenant model (persists across sessions/logouts)
-                    tenant.license_activated = True
-                    tenant.license_expiry = expiry_date
-                    tenant.license_signature = signature.upper()
-                    # Set max orders limit (None means unlimited)
-                    tenant.license_max_orders = int(max_orders) if max_orders and max_orders.strip() else None
-                    tenant.save(update_fields=['license_activated', 'license_expiry', 'license_signature', 'license_max_orders'])
-                else:
-                    # Fallback to session for non-tenant setups
-                    request.session['license_activated'] = True
-                    request.session['license_expiry'] = expiry_date
+                # Store license in session (single-tenant setup)
+                request.session['license_activated'] = True
+                request.session['license_expiry'] = expiry_date
+                request.session['license_signature'] = signature.upper()
+                # Set max orders limit (None means unlimited)
+                request.session['license_max_orders'] = int(max_orders) if max_orders and max_orders.strip() else None
 
                 messages.success(request, 'System activated successfully!')
                 return redirect('license:home')
