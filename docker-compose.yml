@@ -33,6 +33,17 @@ services:
     command: celery -A config worker -l info
     volumes: [.:/app]
 
+  dicom-server:
+    build: .
+    env_file: .env
+    user: "${UID:-1000}:${GID:-1000}"
+    depends_on: [django, postgres]
+    ports:
+      - "11112:11112"  # DICOM Modality Worklist port
+    command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
+    volumes:
+      - .:/app
+
 volumes:
   pgdata:
   static_volume:
