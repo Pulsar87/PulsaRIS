@@ -19,7 +19,7 @@ def worklist(request):
     date_to = request.GET.get("date_to", "")
 
     orders = ExamOrder.objects.filter(is_deleted=False).select_related(
-        "patient", "modality", "facility", "room_station"
+        "patient", "modality", "room_station"
     )
 
     if query:
@@ -188,7 +188,6 @@ def add_order(request):
     # Get scheduled_datetime from query parameter (from calendar click)
     datetime = request.GET.get("datetime", "")
     context = {
-        "facilities": facilities,
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
         "datetime": datetime,
@@ -313,7 +312,6 @@ def edit_order(request, pk):
 
     context = {
         "order": order,
-        "facilities": facilities,
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
         "status_choices": ExamOrder.Status.choices,
