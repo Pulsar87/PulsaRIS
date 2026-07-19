@@ -12,8 +12,16 @@ def home(request):
     from orders.models import ExamOrder
     from tenants.models import Device
 
+    # Get license info from session
+    license_expiry = request.session.get('license_expiry')
+    license_max_orders = request.session.get('license_max_orders')
+
+    # Get current orders count
+    current_orders_count = ExamOrder.objects.count()
+
     # Get tenant from request (now returns None in single-tenant setup)
     tenant = getattr(request, 'tenant', None)
+
 
     # Fetch scheduled orders for the calendar (no tenant filtering in single-tenant mode)
     # Get orders for the next 30 days
@@ -26,7 +34,13 @@ def home(request):
     # Get all active devices with modality info (no tenant filtering)
     devices = Device.objects.filter(is_active=True).select_related('modality').order_by('name')
 
-    return render(request, 'license/home.html', {'orders': orders, 'devices': devices})
+    return render(request, 'license/home.html', {
+        'orders': orders,
+        'devices': devices,
+        'license_expiry': license_expiry,
+        'license_max_orders': license_max_orders,
+        'current_orders_count': current_orders_count
+    })
 
 @login_required
 def calendar_events(request):

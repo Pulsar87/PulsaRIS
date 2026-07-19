@@ -352,16 +352,20 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>{% trans "System Status" %}:</strong>
-                                <span class="badge bg-success">{% trans "Activated" %}</span>
+                            <p><strong>{% trans "End Date" %}:</strong>
+                                <span class="badge {% if license_expiry %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ license_expiry|default:"Not Set" }}
+                                </span>
                             </p>
-                            <p class="text-muted small">{% trans "License is valid and system is operational" %}</p>
+                            <p class="text-muted small">{% trans "License expiration date" %}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>{% trans "Devices" %}:</strong>
-                                <span class="badge bg-info">{{ devices|length }} {% trans "configured" %}</span>
+                            <p><strong>{% trans "Orders Count" %}:</strong>
+                                                            <span class="badge {% if license_max_orders %}bg-info{% else %}bg-success{% endif %}">
+                                                                {% if license_max_orders %}{{ current_orders_count }}/{{ license_max_orders }}{% else %}{% trans "Unlimited" %}{% endif %}
+                                                            </span>
                             </p>
-                            <p class="text-muted small">{% trans "Active devices ready for scheduling" %}</p>
+                            <p class="text-muted small">{% trans "Order usage limit" %}</p>
                         </div>
                     </div>
                 </div>
