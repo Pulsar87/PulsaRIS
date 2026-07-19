@@ -46,6 +46,7 @@ def worklist(request):
     if date_to:
         orders = orders.filter(scheduled_datetime__date__lte=date_to)
 
+
     context = {
         "orders": orders,
         "query": query,
@@ -56,7 +57,6 @@ def worklist(request):
         "date_to": date_to,
         "status_choices": ExamOrder.Status.choices,
         "priority_choices": ExamOrder.Priority.choices,
-        "modalities": modalities,
     }
     return render(request, "orders/worklist.html", context)
 
@@ -136,13 +136,12 @@ def add_order(request):
 
         # Get facility if provided
         facility = None
-        if facility_id:
-            from tenants.models import Facility
 
-            try:
-                facility = Facility.objects.get(id=facility_id)
-            except Facility.DoesNotExist:
-                pass
+
+        try:
+            facility = Facility.objects.get(id=facility_id)
+        except Facility.DoesNotExist:
+            pass
 
         # Create order
         try:
@@ -178,9 +177,6 @@ def add_order(request):
             )
             return redirect("orders:add_order")
 
-    # GET request - render form
-    from tenants.models import Facility
-    facilities = Facility.objects.filter(is_active=True)
 
     # Get active procedures from database
     from orders.models import Procedure
@@ -271,13 +267,11 @@ def edit_order(request, pk):
 
         # Get facility if provided
         facility = None
-        if facility_id:
-            from tenants.models import Facility
 
-            try:
-                facility = Facility.objects.get(id=facility_id)
-            except Facility.DoesNotExist:
-                pass
+        try:
+            facility = Facility.objects.get(id=facility_id)
+        except Facility.DoesNotExist:
+            pass
 
         # Update order
         try:
@@ -310,10 +304,6 @@ def edit_order(request, pk):
             )
             return redirect("orders:edit_order", pk=pk)
 
-    # GET request - render form
-    from tenants.models import Facility
-    facilities = Facility.objects.filter(is_active=True)
-
     # Get active procedures from database
     from orders.models import Procedure
 
@@ -334,7 +324,7 @@ def edit_order(request, pk):
 def delete_order(request, pk):
     """Delete an order (soft delete with audit logging)."""
     from audit.models import AuditLog
-    
+
     order = get_object_or_404(ExamOrder, pk=pk)
 
     if request.method == "POST":
@@ -348,10 +338,10 @@ def delete_order(request, pk):
                 'priority': order.priority,
                 'status': order.status,
             }
-            
+
             # Soft delete instead of hard delete
             order.soft_delete()
-            
+
             # Create audit log entry
             AuditLog.objects.create(
                 user=request.user if request.user.is_authenticated else None,
@@ -363,7 +353,7 @@ def delete_order(request, pk):
                 ip_address=request.META.get('REMOTE_ADDR'),
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
             )
-            
+
             messages.success(request, _("Order deleted successfully!"))
             return redirect("orders:worklist")
         except Exception as e:
@@ -505,11 +495,10 @@ def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
-    from tenants.models import Device
 
     # Get facility from request (if using facility-based filtering)
     facility = getattr(request, 'facility', None)
-    
+
     # Debug: log facility info
     print(f"DEBUG get_devices: facility={facility}")
 
@@ -594,7 +583,7 @@ def send_order_worklist(request, pk):
 
     try:
         order = ExamOrder.objects.select_related(
-            "patient", "modality", "room_station", "tenant"
+            "patient", "modality", "room_station"
         ).get(pk=pk)
 
         # Check if order has required information
