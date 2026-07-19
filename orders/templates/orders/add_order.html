@@ -402,8 +402,7 @@
                                             {% trans "Thyroid Scan" %}
                                         </option>
                                         <option value="NM_LUNG">
-                                            {% trans "Lung
-                                            Perfusion/Ventilation" %}
+                                            {% trans "Lung Perfusion/Ventilation" %}
                                         </option>
                                         <option value="NM_RENAL">
                                             {% trans "Renal Scan" %}
@@ -701,6 +700,15 @@
 {% endblock %} {% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Auto-fill patient data if passed from URL (from patient detail page)
+        {% if patient_data %}
+        document.getElementById("patient_mrn").value = "{{ patient_data.mrn }}";
+        document.getElementById("patient_name").value = "{{ patient_data.name|escapejs }}";
+        document.getElementById("patient_dob").value = "{{ patient_data.dob }}";
+        document.getElementById("patient_gender").value = "{{ patient_data.gender }}";
+        document.getElementById("patient_phone").value = "{{ patient_data.phone }}";
+        {% endif %}
+
         // Auto-generate accession number if empty
         const accessionField = document.getElementById("accession_number");
         if (!accessionField.value) {
