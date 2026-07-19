@@ -180,18 +180,38 @@ def add_order(request):
 
     # Get active procedures from database
     from orders.models import Procedure
+    from patients.models import Patient
 
     procedures = Procedure.objects.filter(is_active=True).order_by(
         "modality_type", "code"
     )
 
     # Get scheduled_datetime from query parameter (from calendar click)
-    datetime = request.GET.get("datetime", "")
+    datetime_param = request.GET.get("datetime", "")
+    
+    # Get mrn from query parameter (from patient detail page)
+    mrn_param = request.GET.get("mrn", "")
+    patient_data = None
+    
+    if mrn_param:
+        try:
+            patient = Patient.objects.get(mrn=mrn_param)
+            patient_data = {
+                'mrn': patient.mrn,
+                'name': str(patient),
+                'dob': patient.dob,
+                'gender': patient.get_gender_display() if hasattr(patient, 'get_gender_display') else patient.gender,
+                'phone': patient.phone,
+            }
+        except Patient.DoesNotExist:
+            pass
+    
     context = {
         "facilities": facilities,
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
-        "datetime": datetime,
+        "datetime": datetime_param,
+        "patient_data": patient_data,
     }
     return render(request, "orders/add_order.html", context)
 
