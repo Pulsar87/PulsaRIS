@@ -6,7 +6,7 @@ set -e
 
 APP_VERSION="0.1"
 EXPORT_DIR="./dist"
-PACKAGE_NAME="django_app_v${APP_VERSION}"
+PACKAGE_NAME="pulsaris_v${APP_VERSION}"
 
 echo "🚀 Building Production Export Package v${APP_VERSION}..."
 
@@ -31,7 +31,7 @@ chmod +x "${EXPORT_DIR}/${PACKAGE_NAME}/entrypoint.sh"
 
 # Compile Python files and copy application code
 echo "🔒 Compiling Python code to bytecode..."
-cd /workspace
+#cd dist
 
 # List of Django apps and modules to include
 APPS="audit billing config core integrations license orders patients reports users"
@@ -62,14 +62,14 @@ find "${EXPORT_DIR}/${PACKAGE_NAME}/app" -name "*.py" -type f -delete
 # Create install script
 cat > "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh" << 'INSTALL_SCRIPT'
 #!/bin/bash
-# Installation script for Django App v0.1
+# Installation script for PulsarRIS v0.1
 set -e
 
-INSTALL_DIR="${INSTALL_DIR:-/opt/django_app}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/pulsaris}"
 VENV_DIR="${INSTALL_DIR}/venv"
 APP_DIR="${INSTALL_DIR}/app"
 
-echo "📦 Installing Django App v0.1 to ${INSTALL_DIR}..."
+echo "📦 Installing PulsarRIS v0.1 to ${INSTALL_DIR}..."
 
 # Create installation directory
 mkdir -p "${INSTALL_DIR}"
@@ -86,7 +86,7 @@ for file in requirements.txt entrypoint.sh systemd.service docker-compose.yml Do
         cp "${SCRIPT_DIR}/${file}" "${INSTALL_DIR}/"
     fi
 done
-cp "${SCRIPT_DIR}/install.sh" "${INSTALL_DIR}/" 
+cp "${SCRIPT_DIR}/install.sh" "${INSTALL_DIR}/"
 
 # Create virtual environment
 echo "🐍 Creating virtual environment..."
@@ -133,10 +133,10 @@ echo "  export PYTHONPATH=${APP_DIR}"
 echo "  cd app && ../venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
 echo ""
 echo "Or use systemd service (recommended for production):"
-echo "  sudo cp ${INSTALL_DIR}/systemd.service /etc/systemd/system/django_app.service"
+echo "  sudo cp ${INSTALL_DIR}/systemd.service /etc/systemd/system/pulsaris.service"
 echo "  sudo systemctl daemon-reload"
-echo "  sudo systemctl enable django_app"
-echo "  sudo systemctl start django_app"
+echo "  sudo systemctl enable pulsaris"
+echo "  sudo systemctl start pulsaris"
 INSTALL_SCRIPT
 
 chmod +x "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh"
@@ -144,16 +144,16 @@ chmod +x "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh"
 # Create systemd service file
 cat > "${EXPORT_DIR}/${PACKAGE_NAME}/systemd.service" << 'SYSTEMD_SERVICE'
 [Unit]
-Description=Django App Production Service
+Description=PulsarRIS Production Service
 After=network.target postgresql.service redis.service
 
 [Service]
 Type=notify
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/django_app
-Environment="PATH=/opt/django_app/venv/bin"
-ExecStart=/opt/django_app/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
+WorkingDirectory=/opt/pulsaris
+Environment="PATH=/opt/pulsaris/venv/bin"
+ExecStart=/opt/pulsaris/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
 Restart=always
 RestartSec=5
 
@@ -167,7 +167,7 @@ version: '3.8'
 
 services:
   web:
-    image: django_app:0.1
+    image: pulsaris:0.1
     build:
       context: .
       dockerfile: Dockerfile.export
@@ -188,8 +188,8 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-django_app}
-      - POSTGRES_USER=${POSTGRES_USER:-django_app}
+      - POSTGRES_DB=${POSTGRES_DB:-pulsaris}
+      - POSTGRES_USER=${POSTGRES_USER:-pulsaris}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -238,7 +238,7 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
 
 LABEL version="0.1" \
-      description="Production Django App - Installable Package"
+      description="Production PulsarRIS - Installable Package"
 DOCKERFILE_EXPORT
 
 # Create README for deployment instructions
@@ -254,14 +254,14 @@ cat > "${EXPORT_DIR}/${PACKAGE_NAME}/DEPLOYMENT.md" << 'README_MD'
 sudo ./install.sh
 
 # Configure environment variables
-sudo cp /opt/django_app/.env.example /opt/django_app/.env
-sudo nano /opt/django_app/.env  # Edit with your values
+sudo cp /opt/pulsaris/.env.example /opt/pulsaris/.env
+sudo nano /opt/pulsaris/.env  # Edit with your values
 
 # Install systemd service
-sudo cp /opt/django_app/systemd.service /etc/systemd/system/django_app.service
+sudo cp /opt/pulsaris/systemd.service /etc/systemd/system/pulsaris.service
 sudo systemctl daemon-reload
-sudo systemctl enable django_app
-sudo systemctl start django_app
+sudo systemctl enable pulsaris
+sudo systemctl start pulsaris
 ```
 
 ### Option 2: Docker Deployment
@@ -280,12 +280,12 @@ docker run -d \
   -p 8000:8000 \
   -e SECRET_KEY=your-secret \
   -e DATABASE_URL=postgresql://... \
-  django_app:0.1
+  pulsaris:0.1
 ```
 
 ## Environment Variables Required
 
-- `SECRET_KEY`: Django secret key
+- `SECRET_KEY`: Pul$@ri$ $ecret key
 - `DATABASE_URL`: PostgreSQL connection string
 - `DEBUG`: Set to False in production
 - `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
@@ -300,7 +300,7 @@ curl http://localhost:8000/health/
 
 ```bash
 # Systemd
-journalctl -u django_app -f
+journalctl -u pulsaris -f
 
 # Docker
 docker-compose logs -f web
