@@ -188,11 +188,11 @@ def add_order(request):
 
     # Get scheduled_datetime from query parameter (from calendar click)
     datetime_param = request.GET.get("datetime", "")
-    
+
     # Get mrn from query parameter (from patient detail page)
     mrn_param = request.GET.get("mrn", "")
     patient_data = None
-    
+
     if mrn_param:
         try:
             patient = Patient.objects.get(mrn=mrn_param)
@@ -205,7 +205,7 @@ def add_order(request):
             }
         except Patient.DoesNotExist:
             pass
-    
+
     context = {
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
