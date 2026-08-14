@@ -15,7 +15,6 @@ django-debug-toolbar==7.0.0
 django-environ==0.13.0
 django-filter==25.2
 django-htmx==1.27.0
-django-tenants==3.10.1
 djangorestframework==3.17.1
 dnspython==2.8.0
 drf-spectacular==0.29.0

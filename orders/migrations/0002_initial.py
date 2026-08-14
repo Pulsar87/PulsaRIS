@@ -25,12 +25,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='examorder',
             name='facility',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='tenants.facility'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.facility'),
         ),
         migrations.AddField(
             model_name='examorder',
             name='modality',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='exam_orders', to='tenants.modality'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='exam_orders', to='core.modality'),
         ),
         migrations.AddField(
             model_name='examorder',
@@ -40,7 +40,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='examorder',
             name='room_station',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='exam_orders', to='tenants.device'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='exam_orders', to='core.device'),
         ),
         migrations.AddIndex(
             model_name='procedure',

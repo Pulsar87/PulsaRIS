@@ -28,7 +28,7 @@ services:
     # Load .env file automatically
     env_file:
       - .env
-    command: python manage.py runserver 0.0.0.0:8000
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
    # && python -c "import config.settings.dev"
     ports:
       - "8000:8000"
@@ -44,6 +44,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8000/"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+        start_period: 30s
 
   celery:
       build: .
@@ -68,7 +74,7 @@ services:
     # Load .env file automatically
     env_file:
       - .env
-    command: sh -c "export PYTHONPATH=/app && python manage.py run_dicom_server --host 0.0.0.0 --port 11112"
+    command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
     ports:
       - "11112:11112"
     environment:
@@ -79,7 +85,7 @@ services:
       postgres:
         condition: service_healthy
       web:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   pgdata:
