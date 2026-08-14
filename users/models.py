@@ -7,7 +7,7 @@ from django.db import models
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     facility = models.ForeignKey(
-        "tenants.Facility", on_delete=models.SET_NULL, null=True, blank=True, related_name="users"
+        "core.Facility", on_delete=models.SET_NULL, null=True, blank=True, related_name="users"
     )
     email = models.CharField(max_length=50, blank=False, unique=True)
     license_number = models.CharField(max_length=50, blank=True)

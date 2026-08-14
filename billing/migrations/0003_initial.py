@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         ('billing', '0002_initial'),
         ('orders', '0001_initial'),
         ('patients', '0001_initial'),
-        ('tenants', '0001_initial'),
+        ('core', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 

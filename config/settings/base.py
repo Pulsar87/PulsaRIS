@@ -38,8 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.admin",
     "audit",  # Audit logs
-    "users",  # Auth
-    "tenants",  # Shared resources (Facility, Modality, Device)
+    "users",  # Authared resources (Facility, Modality, Device)
     "patients",
     "orders",
     "reports",

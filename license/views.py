@@ -10,7 +10,7 @@ from .check import get_hardware_id, verify_key
 def home(request):
     """Home page view with calendar."""
     from orders.models import ExamOrder
-    from tenants.models import Device
+    from core.models import Device
 
     # Get license info from session
     license_expiry = request.session.get('license_expiry')
@@ -20,10 +20,9 @@ def home(request):
     current_orders_count = ExamOrder.objects.count()
 
     # Get tenant from request (now returns None in single-tenant setup)
-    tenant = getattr(request, 'tenant', None)
+#    tenant = getattr(request, 'tenant', None)
 
 
-    # Fetch scheduled orders for the calendar (no tenant filtering in single-tenant mode)
     # Get orders for the next 30 days
     end_date = timezone.now() + timedelta(days=30)
     orders = ExamOrder.objects.filter(
@@ -49,7 +48,7 @@ def calendar_events(request):
     import logging
 
     logger = logging.getLogger(__name__)
-    tenant = getattr(request, 'tenant', None)
+ #   tenant = getattr(request, 'tenant', None)
 
     # Get date range from request
     start = request.GET.get('start')

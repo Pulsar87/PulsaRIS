@@ -6,7 +6,7 @@ from django.db import models
 
 class Procedure(models.Model):
     """Database model for radiology procedures that can be managed via admin panel."""
-    
+
     class ModalityType(models.TextChoices):
         CT = 'CT', 'CT'
         MR = 'MR', 'MR'
@@ -17,27 +17,27 @@ class Procedure(models.Model):
         FLUORO = 'FLUORO', 'Fluoroscopy'
         INT = 'INT', 'Interventional'
         OTHER = 'OTHER', 'Other'
-    
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     code = models.CharField(max_length=20, unique=True, db_index=True)
     name_en = models.CharField(max_length=150)
     name_ar = models.CharField(max_length=150, blank=True)
     modality_type = models.CharField(
-        max_length=10, 
-        choices=ModalityType.choices, 
+        max_length=10,
+        choices=ModalityType.choices,
         default=ModalityType.OTHER
     )
     description = models.TextField(blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
         ordering = ['modality_type', 'code']
         indexes = [
             models.Index(fields=['modality_type', 'is_active']),
         ]
-    
+
     def __str__(self):
         return f"{self.code} - {self.name_en}"
 
@@ -55,7 +55,7 @@ RADIOLOGY_PROCEDURE_CHOICES = [
     ('CT_PELVIS_C', 'CT Pelvis with contrast'),
     ('CT_SPINE_C', 'CT Cervical spine with contrast'),
     ('CT_ANGIO', 'CT Angiography'),
-    
+
     # MR Procedures
     ('MR_BRAIN', 'MRI Brain without contrast'),
     ('MR_BRAIN_C', 'MRI Brain with contrast'),
@@ -66,7 +66,7 @@ RADIOLOGY_PROCEDURE_CHOICES = [
     ('MR_SHOULDER', 'MRI Shoulder without contrast'),
     ('MR_JOINT', 'MRI Joint without contrast'),
     ('MR_ANGIO', 'MR Angiography'),
-    
+
     # X-Ray Procedures
     ('CXR', 'Chest X-Ray'),
     ('XR_SKULL', 'X-Ray Skull'),
@@ -89,7 +89,7 @@ RADIOLOGY_PROCEDURE_CHOICES = [
     ('XR_HAND', 'X-Ray Hand'),
     ('XR_FINGER', 'X-Ray Finger'),
     ('XR_MAMMO', 'Mammography'),
-    
+
     # Ultrasound Procedures
     ('US_ABD', 'Ultrasound Abdomen'),
     ('US_PELVIS', 'Ultrasound Pelvis'),
@@ -99,7 +99,7 @@ RADIOLOGY_PROCEDURE_CHOICES = [
     ('US_SCROTAL', 'Ultrasound Scrotal'),
     ('US_DOPPLER', 'Ultrasound Doppler'),
     ('US_ECHO', 'Echocardiography'),
-    
+
     # Nuclear Medicine Procedures
     ('NM_BONE', 'Bone Scan'),
     ('NM_CARDIAC', 'Cardiac Stress Test'),
@@ -107,18 +107,18 @@ RADIOLOGY_PROCEDURE_CHOICES = [
     ('NM_LUNG', 'Lung Perfusion/Ventilation'),
     ('NM_RENAL', 'Renal Scan'),
     ('NM_HEPATOBILIARY', 'Hepatobiliary Scan'),
-    
+
     # PET Procedures
     ('PET_CT', 'PET-CT Whole Body'),
     ('PET_BRAIN', 'PET Brain'),
-    
+
     # Fluoroscopy Procedures
     ('FLUORO_BARIUM', 'Barium Swallow/Meal'),
     ('FLUORO_ENEMA', 'Barium Enema'),
     ('FLUORO_IVP', 'IVP/Urogram'),
     ('FLUORO_HSG', 'Hysterosalpingography'),
     ('FLUORO_VCUG', 'VCUG'),
-    
+
     # Interventional Procedures
     ('INT_BIOPSY', 'Image-guided Biopsy'),
     ('INT_DRAINAGE', 'Image-guided Drainage'),
@@ -144,12 +144,12 @@ class ExamOrder(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT)
     facility = models.ForeignKey(
-        "tenants.Facility", on_delete=models.SET_NULL, null=True
+        "core.Facility", on_delete=models.SET_NULL, null=True
     )
     accession_number = models.CharField(max_length=50, db_index=True)
     referring_physician = models.CharField(max_length=150, blank=True)
     modality = models.ForeignKey(
-        "tenants.Modality", on_delete=models.PROTECT, related_name="exam_orders"
+        "core.Modality", on_delete=models.PROTECT, related_name="exam_orders"
     )
     procedure_code = models.CharField(max_length=20)
     procedure_name_en = models.CharField(max_length=150)
@@ -171,7 +171,7 @@ class ExamOrder(models.Model):
     scheduled_datetime = models.DateTimeField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=15)
     room_station = models.ForeignKey(
-        "tenants.Device", on_delete=models.SET_NULL, null=True, blank=True, related_name="exam_orders"
+        "core.Device", on_delete=models.SET_NULL, null=True, blank=True, related_name="exam_orders"
     )
     dicom_study_instance_uid = models.CharField(
         max_length=64, blank=True, db_index=True
