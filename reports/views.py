@@ -279,25 +279,34 @@ def export_report_dicom(request, report_id):
     report = get_object_or_404(Report, id=report_id)
 
     try:
-        # Create DICOM dataset for Structured Report
-        ds = Dataset()
+        from io import BytesIO
+        
+        # Create file_meta first
+        file_meta = Dataset()
+        file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.88.11"  # Basic Text SR IOD
+        file_meta.MediaStorageSOPInstanceUID = generate_uid()
+        file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
+        file_meta.ImplementationClassUID = "1.2.840.10008.3.1.1.1"  # Standard Implementation Class UID
 
-        # Set SOP Class UID for Basic Text SR
-        ds.SOPClassUID = "1.2.840.10008.5.1.4.1.1.88.11"  # Basic Text SR IOD
-        ds.SOPInstanceUID = generate_uid()
+        # Create the FileDataset instance with preamble
+        ds = FileDataset(None, {}, file_meta=file_meta, preamble=b"\0" * 128)
+        
+        # Set SOP UIDs
+        ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
+        ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
         ds.StudyInstanceUID = generate_uid()
         ds.SeriesInstanceUID = generate_uid()
 
         # Patient Information
         patient = report.order.patient
-        ds.PatientName = f"{patient.last_name_en}^{patient.first_name_en}"
+        ds.PatientName = f"{patient.last_name_en}^{patient.first_name_en}" if patient.last_name_en or patient.first_name_en else ""
         ds.PatientID = patient.mrn or ""
         ds.PatientSex = patient.gender or ""
         if patient.dob:
             ds.PatientBirthDate = patient.dob.strftime("%Y%m%d")
 
         # Study Information
-        ds.StudyID = report.order.accession_number or str(uuid.uuid4())[:8]
+        ds.StudyID = report.order.accession_number or str(uuid.uuid4())[:8].upper()
         ds.AccessionNumber = report.order.accession_number or ""
         ds.StudyDescription = report.order.procedure_name_en or "Radiology Report"
         if report.order.scheduled_datetime:
@@ -314,7 +323,7 @@ def export_report_dicom(request, report_id):
 
         # Equipment Information
         ds.Manufacturer = "Pulsar RIS"
-        ds.InstitutionName = tenant.name if hasattr(tenant, 'name') else ""
+        ds.InstitutionName = report.order.tenant.name if hasattr(report.order, 'tenant') and hasattr(report.order.tenant, 'name') else ""
 
         # Content - encode the report findings and impression
         content_items = []
@@ -332,61 +341,6 @@ def export_report_dicom(request, report_id):
         # Combine content
         report_content = "\n\n".join(content_items) if content_items else "No report content available."
 
-        # Create a simple text file content for the SR
-        import tempfile
-        import os
-
-        # Create temporary file with report content
-        temp_file = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.txt')
-        temp_file.write("=" * 60 + "\n")
-        temp_file.write("RADIOLOGY REPORT\n")
-        temp_file.write("=" * 60 + "\n\n")
-        temp_file.write(f"Accession Number: {ds.AccessionNumber}\n")
-        temp_file.write(f"Patient Name: {ds.PatientName}\n")
-        temp_file.write(f"Patient ID: {ds.PatientID}\n")
-        temp_file.write(f"Study Date: {ds.StudyDate}\n")
-        temp_file.write(f"Modality: {ds.Modality}\n")
-        temp_file.write(f"Procedure: {report.order.procedure_name_en}\n")
-        temp_file.write(f"Radiologist: {report.radiologist.username}\n")
-        temp_file.write(f"Status: {report.status}\n")
-        if report.finalized_at:
-            temp_file.write(f"Finalized: {report.finalized_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
-        temp_file.write("\n" + "=" * 60 + "\n")
-        temp_file.write(report_content)
-        temp_file.write("\n\n" + "=" * 60 + "\n")
-        temp_file.write(f"Report ID: {report.id}\n")
-        temp_file.write(f"Created: {report.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
-        temp_file.write(f"Updated: {report.updated_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
-        temp_file.close()
-
-        # Read the file content
-        with open(temp_file.name, 'rb') as f:
-            file_content = f.read()
-
-        # Clean up temp file
-        os.unlink(temp_file.name)
-
-        # Create FileDataset
-        file_meta = Dataset()
-        file_meta.MediaStorageSOPClassUID = ds.SOPClassUID
-        file_meta.MediaStorageSOPInstanceUID = ds.SOPInstanceUID
-        file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
-        file_meta.ImplementationClassUID = "1.2.3.4.5.6.7.8.9.10"
-
-        # Create the FileDataset instance
-        ds = FileDataset(None, {}, file_meta=file_meta, preamble=b"\0" * 128)
-
-        # Copy all attributes
-        for attr in [
-            'SOPClassUID', 'SOPInstanceUID', 'StudyInstanceUID', 'SeriesInstanceUID',
-            'PatientName', 'PatientID', 'PatientSex', 'PatientBirthDate',
-            'StudyID', 'AccessionNumber', 'StudyDescription', 'StudyDate', 'StudyTime',
-            'Modality', 'SeriesNumber', 'SeriesDescription',
-            'Manufacturer', 'InstitutionName'
-        ]:
-            if hasattr(ds, attr):
-                setattr(ds, attr, getattr(ds, attr))
-
         # Add the report content as encapsulated document
         ds.ContentSequence = Sequence([Dataset()])
         content_ds = ds.ContentSequence[0]
@@ -395,7 +349,6 @@ def export_report_dicom(request, report_id):
         content_ds.TextValue = report_content
 
         # Save to BytesIO for HTTP response
-        from io import BytesIO
         buffer = BytesIO()
         ds.is_little_endian = True
         ds.is_implicit_VR = False
