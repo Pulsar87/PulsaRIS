@@ -28,18 +28,17 @@ services:
     # Load .env file automatically
     env_file:
       - .env
-    command: >
-          sh -c "python manage.py migrate &&
-                 python manage.py collectstatic --noinput &&
-                 python manage.py runserver 0.0.0.0:8000"
+    command: python manage.py runserver 0.0.0.0:8000
+   # && python -c "import config.settings.dev"
     ports:
       - "8000:8000"
-    environment:
-      - DJANGO_SETTINGS_MODULE=config.settings.dev
+#    environment:
+#      - DJANGO_SETTINGS_MODULE=config.settings.dev
+#      - PYTHONPATH=/app
     # No code volume mount here; code is baked in the image
-    volumes:
-      - .:/app:Z
-      - static_volume:/app/staticfiles
+#    volumes:
+#      - .:/app:Z
+#      - static_volume:/app/staticfiles
     depends_on:
       postgres:
         condition: service_healthy
@@ -50,9 +49,10 @@ services:
       build: .
       # Remove the entrypoint if it forces a specific shell behavior that conflicts
       entrypoint: []
-      command: ["python", "-m", "celery", "-A", "config", "worker", "-l", "info"]
+      command: python -m celery -A config worker -l info
       environment:
         - DJANGO_SETTINGS_MODULE=config.settings.dev
+        - PYTHONPATH=/app
       volumes:
         - .:/app:Z
       depends_on:
@@ -68,11 +68,12 @@ services:
     # Load .env file automatically
     env_file:
       - .env
-    command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
+    command: sh -c "export PYTHONPATH=/app && python manage.py run_dicom_server --host 0.0.0.0 --port 11112"
     ports:
       - "11112:11112"
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - PYTHONPATH=/app
     # No code volume mount here
     depends_on:
       postgres:

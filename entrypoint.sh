@@ -1,6 +1,8 @@
 #!/bin/sh
 set -e
 
+export PYTHONPATH=/app
+
 echo "⏳ Applying database migrations..."
 python manage.py migrate --noinput
 
