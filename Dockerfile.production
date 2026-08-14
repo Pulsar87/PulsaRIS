@@ -1,0 +1,94 @@
+# Production Dockerfile - Version 0.1
+# Compiles Python code to .pyc bytecode only (no readable .py files)
+
+FROM python:3.11-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 
+ENV PYTHONUNBUFFERED=1
+ENV APP_VERSION=0.1
+
+WORKDIR /build
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev gcc curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy source code
+COPY . .
+
+# Compile all Python files to .pyc and remove .py files
+RUN find . -type f -name "*.py" -exec python -m py_compile {} \; && \
+    find . -type f -name "*.py" ! -path "*/myenv/*" -delete && \
+    find . -type d -name "__pycache__" -exec chmod 755 {} \;
+
+# Create export directory
+RUN mkdir -p /export/app /export/venv
+
+# Export compiled application
+COPY --from=builder /build/audit /export/app/audit
+COPY --from=builder /build/billing /export/app/billing
+COPY --from=builder /build/config /export/app/config
+COPY --from=builder /build/core /export/app/core
+COPY --from=builder /build/integrations /export/app/integrations
+COPY --from=builder /build/license /export/app/license
+COPY --from=builder /build/orders /export/app/orders
+COPY --from=builder /build/patients /export/app/patients
+COPY --from=builder /build/reports /export/app/reports
+COPY --from=builder /build/users /export/app/users
+COPY --from=builder /build/templates /export/app/templates
+COPY --from=builder /build/static /export/app/static
+COPY --from=builder /build/locale /export/app/locale
+
+# Copy management files
+COPY --from=builder /build/manage.py /export/app/
+COPY --from=builder /build/requirements.txt /export/app/
+COPY --from=builder /build/entrypoint.sh /export/entrypoint.sh
+
+# Create virtual environment for export
+RUN python -m venv /export/venv && \
+    /export/venv/bin/pip install --no-cache-dir -r /export/app/requirements.txt
+
+# Make entrypoint executable
+RUN chmod +x /export/entrypoint.sh
+
+
+# Final production image
+FROM python:3.11-slim
+
+ENV APP_VERSION=0.1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV PATH="/venv/bin:$PATH"
+
+WORKDIR /app
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && useradd -m -u 1000 appuser
+
+# Copy compiled application from builder
+COPY --from=builder /export/app /app
+COPY --from=builder /export/venv /venv
+COPY --from=builder /export/entrypoint.sh /entrypoint.sh
+
+RUN chmod +x /entrypoint.sh && \
+    chown -R appuser:appuser /app
+
+EXPOSE 8000
+
+USER appuser
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
+
+LABEL version="0.1" \
+      description="Production Django App - Compiled Python Bytecode" \
+      maintainer="devops"
