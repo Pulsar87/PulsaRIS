@@ -179,19 +179,6 @@ async function saveAllSettings() {
     showToast("Error", "Could not save settings.", "danger");
   }
 }
-const modalityData = [{% for m in modalities %}{ type: "{{ m[0] }}", aet: "{{ m[1] }}" },{% endfor %}];
-function filterAETitles() {
-    const selectedType = document.getElementById('modalitySelect').value;
-    const aeSelect = document.getElementById('aeSelect');
-    aeSelect.innerHTML = '';
-    modalityData.filter(item => item.type === selectedType).forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.aet; opt.textContent = item.aet;
-        aeSelect.appendChild(opt);
-    });
-}
-// Run once on load to populate AE Titles correctly if modality is pre-selected
-window.onload = filterAETitles;
 
 function submitPayment(orderId) {
     const method = document.querySelector('input[name="method"]:checked').value;
