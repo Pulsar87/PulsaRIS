@@ -5,6 +5,11 @@ from django.db import models
 
 
 class Patient(models.Model):
+    GENDER_CHOICES = [
+        ("M", "Male"),
+        ("F", "Female"),
+        ("O", "Other"),
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     mrn = models.CharField(max_length=50, db_index=True)
     first_name_en = models.CharField(max_length=100)
@@ -13,7 +18,7 @@ class Patient(models.Model):
     last_name_ar = models.CharField(max_length=100, blank=True)
     dob = models.DateField()
     gender = models.CharField(
-        max_length=1, choices=[("M", "Male"), ("F", "Female"), ("O", "Other")]
+        max_length=1, choices=GENDER_CHOICES
     )
     nationality = models.CharField(max_length=3, blank=True)  # ISO 3166-1 alpha-3
     national_id = models.CharField(max_length=50, blank=True)

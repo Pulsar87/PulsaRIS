@@ -1003,11 +1003,11 @@
                     const patients = (data.results || []).map(result => ({
                         id: result.id,
                         mrn: result.mrn,
-                        name_en: result.text.split(' (')[0] || '',
-                        name_ar: '',
+                        name_en: `${result.first_name_en} ${result.last_name_en}`.trim(),
+                        name_ar: `${result.first_name_ar} ${result.last_name_ar}`.trim(),
                         dob: result.dob || '',
                         gender: result.gender || '',
-                        phone: ''
+                        phone: result.phone || ''
                     }));
                     displaySearchResults(patients);
                 })
@@ -1043,6 +1043,7 @@
                           : "{% trans 'Other' %}";
                 const dobDisplay = patient.dob || 'N/A';
                 const phoneDisplay = patient.phone ? `<br><small class="text-muted"><i class="bi bi-telephone me-1"></i>${escapeHtml(patient.phone)}</small>` : '';
+
 
                 // Escape special characters for safe inline JS
                 const patientDataSafe = JSON.stringify({

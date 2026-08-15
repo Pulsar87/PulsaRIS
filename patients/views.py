@@ -380,8 +380,13 @@ def patient_search_api(request):
             'id': str(p.id),
             'text': display_text,
             'mrn': p.mrn,
+            'first_name_en': p.first_name_en or '',
+            'last_name_en': p.last_name_en or '',
+            'first_name_ar': p.first_name_ar or '',
+            'last_name_ar': p.last_name_ar or '',
             'dob': dob_str,
             'gender': p.gender,
+            'phone': p.phone or '',
         })
 
     return JsonResponse({
