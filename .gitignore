@@ -1,1 +1,40 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a template HTML file (`templates/license/home.html`), which is source code and should not be ignored.
+```gitignore
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Compiled Python files
+*.cpython-*.pyc
+*.pyc
+*.pyo
+*.pyd
+
+# Development environment
+.venv/
+venv/
+.env
+.env.local
+.env.*
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Logs
+*.log
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+```
