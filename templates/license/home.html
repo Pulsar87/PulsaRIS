@@ -747,6 +747,7 @@
             headerToolbar: false,
             footerToolbar: false,
             eventDidMount: function (info) {
+                console.log("Event mounted:", info.event.title);
                 // Add tooltip to events with device information
                 var tooltipText =
                     info.event.title +
@@ -777,6 +778,9 @@
                     info.el.style.borderColor = "#dc2626";
                 }
             },
+            eventsSet: function(events) {
+                console.log("Events set in calendar:", events.length, "events");
+            },
             events: function (info, successCallback, failureCallback) {
                 // Build query parameters with selected devices and single day
                 var startDate = info.startStr.split("T")[0];
@@ -790,11 +794,18 @@
                     queryParams += "&devices[]=" + encodeURIComponent(deviceId);
                 });
 
+                console.log("Fetching calendar events:", "/api/calendar-events/" + queryParams);
                 fetch("/api/calendar-events/" + queryParams)
                     .then(function (response) {
+                        console.log("Response status:", response.status);
+                        if (!response.ok) {
+                            throw new Error("HTTP error! status: " + response.status);
+                        }
                         return response.json();
                     })
                     .then(function (data) {
+                        console.log("Received events:", data);
+                        console.log("Events array length:", Array.isArray(data) ? data.length : "not an array");
                         successCallback(data);
                     })
                     .catch(function (error) {
@@ -877,7 +888,13 @@
             slotEventOverlap: true,
             allDaySlot: false,
             scrollTime: "08:00:00",
+            dayHeaderFormat: { weekday: 'short' },
+            slotLabelFormat: { hour: 'numeric', minute: '2-digit' },
         });
+
+        console.log("Calendar initialized:", calendar);
+        console.log("Initial view:", calendar.view.type);
+        console.log("Current date:", calendar.getDate());
 
         calendar.render();
 
