@@ -12,7 +12,6 @@ from datetime import datetime
 import pydicom
 from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian, generate_uid
-from pydicom.sequence import Sequence
 
 
 def create_report(request, order_id):
@@ -326,27 +325,64 @@ def export_report_dicom(request, report_id):
         ds.InstitutionName = report.order.tenant.name if hasattr(report.order, 'tenant') and hasattr(report.order.tenant, 'name') else ""
 
         # Content - encode the report findings and impression
+        # Build proper DICOM SR Content Sequence with required attributes
+        
+        # Root content item (CONTAINER for the whole report)
+        root_item = Dataset()
+        root_item.RelationshipType = "CONTAINS"
+        root_item.ValueType = "CONTAINER"
+        # Concept Name Code Sequence - Title of the report
+        root_item.ConceptNameCodeSequence = [Dataset()]
+        root_item.ConceptNameCodeSequence[0].CodeValue = "113014"
+        root_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
+        root_item.ConceptNameCodeSequence[0].CodeMeaning = "Imaging Report"
+        
+        # Content Sequence for findings and impression
         content_items = []
-
-        # Add findings
+        
+        # Add findings as TEXT content item
         if report.findings_en:
-            findings_text = report.findings_en
-            content_items.append(f"FINDINGS:\n{findings_text}")
-
-        # Add impression
+            findings_item = Dataset()
+            findings_item.RelationshipType = "CONTAINS"
+            findings_item.ValueType = "TEXT"
+            # Concept Name Code Sequence for Findings
+            findings_item.ConceptNameCodeSequence = [Dataset()]
+            findings_item.ConceptNameCodeSequence[0].CodeValue = "113016"
+            findings_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
+            findings_item.ConceptNameCodeSequence[0].CodeMeaning = "Findings"
+            findings_item.TextValue = report.findings_en
+            content_items.append(findings_item)
+        
+        # Add impression as TEXT content item
         if report.impression_en:
-            impression_text = report.impression_en
-            content_items.append(f"\nIMPRESSION:\n{impression_text}")
-
-        # Combine content
-        report_content = "\n\n".join(content_items) if content_items else "No report content available."
-
-        # Add the report content as encapsulated document
-        ds.ContentSequence = Sequence([Dataset()])
-        content_ds = ds.ContentSequence[0]
-        content_ds.RelationshipType = "CONTAINS"
-        content_ds.ValueType = "TEXT"
-        content_ds.TextValue = report_content
+            impression_item = Dataset()
+            impression_item.RelationshipType = "CONTAINS"
+            impression_item.ValueType = "TEXT"
+            # Concept Name Code Sequence for Impression
+            impression_item.ConceptNameCodeSequence = [Dataset()]
+            impression_item.ConceptNameCodeSequence[0].CodeValue = "113017"
+            impression_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
+            impression_item.ConceptNameCodeSequence[0].CodeMeaning = "Conclusion"
+            impression_item.TextValue = report.impression_en
+            content_items.append(impression_item)
+        
+        # If no content, add a default text item
+        if not content_items:
+            default_item = Dataset()
+            default_item.RelationshipType = "CONTAINS"
+            default_item.ValueType = "TEXT"
+            default_item.ConceptNameCodeSequence = [Dataset()]
+            default_item.ConceptNameCodeSequence[0].CodeValue = "113016"
+            default_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
+            default_item.ConceptNameCodeSequence[0].CodeMeaning = "Findings"
+            default_item.TextValue = "No report content available."
+            content_items.append(default_item)
+        
+        # Set the content sequence on root item
+        root_item.ContentSequence = content_items
+        
+        # Set the root content sequence on dataset
+        ds.ContentSequence = [root_item]
 
         # Save to BytesIO for HTTP response
         buffer = BytesIO()
