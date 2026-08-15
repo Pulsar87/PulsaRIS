@@ -28,8 +28,13 @@ services:
     # Load .env file automatically
     env_file:
       - .env
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.dev
+      - PYTHONPATH=/app
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app:z
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,7 +56,7 @@ services:
         - DJANGO_SETTINGS_MODULE=config.settings.dev
         - PYTHONPATH=/app
       volumes:
-        - .:/app:Z
+        - .:/app:z
       depends_on:
         postgres:
           condition: service_healthy
@@ -65,13 +70,15 @@ services:
     # Load .env file automatically
     env_file:
       - .env
-    command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
     ports:
       - "11112:11112"
     environment:
       - DJANGO_SETTINGS_MODULE=config.settings.dev
       - PYTHONPATH=/app
     # No code volume mount here
+    command: python manage.py run_dicom_server --host 0.0.0.0 --port 11112
+    volumes:
+      - .:/app:z
     depends_on:
       postgres:
         condition: service_healthy

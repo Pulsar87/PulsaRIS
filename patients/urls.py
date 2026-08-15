@@ -11,4 +11,5 @@ urlpatterns = [
     path('<uuid:pk>/delete/', views.delete_patient, name='delete_patient'),
     path('search/', views.search_patient, name='search_patient'),
     path('api/lookup/', views.patient_lookup, name='patient_lookup'),
+    path('api/search/', views.patient_search_api, name='patient_search_api'),
 ]

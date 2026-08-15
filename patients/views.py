@@ -131,7 +131,7 @@ def patient_detail(request, pk):
 def edit_patient(request, pk):
     """Edit an existing patient."""
     patient = get_object_or_404(Patient, pk=pk)
-    
+
     if request.method == "POST":
         # Get form data
         mrn = request.POST.get("mrn", "").strip()
@@ -204,7 +204,7 @@ def edit_patient(request, pk):
             patient.data_retention_until = data_retention_until if data_retention_until else None
             patient.is_deceased = is_deceased
             patient.save()
-            
+
             messages.success(request, _("Patient updated successfully!"))
             return redirect("patients:patient_detail", pk=patient.pk)
         except Exception as e:
@@ -222,9 +222,9 @@ def edit_patient(request, pk):
 def delete_patient(request, pk):
     """Delete a patient (soft delete with audit logging)."""
     from audit.models import AuditLog
-    
+
     patient = get_object_or_404(Patient, pk=pk)
-    
+
     if request.method == "POST":
         try:
             # Store old values for audit
@@ -237,10 +237,10 @@ def delete_patient(request, pk):
                 'dob': str(patient.dob),
                 'gender': patient.gender,
             }
-            
+
             # Soft delete instead of hard delete
             patient.soft_delete()
-            
+
             # Create audit log entry
             AuditLog.objects.create(
                 user=request.user if request.user.is_authenticated else None,
@@ -252,7 +252,7 @@ def delete_patient(request, pk):
                 ip_address=request.META.get('REMOTE_ADDR'),
                 user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
             )
-            
+
             messages.success(request, _("Patient deleted successfully!"))
             return redirect("patients:patient_list")
         except Exception as e:
@@ -260,7 +260,7 @@ def delete_patient(request, pk):
                 request, _("Error deleting patient: %(error)s") % {"error": str(e)}
             )
             return redirect("patients:patient_detail", pk=pk)
-    
+
     context = {
         "patient": patient,
     }
@@ -290,7 +290,7 @@ def search_patient(request):
 
 def patient_lookup(request):
     """API endpoint for patient lookup supporting multiple search fields.
-    
+
     Returns JSON response with matching patients.
     Search supports: MRN, name (English/Arabic), national ID, phone.
     """
@@ -308,7 +308,7 @@ def patient_lookup(request):
         | Q(national_id__icontains=query)
         | Q(phone__icontains=query),
     ).values(
-        'id', 'mrn', 'first_name_en', 'last_name_en', 
+        'id', 'mrn', 'first_name_en', 'last_name_en',
         'first_name_ar', 'last_name_ar', 'dob', 'gender', 'phone'
     )[:20]  # Limit to 20 results
 
@@ -325,5 +325,66 @@ def patient_lookup(request):
             'phone': p['phone'],
             'display': f"{p['mrn']} - {p['first_name_en']} {p['last_name_en']}"
         })
-    
+
     return JsonResponse({"patients": patient_list})
+
+
+
+def patient_search_api(request):
+    """Select2-compatible API endpoint for patient search.
+
+    Returns JSON response in Select2 format with pagination support.
+    Search supports: MRN, name (English/Arabic), national ID, phone.
+    Excludes deleted patients.
+    """
+    query = request.GET.get("q", "").strip()
+    page = int(request.GET.get("page", 1))
+    page_size = 20
+
+    if not query:
+        return JsonResponse({
+            "results": [],
+            "pagination": {"more": False}
+        })
+
+    patients_qs = Patient.objects.filter(
+        is_deleted=False
+    ).filter(
+        Q(mrn__icontains=query)
+        | Q(first_name_en__icontains=query)
+        | Q(last_name_en__icontains=query)
+        | Q(first_name_ar__icontains=query)
+        | Q(last_name_ar__icontains=query)
+        | Q(national_id__icontains=query)
+        | Q(phone__icontains=query),
+    ).order_by('last_name_en', 'first_name_en')
+
+    # Check if there are more results
+    total_count = patients_qs.count()
+    has_more = total_count > page * page_size
+
+    # Get paginated results
+    patients_qs = patients_qs[(page-1)*page_size : page*page_size]
+
+    results = []
+    for p in patients_qs:
+        dob_str = p.dob.strftime('%Y-%m-%d') if p.dob else ''
+        gender_display = dict(Patient.GENDER_CHOICES).get(p.gender, '')
+        display_text = f"{p.first_name_en} {p.last_name_en} ({p.mrn})"
+        if dob_str:
+            display_text += f" - {dob_str}"
+        if gender_display:
+            display_text += f" - {gender_display}"
+
+        results.append({
+            'id': str(p.id),
+            'text': display_text,
+            'mrn': p.mrn,
+            'dob': dob_str,
+            'gender': p.gender,
+        })
+
+    return JsonResponse({
+        "results": results,
+        "pagination": {"more": has_more}
+    })
