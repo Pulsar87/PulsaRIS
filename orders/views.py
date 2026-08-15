@@ -5,7 +5,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
-
+from core.models import Device, Facility
 from orders.models import ExamOrder
 
 
@@ -137,7 +137,6 @@ def add_order(request):
         # Get facility if provided
         facility = None
 
-
         try:
             facility = Facility.objects.get(id=facility_id)
         except Facility.DoesNotExist:
@@ -197,6 +196,7 @@ def add_order(request):
         try:
             patient = Patient.objects.get(mrn=mrn_param)
             patient_data = {
+                'id': patient.id,
                 'mrn': patient.mrn,
                 'name': str(patient),
                 'dob': patient.dob,
@@ -207,7 +207,6 @@ def add_order(request):
             pass
 
     # Get active facilities
-    from core.models import Facility
     facilities = Facility.objects.filter(is_active=True).order_by("name")
 
 
