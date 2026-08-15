@@ -66,11 +66,19 @@ function setQuickRange(range) {
   applyFilters();
 }
 
-// Listeners
-searchInput.addEventListener("keyup", applyFilters);
-dateFrom.addEventListener("change", applyFilters);
-dateTo.addEventListener("change", applyFilters);
-checkboxes.forEach((cb) => cb.addEventListener("change", applyFilters));
+// Listeners - Only attach if elements exist (for pages that have filters)
+if (searchInput) {
+  searchInput.addEventListener("keyup", applyFilters);
+}
+if (dateFrom) {
+  dateFrom.addEventListener("change", applyFilters);
+}
+if (dateTo) {
+  dateTo.addEventListener("change", applyFilters);
+}
+if (checkboxes.length > 0) {
+  checkboxes.forEach((cb) => cb.addEventListener("change", applyFilters));
+}
 
 document.addEventListener("DOMContentLoaded", function () {
   const toasts = document.querySelectorAll(".toast");
