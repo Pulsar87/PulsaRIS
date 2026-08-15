@@ -1,1 +1,58 @@
-Nothing needs to be added to .gitignore since only a Python source file (`reports/views.py`) was modified and no build artifacts, dependencies, or temporary files were detected in the changes.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
+.env
+.env.local
+.env.*
+
+# Build artifacts
+build/
+dist/
+*.egg
+*.egg-info/
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Testing
+.coverage
+coverage/
+htmlcov/
+.noserc
+.pytest_cache/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Dependencies
+node_modules/
+.mypy_cache/
+.tox/
+.hypothesis/
+```
