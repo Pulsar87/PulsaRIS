@@ -8,20 +8,22 @@
 <script src="https://cdn.jsdelivr.net/npm/tinymce@7/tinymce.min.js"></script>
 <!-- html2pdf for PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<!-- html2canvas for JPG export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
     :root {
         --editor-border-color: #e2e8f0;
         --editor-focus-border: #3b82f6;
         --section-header-bg: #f8fafc;
     }
-    
+
     .main-editor-panel {
         background: #ffffff;
         border-radius: 0.75rem;
         box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         overflow: hidden;
     }
-    
+
     .editor-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
@@ -30,17 +32,17 @@
         justify-content: space-between;
         align-items: center;
     }
-    
+
     .editor-header h4 {
         margin: 0;
         font-weight: 600;
         font-size: 1.1rem;
     }
-    
+
     .editor-section {
         padding: 1.25rem;
     }
-    
+
     .section-title {
         display: flex;
         align-items: center;
@@ -52,58 +54,58 @@
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
-    
+
     .section-title i {
         color: #667eea;
         font-size: 1.1rem;
     }
-    
+
     .tox-tinymce {
         border-radius: 0.5rem !important;
         border: 1px solid var(--editor-border-color) !important;
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
-    
+
     .tox-tinymce:focus-within {
         border-color: var(--editor-focus-border) !important;
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    
+
     .tox-toolbar-overlord {
         background: #f8fafc !important;
         border-bottom: 1px solid var(--editor-border-color) !important;
     }
-    
+
     .patient-info-card {
         background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
         border-radius: 0.5rem;
         padding: 1rem;
         margin-bottom: 1rem;
     }
-    
+
     .patient-info-row {
         display: flex;
         justify-content: space-between;
         padding: 0.5rem 0;
         border-bottom: 1px solid rgba(0,0,0,0.05);
     }
-    
+
     .patient-info-row:last-child {
         border-bottom: none;
     }
-    
+
     .patient-info-label {
         font-size: 0.8rem;
         color: #64748b;
         font-weight: 500;
     }
-    
+
     .patient-info-value {
         font-size: 0.9rem;
         color: #1e293b;
         font-weight: 600;
     }
-    
+
     .auto-save-indicator {
         position: fixed;
         bottom: 20px;
@@ -122,16 +124,16 @@
         align-items: center;
         gap: 0.5rem;
     }
-    
+
     .auto-save-indicator.show {
         opacity: 1;
     }
-    
+
     .auto-save-indicator.saving {
         background: #f59e0b;
         color: #000;
     }
-    
+
     /* Print styles */
     @media print {
         .no-print {
@@ -150,18 +152,18 @@
             background: white;
         }
     }
-    
+
     /* Report content for PDF/Print */
     #reportContent {
         background: white;
         padding: 2rem;
         min-height: 500px;
     }
-    
+
     #reportContent h1, #reportContent h2, #reportContent h3 {
         color: #1e293b;
     }
-    
+
     #reportContent p {
         line-height: 1.8;
         margin-bottom: 1rem;
@@ -181,17 +183,18 @@
             <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
         </div>
         <div class="d-flex gap-2">
+            <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
+            </a>
             <button type="button" class="btn btn-success" onclick="exportToPDF()">
                 <i class="bi bi-file-earmark-pdf me-1"></i> {% trans "Export to PDF" %}
+            </button>
+            <button type="button" class="btn btn-info" onclick="exportToJPG()">
+                <i class="bi bi-file-earmark-image me-1"></i> {% trans "Export to JPG" %}
             </button>
             <button type="button" class="btn btn-primary" onclick="printReport()">
                 <i class="bi bi-printer me-1"></i> {% trans "Print" %}
             </button>
-            {% if report %}
-            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-outline-secondary">
-                <i class="bi bi-eye me-1"></i> {% trans "View" %}
-            </a>
-            {% endif %}
             <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}
             </a>
@@ -202,7 +205,7 @@
         {% csrf_token %}
         <input type="hidden" name="status" id="status" value="{% if report %}{{ report.status }}{% else %}DRAFT{% endif %}">
         <input type="hidden" name="critical_finding" id="critical_finding" value="{% if report.critical_finding %}on{% endif %}">
-        
+
         <!-- Main Editor Panel -->
         <div class="main-editor-panel">
             <!-- Editor Header -->
@@ -379,19 +382,19 @@ function autoSave() {
 function saveDraft() {
     const indicator = document.getElementById('autoSaveIndicator');
     const text = document.getElementById('autoSaveText');
-    
+
     indicator.classList.add('saving');
     text.textContent = '{% trans "Saving..." %}';
     indicator.classList.add('show');
-    
+
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
-    
+
     const formData = new FormData();
     formData.append('order_id', '{{ order.id }}');
     formData.append('report_content', content);
     formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-    
+
     fetch('{% url "reports:save_report_draft" %}', {
         method: 'POST',
         body: formData
@@ -461,12 +464,12 @@ function loadTemplate(content) {
 // Insert normal report template
 function insertNormalTemplate() {
     const normalTemplate = "<p><strong>No acute abnormality identified.</strong></p><p><strong>Findings:</strong></p><ul><li>Normal study without significant findings.</li><li>No evidence of acute disease process.</li></ul><p><strong>Impression:</strong></p><p>Normal examination.</p>";
-    
+
     const activeEditor = tinymce.activeEditor;
     if (activeEditor) {
         activeEditor.setContent(normalTemplate);
     }
-    
+
     // Trigger auto-save
     autoSave();
 }
@@ -475,13 +478,13 @@ function insertNormalTemplate() {
 function exportToPDF() {
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
-    
+
     document.getElementById('reportBodyContent').innerHTML = content;
     document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
-    
+
     const element = document.getElementById('reportContent');
     element.style.display = 'block';
-    
+
     const opt = {
         margin: 10,
         filename: 'report_{{ order.accession_number }}.pdf',
@@ -489,8 +492,31 @@ function exportToPDF() {
         html2canvas: { scale: 2 },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
-    
+
     html2pdf().set(opt).from(element).save().then(function() {
+        element.style.display = 'none';
+    });
+}
+
+
+// Export to JPG - uses same rendering as PDF export
+function exportToJPG() {
+    const editor = tinymce.get('report_content');
+    const content = editor ? editor.getContent() : '';
+
+    document.getElementById('reportBodyContent').innerHTML = content;
+    document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
+
+    const element = document.getElementById('reportContent');
+    element.style.display = 'block';
+
+    // Use html2canvas with same settings as PDF export (scale: 2, jpeg quality: 0.98)
+    html2canvas(element, { scale: 2, useCORS: true }).then(function(canvas) {
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = 'report_{{ order.accession_number }}.jpg';
+        link.click();
         element.style.display = 'none';
     });
 }
@@ -499,11 +525,34 @@ function exportToPDF() {
 function printReport() {
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
-    
+
     document.getElementById('reportBodyContent').innerHTML = content;
     document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
-    
-    window.print();
+
+    const element = document.getElementById('reportContent');
+        element.style.display = 'block';
+
+        // Use html2pdf to generate and open in new window for printing
+        const opt = {
+            margin: 10,
+            filename: 'report_{{ order.accession_number }}.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Generate PDF and open in new window for printing
+        html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
+            const pdfBlob = pdf.output('blob');
+            const pdfUrl = URL.createObjectURL(pdfBlob);
+            const printWindow = window.open(pdfUrl, '_blank');
+            if (printWindow) {
+                printWindow.onload = function() {
+                    printWindow.print();
+                };
+            }
+            element.style.display = 'none';
+        });
 }
 </script>
 {% endblock %}
