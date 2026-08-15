@@ -206,11 +206,17 @@ def add_order(request):
         except Patient.DoesNotExist:
             pass
 
+    # Get active facilities
+    from core.models import Facility
+    facilities = Facility.objects.filter(is_active=True).order_by("name")
+
+
     context = {
         "procedures": procedures,
         "priority_choices": ExamOrder.Priority.choices,
         "datetime": datetime_param,
         "patient_data": patient_data,
+        "facilities": facilities,
     }
     return render(request, "orders/add_order.html", context)
 
@@ -518,30 +524,30 @@ def get_devices(request):
     # Get facility from request parameter (if provided)
     facility_id = request.GET.get('facility')
     facility = None
-    
+
     if facility_id:
         try:
             facility = Facility.objects.get(id=facility_id)
         except Facility.DoesNotExist:
             pass
-    
-    # Debug: log facility info
-    print(f"DEBUG get_devices: facility_id={facility_id}, facility={facility}")
+
+    # # Debug: log facility info
+    # print(f"DEBUG get_devices: facility_id={facility_id}, facility={facility}")
 
     if not facility:
         # If no facility specified, return all active devices
         devices = Device.objects.filter(is_active=True).select_related("modality").order_by("name")
-        print(f"DEBUG get_devices: no facility, returning all {devices.count()} devices")
+        # print(f"DEBUG get_devices: no facility, returning all {devices.count()} devices")
     else:
         devices = (
             Device.objects.filter(facility=facility, is_active=True)
             .select_related("modality")
             .order_by("name")
         )
-        print(f"DEBUG get_devices: found {devices.count()} devices for facility {facility}")
+        # print(f"DEBUG get_devices: found {devices.count()} devices for facility {facility}")
 
     html = render_to_string("orders/_device_options.html", {"devices": devices})
-    print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
+    # print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
     return HttpResponse(html)
 
 
