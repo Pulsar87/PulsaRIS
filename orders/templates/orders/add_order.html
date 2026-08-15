@@ -191,6 +191,34 @@
                                 </select>
                             </div>
 
+                            <!-- Facility -->
+                            <div class="col-md-6">
+                                <label
+                                    for="facility"
+                                    class="form-label fw-medium"
+                                >
+                                    {% trans "Facility" %}
+                                </label>
+                                <select
+                                    class="form-select form-select-lg"
+                                    id="facility"
+                                    name="facility"
+                                    hx-get="{% url 'orders:get_devices' %}"
+                                    hx-trigger="change"
+                                    hx-target="#device"
+                                    hx-swap="innerHTML"
+                                >
+                                    <option value="" selected disabled>
+                                        {% trans "Select a facility" %}
+                                    </option>
+                                    {% for facility in facilities %}
+                                    <option value="{{ facility.id }}">
+                                        {{ facility.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
                             <!-- Device (replaces Modality) -->
                             <div class="col-md-6">
                                 <label
@@ -206,12 +234,13 @@
                                     name="device"
                                     required
                                     hx-get="{% url 'orders:get_devices' %}"
-                                    hx-trigger="load once"
+                                    hx-trigger="load, change from:#facility"
                                     hx-target="#device"
                                     hx-swap="innerHTML"
+                                    hx-include="#facility"
                                 >
                                     <option value="" selected disabled>
-                                        {% trans "Loading devices..." %}
+                                        {% trans "Select a facility first" %}
                                     </option>
                                 </select>
                             </div>

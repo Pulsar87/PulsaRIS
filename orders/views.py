@@ -513,28 +513,32 @@ def get_devices(request):
     """HTMX endpoint to fetch devices for the current tenant."""
     from django.http import HttpResponse
     from django.template.loader import render_to_string
+    from core.models import Facility, Device
 
-    # Get facility from request (if using facility-based filtering)
-    facility = getattr(request, 'facility', None)
-
+    # Get facility from request parameter (if provided)
+    facility_id = request.GET.get('facility')
+    facility = None
+    
+    if facility_id:
+        try:
+            facility = Facility.objects.get(id=facility_id)
+        except Facility.DoesNotExist:
+            pass
+    
     # Debug: log facility info
-    print(f"DEBUG get_devices: facility={facility}")
+    print(f"DEBUG get_devices: facility_id={facility_id}, facility={facility}")
 
     if not facility:
-        html = render_to_string(
-            "orders/_device_options.html", {"devices": [], "error": "Facility not found"}
+        # If no facility specified, return all active devices
+        devices = Device.objects.filter(is_active=True).select_related("modality").order_by("name")
+        print(f"DEBUG get_devices: no facility, returning all {devices.count()} devices")
+    else:
+        devices = (
+            Device.objects.filter(facility=facility, is_active=True)
+            .select_related("modality")
+            .order_by("name")
         )
-        print(f"DEBUG get_devices: no facility, returning error HTML")
-        return HttpResponse(html)
-
-    devices = (
-        Device.objects.filter(facility=facility, is_active=True)
-        .select_related("modality")
-        .order_by("name")
-    )
-
-    # Debug: log device count
-    print(f"DEBUG get_devices: found {devices.count()} devices")
+        print(f"DEBUG get_devices: found {devices.count()} devices for facility {facility}")
 
     html = render_to_string("orders/_device_options.html", {"devices": devices})
     print(f"DEBUG get_devices: returning HTML with {len(html)} chars")
