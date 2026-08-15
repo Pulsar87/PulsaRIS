@@ -744,7 +744,7 @@
             gender: "{{ patient_data.gender }}",
             phone: "{{ patient_data.phone }}"
         };
-        selectPatient(initialPatientData);
+        window.selectPatient(initialPatientData);
         isPatientSelected = true;
         {% endif %}
 
@@ -1086,14 +1086,14 @@
         /**
          * Handle patient selection from search results
          */
-        function handlePatientSelect(patientData) {
-            selectPatient(patientData);
+        window.handlePatientSelect = function(patientData) {
+            window.selectPatient(patientData);
         }
 
         /**
          * Select a patient and update UI
          */
-        function selectPatient(patientData) {
+         window.selectPatient = function(patientData) {
             // Update hidden fields
             patientIdField.value = patientData.id;
             patientMrnField.value = patientData.mrn;
