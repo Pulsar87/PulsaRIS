@@ -747,7 +747,7 @@
             headerToolbar: false,
             footerToolbar: false,
             eventDidMount: function (info) {
-                console.log("Event mounted:", info.event.title);
+                console.log("Event mounted:", info.event.title, "Start:", info.event.start);
                 // Add tooltip to events with device information
                 var tooltipText =
                     info.event.title +
@@ -780,6 +780,10 @@
             },
             eventsSet: function(events) {
                 console.log("Events set in calendar:", events.length, "events");
+                // Log each event for debugging
+                events.forEach(function(event) {
+                    console.log("Event in calendar:", event.title, "Start:", event.start, "End:", event.end);
+                });
             },
             events: function (info, successCallback, failureCallback) {
                 // Build query parameters with selected devices and single day
@@ -806,6 +810,12 @@
                     .then(function (data) {
                         console.log("Received events:", data);
                         console.log("Events array length:", Array.isArray(data) ? data.length : "not an array");
+                        // Log each event's details for debugging
+                        if (Array.isArray(data)) {
+                            data.forEach(function(event, index) {
+                                console.log("Event " + index + ":", event.title, "start:", event.start, "end:", event.end);
+                            });
+                        }
                         successCallback(data);
                     })
                     .catch(function (error) {
