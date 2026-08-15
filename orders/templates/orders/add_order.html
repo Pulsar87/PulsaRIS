@@ -19,8 +19,10 @@
                 </div>
             </div>
             <div class="card-body p-4">
-                <form method="post" action="{% url 'orders:add_order' %}">
+                <form method="post" action="{% url 'orders:add_order' %}" id="orderForm">
                     {% csrf_token %}
+                    <!-- Hidden field to store selected patient ID -->
+                    <input type="hidden" id="patient_id" name="patient_id" />
 
                     <!-- Patient Information Section -->
                     <div class="mb-4">
@@ -28,114 +30,93 @@
                             <i class="bi bi-person-fill me-2"></i>
                             {% trans "Patient Information" %}
                         </h5>
-                        <div class="row g-3">
-                            <!-- MRN Lookup -->
-                            <div class="col-md-6">
-                                <label
-                                    for="patient_mrn"
-                                    class="form-label fw-medium"
-                                >
-                                    {% trans "Medical Record Number (MRN)" %}
-                                    <span class="text-danger">*</span>
-                                </label>
-                                <div class="input-group">
+                        
+                        <!-- Patient Search with Autocomplete -->
+                        <div class="mb-3">
+                            <label
+                                for="patient_search"
+                                class="form-label fw-medium"
+                            >
+                                {% trans "Search Patient" %}
+                                <span class="text-danger">*</span>
+                            </label>
+                            <div class="position-relative">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-light">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
                                     <input
                                         type="text"
-                                        class="form-control form-control-lg"
-                                        id="patient_mrn"
-                                        name="patient_mrn"
-                                        placeholder="{% trans 'Enter patient MRN' %}"
+                                        class="form-control"
+                                        id="patient_search"
+                                        name="patient_search"
+                                        placeholder="{% trans 'Type MRN, name, or national ID to search...' %}"
+                                        autocomplete="off"
                                         required
                                         autofocus
                                     />
                                     <button
-                                        class="btn btn-outline-primary"
+                                        class="btn btn-outline-secondary"
                                         type="button"
-                                        id="btnLookupPatient"
-                                        hx-get="/api/patients/lookup/"
-                                        hx-target="#patientResults"
-                                        hx-trigger="click"
+                                        id="btnClearSearch"
+                                        title="{% trans 'Clear search' %}"
+                                        style="display: none;"
                                     >
-                                        <i class="bi bi-search">
-                                            <trans>Lookup</trans></i
-                                        >
+                                        <i class="bi bi-x-lg"></i>
                                     </button>
                                 </div>
-                                <div id="patientResults" class="mt-2"></div>
+                                <!-- Search Results Dropdown -->
+                                <div 
+                                    id="patientSearchResults" 
+                                    class="position-absolute w-100 shadow-lg rounded-3 mt-1"
+                                    style="z-index: 1000; display: none; max-height: 400px; overflow-y: auto; background: white; border: 1px solid #dee2e6;"
+                                ></div>
                             </div>
-
-                            <!-- Patient Name (Auto-filled) -->
-                            <div class="col-md-6">
-                                <label
-                                    for="patient_name"
-                                    class="form-label fw-medium"
-                                >
-                                    {% trans "Patient Name" %}
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control form-control-lg"
-                                    id="patient_name"
-                                    name="patient_name"
-                                    readonly
-                                    style="background-color: #f8f9fa"
-                                />
-                            </div>
-
-                            <!-- Date of Birth -->
-                            <div class="col-md-4">
-                                <label
-                                    for="patient_dob"
-                                    class="form-label fw-medium"
-                                >
-                                    {% trans "Date of Birth" %}
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="patient_dob"
-                                    name="patient_dob"
-                                    readonly
-                                    style="background-color: #f8f9fa"
-                                />
-                            </div>
-
-                            <!-- Gender -->
-                            <div class="col-md-4">
-                                <label
-                                    for="patient_gender"
-                                    class="form-label fw-medium"
-                                >
-                                    {% trans "Gender" %}
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="patient_gender"
-                                    name="patient_gender"
-                                    readonly
-                                    style="background-color: #f8f9fa"
-                                />
-                            </div>
-
-                            <!-- Phone -->
-                            <div class="col-md-4">
-                                <label
-                                    for="patient_phone"
-                                    class="form-label fw-medium"
-                                >
-                                    {% trans "Phone" %}
-                                </label>
-                                <input
-                                    type="text"
-                                    class="form-control"
-                                    id="patient_phone"
-                                    name="patient_phone"
-                                    readonly
-                                    style="background-color: #f8f9fa"
-                                />
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                {% trans "Start typing to search patients. You can search by MRN, name (English or Arabic), or national ID." %}
                             </div>
                         </div>
+
+                        <!-- Selected Patient Card (Hidden until patient is selected) -->
+                        <div id="selectedPatientCard" class="card bg-light border-0" style="display: none;">
+                            <div class="card-body py-3">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-auto">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="bi bi-person-fill fs-4"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1 fw-semibold" id="selectedPatientName"></h6>
+                                        <div class="small text-muted">
+                                            <span class="me-3"><i class="bi bi-card-heading me-1"></i><strong>MRN:</strong> <span id="selectedPatientMrn"></span></span>
+                                            <span class="me-3"><i class="bi bi-calendar3 me-1"></i><strong>DOB:</strong> <span id="selectedPatientDob"></span></span>
+                                            <span class="me-3"><i class="bi bi-gender-ambiguous me-1"></i><strong>Gender:</strong> <span id="selectedPatientGender"></span></span>
+                                            <span><i class="bi bi-telephone me-1"></i><span id="selectedPatientPhone"></span></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            id="btnChangePatient"
+                                            title="{% trans 'Select different patient' %}"
+                                        >
+                                            <i class="bi bi-pencil-square me-1"></i>
+                                            {% trans "Change" %}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields for form data -->
+                        <input type="hidden" id="patient_mrn" name="patient_mrn" />
+                        <input type="hidden" id="patient_name" name="patient_name" />
+                        <input type="hidden" id="patient_dob" name="patient_dob" />
+                        <input type="hidden" id="patient_gender" name="patient_gender" />
+                        <input type="hidden" id="patient_phone" name="patient_phone" />
                     </div>
 
                     <!-- Order Details Section -->
@@ -728,13 +709,42 @@
 {% endblock %} {% block extra_js %}
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Patient search elements
+        const patientSearchInput = document.getElementById("patient_search");
+        const patientSearchResults = document.getElementById("patientSearchResults");
+        const btnClearSearch = document.getElementById("btnClearSearch");
+        const selectedPatientCard = document.getElementById("selectedPatientCard");
+        const btnChangePatient = document.getElementById("btnChangePatient");
+        
+        // Hidden fields
+        const patientIdField = document.getElementById("patient_id");
+        const patientMrnField = document.getElementById("patient_mrn");
+        const patientNameField = document.getElementById("patient_name");
+        const patientDobField = document.getElementById("patient_dob");
+        const patientGenderField = document.getElementById("patient_gender");
+        const patientPhoneField = document.getElementById("patient_phone");
+        
+        // Selected patient display elements
+        const selectedPatientName = document.getElementById("selectedPatientName");
+        const selectedPatientMrn = document.getElementById("selectedPatientMrn");
+        const selectedPatientDob = document.getElementById("selectedPatientDob");
+        const selectedPatientGender = document.getElementById("selectedPatientGender");
+        const selectedPatientPhone = document.getElementById("selectedPatientPhone");
+
+        let searchTimeout = null;
+        let isPatientSelected = false;
+
         // Auto-fill patient data if passed from URL (from patient detail page)
         {% if patient_data %}
-        document.getElementById("patient_mrn").value = "{{ patient_data.mrn }}";
-        document.getElementById("patient_name").value = "{{ patient_data.name|escapejs }}";
-        document.getElementById("patient_dob").value = "{{ patient_data.dob }}";
-        document.getElementById("patient_gender").value = "{{ patient_data.gender }}";
-        document.getElementById("patient_phone").value = "{{ patient_data.phone }}";
+        const initialPatientData = {
+            id: "{{ patient_data.id|default:'' }}",
+            mrn: "{{ patient_data.mrn }}",
+            name: "{{ patient_data.name|escapejs }}",
+            dob: "{{ patient_data.dob }}",
+            gender: "{{ patient_data.gender }}",
+            phone: "{{ patient_data.phone }}"
+        };
+        selectPatient(initialPatientData);
         {% endif %}
 
         // Auto-generate accession number if empty
@@ -745,33 +755,72 @@
             accessionField.value = "ACC-" + timestamp + "-" + random;
         }
 
-        // const formattedDate = datetime.toISOString();
-
-        // document.getElementById("scheduled_datetime").value = datetime;
-        // 1. Create a Date object from the string
-        // const dateObj = new Date(scheduled_datetime);
-
-
-        // 3. Slice the ISO string to format as 'YYYY-MM-DDTHH:mm'
-        // const formattedDate = new Date(datetime);
-
-        // 4. Assign directly to the HTML datetime-local input
-
         // Form validation
-        const form = document.querySelector("form");
+        const form = document.getElementById("orderForm");
         form.addEventListener("submit", function (e) {
-            const mrn = document.getElementById("patient_mrn").value.trim();
-            if (!mrn) {
+            if (!isPatientSelected || !patientIdField.value.trim()) {
                 e.preventDefault();
-                alert('{% trans "Please enter a valid MRN" %}');
-                document.getElementById("patient_mrn").focus();
+                showAlert('danger', '{% trans "Please select a patient first" %}');
+                patientSearchInput.focus();
                 return false;
             }
         });
 
-        // Patient lookup functionality
-        const btnLookup = document.getElementById("btnLookupPatient");
-        const patientResultsDiv = document.getElementById("patientResults");
+        // Patient search with debounce
+        if (patientSearchInput) {
+            patientSearchInput.addEventListener("input", function () {
+                const query = this.value.trim();
+                
+                // Show/hide clear button
+                btnClearSearch.style.display = query ? 'inline-block' : 'none';
+                
+                // Clear previous timeout
+                if (searchTimeout) {
+                    clearTimeout(searchTimeout);
+                }
+                
+                // Hide results if query is too short
+                if (query.length < 2) {
+                    patientSearchResults.style.display = 'none';
+                    return;
+                }
+                
+                // Debounce search - wait 300ms after user stops typing
+                searchTimeout = setTimeout(function() {
+                    performPatientSearch(query);
+                }, 300);
+            });
+
+            // Clear search button
+            btnClearSearch.addEventListener("click", function () {
+                patientSearchInput.value = '';
+                btnClearSearch.style.display = 'none';
+                patientSearchResults.style.display = 'none';
+                patientSearchInput.focus();
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener("click", function (e) {
+                if (!patientSearchInput.contains(e.target) && 
+                    !patientSearchResults.contains(e.target)) {
+                    patientSearchResults.style.display = 'none';
+                }
+            });
+
+            // Handle keyboard navigation
+            patientSearchInput.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") {
+                    patientSearchResults.style.display = 'none';
+                }
+            });
+        }
+
+        // Change patient button
+        if (btnChangePatient) {
+            btnChangePatient.addEventListener("click", function () {
+                resetPatientSelection();
+            });
+        }
 
         // Procedure code to name mapping
         const procedureNames = {
@@ -938,100 +987,180 @@
             });
         }
 
-        if (btnLookup) {
-            btnLookup.addEventListener("click", function () {
-                const mrnInput = document.getElementById("patient_mrn");
-                const query = mrnInput.value.trim();
+        /**
+         * Perform patient search via API
+         */
+        function performPatientSearch(query) {
+            fetch(`/patients/api/lookup/?q=${encodeURIComponent(query)}`)
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    displaySearchResults(data.patients || []);
+                })
+                .catch((error) => {
+                    console.error("Search error:", error);
+                    patientSearchResults.innerHTML =
+                        '<div class="p-3 text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Error searching for patients</div>';
+                    patientSearchResults.style.display = 'block';
+                });
+        }
 
-                if (!query) {
-                    patientResultsDiv.innerHTML =
-                        '<div class="alert alert-warning">Please enter an MRN, name, or ID to search</div>';
-                    return;
-                }
+        /**
+         * Display search results in dropdown
+         */
+        function displaySearchResults(patients) {
+            if (!patients || patients.length === 0) {
+                patientSearchResults.innerHTML =
+                    '<div class="p-3 text-muted"><i class="bi bi-info-circle me-2"></i>No patients found. <a href="/patients/add/" target="_blank">Add new patient?</a></div>';
+                patientSearchResults.style.display = 'block';
+                return;
+            }
 
-                // Fetch patients from API
-                fetch(`/patients/api/lookup/?q=${encodeURIComponent(query)}`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.error) {
-                            patientResultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                            return;
-                        }
+            let html = '<div class="list-group list-group-flush rounded-3">';
+            patients.forEach((patient) => {
+                const displayName = patient.name_ar
+                    ? `${patient.name_en} / ${patient.name_ar}`
+                    : patient.name_en;
+                const genderDisplay =
+                    patient.gender === "M"
+                        ? "{% trans 'Male' %}"
+                        : patient.gender === "F"
+                          ? "{% trans 'Female' %}"
+                          : "{% trans 'Other' %}";
+                const dobDisplay = patient.dob || 'N/A';
+                const phoneDisplay = patient.phone ? `<br><small class="text-muted"><i class="bi bi-telephone me-1"></i>${escapeHtml(patient.phone)}</small>` : '';
 
-                        if (!data.patients || data.patients.length === 0) {
-                            patientResultsDiv.innerHTML =
-                                '<div class="alert alert-info">No patients found. <a href="/patients/add/" target="_blank">Add new patient?</a></div>';
-                            return;
-                        }
+                // Escape special characters for safe inline JS
+                const patientDataSafe = JSON.stringify({
+                    id: patient.id,
+                    mrn: patient.mrn,
+                    name: displayName,
+                    dob: dobDisplay,
+                    gender: genderDisplay,
+                    phone: patient.phone || ''
+                }).replace(/"/g, '&quot;');
 
-                        // Build results HTML
-                        let html = '<div class="list-group">';
-                        data.patients.forEach((patient) => {
-                            const displayName = patient.name_ar
-                                ? `${patient.name_en} / ${patient.name_ar}`
-                                : patient.name_en;
-                            const genderDisplay =
-                                patient.gender === "M"
-                                    ? "Male"
-                                    : patient.gender === "F"
-                                      ? "Female"
-                                      : "Other";
-
-                            html += `
-                            <button type="button" class="list-group-item list-group-item-action"
-                                onclick="selectPatient('${patient.id}', '${patient.mrn.replace(/'/g, "\\'")}', '${displayName.replace(/'/g, "\\'")}', '${patient.dob}', '${genderDisplay}', '${(patient.phone || "").replace(/'/g, "\\'")}')">
-                                <div class="d-flex w-100 justify-content-between align-items-center">
-                                    <div>
-                                        <strong>${patient.mrn}</strong> - ${displayName}
-                                        <br>
-                                        <small class="text-muted">DOB: ${patient.dob} | Gender: ${genderDisplay}</small>
-                                        ${patient.phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${patient.phone}</small>` : ""}
-                                    </div>
-                                    <i class="bi bi-chevron-right text-muted"></i>
-                                </div>
-                            </button>
-                        `;
-                        });
-                        html += "</div>";
-                        patientResultsDiv.innerHTML = html;
-                    })
-                    .catch((error) => {
-                        console.error("Error:", error);
-                        patientResultsDiv.innerHTML =
-                            '<div class="alert alert-danger">Error searching for patients</div>';
-                    });
+                html += `
+                    <button type="button" 
+                        class="list-group-item list-group-item-action py-3 px-3 border-0 border-bottom"
+                        onclick="handlePatientSelect(${patientDataSafe})"
+                        style="cursor: pointer;">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold text-primary">${escapeHtml(patient.mrn)}</div>
+                                <div class="mb-1">${escapeHtml(displayName)}</div>
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar3 me-1"></i>DOB: ${dobDisplay} 
+                                    <span class="mx-2">•</span>
+                                    <i class="bi bi-gender-ambiguous me-1"></i>${genderDisplay}
+                                    ${phoneDisplay}
+                                </small>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted mt-2"></i>
+                        </div>
+                    </button>
+                `;
             });
+            html += "</div>";
+            
+            patientSearchResults.innerHTML = html;
+            patientSearchResults.style.display = 'block';
+        }
+
+        /**
+         * Handle patient selection from search results
+         */
+        function handlePatientSelect(patientData) {
+            selectPatient(patientData);
+        }
+
+        /**
+         * Select a patient and update UI
+         */
+        function selectPatient(patientData) {
+            // Update hidden fields
+            patientIdField.value = patientData.id;
+            patientMrnField.value = patientData.mrn;
+            patientNameField.value = patientData.name;
+            patientDobField.value = patientData.dob;
+            patientGenderField.value = patientData.gender;
+            patientPhoneField.value = patientData.phone;
+
+            // Update displayed patient card
+            selectedPatientName.textContent = patientData.name;
+            selectedPatientMrn.textContent = patientData.mrn;
+            selectedPatientDob.textContent = patientData.dob;
+            selectedPatientGender.textContent = patientData.gender;
+            selectedPatientPhone.textContent = patientData.phone || 'N/A';
+
+            // Show patient card, hide search
+            selectedPatientCard.style.display = 'block';
+            patientSearchInput.value = '';
+            patientSearchInput.readOnly = true;
+            patientSearchInput.placeholder = "{% trans 'Patient selected - click Change to select different' %}";
+            btnClearSearch.style.display = 'none';
+            patientSearchResults.style.display = 'none';
+            
+            isPatientSelected = true;
+        }
+
+        /**
+         * Reset patient selection
+         */
+        function resetPatientSelection() {
+            // Clear hidden fields
+            patientIdField.value = '';
+            patientMrnField.value = '';
+            patientNameField.value = '';
+            patientDobField.value = '';
+            patientGenderField.value = '';
+            patientPhoneField.value = '';
+
+            // Reset UI
+            selectedPatientCard.style.display = 'none';
+            patientSearchInput.value = '';
+            patientSearchInput.readOnly = false;
+            patientSearchInput.placeholder = "{% trans 'Type MRN, name, or national ID to search...' %}";
+            patientSearchInput.focus();
+            
+            isPatientSelected = false;
+        }
+
+        /**
+         * Escape HTML to prevent XSS
+         */
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Show alert message
+         */
+        function showAlert(type, message) {
+            // Remove existing alerts
+            const existingAlert = document.querySelector('.form-alert-container');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} form-alert-container`;
+            alertDiv.innerHTML = `<i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>${message}`;
+            
+            form.insertBefore(alertDiv, form.firstChild);
+            
+            // Auto-dismiss after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
         }
     });
-
-    function selectPatient(id, mrn, name, dob, gender, phone) {
-        document.getElementById("patient_mrn").value = mrn;
-        document.getElementById("patient_name").value = name;
-        document.getElementById("patient_dob").value = dob;
-        document.getElementById("patient_gender").value = gender;
-        document.getElementById("patient_phone").value = phone;
-
-        // Clear the results
-        document.getElementById("patientResults").innerHTML = "";
-    }
-
-    // Auto-fill procedure names when procedure code is selected
-    const procedureCodeSelect = document.getElementById("procedure_code");
-    const procedureNameEnInput = document.getElementById("procedure_name_en");
-    const procedureNameArInput = document.getElementById("procedure_name_ar");
-
-    if (procedureCodeSelect && procedureNameEnInput && procedureNameArInput) {
-        procedureCodeSelect.addEventListener("change", function () {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.value) {
-                const nameEn =
-                    selectedOption.getAttribute("data-name-en") || "";
-                const nameAr =
-                    selectedOption.getAttribute("data-name-ar") || "";
-                procedureNameEnInput.value = nameEn;
-                procedureNameArInput.value = nameAr;
-            }
-        });
-    }
 </script>
 {% endblock %}
