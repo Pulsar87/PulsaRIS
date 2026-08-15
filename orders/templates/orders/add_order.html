@@ -218,7 +218,6 @@
                                     {% endfor %}
                                 </select>
                             </div>
-
                             <!-- Device (replaces Modality) -->
                             <div class="col-md-6">
                                 <label
@@ -234,7 +233,7 @@
                                     name="device"
                                     required
                                     hx-get="{% url 'orders:get_devices' %}"
-                                    hx-trigger="load, change from:#facility"
+                                    hx-trigger="change from:#facility"
                                     hx-target="#device"
                                     hx-swap="innerHTML"
                                     hx-include="#facility"
