@@ -88,3 +88,27 @@ def verify_key(provided_key):
         return signature == expected_sig
     except:
         return False
+
+
+def is_license_valid(license_expiry, license_max_orders, current_orders_count):
+    """
+    Check if the license is valid based on:
+    1. Expiration date
+    2. Order usage limit
+    
+    Returns True if license is valid, False otherwise.
+    """
+    # Check expiration date
+    if license_expiry:
+        try:
+            expiry_date = datetime.strptime(license_expiry, "%Y-%m-%d").date()
+            if datetime.now().date() > expiry_date:
+                return False
+        except ValueError:
+            return False
+    
+    # Check order usage limit
+    if license_max_orders is not None and current_orders_count >= license_max_orders:
+        return False
+    
+    return True
