@@ -45,6 +45,7 @@ def create_report(request, order_id):
     context = {
         "order": order,
         "report": None,
+        "status_choices": Report.Status.choices,
     }
     return render(request, "reports/report_form.html", context)
 
@@ -82,6 +83,7 @@ def edit_report(request, report_id):
     context = {
         "order": report.order,
         "report": report,
+        "status_choices": Report.Status.choices,
     }
     return render(request, "reports/report_form.html", context)
 
@@ -276,6 +278,11 @@ def save_report_draft(request):
 def export_report_dicom(request, report_id):
     """Export a report as a DICOM SR (Structured Report) file."""
     report = get_object_or_404(Report, id=report_id)
+    
+    # Only allow export if report is finalized (FINAL or AMENDED status)
+    if report.status not in [Report.Status.FINAL, Report.Status.AMENDED]:
+        messages.error(request, _("Only finalized reports can be exported."))
+        return redirect("reports:study_reports", order_id=report.order.id)
 
     try:
         from io import BytesIO

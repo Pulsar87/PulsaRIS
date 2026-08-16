@@ -183,6 +183,7 @@
             <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
         </div>
         <div class="d-flex gap-2">
+            {% if report and report.status == 'FINAL' or report.status == 'AMENDED' %}
             <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success">
                 <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
             </a>
@@ -195,6 +196,17 @@
             <button type="button" class="btn btn-primary" onclick="printReport()">
                 <i class="bi bi-printer me-1"></i> {% trans "Print" %}
             </button>
+            {% elif not report %}
+            <span class="badge bg-warning text-dark me-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {% trans "Save the report first before export/print" %}
+            </span>
+            {% else %}
+            <span class="badge bg-warning text-dark me-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {% trans "Report must be finalized before export/print" %}
+            </span>
+            {% endif %}
             <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}
             </a>
@@ -476,11 +488,17 @@ function insertNormalTemplate() {
 
 // Export to PDF
 function exportToPDF() {
+    const status = document.getElementById('status').value || 'DRAFT';
+    if (status !== 'FINAL' && status !== 'AMENDED') {
+        alert('{% trans "Only finalized reports can be exported." %}');
+        return;
+    }
+    
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
     document.getElementById('reportBodyContent').innerHTML = content;
-    document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
+    document.getElementById('printStatus').textContent = status;
 
     const element = document.getElementById('reportContent');
     element.style.display = 'block';
@@ -501,11 +519,17 @@ function exportToPDF() {
 
 // Export to JPG - uses same rendering as PDF export
 function exportToJPG() {
+    const status = document.getElementById('status').value || 'DRAFT';
+    if (status !== 'FINAL' && status !== 'AMENDED') {
+        alert('{% trans "Only finalized reports can be exported." %}');
+        return;
+    }
+    
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
     document.getElementById('reportBodyContent').innerHTML = content;
-    document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
+    document.getElementById('printStatus').textContent = status;
 
     const element = document.getElementById('reportContent');
     element.style.display = 'block';
@@ -523,11 +547,17 @@ function exportToJPG() {
 
 // Print report
 function printReport() {
+    const status = document.getElementById('status').value || 'DRAFT';
+    if (status !== 'FINAL' && status !== 'AMENDED') {
+        alert('{% trans "Only finalized reports can be printed." %}');
+        return;
+    }
+    
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
     document.getElementById('reportBodyContent').innerHTML = content;
-    document.getElementById('printStatus').textContent = document.getElementById('status').value || 'DRAFT';
+    document.getElementById('printStatus').textContent = status;
 
     const element = document.getElementById('reportContent');
         element.style.display = 'block';
