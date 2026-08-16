@@ -1,0 +1,96 @@
+{% extends 'layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Verify Report" %} - {{ report.order.accession_number }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-shield-check me-2"></i>
+                        {% trans "Verify Report" %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        {% trans "You are about to verify and finalize this report. Once finalized, the report will be locked and can only be amended by a supervising physician." %}
+                    </div>
+                    
+                    <h5 class="mb-3">{% trans "Report Details" %}</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="30%">{% trans "Accession Number" %}</th>
+                            <td>{{ report.order.accession_number }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Patient" %}</th>
+                            <td>{{ report.order.patient.full_name }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "MRN" %}</th>
+                            <td>{{ report.order.patient.mrn }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Procedure" %}</th>
+                            <td>{{ report.order.procedure_name_en }}</td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Current Status" %}</th>
+                            <td>
+                                <span class="badge bg-{% if report.status == 'DRAFT' %}secondary{% elif report.status == 'PRELIMINARY' %}warning{% elif report.status == 'FINAL' %}success{% else %}info{% endif %}">
+                                    {{ report.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>{% trans "Author" %}</th>
+                            <td>{{ report.radiologist.get_full_name|default:report.radiologist.username }}</td>
+                        </tr>
+                        {% if report.finalized_at %}
+                        <tr>
+                            <th>{% trans "Finalized At" %}</th>
+                            <td>{{ report.finalized_at|date:"Y-m-d H:i" }}</td>
+                        </tr>
+                        {% endif %}
+                    </table>
+                    
+                    <h5 class="mb-3 mt-4">{% trans "Report Content" %}</h5>
+                    <div class="border rounded p-3 bg-light" style="max-height: 300px; overflow-y: auto;">
+                        {{ report.findings_en|linebreaks }}
+                        {% if report.impression_en %}
+                        <hr>
+                        <strong>{% trans "Impression:" %}</strong>
+                        <p>{{ report.impression_en|linebreaks }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'reports:view_report' report.id %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i> {% trans "Cancel" %}
+                            </a>
+                            
+                            {% if report.status != 'FINAL' %}
+                            <button type="submit" name="action" value="verify" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle me-1"></i> {% trans "Verify & Finalize Report" %}
+                            </button>
+                            {% endif %}
+                            
+                            {% if report.status == 'FINAL' %}
+                            <button type="submit" name="action" value="amend" class="btn btn-warning btn-lg">
+                                <i class="bi bi-pencil-square me-1"></i> {% trans "Amend Report" %}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
