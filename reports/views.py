@@ -59,9 +59,22 @@ def edit_report(request, report_id):
         messages.error(request, _("You don't have permission to edit this report."))
         return redirect("reports:view_report", report_id=report_id)
 
+    # Prevent editing of finalized reports except by staff
+    if report.status in [Report.Status.FINAL, Report.Status.AMENDED] and not request.user.is_staff:
+        messages.error(request, _("Finalized reports cannot be edited. Please contact a supervisor."))
+        return redirect("reports:view_report", report_id=report_id)
+
     if request.method == "POST":
         report_content = request.POST.get("report_content", "").strip()
-        status = request.POST.get("status", report.status)
+        # Only staff can change status directly in the form
+        if request.user.is_staff:
+            status = request.POST.get("status", report.status)
+        else:
+            # Non-staff users can only save as draft or preliminary
+            status = report.status
+            if request.POST.get("status") == Report.Status.FINAL:
+                messages.warning(request, _("Only supervising physicians can finalize reports."))
+                status = Report.Status.PRELIMINARY
 
         # Update report
         report.findings_en = report_content
@@ -86,6 +99,83 @@ def edit_report(request, report_id):
         "status_choices": Report.Status.choices,
     }
     return render(request, "reports/report_form.html", context)
+
+
+def verify_report(request, report_id):
+    """Verify/finalize a report (only for doctors/staff)."""
+    report = get_object_or_404(Report, id=report_id)
+    
+    # Only staff (doctors/supervisors) can verify reports
+    if not request.user.is_staff:
+        messages.error(request, _("Only supervising physicians can verify reports."))
+        return redirect("reports:view_report", report_id=report_id)
+    
+    if request.method == "POST":
+        action = request.POST.get("action")
+        
+        if action == "verify":
+            # Verify/finalize the report
+            old_status = report.status
+            report.status = Report.Status.FINAL
+            report.finalized_at = timezone.now()
+            report.signed_at = timezone.now()
+            report.save()
+            
+            # Update order status
+            report.order.status = ExamOrder.Status.REPORTED
+            report.order.save(update_fields=["status"])
+            
+            # Create audit log if available
+            try:
+                from audit.models import AuditLog
+                AuditLog.objects.create(
+                    user=request.user,
+                    action='VERIFY',
+                    entity_type='Report',
+                    entity_id=report.id,
+                    old_values={'status': old_status},
+                    new_values={'status': Report.Status.FINAL, 'finalized_at': str(report.finalized_at)},
+                    ip_address=request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+                )
+            except:
+                pass
+            
+            messages.success(request, _("Report verified and finalized successfully!"))
+            
+        elif action == "amend":
+            # Amend a finalized report (creates new version or changes status)
+            if report.status == Report.Status.FINAL:
+                report.status = Report.Status.AMENDED
+                report.version += 1
+                report.finalized_at = timezone.now()
+                report.save()
+                
+                # Create audit log if available
+                try:
+                    from audit.models import AuditLog
+                    AuditLog.objects.create(
+                        user=request.user,
+                        action='AMEND',
+                        entity_type='Report',
+                        entity_id=report.id,
+                        old_values={'status': Report.Status.FINAL, 'version': report.version - 1},
+                        new_values={'status': Report.Status.AMENDED, 'version': report.version},
+                        ip_address=request.META.get('REMOTE_ADDR'),
+                        user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
+                    )
+                except:
+                    pass
+                
+                messages.success(request, _("Report marked as amended. Please update the content."))
+        
+        return redirect("reports:view_report", report_id=report.id)
+    
+    context = {
+        "report": report,
+        "order": report.order,
+    }
+    return render(request, "reports/report_verify.html", context)
 
 
 def view_report(request, report_id):
