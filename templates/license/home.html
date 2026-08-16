@@ -264,6 +264,7 @@
     .fc-timegrid-event {
         min-height: 20px;
         overflow: visible;
+        z-index: 10 !important;
     }
 
     .fc-timegrid-event-harness {
@@ -273,6 +274,7 @@
 
     .fc-timegrid-col-events {
         position: relative;
+        z-index: 5;
     }
 
     .fc-event:hover {
@@ -770,6 +772,7 @@
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: "timeGridDay",
             initialDate: selectedDate.toISOString().split("T")[0],
+            timeZone: "Etc/GMT-3", // Force GMT+03:00 timezone
             headerToolbar: false,
             footerToolbar: false,
             eventDidMount: function (info) {

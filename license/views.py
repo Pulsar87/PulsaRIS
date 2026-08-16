@@ -122,8 +122,19 @@ def calendar_events(request):
             scheduled_dt = timezone.make_aware(scheduled_dt)
 
         end_dt = None
-        if order.duration_minutes:
+        if order.duration_minutes and scheduled_dt:
             end_dt = scheduled_dt + timedelta(minutes=order.duration_minutes)
+
+# Convert to GMT+03:00 timezone for consistent display
+        from django.utils.timezone import get_fixed_timezone
+        tz_gmt3 = get_fixed_timezone(180)  # GMT+03:00 = 180 minutes
+
+        if scheduled_dt:
+            scheduled_dt = scheduled_dt.astimezone(tz_gmt3)
+
+        if end_dt:
+            end_dt = end_dt.astimezone(tz_gmt3)
+
 
         # Set color based on status
         status_color_map = {
