@@ -59,9 +59,15 @@ def edit_report(request, report_id):
         messages.error(request, _("You don't have permission to edit this report."))
         return redirect("reports:view_report", report_id=report_id)
 
-    # Prevent editing of finalized reports except by staff
-    if report.status in [Report.Status.FINAL, Report.Status.AMENDED] and not request.user.is_staff:
-        messages.error(request, _("Finalized reports cannot be edited. Please contact a supervisor."))
+    # Prevent editing of finalized reports (FINAL status is locked)
+    # Only DRAFT, PRELIMINARY, and AMENDED reports can be edited
+    if report.status == Report.Status.FINAL:
+        messages.error(request, _("Finalized reports cannot be edited. Please use the Amend function to make changes."))
+        return redirect("reports:view_report", report_id=report_id)
+    
+    # AMENDED reports can only be edited by staff
+    if report.status == Report.Status.AMENDED and not request.user.is_staff:
+        messages.error(request, _("Amended reports can only be edited by supervising physicians."))
         return redirect("reports:view_report", report_id=report_id)
 
     if request.method == "POST":
