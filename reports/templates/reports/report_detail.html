@@ -18,11 +18,7 @@
                         <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
                     </div>
                     <div class="d-flex gap-2">
-                        {% if report.status == 'FINAL' %}
-                        <span class="badge bg-secondary btn-sm align-self-center">
-                            <i class="bi bi-lock-fill me-1"></i> {% trans "Finalized - Cannot Edit" %}
-                        </span>
-                        {% elif report.radiologist == user or user.is_staff %}
+                        {% if report.radiologist == user or user.is_staff %}
                         <a href="{% url 'reports:edit_report' report.id %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-pencil me-1"></i> {% trans "Edit" %}
                         </a>
