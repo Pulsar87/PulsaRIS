@@ -5,26 +5,56 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Logs and temp files
-*.log
-*.tmp
-
 # Environment
+.venv/
+venv/
 .env
 .env.local
 *.env.*
+
+# Logs
+*.log
 
 # Editors
 .vscode/
 .idea/
 
-# Dependencies
-.venv/
-venv/
-node_modules/
+# Tests
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
 
-# Build artifacts
-dist/
+# Build/compiled
 build/
-target/
+dist/
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# Compression
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
 ```
