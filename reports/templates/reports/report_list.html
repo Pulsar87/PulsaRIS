@@ -177,7 +177,7 @@
                                     <td>{{ report.created_at|date:"Y-m-d H:i" }}</td>
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
-                                            {% if report.status == 'DRAFT' or report.radiologist == user or user.is_staff %}
+                                            {% if report.radiologist == user or user.is_staff %}
                                             <a href="{% url 'reports:edit_report' report.id %}"
                                                 class="btn btn-outline-secondary"
                                                 title="{% trans 'Edit' %}">
