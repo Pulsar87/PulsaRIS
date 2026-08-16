@@ -179,6 +179,12 @@
                     <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success">
                         <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
                     </a>
+                    <button onclick="exportToPDF()" class="btn btn-outline-danger">
+                        <i class="bi bi-file-pdf me-1"></i> {% trans "Export as PDF" %}
+                    </button>
+                    <button onclick="exportToJPG()" class="btn btn-outline-warning">
+                        <i class="bi bi-file-image me-1"></i> {% trans "Export as JPG" %}
+                    </button>
                     {% else %}
                     <span class="badge bg-warning text-dark ms-auto align-self-center">
                         <i class="bi bi-exclamation-triangle me-1"></i>
@@ -190,4 +196,40 @@
         </div>
     </div>
 </div>
+
+<!-- Hidden content for PDF/JPG export -->
+<div id="reportContent" style="display:none;">
+    <div id="reportBodyContent"></div>
+    <p>Status: <span id="printStatus"></span></p>
+</div>
+
+<script>
+// Export to PDF
+function exportToPDF() {
+    const content = `{{ report.report_content|escapejs }}`;
+    document.getElementById('reportBodyContent').innerHTML = content;
+    document.getElementById('printStatus').textContent = '{{ report.status }}';
+
+    const element = document.getElementById('reportContent');
+    element.style.display = 'block';
+    
+    window.print();
+    
+    element.style.display = 'none';
+}
+
+// Export to JPG - uses same rendering as PDF export
+function exportToJPG() {
+    const content = `{{ report.report_content|escapejs }}`;
+    document.getElementById('reportBodyContent').innerHTML = content;
+    document.getElementById('printStatus').textContent = '{{ report.status }}';
+
+    const element = document.getElementById('reportContent');
+    element.style.display = 'block';
+    
+    window.print();
+    
+    element.style.display = 'none';
+}
+</script>
 {% endblock %}
