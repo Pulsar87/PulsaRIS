@@ -101,10 +101,10 @@ def get_dashboard_context():
     
     # === REVENUE BY PAYER ===
     revenue_by_payer = ServiceLine.objects.filter(
-        claim__insurance_payer__isnull=False,
+        claim__payer__isnull=False,
         total_charge__isnull=False
     ).values(
-        'claim__insurance_payer__name'
+        'claim__payer__name'
     ).annotate(
         total_revenue=Sum('total_charge')
     ).order_by('-total_revenue')[:10]
@@ -244,16 +244,16 @@ def orders_trend_chart(request):
 def revenue_by_payer_chart(request):
     """Chart data: Revenue by insurance payer."""
     payer_data = ServiceLine.objects.filter(
-        claim__insurance_payer__isnull=False,
+        claim__payer__isnull=False,
         total_charge__isnull=False
     ).values(
-        'claim__insurance_payer__name'
+        'claim__payer__name'
     ).annotate(
         total_revenue=Sum('total_charge')
     ).order_by('-total_revenue')[:10]
     
     chart_data = {
-        'labels': [item['claim__insurance_payer__name'] for item in payer_data],
+        'labels': [item['claim__payer__name'] for item in payer_data],
         'datasets': [{
             'label': 'Revenue by Payer',
             'data': [float(item['total_revenue']) if item['total_revenue'] else 0 
