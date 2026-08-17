@@ -79,8 +79,8 @@ def get_dashboard_context():
     
     # === BILLING METRICS ===
     total_billed = ServiceLine.objects.filter(
-        charge_amount__isnull=False
-    ).aggregate(total=Sum('charge_amount'))['total'] or 0
+        total_charge__isnull=False
+    ).aggregate(total=Sum('total_charge'))['total'] or 0
     
     total_paid = Payment.objects.aggregate(
         total=Sum('amount')
@@ -101,11 +101,12 @@ def get_dashboard_context():
     
     # === REVENUE BY PAYER ===
     revenue_by_payer = ServiceLine.objects.filter(
-        claim__insurance_payer__isnull=False
+        claim__insurance_payer__isnull=False,
+        total_charge__isnull=False
     ).values(
         'claim__insurance_payer__name'
     ).annotate(
-        total_revenue=Sum('charge_amount')
+        total_revenue=Sum('total_charge')
     ).order_by('-total_revenue')[:10]
     
     # === ORDERS TREND (Last 30 days) ===
@@ -244,11 +245,11 @@ def revenue_by_payer_chart(request):
     """Chart data: Revenue by insurance payer."""
     payer_data = ServiceLine.objects.filter(
         claim__insurance_payer__isnull=False,
-        charge_amount__isnull=False
+        total_charge__isnull=False
     ).values(
         'claim__insurance_payer__name'
     ).annotate(
-        total_revenue=Sum('charge_amount')
+        total_revenue=Sum('total_charge')
     ).order_by('-total_revenue')[:10]
     
     chart_data = {
