@@ -183,6 +183,30 @@
             <p class="text-muted mb-0">{{ order.accession_number }} | {{ order.patient.mrn }}</p>
         </div>
         <div class="d-flex gap-2">
+            {% if report and report.status == 'FINAL' or report.status == 'AMENDED' %}
+            <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success">
+                <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
+            </a>
+            <button type="button" class="btn btn-success" onclick="exportToPDF()">
+                <i class="bi bi-file-earmark-pdf me-1"></i> {% trans "Export to PDF" %}
+            </button>
+            <button type="button" class="btn btn-info" onclick="exportToJPG()">
+                <i class="bi bi-file-earmark-image me-1"></i> {% trans "Export to JPG" %}
+            </button>
+            <button type="button" class="btn btn-primary" onclick="printReport()">
+                <i class="bi bi-printer me-1"></i> {% trans "Print" %}
+            </button>
+            {% elif not report %}
+            <span class="badge bg-warning text-dark me-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {% trans "Save the report first before export/print" %}
+            </span>
+            {% else %}
+            <span class="badge bg-warning text-dark me-2">
+                <i class="bi bi-exclamation-triangle me-1"></i>
+                {% trans "Report must be finalized before export/print" %}
+            </span>
+            {% endif %}
             <a href="{% url 'reports:study_reports' order.id %}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left me-1"></i> {% trans "Back" %}
             </a>
@@ -193,19 +217,6 @@
         {% csrf_token %}
         <input type="hidden" name="status" id="status" value="{% if report %}{{ report.status }}{% else %}DRAFT{% endif %}">
         <input type="hidden" name="critical_finding" id="critical_finding" value="{% if report.critical_finding %}on{% endif %}">
-
-        <!-- Finalized Report Warning -->
-        {% if report and report.status == 'FINAL' %}
-        <div class="alert alert-danger mb-3" role="alert">
-            <i class="bi bi-lock-fill me-2"></i>
-            <strong>{% trans "Report is Finalized" %}</strong> - {% trans "This report cannot be edited. To make changes, please use the Amend function from the report view page." %}
-        </div>
-        {% elif report and report.status == 'AMENDED' and not request.user.is_staff %}
-        <div class="alert alert-warning mb-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <strong>{% trans "Amended Report" %}</strong> - {% trans "Only supervising physicians can edit amended reports." %}
-        </div>
-        {% endif %}
 
         <!-- Main Editor Panel -->
         <div class="main-editor-panel">
@@ -252,42 +263,15 @@
                     <i class="bi bi-file-text-fill"></i>
                     <span>{% trans "Report Content" %}</span>
                 </div>
-                <textarea id="report_content" name="report_content">{% if report %}{{ report.findings_en }}{% if report.impression_en %}
+                <textarea id="report_content" name="report_content" >{% if report %}{{ report.findings_en }}{% if report.impression_en %}
 
 {% trans "Impression:" %}
 {{ report.impression_en }}{% endif %}{% endif %}</textarea>
             </div>
-
+{% if report.status != 'FINAL' %}
             <!-- Action Buttons -->
             <div class="editor-section bg-light">
                 <div class="d-flex gap-3">
-                    {% if report and report.status == 'FINAL' %}
-                    <!-- Finalized reports cannot be edited -->
-                    <button type="button" class="btn btn-secondary btn-lg flex-fill" disabled>
-                        <i class="bi bi-lock-fill me-2"></i>
-                        {% trans "Report is Finalized - Cannot Edit" %}
-                    </button>
-                    
-                    <!-- Print and Export buttons for finalized reports -->
-                    <button onclick="printReport()" class="btn btn-outline-primary btn-lg">
-                        <i class="bi bi-printer me-1"></i> {% trans "Print" %}
-                    </button>
-                    <a href="{% url 'reports:export_report_dicom' report.id %}" class="btn btn-outline-success btn-lg">
-                        <i class="bi bi-download me-1"></i> {% trans "Export as DICOM" %}
-                    </a>
-                    <button onclick="exportToPDF()" class="btn btn-outline-danger btn-lg">
-                        <i class="bi bi-file-pdf me-1"></i> {% trans "Export as PDF" %}
-                    </button>
-                    <button onclick="exportToJPG()" class="btn btn-outline-warning btn-lg">
-                        <i class="bi bi-file-image me-1"></i> {% trans "Export as JPG" %}
-                    </button>
-                    {% elif report and report.status == 'AMENDED' and not request.user.is_staff %}
-                    <!-- Amended reports can only be edited by staff -->
-                    <button type="button" class="btn btn-secondary btn-lg flex-fill" disabled>
-                        <i class="bi bi-lock-fill me-2"></i>
-                        {% trans "Only Supervising Physicians Can Edit" %}
-                    </button>
-                    {% else %}
                     <button type="submit" name="action" value="save" class="btn btn-primary btn-lg flex-fill">
                         <i class="bi bi-check-circle-fill me-2"></i>
                         {% if report %}{% trans "Update Report" %}{% else %}{% trans "Create Report" %}{% endif %}
@@ -304,9 +288,9 @@
                         <i class="bi bi-file-earmark-check me-2"></i>
                         {% trans "Normal Report" %}
                     </button>
-                    {% endif %}
                 </div>
             </div>
+            {% endif %}
         </div>
     </form>
 
@@ -366,13 +350,13 @@
 
 {% block extra_js %}
 <script>
-// Check if report is finalized (for disabling editor)
-const isReportFinalized = {% if report and report.status == 'FINAL' %}true{% else %}false{% endif %};
-const isAmendedAndNotStaff = {% if report and report.status == 'AMENDED' and not request.user.is_staff %}true{% else %}false{% endif %};
 
 // Initialize TinyMCE editor with Microsoft Word-like toolbar
 const tinyMCEConfig = {
     selector: '#report_content',
+    {% if report and report.status == 'FINAL' or report.status == 'AMENDED' %}
+        readonly: true,
+    {% endif %}
     height: 600,
     menubar: 'file edit insert view format table tools',
     branding: false,
@@ -389,16 +373,8 @@ const tinyMCEConfig = {
         { title: 'Heading 3', format: 'h3' },
     ],
     setup: function(editor) {
-        // Disable editor for finalized reports
-        if (isReportFinalized || isAmendedAndNotStaff) {
-            editor.mode.set('readonly');
-        }
-        
         editor.on('change', function() {
-            // Only auto-save if editor is not readonly
-            if (!isReportFinalized && !isAmendedAndNotStaff) {
-                autoSave();
-            }
+            autoSave();
         });
         editor.on('init', function() {
             const textarea = document.getElementById(editor.id);
@@ -408,8 +384,8 @@ const tinyMCEConfig = {
         });
     }
 };
-
 tinymce.init(tinyMCEConfig);
+
 
 // Auto-save functionality
 let autoSaveTimeout;
@@ -522,7 +498,7 @@ function exportToPDF() {
         alert('{% trans "Only finalized reports can be exported." %}');
         return;
     }
-    
+
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
@@ -553,7 +529,7 @@ function exportToJPG() {
         alert('{% trans "Only finalized reports can be exported." %}');
         return;
     }
-    
+
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
@@ -581,7 +557,7 @@ function printReport() {
         alert('{% trans "Only finalized reports can be printed." %}');
         return;
     }
-    
+
     const editor = tinymce.get('report_content');
     const content = editor ? editor.getContent() : '';
 
