@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "reports",
     "integrations",
     "billing",  # Financial/Billing module
+    "dashboard",  # Dashboard and statistics
     "django.contrib.staticfiles",
     "django_filters",
     "rest_framework",

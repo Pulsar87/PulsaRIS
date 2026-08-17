@@ -38,6 +38,7 @@ urlpatterns = [
     path("admin/", admin.site.urls, name="activation_required"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("worklist/", ordersview.worklist, name="worklist"),
+    path("dashboard/", include("dashboard.urls")),
     path("", include("license.urls"), name="activation"),
     path("users/", include("users.urls")),
     path("orders/", include("orders.urls")),
