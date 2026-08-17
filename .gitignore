@@ -1,1 +1,10 @@
-Nothing needs to be added to the .gitignore file based on the provided file changes, as they only include HTML template files and a Python view file, which are source code files that should not be ignored.
+```
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Reports specific
+reports/__pycache__/
+```

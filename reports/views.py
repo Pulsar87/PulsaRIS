@@ -104,7 +104,7 @@ def edit_report(request, report_id):
         "report": report,
         "status_choices": Report.Status.choices,
     }
-    return render(request, "reports/report_detail.html", context)
+    return render(request, "reports/report_form.html", context)
 
 
 def verify_report(request, report_id):
