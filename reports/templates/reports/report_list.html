@@ -178,11 +178,19 @@
                                     <td>
                                         <div class="btn-group btn-group-sm" role="group">
                                             {% if report.radiologist == user or user.is_staff %}
+                                            {% if report.status != 'FINAL' and report.status != 'AMENDED' %}
                                             <a href="{% url 'reports:edit_report' report.id %}"
                                                 class="btn btn-outline-secondary"
                                                 title="{% trans 'Edit' %}">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
+                                            {% else %}
+                                            <a href="{% url 'reports:edit_report' report.id %}"
+                                                class="btn btn-outline-primary"
+                                                title="{% trans 'View & Export' %}">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            {% endif %}
                                             {% endif %}
                                             <a href="{% url 'reports:study_reports' report.order.id %}"
                                                 class="btn btn-outline-info"
