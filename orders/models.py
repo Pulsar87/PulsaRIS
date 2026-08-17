@@ -144,7 +144,7 @@ class ExamOrder(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey("patients.Patient", on_delete=models.PROTECT)
     facility = models.ForeignKey(
-        "core.Facility", on_delete=models.SET_NULL, null=True
+        "core.Facility", on_delete=models.SET_NULL, null=True, related_name="exam_orders"
     )
     accession_number = models.CharField(max_length=50, db_index=True)
     referring_physician = models.CharField(max_length=150, blank=True)

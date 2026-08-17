@@ -73,7 +73,7 @@ def get_dashboard_context():
     
     # === FACILITY STATISTICS ===
     facility_stats = Facility.objects.annotate(
-        order_count=Count('devices__examorder', distinct=True),
+        order_count=Count('exam_orders', distinct=True),
         device_count=Count('devices', distinct=True)
     ).order_by('-order_count')[:5]
     
