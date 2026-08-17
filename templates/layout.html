@@ -102,6 +102,17 @@
                             >
                         </li>
 
+                        <!-- Dashboard Stats -->
+                        <li class="nav-item">
+                            <a
+                                class="nav-link {% if request.resolver_match.url_name == 'dashboard_stats' %}active{% endif %}"
+                                href="/dashboard/"
+                                ><i class="bi bi-speedometer2 me-1">
+                                    {% trans "Dashboard" %}</i
+                                ></a
+                            >
+                        </li>
+
                         <!-- Patients -->
                         <li class="nav-item">
                             <a

@@ -1,0 +1,591 @@
+{% extends 'layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Dashboard - App Statistics" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+        transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #5a5c69;
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        opacity: 0.3;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 2rem;
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(45deg, #4e73df, #224abe);
+        color: white;
+    }
+    
+    .bg-gradient-success {
+        background: linear-gradient(45deg, #1cc88a, #13855c);
+        color: white;
+    }
+    
+    .bg-gradient-info {
+        background: linear-gradient(45deg, #36b9cc, #258391);
+        color: white;
+    }
+    
+    .bg-gradient-warning {
+        background: linear-gradient(45deg, #f6c23e, #dda20a);
+        color: white;
+    }
+    
+    .bg-gradient-danger {
+        background: linear-gradient(45deg, #e74a3b, #be2617);
+        color: white;
+    }
+    
+    .progress-thin {
+        height: 0.5rem;
+        border-radius: 1rem;
+    }
+    
+    .list-group-item-custom {
+        border: none;
+        border-bottom: 1px solid #e3e6f0;
+        padding: 1rem 1.5rem;
+    }
+    
+    .list-group-item-custom:last-child {
+        border-bottom: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 mt-4">
+        <h1 class="h3 mb-0 text-gray-800">{% trans "Dashboard" %}</h1>
+        <button class="btn btn-sm btn-primary" onclick="refreshStats()">
+            <i class="bi bi-arrow-clockwise me-1"></i> {% trans "Refresh" %}
+        </button>
+    </div>
+
+    <!-- Database Record Counts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Patients -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-gradient-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-white-50">{% trans "Patients" %}</div>
+                            <div class="stat-value text-white">{{ patient_count|default:"0" }}</div>
+                        </div>
+                        <i class="bi bi-people-fill stat-icon text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-gradient-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-white-50">{% trans "Orders" %}</div>
+                            <div class="stat-value text-white">{{ order_count|default:"0" }}</div>
+                        </div>
+                        <i class="bi bi-clipboard-check-fill stat-icon text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-gradient-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-white-50">{% trans "Reports" %}</div>
+                            <div class="stat-value text-white">{{ report_count|default:"0" }}</div>
+                        </div>
+                        <i class="bi bi-file-text-fill stat-icon text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card bg-gradient-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="stat-label text-white-50">{% trans "Claims" %}</div>
+                            <div class="stat-value text-white">{{ claim_count|default:"0" }}</div>
+                        </div>
+                        <i class="bi bi-receipt stat-icon text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Infrastructure Row -->
+    <div class="row g-4 mb-4">
+        <!-- Facilities -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card border-start border-4 border-primary h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-label text-primary">{% trans "Facilities" %}</div>
+                            <div class="stat-value">{{ facility_count|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-building stat-icon text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Devices -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card border-start border-4 border-success h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-label text-success">{% trans "Devices" %}</div>
+                            <div class="stat-value">{{ device_count|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-hdd-stack stat-icon text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modalities -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card border-start border-4 border-info h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-label text-info">{% trans "Modalities" %}</div>
+                            <div class="stat-value">{{ modality_count|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cpu stat-icon text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payers -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card stat-card border-start border-4 border-warning h-100">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col mr-2">
+                            <div class="stat-label text-warning">{% trans "Insurance Payers" %}</div>
+                            <div class="stat-value">{{ payer_count|default:"0" }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-shield-check stat-icon text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Activity -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "Today's Activity" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center p-3">
+                                <i class="bi bi-clipboard-plus text-primary" style="font-size: 2.5rem;"></i>
+                                <h3 class="mt-2 mb-0">{{ orders_today|default:"0" }}</h3>
+                                <small class="text-muted">{% trans "New Orders" %}</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3">
+                                <i class="bi bi-file-earmark-check text-success" style="font-size: 2.5rem;"></i>
+                                <h3 class="mt-2 mb-0">{{ reports_today|default:"0" }}</h3>
+                                <small class="text-muted">{% trans "Reports Completed" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Last 7 Days Summary -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-success">{% trans "Last 7 Days" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="text-center p-3">
+                                <h3 class="mt-2 mb-0 text-primary">{{ orders_last_7|default:"0" }}</h3>
+                                <small class="text-muted">{% trans "Total Orders" %}</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3">
+                                <h3 class="mt-2 mb-0 text-success">{{ reports_last_7|default:"0" }}</h3>
+                                <small class="text-muted">{% trans "Total Reports" %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-4 mb-4">
+        <!-- Orders Trend Chart -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "Orders Trend (Last 30 Days)" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="ordersTrendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Status -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-info">{% trans "Order Status" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="orderStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-4 mb-4">
+        <!-- Modality Distribution -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-success">{% trans "Orders by Modality" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="modalityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claims Status -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-warning">{% trans "Claims Status" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="claimsStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Billing Metrics -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "Billing Overview" %}</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted text-uppercase">{% trans "Total Billed" %}</small>
+                                <h4 class="mb-0 text-primary">${{ total_billed|floatformat:2|default:"0.00" }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted text-uppercase">{% trans "Total Paid" %}</small>
+                                <h4 class="mb-0 text-success">${{ total_paid|floatformat:2|default:"0.00" }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted text-uppercase">{% trans "Pending Claims" %}</small>
+                                <h4 class="mb-0 text-warning">{{ pending_claims|default:"0" }}</h4>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="p-3 bg-light rounded">
+                                <small class="text-muted text-uppercase">{% trans "Denied Claims" %}</small>
+                                <h4 class="mb-0 text-danger">{{ denied_claims|default:"0" }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue by Payer -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-info">{% trans "Top Payers by Revenue" %}</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="chart-container">
+                        <canvas id="revenueByPayerChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Facilities -->
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">{% trans "Top Facilities by Volume" %}</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="border-0 py-3">{% trans "Facility" %}</th>
+                                    <th class="border-0 py-3 text-center">{% trans "Devices" %}</th>
+                                    <th class="border-0 py-3 text-end">{% trans "Orders" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for facility in facility_stats %}
+                                <tr>
+                                    <td class="py-3">{{ facility.name }}</td>
+                                    <td class="py-3 text-center">{{ facility.device_count }}</td>
+                                    <td class="py-3 text-end">
+                                        <span class="badge bg-primary">{{ facility.order_count }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">
+                                        {% trans "No facility data available" %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// Global chart instances
+let ordersTrendChart, orderStatusChart, modalityChart, claimsStatusChart, revenueByPayerChart;
+
+// Initialize charts when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    loadCharts();
+});
+
+function loadCharts() {
+    // Load Orders Trend Chart
+    fetch('{% url "dashboard:orders_trend_chart" %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('ordersTrendChart').getContext('2d');
+            ordersTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading orders trend:', error));
+
+    // Load Order Status Chart
+    fetch('{% url "dashboard:dashboard_stats_api" %}')
+        .then(response => response.json())
+        .then(data => {
+            const statusData = data.order_status_counts || [];
+            const ctx = document.getElementById('orderStatusChart').getContext('2d');
+            orderStatusChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: statusData.map(item => item.status || 'Unknown'),
+                    datasets: [{
+                        data: statusData.map(item => item.count),
+                        backgroundColor: [
+                            '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                            '#858796', '#5a5c69'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading order status:', error));
+
+    // Load Modality Chart
+    fetch('{% url "dashboard:orders_by_modality_chart" %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('modalityChart').getContext('2d');
+            modalityChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading modality chart:', error));
+
+    // Load Claims Status Chart
+    fetch('{% url "dashboard:claims_status_chart" %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('claimsStatusChart').getContext('2d');
+            claimsStatusChart = new Chart(ctx, {
+                type: 'pie',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading claims status:', error));
+
+    // Load Revenue by Payer Chart
+    fetch('{% url "dashboard:revenue_by_payer_chart" %}')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('revenueByPayerChart').getContext('2d');
+            revenueByPayerChart = new Chart(ctx, {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error loading revenue by payer:', error));
+}
+
+function refreshStats() {
+    location.reload();
+}
+</script>
+{% endblock %}
