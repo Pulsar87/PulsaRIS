@@ -151,9 +151,10 @@
                     </a>
                     {% endif %}
                     {% elif report.status == 'FINAL' or report.status == 'AMENDED' %}
-                    <button type="button" class="btn btn-secondary" disabled>
-                        <i class="bi bi-lock-fill me-1"></i> {% trans "Report is Finalized - Cannot Edit" %}
-                    </button>
+                    <!-- For finalized reports, go to edit page for read-only view with export/print -->
+                    <a href="{% url 'reports:edit_report' report.id %}" class="btn btn-outline-primary">
+                        <i class="bi bi-eye me-1"></i> {% trans "View & Export" %}
+                    </a>
                     {% endif %}
                     
                     <!-- Verify button - only for staff/doctors when report is not finalized -->

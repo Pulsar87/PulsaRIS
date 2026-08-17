@@ -1,10 +1,32 @@
 ```
-# Python
+# Python compiled files
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 
-# Reports specific
-reports/__pycache__/
+# Django/Django-related
+*.log
+*.pot
+*.po
+*.mo
+*.db
+*.sqlite3
+
+# Dependencies
+venv/
+.venv/
+env/
+ENV/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
 ```

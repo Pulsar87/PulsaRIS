@@ -51,26 +51,25 @@ def create_report(request, order_id):
 
 
 def edit_report(request, report_id):
-    """Edit an existing report."""
+    """Edit an existing report or view finalized reports with export/print options."""
     report = get_object_or_404(Report, id=report_id)
 
-    # Check permission - only the author or staff can edit
+    # Check permission - only the author or staff can access
     if report.radiologist != request.user and not request.user.is_staff:
-        messages.error(request, _("You don't have permission to edit this report."))
-        return redirect("reports:view_report", report_id=report_id)
-
-    # Prevent editing of finalized reports (FINAL status is locked)
-    # Only DRAFT, PRELIMINARY, and AMENDED reports can be edited
-    if report.status == Report.Status.FINAL:
-        messages.error(request, _("Finalized reports cannot be edited. Please use the Amend function to make changes."))
+        messages.error(request, _("You don't have permission to access this report."))
         return redirect("reports:view_report", report_id=report_id)
     
-    # AMENDED reports can only be edited by staff
-    if report.status == Report.Status.AMENDED and not request.user.is_staff:
+    # AMENDED reports can only be edited by staff, but all authorized users can view/print
+    if report.status == Report.Status.AMENDED and not request.user.is_staff and request.method == "POST":
         messages.error(request, _("Amended reports can only be edited by supervising physicians."))
         return redirect("reports:view_report", report_id=report_id)
 
     if request.method == "POST":
+        # Prevent saving changes to finalized reports
+        if report.status == Report.Status.FINAL:
+            messages.error(request, _("Finalized reports cannot be edited. Please use the Amend function to make changes."))
+            return redirect("reports:edit_report", report_id=report.id)
+        
         report_content = request.POST.get("report_content", "").strip()
         # Only staff can change status directly in the form
         if request.user.is_staff:
