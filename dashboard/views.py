@@ -65,10 +65,10 @@ def get_dashboard_context():
     
     # === MODALITY DISTRIBUTION ===
     modality_distribution = ExamOrder.objects.values(
-        'procedure__modality__code'
+        'modality__code'
     ).annotate(
         count=Count('id'),
-        modality_name=Count('procedure__modality__name')
+        modality_name=Count('modality__name')
     ).order_by('-count')[:10]
     
     # === FACILITY STATISTICS ===
@@ -118,8 +118,11 @@ def get_dashboard_context():
     ).order_by('date')
     
     # === TOP PROCEDURES ===
-    top_procedures = Procedure.objects.annotate(
-        order_count=Count('examorder')
+    top_procedures = ExamOrder.objects.values(
+        'procedure_code',
+        'procedure_name_en'
+    ).annotate(
+        order_count=Count('id')
     ).order_by('-order_count')[:10]
     
     context = {
@@ -185,16 +188,16 @@ def orders_by_modality_chart(request):
     
     modality_data = ExamOrder.objects.filter(
         created_at__date__gte=last_30_days,
-        procedure__modality__isnull=False
+        modality__isnull=False
     ).values(
-        'procedure__modality__code',
-        'procedure__modality__name'
+        'modality__code',
+        'modality__name'
     ).annotate(
         count=Count('id')
     ).order_by('-count')
     
     chart_data = {
-        'labels': [f"{item['procedure__modality__code']} - {item['procedure__modality__name']}" 
+        'labels': [f"{item['modality__code']} - {item['modality__name']}" 
                    for item in modality_data],
         'datasets': [{
             'label': 'Orders by Modality (Last 30 Days)',
