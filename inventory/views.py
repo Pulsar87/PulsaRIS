@@ -1,5 +1,6 @@
 import json
 from json import JSONDecodeError
+from decimal import Decimal
 from urllib.parse import urlencode
 from uuid import UUID
 
@@ -10,6 +11,7 @@ from django.db.models import BooleanField, Case, F, Value, When
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from django.views.decorators.http import require_http_methods
 
@@ -21,12 +23,19 @@ from .forms import (
     StockTransactionForm,
     SupplierForm,
 )
-from .models import Category, InventoryItem, StockReceipt, Supplier
+from .models import (
+    Category,
+    InventoryItem,
+    StockReceipt,
+    StockTransaction,
+    Supplier,
+)
 from .services import (
     InventoryError,
     InsufficientStockError,
     add_stock,
     adjust_stock,
+    apply_transaction_effect,
     consume_exam_materials,
     create_stock_receipt,
     record_stock_movement,
@@ -240,6 +249,266 @@ def exam_consumption(request):
             ],
         },
         status=201,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Stock transactions — web pages (insert, edit, soft delete)
+# ---------------------------------------------------------------------------
+
+_STOCK_LEVEL_MAX = Decimal("1000000000")
+
+
+class _ZeroStock:
+    """Stand-in object so ``apply_transaction_effect`` can compute the signed
+    effect of a single ledger entry (delta relative to a zero baseline)."""
+
+    current_stock_level = Decimal("0")
+
+
+ZERO_ITEM = _ZeroStock()
+
+
+def _transaction_effect(transaction_type, quantity):
+    """Signed stock effect of one ledger entry."""
+    return apply_transaction_effect(ZERO_ITEM, transaction_type, quantity)
+
+
+def _validate_stock_level(item, projected):
+    if projected < 0:
+        raise InventoryError(
+            f"This change would make {item.name} stock negative "
+            f"({projected}). Reverse other transactions first."
+        )
+    if projected >= _STOCK_LEVEL_MAX:
+        raise InventoryError(
+            f"Stock level for {item.name} exceeds the supported maximum."
+        )
+
+
+def _transaction_list_context(request):
+    transactions = StockTransaction.objects.select_related(
+        "item", "item__category", "user", "exam"
+    ).all()[:500]
+    type_filter = request.GET.get("type", "")
+    if type_filter in StockTransaction.TransactionType.values:
+        transactions = transactions.filter(transaction_type=type_filter)
+    item_filter = request.GET.get("item", "")
+    if item_filter:
+        try:
+            UUID(item_filter)
+        except (TypeError, ValueError):
+            item_filter = ""
+        else:
+            transactions = transactions.filter(item_id=item_filter)
+    return {
+        "transactions": transactions,
+        "items": InventoryItem.objects.filter(is_active=True),
+        "type_filter": type_filter,
+        "item_filter": item_filter,
+    }
+
+
+@login_required
+def transaction_list(request):
+    return render(
+        request,
+        "inventory/transaction_list.html",
+        _transaction_list_context(request),
+    )
+
+
+@login_required
+def transaction_create(request):
+    form = StockTransactionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        data = form.cleaned_data
+        transaction_type = data["transaction_type"]
+        quantity = data["quantity"]
+        try:
+            if transaction_type == StockTransaction.TransactionType.ADJUSTMENT:
+                entry = adjust_stock(
+                    item_id=data["item"].pk,
+                    quantity_delta=quantity,
+                    user=request.user,
+                )
+            else:
+                entry = record_stock_movement(
+                    item_id=data["item"].pk,
+                    transaction_type=transaction_type,
+                    quantity=quantity,
+                    user=request.user,
+                    exam=data.get("exam"),
+                )
+        except InventoryError as exc:
+            form.add_error("quantity", str(exc))
+        else:
+            if data.get("notes"):
+                entry.notes = data["notes"]
+                entry.save(update_fields=["notes"])
+            messages.success(
+                request,
+                f"{entry.get_transaction_type_display()} of {entry.quantity} "
+                f"recorded for {entry.item.name}. "
+                f"Current stock: {entry.item.current_stock_level} "
+                f"{entry.item.unit_of_measure}.",
+            )
+            return redirect("inventory:transaction_list")
+
+    return render(
+        request,
+        "inventory/transaction_form.html",
+        {"form": form, "title": _("Record stock transaction")},
+    )
+
+
+@login_required
+def transaction_edit(request, transaction_id):
+    entry = get_object_or_404(
+        StockTransaction.objects.select_related("item"), pk=transaction_id
+    )
+    original_item_id = entry.item_id
+    # Snapshot of this entry's own stock effect before editing.
+    effect_before = _transaction_effect(entry.transaction_type, entry.quantity)
+    form = StockTransactionForm(request.POST or None, instance=entry)
+
+    if request.method == "POST" and form.is_valid():
+        updated = form.save(commit=False)
+        effect_after = _transaction_effect(
+            updated.transaction_type, updated.quantity
+        )
+        context = {
+            "form": form,
+            "transaction": entry,
+            "title": _("Edit stock transaction"),
+        }
+        try:
+            with db_transaction.atomic:
+                if original_item_id == updated.item_id:
+                    item = InventoryItem.objects.select_for_update().get(
+                        pk=original_item_id
+                    )
+                    projected = (
+                        item.current_stock_level - effect_before + effect_after
+                    )
+                    _validate_stock_level(item, projected)
+                    item.current_stock_level = projected
+                    item.save(
+                        update_fields=["current_stock_level", "updated_at"]
+                    )
+                else:
+                    old_item = InventoryItem.objects.select_for_update().get(
+                        pk=original_item_id
+                    )
+                    new_item = InventoryItem.objects.select_for_update().get(
+                        pk=updated.item_id
+                    )
+                    old_projected = old_item.current_stock_level - effect_before
+                    new_projected = new_item.current_stock_level + effect_after
+                    _validate_stock_level(old_item, old_projected)
+                    _validate_stock_level(new_item, new_projected)
+                    old_item.current_stock_level = old_projected
+                    old_item.save(
+                        update_fields=["current_stock_level", "updated_at"]
+                    )
+                    new_item.current_stock_level = new_projected
+                    new_item.save(
+                        update_fields=["current_stock_level", "updated_at"]
+                    )
+                # Preserve ledger metadata that must not change via the form.
+                updated.user_id = entry.user_id
+                updated.timestamp = entry.timestamp
+                updated.is_deleted = entry.is_deleted
+                updated.deleted_at = entry.deleted_at
+                updated.deleted_by_id = entry.deleted_by_id
+                updated.save()
+        except InventoryError as exc:
+            messages.error(request, str(exc))
+            status = 409 if "negative" in str(exc) else 400
+            return render(
+                request, "inventory/transaction_form.html", context, status=status
+            )
+
+        messages.success(
+            request, f"Transaction for {entry.item.name} updated."
+        )
+        return redirect("inventory:transaction_list")
+
+    return render(
+        request,
+        "inventory/transaction_form.html",
+        {
+            "form": form,
+            "transaction": entry,
+            "title": _("Edit stock transaction"),
+        },
+    )
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def transaction_delete(request, transaction_id):
+    """Soft-delete a stock transaction (ledger row is never removed)."""
+    from audit.models import AuditLog
+
+    entry = get_object_or_404(
+        StockTransaction.objects.select_related("item", "user"),
+        pk=transaction_id,
+    )
+
+    if request.method == "POST":
+        reason = request.POST.get("reason", "").strip()
+        reverse_effect = -_transaction_effect(
+            entry.transaction_type, entry.quantity
+        )
+        with db_transaction.atomic:
+            item = InventoryItem.objects.select_for_update().get(pk=entry.item_id)
+            projected = item.current_stock_level + reverse_effect
+            try:
+                _validate_stock_level(item, projected)
+            except InventoryError as exc:
+                messages.error(request, f"Cannot void this transaction: {exc}")
+                return redirect(
+                    "inventory:transaction_delete", transaction_id
+                )
+            item.current_stock_level = projected
+            item.save(update_fields=["current_stock_level", "updated_at"])
+            entry.soft_delete(deleted_by=request.user)
+            if reason:
+                prefix = f"{entry.notes}\n" if entry.notes else ""
+                entry.notes = f"{prefix}Voided: {reason}"
+                entry.save(update_fields=["notes"])
+
+        AuditLog.objects.create(
+            user=request.user if request.user.is_authenticated else None,
+            action="DELETE",
+            entity_type="StockTransaction",
+            entity_id=entry.id,
+            old_values={
+                "is_deleted": False,
+                "item": entry.item.name,
+                "transaction_type": entry.transaction_type,
+                "quantity": str(entry.quantity),
+            },
+            new_values={
+                "is_deleted": True,
+                "deleted_at": str(entry.deleted_at),
+                "reason": reason,
+            },
+            ip_address=request.META.get("REMOTE_ADDR"),
+            user_agent=request.META.get("HTTP_USER_AGENT", "")[:500],
+        )
+        messages.success(
+            request,
+            f"Transaction for {entry.item.name} voided (soft deleted). "
+            f"Current stock: {item.current_stock_level} {item.unit_of_measure}.",
+        )
+        return redirect("inventory:transaction_list")
+
+    return render(
+        request,
+        "inventory/transaction_confirm_delete.html",
+        {"transaction": entry},
     )
 
 

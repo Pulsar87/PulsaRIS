@@ -126,11 +126,27 @@ class InventoryItem(models.Model):
         return days is not None and 0 <= days <= 90
 
 
+class StockTransactionQuerySet(models.QuerySet):
+    def alive(self):
+        return self.filter(is_deleted=False)
+
+    def include_deleted(self):
+        return self.all()
+
+
+class StockTransactionManager(models.Manager.from_queryset(StockTransactionQuerySet)):
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
+
+
 class StockTransaction(models.Model):
     class TransactionType(models.TextChoices):
         IN = "IN", "Stock In"
         OUT = "OUT", "Stock Out"
         ADJUSTMENT = "ADJUSTMENT", "Adjustment"
+
+    objects = StockTransactionManager()
+    all_objects = StockTransactionQuerySet.as_manager()
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     item = models.ForeignKey(
@@ -155,12 +171,23 @@ class StockTransaction(models.Model):
         null=True,
         blank=True,
     )
+    notes = models.TextField(blank=True)
+    is_deleted = models.BooleanField(default=False, db_index=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name="deleted_stock_transactions",
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         ordering = ["-timestamp"]
         indexes = [
             models.Index(fields=["item", "timestamp"]),
             models.Index(fields=["transaction_type", "timestamp"]),
+            models.Index(fields=["is_deleted"]),
         ]
         constraints = [
             models.CheckConstraint(
@@ -181,6 +208,19 @@ class StockTransaction(models.Model):
 
     def __str__(self):
         return f"{self.get_transaction_type_display()}: {self.item} ({self.quantity})"
+
+    def soft_delete(self, deleted_by=None):
+        """Mark the transaction as deleted without removing the ledger row."""
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
+        self.deleted_by = deleted_by
+        self.save(update_fields=["is_deleted", "deleted_at", "deleted_by"])
+
+    def restore(self):
+        self.is_deleted = False
+        self.deleted_at = None
+        self.deleted_by = None
+        self.save(update_fields=["is_deleted", "deleted_at", "deleted_by"])
 
 
 class StockReceipt(models.Model):

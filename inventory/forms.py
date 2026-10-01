@@ -42,6 +42,67 @@ class StockTransactionForm(forms.Form):
     )
 
 
+class StockTransactionForm(forms.ModelForm):
+    """Create / edit a stock ledger entry (In, Out or Adjustment)."""
+
+    class Meta:
+        model = StockTransaction
+        fields = ["item", "transaction_type", "quantity", "exam", "notes"]
+        widgets = {
+            "item": forms.Select(attrs={"class": "form-select"}),
+            "transaction_type": forms.Select(attrs={"class": "form-select"}),
+            "quantity": forms.NumberInput(
+                attrs={
+                    "class": "form-control",
+                    "min": "0.001",
+                    "step": "0.001",
+                    "placeholder": "0.000",
+                }
+            ),
+            "exam": forms.Select(attrs={"class": "form-select"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["item"].queryset = InventoryItem.objects.filter(
+            is_active=True
+        ).select_related("category")
+        self.fields["item"].empty_label = None
+        self.fields["exam"].queryset = ExamOrder.objects.all().order_by(
+            "-created_at"
+        )[:500]
+        self.fields["exam"].empty_label = "No exam reference"
+        self.fields["exam"].required = False
+
+    def clean_quantity(self):
+        quantity = self.cleaned_data["quantity"]
+        if quantity == 0:
+            raise forms.ValidationError("Quantity cannot be zero.")
+        return quantity
+
+    def clean(self):
+        cleaned = super().clean()
+        transaction_type = cleaned.get("transaction_type")
+        quantity = cleaned.get("quantity")
+        if quantity is not None and transaction_type:
+            if transaction_type in (
+                StockTransaction.TransactionType.IN,
+                StockTransaction.TransactionType.OUT,
+            ) and quantity <= 0:
+                self.add_error(
+                    "quantity", "Quantity must be greater than zero."
+                )
+            elif (
+                transaction_type == StockTransaction.TransactionType.ADJUSTMENT
+                and quantity == 0
+            ):
+                self.add_error(
+                    "quantity", "An adjustment cannot be zero."
+                )
+        return cleaned
+
+
 class SupplierForm(forms.ModelForm):
     """Create / edit a seller (vendor) that stock is imported from."""
 

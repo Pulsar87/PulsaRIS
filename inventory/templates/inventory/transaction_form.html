@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 720px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-arrow-left-right me-2 text-primary"></i>{{ title }}</h1>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'inventory:transaction_list' %}">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Back to transactions" %}
+        </a>
+    </div>
+
+    {% if transaction %}
+    <div class="alert alert-info d-flex align-items-center gap-2">
+        <i class="bi bi-info-circle"></i>
+        <div>
+            {% blocktrans with ts=transaction.timestamp|date:"Y-m-d H:i" user=transaction.user %}
+            Original entry recorded on {{ ts }} by {{ user }}. Stock levels are
+            recalculated automatically when you save.
+            {% endblocktrans %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.item.id_for_label }}">{% trans "Item" %} *</label>
+                        {{ form.item }}
+                        {% for error in form.item.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.transaction_type.id_for_label }}">{% trans "Transaction type" %} *</label>
+                        {{ form.transaction_type }}
+                        {% for error in form.transaction_type.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label" for="{{ form.quantity.id_for_label }}">{% trans "Quantity" %} *</label>
+                        {{ form.quantity }}
+                        <div class="form-text">
+                            {% trans "Positive for Stock In / Out; signed delta (e.g. -1.5) for an Adjustment." %}
+                        </div>
+                        {% for error in form.quantity.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.exam.id_for_label }}">{% trans "Reference exam (optional)" %}</label>
+                        {{ form.exam }}
+                        {% for error in form.exam.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label" for="{{ form.notes.id_for_label }}">{% trans "Notes" %}</label>
+                        {{ form.notes }}
+                        {% for error in form.notes.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-outline-secondary" href="{% url 'inventory:transaction_list' %}">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i>{% trans "Save transaction" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -15,6 +15,19 @@ urlpatterns = [
     path("stock-in/", views.stock_in, name="stock_in"),
     path("adjustments/", views.stock_adjustment, name="stock_adjustment"),
     path("consume-exam/", views.exam_consumption, name="exam_consumption"),
+    # Stock transactions (ledger) — web pages
+    path("transactions/", views.transaction_list, name="transaction_list"),
+    path("transactions/new/", views.transaction_create, name="transaction_create"),
+    path(
+        "transactions/<uuid:transaction_id>/edit/",
+        views.transaction_edit,
+        name="transaction_edit",
+    ),
+    path(
+        "transactions/<uuid:transaction_id>/delete/",
+        views.transaction_delete,
+        name="transaction_delete",
+    ),
     # Suppliers (sellers)
     path("suppliers/", views.supplier_list, name="supplier_list"),
     path("suppliers/new/", views.supplier_create, name="supplier_create"),

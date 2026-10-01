@@ -1,29 +1,7 @@
-# Compiled and build artifacts
+# Python compiled files
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
-# Dependency directories
-myenv/
-venv/
-.venv/
-
-# Database files
-test_ris.db
-*.db
-
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors/IDE
-.vscode/
-.idea/
+# Django media/static (common in Django projects)
+media/
+staticfiles/
