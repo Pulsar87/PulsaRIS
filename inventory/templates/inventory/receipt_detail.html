@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{{ receipt.receipt_number }} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-receipt me-2 text-primary"></i>{{ receipt.receipt_number }}
+            </h1>
+            <p class="text-muted mb-0">
+                {% blocktrans with supplier=receipt.supplier.name %}Delivery from {{ supplier }}{% endblocktrans %}
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="{% url 'inventory:stock_receipt_list' %}">
+                <i class="bi bi-arrow-left me-1"></i>{% trans "All receipts" %}
+            </a>
+            <a class="btn btn-primary" href="{% url 'inventory:stock_receipt_create' %}">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "New import" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body row g-3">
+            <div class="col-md-3">
+                <div class="text-muted small">{% trans "Seller" %}</div>
+                <div class="fw-semibold">{{ receipt.supplier.name }}</div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-muted small">{% trans "Received date" %}</div>
+                <div class="fw-semibold">{{ receipt.received_date }}</div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-muted small">{% trans "Invoice #" %}</div>
+                <div class="fw-semibold">{{ receipt.invoice_number|default:"—" }}</div>
+            </div>
+            <div class="col-md-2">
+                <div class="text-muted small">{% trans "Delivery note" %}</div>
+                <div class="fw-semibold">{{ receipt.delivery_note|default:"—" }}</div>
+            </div>
+            <div class="col-md-3">
+                <div class="text-muted small">{% trans "Received by" %}</div>
+                <div class="fw-semibold">{{ receipt.received_by.get_full_name|default:receipt.received_by.username }}</div>
+            </div>
+            {% if receipt.notes %}
+            <div class="col-12">
+                <div class="text-muted small">{% trans "Notes" %}</div>
+                <div>{{ receipt.notes }}</div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">{% trans "Items in this delivery" %}</h2>
+            <span class="badge text-bg-secondary">{{ receipt.items.count }} {% trans "lines" %}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Item" %}</th>
+                        <th>{% trans "Quantity" %}</th>
+                        <th>{% trans "Unit price" %}</th>
+                        <th>{% trans "Total" %}</th>
+                        <th>{% trans "Batch #" %}</th>
+                        <th>{% trans "Manufactured" %}</th>
+                        <th>{% trans "Expiry" %}</th>
+                        <th>{% trans "Status" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for line in receipt.items.all %}
+                    <tr>
+                        <td class="fw-semibold">
+                            {{ line.item.name }}
+                            <div class="small text-muted"><code>{{ line.item.sku }}</code></div>
+                        </td>
+                        <td>{{ line.quantity|floatformat:"-3" }} {{ line.item.unit_of_measure }}</td>
+                        <td>{% if line.unit_price is not None %}{{ line.unit_price|floatformat:2 }}{% else %}—{% endif %}</td>
+                        <td>{% if line.total_price is not None %}{{ line.total_price|floatformat:2 }}{% else %}—{% endif %}</td>
+                        <td>{{ line.batch_number|default:"—" }}</td>
+                        <td>{{ line.manufacture_date|default:"—" }}</td>
+                        <td>
+                            {{ line.expiry_date }}
+                            <div class="small text-muted">{{ line.days_to_expiry }} {% trans "days left" %}</div>
+                        </td>
+                        <td>
+                            {% if line.expiry_status == "OK" %}
+                            <span class="badge text-bg-success">{% trans "Acceptable" %}</span>
+                            {% elif line.expiry_status == "WARNING" %}
+                            <span class="badge text-bg-warning text-dark">{% trans "Short shelf life" %}</span>
+                            {% else %}
+                            <span class="badge text-bg-danger">{% trans "Rejected" %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
