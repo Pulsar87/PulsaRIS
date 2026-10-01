@@ -88,8 +88,9 @@ class StockTransactionAdmin(admin.ModelAdmin):
         "timestamp",
         "user",
         "exam",
+        "is_deleted",
     ]
-    list_filter = ["transaction_type", "timestamp"]
+    list_filter = ["transaction_type", "timestamp", "is_deleted"]
     search_fields = ["item__name", "item__sku", "exam__accession_number"]
     readonly_fields = [
         "item",
@@ -98,6 +99,10 @@ class StockTransactionAdmin(admin.ModelAdmin):
         "timestamp",
         "user",
         "exam",
+        "notes",
+        "is_deleted",
+        "deleted_at",
+        "deleted_by",
     ]
 
     def has_add_permission(self, request):

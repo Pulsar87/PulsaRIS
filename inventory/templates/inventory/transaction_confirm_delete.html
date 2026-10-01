@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Void stock transaction" %} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 640px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0"><i class="bi bi-trash me-2 text-danger"></i>{% trans "Void stock transaction" %}</h1>
+        <a class="btn btn-outline-secondary btn-sm" href="{% url 'inventory:transaction_list' %}">
+            <i class="bi bi-arrow-left me-1"></i>{% trans "Back to transactions" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <div class="alert alert-warning d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+                <div>{% trans "This transaction will be soft-deleted (voided): it stays in the audit ledger but is removed from active reports, and its effect on stock is reversed." %}</div>
+            </div>
+
+            <table class="table table-sm align-middle">
+                <tbody>
+                    <tr><th>{% trans "Item" %}</th><td>{{ transaction.item.name }} ({{ transaction.item.sku }})</td></tr>
+                    <tr><th>{% trans "Type" %}</th><td>{{ transaction.get_transaction_type_display }}</td></tr>
+                    <tr><th>{% trans "Quantity" %}</th><td>{{ transaction.quantity }} {{ transaction.item.unit_of_measure }}</td></tr>
+                    <tr><th>{% trans "Recorded" %}</th><td>{{ transaction.timestamp|date:"Y-m-d H:i" }} — {{ transaction.user }}</td></tr>
+                    <tr><th>{% trans "Exam" %}</th><td>{{ transaction.exam.accession_number|default:"—" }}</td></tr>
+                    {% if transaction.notes %}<tr><th>{% trans "Notes" %}</th><td>{{ transaction.notes }}</td></tr>{% endif %}
+                </tbody>
+            </table>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="reason">{% trans "Reason for voiding (optional)" %}</label>
+                    <textarea class="form-control" id="reason" name="reason" rows="2" placeholder="{% trans 'e.g. Data-entry error' %}"></textarea>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-outline-secondary" href="{% url 'inventory:transaction_list' %}">{% trans "Cancel" %}</a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>{% trans "Confirm void (soft delete)" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

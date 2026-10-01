@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Stock transactions" %} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-arrow-left-right me-2 text-primary"></i>{% trans "Stock transactions" %}</h1>
+            <p class="text-muted mb-0">{% trans "Inventory ledger of stock in, stock out and adjustment entries." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary" href="{% url 'inventory:dashboard' %}">
+                <i class="bi bi-box-seam me-1"></i>{% trans "Inventory" %}
+            </a>
+            <a class="btn btn-primary" href="{% url 'inventory:transaction_create' %}">
+                <i class="bi bi-plus-lg me-1"></i>{% trans "Record transaction" %}
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label small text-muted">{% trans "Item" %}</label>
+                    <select name="item" class="form-select form-select-sm">
+                        <option value="">{% trans "All items" %}</option>
+                        {% for item in items %}
+                        <option value="{{ item.pk }}" {% if item_filter == item.pk|stringformat:'s' %}selected{% endif %}>{{ item.name }} ({{ item.sku }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small text-muted">{% trans "Type" %}</label>
+                    <select name="type" class="form-select form-select-sm">
+                        <option value="">{% trans "All types" %}</option>
+                        <option value="IN" {% if type_filter == 'IN' %}selected{% endif %}>{% trans "Stock In" %}</option>
+                        <option value="OUT" {% if type_filter == 'OUT' %}selected{% endif %}>{% trans "Stock Out" %}</option>
+                        <option value="ADJUSTMENT" {% if type_filter == 'ADJUSTMENT' %}selected{% endif %}>{% trans "Adjustment" %}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-funnel me-1"></i>{% trans "Filter" %}
+                    </button>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'inventory:transaction_list' %}">{% trans "Reset" %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Date / time" %}</th>
+                        <th>{% trans "Item" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th class="text-end">{% trans "Quantity" %}</th>
+                        <th>{% trans "User" %}</th>
+                        <th>{% trans "Exam" %}</th>
+                        <th>{% trans "Notes" %}</th>
+                        <th class="text-end">{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tx in transactions %}
+                    <tr>
+                        <td class="text-nowrap">{{ tx.timestamp|date:"Y-m-d H:i" }}</td>
+                        <td class="fw-semibold">{{ tx.item.name }} <span class="text-muted small">({{ tx.item.sku }})</span></td>
+                        <td>
+                            {% if tx.transaction_type == 'IN' %}
+                            <span class="badge text-bg-success">{% trans "Stock In" %}</span>
+                            {% elif tx.transaction_type == 'OUT' %}
+                            <span class="badge text-bg-danger">{% trans "Stock Out" %}</span>
+                            {% else %}
+                            <span class="badge text-bg-warning text-dark">{% trans "Adjustment" %}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">{{ tx.quantity }}</td>
+                        <td>{{ tx.user.get_username|default:tx.user }}</td>
+                        <td>{{ tx.exam.accession_number|default:"—" }}</td>
+                        <td class="small text-muted text-truncate" style="max-width: 220px;">{{ tx.notes|default:"—" }}</td>
+                        <td class="text-end text-nowrap">
+                            <a class="btn btn-sm btn-outline-primary" href="{% url 'inventory:transaction_edit' tx.pk %}">
+                                <i class="bi bi-pencil me-1"></i>{% trans "Edit" %}
+                            </a>
+                            <a class="btn btn-sm btn-outline-danger" href="{% url 'inventory:transaction_delete' tx.pk %}">
+                                <i class="bi bi-trash me-1"></i>{% trans "Void" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="bi bi-arrow-left-right display-6 text-muted"></i>
+                            <p class="text-muted mt-2 mb-0">{% trans "No stock transactions recorded yet." %}</p>
+                            <a class="btn btn-primary btn-sm mt-2" href="{% url 'inventory:transaction_create' %}">
+                                <i class="bi bi-plus-lg me-1"></i>{% trans "Record transaction" %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -17,6 +17,18 @@ class InventoryError(ValueError):
     """Base exception for invalid inventory operations."""
 
 
+def apply_transaction_effect(item, transaction_type, quantity):
+    """Return the stock level after applying a transaction to ``item``.
+
+    IN adds, OUT subtracts, ADJUSTMENT applies the signed delta.
+    """
+    if transaction_type == StockTransaction.TransactionType.IN:
+        return item.current_stock_level + quantity
+    if transaction_type == StockTransaction.TransactionType.OUT:
+        return item.current_stock_level - quantity
+    return item.current_stock_level + quantity
+
+
 class InsufficientStockError(InventoryError):
     def __init__(self, item, requested, available):
         self.item = item
