@@ -1,8 +1,50 @@
 import uuid
+from datetime import timedelta
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
+from django.utils import timezone
+
+
+def default_receipt_number():
+    """Human-friendly sequential receipt number, e.g. GRN-20260731-001."""
+    today = timezone.localdate()
+    prefix = f"GRN-{today:%Y%m%d}-"
+    last = (
+        StockReceipt.objects.filter(receipt_number__startswith=prefix)
+        .order_by("-receipt_number")
+        .values_list("receipt_number", flat=True)
+        .first()
+    )
+    try:
+        sequence = int(last.rsplit("-", 1)[1]) + 1 if last else 1
+    except (ValueError, IndexError):
+        sequence = 1
+    return f"{prefix}{sequence:03d}"
+
+
+class Supplier(models.Model):
+    """A vendor/seller that radiology consumables are purchased from."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=150, unique=True)
+    contact_person = models.CharField(max_length=150, blank=True)
+    phone = models.CharField(max_length=40, blank=True)
+    email = models.EmailField(blank=True)
+    address = models.CharField(max_length=255, blank=True)
+    tax_id = models.CharField(max_length=60, blank=True)
+    notes = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
 
 
 class Category(models.Model):
@@ -27,6 +69,21 @@ class InventoryItem(models.Model):
         Category, on_delete=models.PROTECT, related_name="items"
     )
     unit_of_measure = models.CharField(max_length=40)
+    supplier = models.ForeignKey(
+        Supplier,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="items",
+        help_text="Default seller this item is purchased from.",
+    )
+    batch_number = models.CharField(max_length=60, blank=True)
+    manufacture_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Earliest expiry currently held for this SKU.",
+    )
     low_stock_threshold = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     current_stock_level = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     is_active = models.BooleanField(default=True)
@@ -52,6 +109,21 @@ class InventoryItem(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.sku})"
+
+    @property
+    def days_to_expiry(self):
+        if self.expiry_date is None:
+            return None
+        return (self.expiry_date - timezone.localdate()).days
+
+    @property
+    def is_expired(self):
+        return self.days_to_expiry is not None and self.days_to_expiry < 0
+
+    @property
+    def is_expiring_soon(self):
+        days = self.days_to_expiry
+        return days is not None and 0 <= days <= 90
 
 
 class StockTransaction(models.Model):
@@ -109,3 +181,109 @@ class StockTransaction(models.Model):
 
     def __str__(self):
         return f"{self.get_transaction_type_display()}: {self.item} ({self.quantity})"
+
+
+class StockReceipt(models.Model):
+    """A goods-received note: one delivery from a supplier into inventory."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    receipt_number = models.CharField(
+        max_length=30, unique=True, default=default_receipt_number
+    )
+    supplier = models.ForeignKey(
+        Supplier, on_delete=models.PROTECT, related_name="receipts"
+    )
+    invoice_number = models.CharField(max_length=60, blank=True)
+    delivery_note = models.CharField(max_length=60, blank=True)
+    received_date = models.DateField(default=timezone.localdate)
+    received_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="stock_receipts",
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "stock receipt"
+        verbose_name_plural = "stock receipts"
+        indexes = [models.Index(fields=["supplier", "received_date"])]
+
+    def __str__(self):
+        return f"{self.receipt_number} ({self.supplier.name})"
+
+
+class StockReceiptItem(models.Model):
+    """One line of a stock receipt: an item, its quantity, batch and expiry."""
+
+    EXPIRY_STATUS_CHOICES = [
+        ("OK", "Acceptable"),
+        ("WARNING", "Accepted with warning (short shelf life)"),
+        ("REJECTED", "Rejected (expired / below minimum shelf life)"),
+    ]
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    receipt = models.ForeignKey(
+        StockReceipt, on_delete=models.CASCADE, related_name="items"
+    )
+    item = models.ForeignKey(
+        InventoryItem, on_delete=models.PROTECT, related_name="receipt_items"
+    )
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    unit_price = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True
+    )
+    total_price = models.DecimalField(
+        max_digits=14, decimal_places=2, null=True, blank=True
+    )
+    batch_number = models.CharField(max_length=60, blank=True)
+    manufacture_date = models.DateField(null=True, blank=True)
+    expiry_date = models.DateField()
+    minimum_shelf_life_days = models.PositiveIntegerField(
+        default=90,
+        help_text="Deliveries expiring sooner than this are rejected.",
+    )
+    expiry_status = models.CharField(
+        max_length=10, choices=EXPIRY_STATUS_CHOICES, default="OK"
+    )
+    transaction = models.OneToOneField(
+        StockTransaction,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="receipt_item",
+    )
+
+    class Meta:
+        ordering = ["id"]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(quantity__gt=0),
+                name="stock_receipt_item_quantity_positive",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.item.name} x {self.quantity}"
+
+    @property
+    def days_to_expiry(self):
+        return (self.expiry_date - timezone.localdate()).days
+
+    def clean(self):
+        super().clean()
+        errors = {}
+        if self.quantity is not None and self.quantity <= 0:
+            errors["quantity"] = "Quantity must be greater than zero."
+        if self.manufacture_date and self.expiry_date:
+            if self.expiry_date <= self.manufacture_date:
+                errors["expiry_date"] = (
+                    "Expiry date must be after the manufacture date."
+                )
+            elif self.expiry_date < timezone.localdate():
+                errors["expiry_date"] = (
+                    "This batch is already expired and cannot be received."
+                )
+        if errors:
+            raise ValidationError(errors)
