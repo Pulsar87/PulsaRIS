@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
-from django.utils import timezone
 
-from .check import get_hardware_id, verify_key, is_license_valid
+from .check import is_license_valid
+from .models import LicenseActivation
 
 
 class LicenseMiddleware:
@@ -31,12 +31,12 @@ class LicenseMiddleware:
             if path.startswith(exempt_path):
                 return self.get_response(request)
 
-        # Check license status from session (single-tenant setup)
-        if not request.session.get("license_activated"):
+        license_activation = LicenseActivation.objects.filter(pk=1).first()
+        if license_activation is None:
             return redirect("license:activation_required")
 
-        license_expiry = request.session.get("license_expiry")
-        license_max_orders = request.session.get("license_max_orders")
+        license_expiry = license_activation.expiry_date.isoformat()
+        license_max_orders = license_activation.max_orders
         
         if license_expiry or license_max_orders is not None:
             # Get current orders count to check against usage limit

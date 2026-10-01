@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Payment plan' %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div><a href="{% url 'billing:payment_plan_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Payment plans' %}</a><h1 class="mt-2">{% trans 'Payment plan' %}</h1><span class="badge {% if payment_plan.status == 'ACTIVE' %}text-bg-success{% elif payment_plan.status == 'DEFAULTED' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ payment_plan.get_status_display }}</span></div>
+        <div class="d-flex gap-2"><a href="{% url 'billing:payment_plan_update' payment_plan.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:payment_plan_delete' payment_plan.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Plan terms' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-6">{% trans 'Patient account' %}</dt><dd class="col-sm-6"><a href="{% url 'billing:patient_account_detail' payment_plan.patient_account.pk %}">{{ payment_plan.patient_account.account_number }}</a></dd>
+            <dt class="col-sm-6">{% trans 'Total amount' %}</dt><dd class="col-sm-6">${{ payment_plan.total_amount|floatformat:2 }}</dd>
+            <dt class="col-sm-6">{% trans 'Monthly payment' %}</dt><dd class="col-sm-6">${{ payment_plan.monthly_payment|floatformat:2 }}</dd>
+            <dt class="col-sm-6">{% trans 'First payment date' %}</dt><dd class="col-sm-6">{{ payment_plan.first_payment_date|date:"M d, Y" }}</dd>
+            <dt class="col-sm-6">{% trans 'Payment day' %}</dt><dd class="col-sm-6">{{ payment_plan.payment_day }}</dd>
+            <dt class="col-sm-6">{% trans 'Agreement signed' %}</dt><dd class="col-sm-6">{% if payment_plan.agreement_signed %}{% trans 'Yes' %}{% if payment_plan.agreement_date %} · {{ payment_plan.agreement_date|date:"M d, Y" }}{% endif %}{% else %}{% trans 'No' %}{% endif %}</dd>
+        </dl></div></div></div>
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Progress' %}</div><div class="card-body">
+            <p class="mb-1">{% blocktrans with paid=payment_plan.payments_made total=payment_plan.number_of_payments %}{{ paid }} of {{ total }} installments paid{% endblocktrans %}</p>
+            {% widthratio payment_plan.payments_made payment_plan.number_of_payments 100 as percentage %}
+            <div class="progress mb-3" role="progressbar" aria-label="{% trans 'Plan progress' %}" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width: {{ percentage }}%">{{ percentage }}%</div></div>
+            <div class="text-muted">{% trans 'Remaining balance' %}</div><div class="fs-3 fw-semibold">${{ payment_plan.remaining_balance|floatformat:2 }}</div>
+            {% if payment_plan.notes %}<hr><div>{{ payment_plan.notes|linebreaksbr }}</div>{% endif %}
+        </div></div></div>
+    </div>
+    <div class="card"><div class="card-header"><h2 class="h5 mb-0">{% trans 'Installments' %}</h2></div><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>#</th><th>{% trans 'Due date' %}</th><th class="text-end">{% trans 'Amount due' %}</th><th class="text-end">{% trans 'Amount paid' %}</th><th>{% trans 'Status' %}</th><th>{% trans 'Payment' %}</th><th></th></tr></thead>
+        <tbody>{% for installment in payment_plan.installments.all %}
+            <tr><td>{{ installment.installment_number }}</td><td>{{ installment.due_date|date:"M d, Y" }}</td><td class="text-end">${{ installment.amount_due|floatformat:2 }}</td><td class="text-end">${{ installment.amount_paid|floatformat:2 }}</td><td><span class="badge {% if installment.status == 'PAID' %}text-bg-success{% elif installment.status == 'LATE' %}text-bg-danger{% else %}text-bg-secondary{% endif %}">{{ installment.get_status_display }}</span></td>
+                <td>{% if installment.payment %}<a href="{% url 'billing:payment_detail' installment.payment.pk %}">{{ installment.payment }}</a>{% else %}—{% endif %}</td>
+                <td class="text-end"><a href="{% url 'billing:payment_plan_installment_update' installment.pk %}" class="btn btn-sm btn-outline-secondary">{% trans 'Update' %}</a></td></tr>
+        {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">{% trans 'No installments are scheduled.' %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+</div>
+{% endblock %}

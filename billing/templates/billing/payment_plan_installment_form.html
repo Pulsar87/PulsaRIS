@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Update installment' %}{% endblock %}
+{% block content %}
+{% url 'billing:payment_plan_detail' object.payment_plan.pk as cancel_url %}
+{% trans 'Update payment plan installment' as page_title %}
+{% trans 'Save installment' as submit_label %}
+{% include 'billing/_form_page.html' %}
+{% endblock %}

@@ -358,17 +358,17 @@ FeeScheduleItemFormSet = inlineformset_factory(
 
 class ServiceLineForm(forms.ModelForm):
     """Form for creating/editing service line items (charge capture)"""
-    
+
     diagnosis_code_1 = forms.CharField(max_length=20, required=True, label="Primary Diagnosis")
     diagnosis_code_2 = forms.CharField(max_length=20, required=False, label="Secondary Diagnosis")
     diagnosis_code_3 = forms.CharField(max_length=20, required=False, label="Diagnosis 3")
     diagnosis_code_4 = forms.CharField(max_length=20, required=False, label="Diagnosis 4")
-    
+
     modifier_1 = forms.CharField(max_length=5, required=False)
     modifier_2 = forms.CharField(max_length=5, required=False)
     modifier_3 = forms.CharField(max_length=5, required=False)
     modifier_4 = forms.CharField(max_length=5, required=False)
-    
+
     class Meta:
         model = ServiceLine
         fields = [
@@ -405,27 +405,27 @@ class ServiceLineForm(forms.ModelForm):
             'billing_status': forms.Select(attrs={'class': 'form-select'}),
             'audit_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # If editing an existing instance, populate diagnosis and modifier fields
         if self.instance and self.instance.pk:
             diagnosis_codes = self.instance.diagnosis_codes or []
             modifiers = self.instance.modifiers or []
-            
+
             for i in range(min(4, len(diagnosis_codes))):
                 field_name = f'diagnosis_code_{i+1}'
                 if field_name in self.fields:
                     self.initial[field_name] = diagnosis_codes[i].get('code', '') if isinstance(diagnosis_codes[i], dict) else diagnosis_codes[i]
-            
+
             for i in range(min(4, len(modifiers))):
                 field_name = f'modifier_{i+1}'
                 if field_name in self.fields:
                     self.initial[field_name] = modifiers[i]
-    
+
     def clean(self):
         cleaned_data = super().clean()
-        
+
         # Build diagnosis codes list
         diagnosis_codes = []
         for i in range(1, 5):
@@ -436,7 +436,7 @@ class ServiceLineForm(forms.ModelForm):
                     'primary': (i == 1)
                 })
         cleaned_data['diagnosis_codes'] = diagnosis_codes
-        
+
         # Build modifiers list
         modifiers = []
         for i in range(1, 5):
@@ -444,15 +444,15 @@ class ServiceLineForm(forms.ModelForm):
             if mod:
                 modifiers.append(mod.strip())
         cleaned_data['modifiers'] = modifiers
-        
+
         return cleaned_data
-    
+
     def save(self, commit=True):
         instance = super().save(commit=False)
         # Set diagnosis_codes and modifiers from cleaned data
         instance.diagnosis_codes = self.cleaned_data.get('diagnosis_codes', [])
         instance.modifiers = self.cleaned_data.get('modifiers', [])
-        
+
         if commit:
             instance.save()
         return instance
@@ -469,7 +469,7 @@ ServiceLineFormSet = None
 
 class ClaimForm(forms.ModelForm):
     """Form for creating/editing insurance claims"""
-    
+
     class Meta:
         model = Claim
         fields = [
@@ -494,7 +494,7 @@ class ClaimForm(forms.ModelForm):
             'expected_patient': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Filter payers to active ones only
@@ -520,17 +520,17 @@ ClaimLineFormSet = inlineformset_factory(
 
 class ClaimLineForm(forms.ModelForm):
     """Form for individual claim line items"""
-    
+
     diagnosis_ptr_1 = forms.IntegerField(required=False, min_value=1, max_value=12, label="Diag Pointer 1")
     diagnosis_ptr_2 = forms.IntegerField(required=False, min_value=1, max_value=12, label="Diag Pointer 2")
     diagnosis_ptr_3 = forms.IntegerField(required=False, min_value=1, max_value=12, label="Diag Pointer 3")
     diagnosis_ptr_4 = forms.IntegerField(required=False, min_value=1, max_value=12, label="Diag Pointer 4")
-    
+
     modifier_1 = forms.CharField(max_length=5, required=False)
     modifier_2 = forms.CharField(max_length=5, required=False)
     modifier_3 = forms.CharField(max_length=5, required=False)
     modifier_4 = forms.CharField(max_length=5, required=False)
-    
+
     class Meta:
         model = ClaimLine
         fields = [
@@ -555,7 +555,7 @@ class ClaimLineForm(forms.ModelForm):
             'denial_code': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'CARC code'}),
             'denial_reason': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
@@ -565,17 +565,17 @@ class ClaimLineForm(forms.ModelForm):
                 field_name = f'diagnosis_ptr_{i+1}'
                 if field_name in self.fields:
                     self.initial[field_name] = pointers[i]
-            
+
             # Populate modifiers
             modifiers = self.instance.modifiers or []
             for i in range(min(4, len(modifiers))):
                 field_name = f'modifier_{i+1}'
                 if field_name in self.fields:
                     self.initial[field_name] = modifiers[i]
-    
+
     def clean(self):
         cleaned_data = super().clean()
-        
+
         # Build diagnosis pointers list
         pointers = []
         for i in range(1, 5):
@@ -583,7 +583,7 @@ class ClaimLineForm(forms.ModelForm):
             if ptr:
                 pointers.append(ptr)
         cleaned_data['diagnosis_pointers'] = pointers
-        
+
         # Build modifiers list
         modifiers = []
         for i in range(1, 5):
@@ -591,14 +591,14 @@ class ClaimLineForm(forms.ModelForm):
             if mod:
                 modifiers.append(mod.strip())
         cleaned_data['modifiers'] = modifiers
-        
+
         return cleaned_data
-    
+
     def save(self, commit=True):
         instance = super().save(commit=False)
         instance.diagnosis_pointers = self.cleaned_data.get('diagnosis_pointers', [])
         instance.modifiers = self.cleaned_data.get('modifiers', [])
-        
+
         if commit:
             instance.save()
         return instance
@@ -641,14 +641,9 @@ class PaymentPostingForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filter payers to active ones only
         self.fields['payer'].queryset = InsurancePayer.objects.filter(is_active=True)
-        # Filter claims to those that are submitted or accepted
-        if hasattr(kwargs.get('initial'), 'get') or hasattr(self, 'request'):
-            tenant = getattr(self, 'request', None) and getattr(self.request, 'tenant', None)
-            if tenant:
-                self.fields['claim'].queryset = Claim.objects.filter(
-                    tenant=tenant,
-                    status__in=['SUBMITTED', 'ACCEPTED', 'PARTIAL']
-                )
+        self.fields['claim'].queryset = Claim.objects.filter(
+            status__in=['SUBMITTED', 'ACCEPTED', 'PARTIAL']
+        )
 
 
 class PaymentDetailForm(forms.ModelForm):
@@ -728,14 +723,9 @@ class PaymentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter patient accounts to active ones
-        if hasattr(self, 'request'):
-            tenant = getattr(self.request, 'tenant', None)
-            if tenant:
-                self.fields['patient_account'].queryset = PatientAccount.objects.filter(
-                    tenant=tenant,
-                    account_status__in=['ACTIVE', 'PENDING_INSURANCE', 'PENDING_FOLLOWUP']
-                )
+        self.fields['patient_account'].queryset = PatientAccount.objects.filter(
+            account_status='ACTIVE'
+        )
 
 
 class PaymentAllocationForm(forms.ModelForm):
@@ -811,14 +801,9 @@ class PatientStatementForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter patient accounts to active ones with balances
-        if hasattr(self, 'request'):
-            tenant = getattr(self.request, 'tenant', None)
-            if tenant:
-                self.fields['patient_account'].queryset = PatientAccount.objects.filter(
-                    tenant=tenant,
-                    current_balance__gt=0
-                )
+        self.fields['patient_account'].queryset = PatientAccount.objects.filter(
+            current_balance__gt=0
+        )
 
 
 # ============================================================================
@@ -857,15 +842,10 @@ class PaymentPlanForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter patient accounts to active ones
-        if hasattr(self, 'request'):
-            tenant = getattr(self.request, 'tenant', None)
-            if tenant:
-                self.fields['patient_account'].queryset = PatientAccount.objects.filter(
-                    tenant=tenant,
-                    account_status='ACTIVE',
-                    current_balance__gt=0
-                )
+        self.fields['patient_account'].queryset = PatientAccount.objects.filter(
+            account_status='ACTIVE',
+            current_balance__gt=0
+        )
 
 
 class PaymentPlanInstallmentForm(forms.ModelForm):
@@ -965,15 +945,5 @@ class ClaimAppealForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filter claims to denied ones
-        if hasattr(self, 'request'):
-            tenant = getattr(self.request, 'tenant', None)
-            if tenant:
-                self.fields['claim'].queryset = Claim.objects.filter(
-                    tenant=tenant,
-                    status='DENIED'
-                )
-                self.fields['claim_line'].queryset = ClaimLine.objects.filter(
-                    claim__tenant=tenant,
-                    status='DENIED'
-                )
+        self.fields['claim'].queryset = Claim.objects.filter(status='DENIED')
+        self.fields['claim_line'].queryset = ClaimLine.objects.filter(status='DENIED')

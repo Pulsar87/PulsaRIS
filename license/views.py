@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.utils import timezone
 from .check import get_hardware_id, verify_key
+from .models import LicenseActivation
 
 @login_required
 def home(request):
@@ -12,9 +13,13 @@ def home(request):
     from orders.models import ExamOrder
     from core.models import Device
 
-    # Get license info from session
-    license_expiry = request.session.get('license_expiry')
-    license_max_orders = request.session.get('license_max_orders')
+    license_activation = LicenseActivation.objects.filter(pk=1).first()
+    license_expiry = (
+        license_activation.expiry_date.isoformat() if license_activation else None
+    )
+    license_max_orders = (
+        license_activation.max_orders if license_activation else None
+    )
 
     # Get current orders count
     current_orders_count = ExamOrder.objects.count()
@@ -67,6 +72,9 @@ def calendar_events(request):
         try:
             from dateutil import parser
             start_dt = parser.parse(start)
+            # Ensure timezone-aware datetime
+            if timezone.is_naive(start_dt):
+                start_dt = timezone.make_aware(start_dt)
             filters['scheduled_datetime__gte'] = start_dt
             logger.info(f"Parsed start date: {start_dt}")
         except (ValueError, ImportError) as e:
@@ -77,6 +85,9 @@ def calendar_events(request):
         try:
             from dateutil import parser
             end_dt = parser.parse(end)
+# Ensure timezone-aware datetime
+            if timezone.is_naive(end_dt):
+                end_dt = timezone.make_aware(end_dt)
             filters['scheduled_datetime__lte'] = end_dt
             logger.info(f"Parsed end date: {end_dt}")
         except (ValueError, ImportError) as e:
@@ -190,12 +201,18 @@ def activate(request):
             provided_key = f"{expiry_str}-{signature.upper()}"
 
             if verify_key(provided_key):
-                # Store license in session (single-tenant setup)
-                request.session['license_activated'] = True
-                request.session['license_expiry'] = expiry_date
-                request.session['license_signature'] = signature.upper()
-                # Set max orders limit (None means unlimited)
-                request.session['license_max_orders'] = int(max_orders) if max_orders and max_orders.strip() else None
+                LicenseActivation.objects.update_or_create(
+                    pk=1,
+                    defaults={
+                        'expiry_date': date_obj.date(),
+                        'signature': signature.upper(),
+                        'max_orders': (
+                            int(max_orders)
+                            if max_orders and max_orders.strip()
+                            else None
+                        ),
+                    },
+                )
 
                 messages.success(request, 'System activated successfully!')
                 return redirect('license:home')

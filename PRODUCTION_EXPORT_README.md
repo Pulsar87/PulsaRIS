@@ -57,6 +57,11 @@ cp .env.example .env  # Configure your environment
 docker-compose up -d --build
 ```
 
+The Compose deployment stores PostgreSQL data in the `pgdata` named volume, and
+license activation is saved in that database. Re-running `docker-compose up`
+preserves both. Avoid `docker-compose down -v` unless you intend to delete the
+database volume; back it up before removing or changing the Compose project.
+
 ### Option 3: Build Production Docker Image
 ```bash
 # From the project root

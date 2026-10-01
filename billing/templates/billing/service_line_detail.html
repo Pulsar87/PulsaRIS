@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Service line' %} {{ service_line.procedure_code }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4">
+        <div><a href="{% url 'billing:service_line_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Service lines' %}</a><h1 class="mt-2">{{ service_line.procedure_code }} · {{ service_line.procedure_name }}</h1></div>
+        <div class="d-flex gap-2"><a href="{% url 'billing:service_line_update' service_line.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:service_line_delete' service_line.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a></div>
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Service details' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-5">{% trans 'Date of service' %}</dt><dd class="col-sm-7">{{ service_line.service_date|date:"M d, Y" }}</dd>
+            <dt class="col-sm-5">{% trans 'Patient account' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:patient_account_detail' service_line.patient_account.pk %}">{{ service_line.patient_account.account_number }}</a></dd>
+            <dt class="col-sm-5">{% trans 'Exam order' %}</dt><dd class="col-sm-7">{{ service_line.exam_order }}</dd>
+            <dt class="col-sm-5">{% trans 'Billing status' %}</dt><dd class="col-sm-7">{{ service_line.get_billing_status_display }}</dd>
+            <dt class="col-sm-5">{% trans 'Claim' %}</dt><dd class="col-sm-7">{% if service_line.claim %}<a href="{% url 'billing:claim_detail' service_line.claim.pk %}">{{ service_line.claim.claim_number }}</a>{% else %}—{% endif %}</dd>
+            <dt class="col-sm-5">{% trans 'Rendering provider' %}</dt><dd class="col-sm-7">{{ service_line.rendering_provider|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Facility' %}</dt><dd class="col-sm-7">{{ service_line.facility|default:"—" }}</dd>
+        </dl></div></div></div>
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Charge details' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-6">{% trans 'Quantity' %}</dt><dd class="col-sm-6">{{ service_line.quantity }} {{ service_line.units_of_service }}</dd>
+            <dt class="col-sm-6">{% trans 'Unit price' %}</dt><dd class="col-sm-6">${{ service_line.unit_price|floatformat:2 }}</dd>
+            <dt class="col-sm-6">{% trans 'Total charge' %}</dt><dd class="col-sm-6 fw-semibold">${{ service_line.total_charge|floatformat:2 }}</dd>
+            <dt class="col-sm-6">{% trans 'Place of service' %}</dt><dd class="col-sm-6">{{ service_line.place_of_service|default:"—" }}</dd>
+            <dt class="col-sm-6">{% trans 'Diagnosis codes' %}</dt><dd class="col-sm-6">{{ service_line.diagnosis_codes|default:"—" }}</dd>
+            <dt class="col-sm-6">{% trans 'Modifiers' %}</dt><dd class="col-sm-6">{{ service_line.modifiers|default:"—" }}</dd>
+        </dl></div></div></div>
+    </div>
+</div>
+{% endblock %}

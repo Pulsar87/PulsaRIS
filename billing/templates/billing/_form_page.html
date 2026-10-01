@@ -1,0 +1,21 @@
+{% load i18n %}
+{% trans 'Save' as default_submit_label %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <a href="{{ cancel_url }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Back' %}</a>
+        <h1 class="mt-2">{{ page_title }}</h1>
+    </div>
+    <div class="card"><div class="card-body">
+        <form method="post" novalidate>
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>
+            {% endif %}
+            {{ form.as_p }}
+            <div class="d-flex flex-wrap justify-content-end gap-2 mt-4">
+                <a href="{{ cancel_url }}" class="btn btn-outline-secondary">{% trans 'Cancel' %}</a>
+                <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>{{ submit_label|default:default_submit_label }}</button>
+            </div>
+        </form>
+    </div></div>
+</div>

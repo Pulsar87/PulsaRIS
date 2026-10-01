@@ -14,16 +14,16 @@ Examples:
 """
 
 import sys
-
+from datetime import datetime
 from django.core.management.base import BaseCommand
 from pydicom.dataset import Dataset
-from pynetdicom import AE, evt
-from pynetdicom.sop_class import Verification, ModalityWorklistInformationFind
+from pynetdicom import AE, evt, debug_logger
+from pynetdicom.sop_class import Verification, ModalityWorklistInformationFind, ModalityPerformedProcedureStep
 
 from orders.models import ExamOrder
 from core.models import Device, Modality
 
-
+debug_logger()
 class Command(BaseCommand):
     help = "Run DICOM Modality Worklist SCP server"
 
@@ -63,11 +63,15 @@ class Command(BaseCommand):
 
         # Initialize Application Entity
         ae = AE(ae_title)
-        handlers = [(evt.EVT_C_FIND, self.handle_find)]
+        handlers = [(evt.EVT_C_FIND, self.handle_find),
+                    (evt.EVT_N_CREATE, self.handle_n_create),
+                    (evt.EVT_N_SET, self.handle_n_set),
+                    ]
 
         # Add supported contexts
         ae.add_supported_context(Verification)
         ae.add_supported_context(ModalityWorklistInformationFind)
+        ae.add_supported_context(ModalityPerformedProcedureStep)
 
         # Start server
         try:
@@ -96,7 +100,8 @@ class Command(BaseCommand):
         patient_id_filter = getattr(request, "PatientID", None)
 
         self.stdout.write(
-            f"Received C-FIND from {event.association.requestor.ae_title}: "
+            f"Received C-FIND from {event.assoc.requestor.ae_title}: "
+           # f"Received C-FIND from {event.association.requestor.ae_title}: "
             f"Modality={modality_filter or '*'}, Station={station_ae_filter or '*'}"
         )
 
@@ -201,12 +206,208 @@ class Command(BaseCommand):
 
             step.ScheduledProcedureStepDescription = order.procedure_name_en or ""
             step.ScheduledPerformingPhysicianName = order.referring_physician or ""
-            step.ScheduledProcedureStepID = str(order.id)
-            step.AccessionNumber = order.accession_number or ""
-            step.RequestedProcedureID = order.procedure_code or ""
+            # step.ScheduledProcedureStepID = str(order.id)
+            # step.AccessionNumber = order.accession_number or ""
+            # step.RequestedProcedureID = order.procedure_code or ""
+            #
+            # # SH/AE fields: max 16 chars
+            step.ScheduledProcedureStepID = (order.accession_number or str(order.id))[:16]
+            step.AccessionNumber = (order.accession_number or "")[:16]
+            step.RequestedProcedureID = (order.procedure_code or "")[:16]
 
             item.ScheduledProcedureStepSequence = [step]
 
             all_items.append(item)
 
         return all_items
+
+
+    def handle_n_create(self, event):
+        """
+        Handle N-CREATE-RQ messages for MPPS.
+
+        This is called when a modality creates a new MPPS instance,
+        indicating the procedure has started.
+
+        Note: For N-CREATE events, pynetdicom provides the dataset via
+        event.attribute_list (not event.dataset). The attribute_list is
+        a list of (tag, vr, value) tuples.
+        """
+        # Extract attributes from the attribute_list
+        # Format: [(tag, vr, value), ...]
+        attribute_list = event.attribute_list if hasattr(event, 'attribute_list') else []
+
+        # Convert attribute_list to a dict for easier access
+        attrs = {}
+        for tag, vr, value in attribute_list:
+            # Tag format: (group, element) - convert to hex string like "00080050"
+            tag_hex = f"{tag[0]:04X}{tag[1]:04X}"
+            attrs[tag_hex] = value
+
+        # Extract key identifiers using DICOM tags
+        # SOPInstanceUID (0008,0018)
+        mpps_uid = attrs.get('00080018', '')
+        # AccessionNumber (0008,0050) - may be in ScheduledStepAttributesSequence
+        accession_number = attrs.get('00080050', '')
+        # PerformedProcedureStepID (0040,0253)
+        procedure_step_id = attrs.get('00400253', '')
+        # PerformedProcedureStepStatus (0040,0275)
+        status = attrs.get('00400275', '')
+
+        # Try to extract from ScheduledStepAttributesSequence (0040,0270) if not at root
+        if not accession_number and '00400270' in attrs:
+            scheduled_seq = attrs['00400270']
+            # Sequence items may be passed as nested structures
+            if hasattr(scheduled_seq, '__iter__') and not isinstance(scheduled_seq, str):
+                try:
+                    for item in scheduled_seq:
+                        if hasattr(item, 'get'):
+                            accession_number = item.get('AccessionNumber', '')
+                            if accession_number:
+                                break
+                        elif isinstance(item, dict):
+                            accession_number = item.get('00080050', item.get('AccessionNumber', ''))
+                            if accession_number:
+                                break
+                except (TypeError, AttributeError):
+                    pass
+
+        self.stdout.write(
+            f"Received N-CREATE (MPPS): MPPS UID={mpps_uid}, "
+            f"Accession={accession_number or '*'}, Status={status or 'UNKNOWN'}"
+        )
+
+        # Try to find and update the corresponding exam order
+        order = None
+        if accession_number:
+            try:
+                order = ExamOrder.objects.get(accession_number=accession_number)
+                old_status = order.status
+
+                # Update order status to IN_PROGRESS if it's in an appropriate state
+                if order.status in [ExamOrder.Status.REGISTERED, ExamOrder.Status.SCHEDULED]:
+                    order.status = ExamOrder.Status.IN_PROGRESS
+                    order.mpps_sop_instance_uid = mpps_uid
+                    order.save(update_fields=["status", "mpps_sop_instance_uid", "updated_at"])
+                    self.stdout.write(
+                        f"Updated order {order.id} status: {old_status} -> {order.status}, MPPS UID saved"
+                    )
+                else:
+                    # Just save the MPPS UID even if status doesn't change
+                    if not order.mpps_sop_instance_uid:
+                        order.mpps_sop_instance_uid = mpps_uid
+                        order.save(update_fields=["mpps_sop_instance_uid", "updated_at"])
+                        self.stdout.write(f"Saved MPPS UID to order {order.id}")
+            except ExamOrder.DoesNotExist:
+                self.stdout.write(f"No order found with AccessionNumber: {accession_number}")
+            except Exception as e:
+                self.stderr.write(f"Error updating order status: {e}")
+
+        # Create response dataset per DICOM standard for N-CREATE
+        # Response should contain only attributes that were successfully created
+        response = Dataset()
+        if mpps_uid:
+            response.SOPInstanceUID = mpps_uid
+        if procedure_step_id:
+            response.PerformedProcedureStepID = procedure_step_id
+        if status:
+            response.PerformedProcedureStepStatus = status
+
+        # Return success status with response dataset (allowed for N-CREATE)
+        return (0x0000, response) if response else 0x0000
+
+    def handle_n_set(self, event):
+        """
+        Handle N-SET-RQ messages for MPPS.
+
+        This is called when a modality updates an existing MPPS instance,
+        typically to indicate procedure completion or status changes.
+
+        Note: For N-SET events, pynetdicom provides the dataset via
+        event.attribute_list (not event.dataset). The attribute_list is
+        a list of (tag, vr, value) tuples.
+
+        Important: Per DICOM standard, N-SET success response should NOT
+        include a dataset - only the status code should be returned.
+        """
+        # Extract attributes from the attribute_list
+        # Format: [(tag, vr, value), ...]
+        attribute_list = event.attribute_list if hasattr(event, 'attribute_list') else []
+
+        # Convert attribute_list to a dict for easier access
+        attrs = {}
+        for tag, vr, value in attribute_list:
+            # Tag format: (group, element) - convert to hex string like "00080050"
+            tag_hex = f"{tag[0]:04X}{tag[1]:04X}"
+            attrs[tag_hex] = value
+
+        # Extract key identifiers using DICOM tags
+        # SOPInstanceUID (0008,0018) - this is the MPPS UID being updated
+        mpps_uid = attrs.get('00080018', '')
+        # AccessionNumber (0008,0050) - may or may not be present in N-SET
+        accession_number = attrs.get('00080050', '')
+        # PerformedProcedureStepID (0040,0253)
+        procedure_step_id = attrs.get('00400253', '')
+        # PerformedProcedureStepStatus (0040,0275)
+        status = attrs.get('00400275', '')
+
+        self.stdout.write(
+            f"Received N-SET (MPPS): MPPS UID={mpps_uid}, "
+            f"Accession={accession_number or '*'}, Status={status or 'UNKNOWN'}"
+        )
+
+        # Try to find and update the corresponding exam order
+        # Priority: use MPPS UID first (most reliable), fallback to AccessionNumber
+        order = None
+        if mpps_uid:
+            try:
+                order = ExamOrder.objects.get(mpps_sop_instance_uid=mpps_uid)
+            except ExamOrder.DoesNotExist:
+                pass
+
+        if not order and accession_number:
+            try:
+                order = ExamOrder.objects.get(accession_number=accession_number)
+                # If we found by accession and have MPPS UID, save it for future lookups
+                if mpps_uid and not order.mpps_sop_instance_uid:
+                    order.mpps_sop_instance_uid = mpps_uid
+                    order.save(update_fields=["mpps_sop_instance_uid", "updated_at"])
+            except ExamOrder.DoesNotExist:
+                pass
+
+        if order:
+            old_status = order.status
+
+            # Map MPPS status to order status
+            if status == "COMPLETED":
+                if order.status in [
+                    ExamOrder.Status.REGISTERED,
+                    ExamOrder.Status.SCHEDULED,
+                    ExamOrder.Status.IN_PROGRESS,
+                ]:
+                    order.status = ExamOrder.Status.COMPLETED
+                    order.save(update_fields=["status", "updated_at"])
+                    self.stdout.write(
+                        f"Updated order {order.id} status: {old_status} -> {order.status}"
+                    )
+            elif status == "DISCONTINUED":
+                if order.status != ExamOrder.Status.CANCELLED:
+                    order.status = ExamOrder.Status.CANCELLED
+                    order.save(update_fields=["status", "updated_at"])
+                    self.stdout.write(
+                        f"Updated order {order.id} status: {old_status} -> {order.status}"
+                    )
+            elif status == "IN PROGRESS":
+                if order.status in [ExamOrder.Status.REGISTERED, ExamOrder.Status.SCHEDULED]:
+                    order.status = ExamOrder.Status.IN_PROGRESS
+                    order.save(update_fields=["status", "updated_at"])
+                    self.stdout.write(
+                        f"Updated order {order.id} status: {old_status} -> {order.status}"
+                    )
+        else:
+            self.stdout.write(
+                f"No order found with MPPS UID: {mpps_uid} or AccessionNumber: {accession_number}"
+            )
+
+        # Return success status ONLY - no dataset for N-SET per DICOM standard
+        return 0x0000

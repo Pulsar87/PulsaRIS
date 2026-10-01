@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-02 17:52+0000\n"
+"POT-Creation-Date: 2026-09-30 23:01+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,1316 +19,3198 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 "
 "&& n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
-#: orders/views.py:105 orders/views.py:251 templates/orders/add_order.html:720
-msgid "Please enter a valid MRN"
-msgstr "الرجاء إدخال رقم سجل طبي (MRN) صحيح"
-
-#: orders/views.py:109 orders/views.py:255
-msgid "Accession number is required"
-msgstr "رقم الدخول (Accession number) مطلوب"
-
-#: orders/views.py:113 orders/views.py:259
-msgid "Procedure code and name are required"
-msgstr "رمز واسم الإجراء مطلوبان"
-
-#: orders/views.py:119 orders/views.py:227 orders/views.py:366
-#: patients/views.py:91 patients/views.py:179 patients/views.py:275
-#: reports/views.py:17 reports/views.py:58 reports/views.py:100
-#: reports/views.py:116 reports/views.py:133
-msgid "Tenant not found. Please select a tenant."
-msgstr "لم يتم العثور على المستأجر. الرجاء تحديد مستأجر."
-
-#: orders/views.py:129 orders/views.py:269
-#, python-format
-msgid "Patient with MRN %(mrn)s not found"
-msgstr "لم يتم العثور على المريض برقم السجل الطبي %(mrn)s"
-
-#: orders/views.py:138 orders/views.py:280
-msgid "An order with this accession number already exists"
-msgstr "يوجد طلب مسبق بنفس رقم الدخول"
-
-#: orders/views.py:150 orders/views.py:292
-msgid "Selected device not found"
-msgstr "الجهاز المحدد غير موجود"
-
-#: orders/views.py:188
-#, python-format
-msgid "Order created successfully! Accession: %(acc)s"
-msgstr "تم إنشاء الطلب بنجاح! رقم الدخول: %(acc)s"
-
-#: orders/views.py:194
-#, python-format
-msgid "Error creating order: %(error)s"
-msgstr "خطأ في إنشاء الطلب: %(error)s"
-
-#: orders/views.py:328
-msgid "Order updated successfully!"
-msgstr "تم تحديث الطلب بنجاح!"
-
-#: orders/views.py:332
-#, python-format
-msgid "Error updating order: %(error)s"
-msgstr "خطأ في تحديث الطلب: %(error)s"
-
-#: orders/views.py:372
-msgid "Order deleted successfully!"
-msgstr "تم حذف الطلب بنجاح!"
-
-#: orders/views.py:376
-#, python-format
-msgid "Error deleting order: %(error)s"
-msgstr "خطأ في حذف الطلب: %(error)s"
-
-#: patients/views.py:73 patients/views.py:210
-msgid "MRN is required"
-msgstr "رقم السجل الطبي مطلوب"
-
-#: patients/views.py:77 patients/views.py:214
-msgid "English first name and last name are required"
-msgstr "الاسم الأول واسم العائلة باللغة الإنجليزية مطلوبان"
-
-#: patients/views.py:81 patients/views.py:218
-msgid "Date of birth is required"
-msgstr "تاريخ الميلاد مطلوب"
-
-#: patients/views.py:85 patients/views.py:222
-msgid "Gender is required"
-msgstr "الجنس مطلوب"
-
-#: patients/views.py:97 patients/views.py:228
-msgid "A patient with this MRN already exists in your system"
-msgstr "يوجد مريض بهذا الرقم الطبي مسجل مسبقاً في النظام"
-
-#: patients/views.py:127
-#, python-format
-msgid "Patient added successfully! MRN: %(mrn)s"
-msgstr "تم إضافة المريض بنجاح! رقم السجل الطبي: %(mrn)s"
-
-#: patients/views.py:132
-#, python-format
-msgid "Error creating patient: %(error)s"
-msgstr "خطأ في إنشاء المريض: %(error)s"
-
-#: patients/views.py:255
-msgid "Patient updated successfully!"
-msgstr "تم تحديث المريض بنجاح!"
-
-#: patients/views.py:259
-#, python-format
-msgid "Error updating patient: %(error)s"
-msgstr "خطأ في تحديث المريض: %(error)s"
-
-#: patients/views.py:281
-msgid "Patient deleted successfully!"
-msgstr "تم حذف المريض بنجاح!"
-
-#: patients/views.py:285
-#, python-format
-msgid "Error deleting patient: %(error)s"
-msgstr "خطأ في حذف المريض: %(error)s"
-
-#: reports/views.py:44
-msgid "Report created successfully!"
-msgstr "تم إنشاء التقرير بنجاح!"
-
-#: reports/views.py:65
-msgid "You don't have permission to edit this report."
-msgstr "ليس لديك صلاحية لتعديل هذا التقرير."
-
-#: reports/views.py:86
-msgid "Report updated successfully!"
-msgstr "تم تحديث التقرير بنجاح!"
-
-#: reports/views.py:141
-msgid "You don't have permission to delete this report."
-msgstr "ليس لديك صلاحية لحذف هذا التقرير."
-
-#: reports/views.py:146
-msgid "Report deleted successfully!"
-msgstr "تم حذف التقرير بنجاح!"
-
-#: templates/billing/payer_detail.html:16 templates/billing/payer_list.html:178
-#: templates/orders/order_detail.html:335 templates/orders/worklist.html:306
-#: templates/patients/patient_detail.html:24
-#: templates/reports/report_detail.html:23
-#: templates/reports/report_list.html:188
-msgid "Edit"
-msgstr "تعديل"
-
-#: templates/billing/payer_detail.html:19
-#: templates/reports/report_form.html:196
+#: billing/templates/billing/_delete_confirm.html:4
+#: billing/templates/billing/_form_page.html:5
+#: billing/templates/billing/clearinghouse_detail.html:14
+#: billing/templates/billing/payer_detail.html:19
+#: reports/templates/reports/report_form.html:224
 msgid "Back"
 msgstr "رجوع"
 
-#: templates/billing/payer_detail.html:30 templates/billing/payer_form.html:79
-msgid "Contact Information"
-msgstr "معلومات الاتصال"
-
-#: templates/billing/payer_detail.html:35
-#: templates/patients/add_patient.html:131
-#: templates/patients/edit_patient.html:356
-#: templates/patients/patient_detail.html:143
-msgid "Address"
-msgstr "العنوان"
-
-#: templates/billing/payer_detail.html:44
-msgid "Communication"
-msgstr "التواصل"
-
-#: templates/billing/payer_detail.html:59 templates/billing/payer_form.html:160
-msgid "EDI Configuration"
-msgstr "إعدادات التبادل الإلكتروني للبيانات (EDI)"
-
-#: templates/billing/payer_detail.html:64 templates/billing/payer_form.html:165
-msgid "EDI Qualifier"
-msgstr "معرف الـ EDI"
-
-#: templates/billing/payer_detail.html:68 templates/billing/payer_form.html:173
-msgid "EDI Receiver ID"
-msgstr "معرف مستلم الـ EDI"
-
-#: templates/billing/payer_detail.html:72 templates/billing/payer_form.html:180
-msgid "Clearinghouse"
-msgstr "غرفة المقاصة (Clearinghouse)"
-
-#: templates/billing/payer_detail.html:86 templates/billing/payer_list.html:42
-#: templates/billing/payer_list.html:134 templates/orders/delete_order.html:70
-#: templates/orders/edit_order.html:142 templates/orders/order_detail.html:50
-#: templates/orders/worklist.html:45 templates/orders/worklist.html:204
-#: templates/reports/report_detail.html:36
-#: templates/reports/report_list.html:36 templates/reports/report_list.html:138
-#: templates/reports/study_reports.html:40
-#: templates/reports/study_reports.html:70
-msgid "Status"
-msgstr "الحالة"
-
-#: templates/billing/payer_detail.html:88 templates/billing/payer_form.html:68
-#: templates/billing/payer_list.html:45 templates/billing/payer_list.html:81
-#: templates/billing/payer_list.html:169 templates/users/manage_users.html:23
-msgid "Active"
-msgstr "نشط"
-
-#: templates/billing/payer_detail.html:90 templates/billing/payer_list.html:46
-#: templates/billing/payer_list.html:171
-msgid "Inactive"
-msgstr "غير نشط"
-
-#: templates/billing/payer_detail.html:94 templates/billing/payer_form.html:44
-#: templates/billing/payer_list.html:29
-msgid "Payer Type"
-msgstr "نوع الدافع"
-
-#: templates/billing/payer_detail.html:98
-msgid "Patients Insured"
-msgstr "المرضى المؤمن عليهم"
-
-#: templates/billing/payer_detail.html:107
-#: templates/billing/payer_form.html:193
-msgid "Financial Settings"
-msgstr "الإعدادات المالية"
-
-#: templates/billing/payer_detail.html:111
-#: templates/billing/payer_form.html:198 templates/billing/payer_list.html:133
-msgid "Fee Schedule"
-msgstr "جدول الرسوم"
-
-#: templates/billing/payer_detail.html:119
-#: templates/billing/payer_form.html:205
-msgid "Default Copay"
-msgstr "الدفعة المشتركة الافتراضية"
-
-#: templates/billing/payer_form.html:4 templates/billing/payer_form.html:15
-msgid "Edit Payer"
-msgstr "تعديل الدافع"
-
-#: templates/billing/payer_form.html:4 templates/billing/payer_list.html:15
-msgid "Add Payer"
-msgstr "إضافة دافع"
-
-#: templates/billing/payer_form.html:15
-msgid "Add New Payer"
-msgstr "إضافة دافع جديد"
-
-#: templates/billing/payer_form.html:17
-msgid "Insurance company/payer information"
-msgstr "معلومات شركة التأمين/الدافع"
-
-#: templates/billing/payer_form.html:20 templates/orders/order_detail.html:320
-#: templates/patients/patient_detail.html:17
-msgid "Back to List"
-msgstr "الرجوع للقائمة"
-
-#: templates/billing/payer_form.html:31
-msgid "Basic Information"
-msgstr "المعلومات الأساسية"
-
-#: templates/billing/payer_form.html:36 templates/billing/payer_list.html:129
-msgid "Payer ID"
-msgstr "معرف الدافع"
-
-#: templates/billing/payer_form.html:41
-msgid "EDI payer identifier"
-msgstr "معرف الدافع EDI"
-
-#: templates/billing/payer_form.html:51
-msgid "Full Name"
-msgstr "الاسم الكامل"
-
-#: templates/billing/payer_form.html:58
-msgid "Short Name"
-msgstr "الاسم المختصر"
-
-#: templates/billing/payer_form.html:84
-msgid "Address Line 1"
-msgstr "سطر العنوان 1"
-
-#: templates/billing/payer_form.html:91
-msgid "Address Line 2"
-msgstr "سطر العنوان 2"
-
-#: templates/billing/payer_form.html:98
-msgid "City"
-msgstr "المدينة"
-
-#: templates/billing/payer_form.html:105
-msgid "State/Province"
-msgstr "الولاية/المنطقة"
-
-#: templates/billing/payer_form.html:112
-msgid "Postal Code"
-msgstr "الرمز البريدي"
-
-#: templates/billing/payer_form.html:119
-msgid "Country"
-msgstr "البلد"
-
-#: templates/billing/payer_form.html:126 templates/orders/add_order.html:127
-#: templates/orders/order_detail.html:172
-#: templates/patients/add_patient.html:115
-#: templates/patients/delete_patient.html:73
-#: templates/patients/edit_patient.html:324
-#: templates/patients/patient_detail.html:127
-#: templates/patients/patient_list.html:78
-msgid "Phone"
-msgstr "رقم الهاتف"
-
-#: templates/billing/payer_form.html:133
-msgid "Fax"
-msgstr "الفاكس"
-
-#: templates/billing/payer_form.html:140
-#: templates/patients/add_patient.html:122
-#: templates/patients/delete_patient.html:77
-#: templates/patients/edit_patient.html:339
-#: templates/patients/patient_detail.html:135 templates/users/login.html:31
-#: templates/users/manage_users.html:21
-msgid "Email"
-msgstr "البريد الإلكتروني"
-
-#: templates/billing/payer_form.html:147
-msgid "Website"
-msgstr "الموقع الإلكتروني"
-
-#: templates/billing/payer_form.html:170
-msgid "e.g., PI, XV"
-msgstr "مثال: PI, XV"
-
-#: templates/billing/payer_form.html:221 templates/orders/delete_order.html:126
-#: templates/orders/edit_order.html:463 templates/patients/add_patient.html:207
-#: templates/patients/delete_patient.html:109
-#: templates/patients/edit_patient.html:552
-#: templates/patients/edit_patient.html:609
-#: templates/reports/report_confirm_delete.html:33
-msgid "Cancel"
-msgstr "إلغاء"
-
-#: templates/billing/payer_form.html:224
-msgid "Update Payer"
-msgstr "تحديث الدافع"
-
-#: templates/billing/payer_form.html:224
-msgid "Create Payer"
-msgstr "إنشاء دافع"
-
-#: templates/billing/payer_list.html:4 templates/billing/payer_list.html:11
-#: templates/billing/payer_list.html:121
-msgid "Insurance Payers"
-msgstr "دافعو التأمين"
-
-#: templates/billing/payer_list.html:12
-msgid "Manage insurance companies and payers"
-msgstr "إدارة شركات التأمين والدافعين"
-
-#: templates/billing/payer_list.html:24 templates/orders/worklist.html:26
-#: templates/patients/patient_list.html:49
-#: templates/reports/report_list.html:26
-msgid "Search"
-msgstr "بحث"
-
-#: templates/billing/payer_list.html:26
-msgid "Name or Payer ID"
-msgstr "الاسم أو معرف الدافع"
-
-#: templates/billing/payer_list.html:31
-msgid "All Types"
-msgstr "جميع الأنواع"
-
-#: templates/billing/payer_list.html:32 templates/billing/payer_list.html:94
-msgid "Commercial"
-msgstr "تجاري"
-
-#: templates/billing/payer_list.html:33
-msgid "Medicare"
-msgstr "رعاية طبية (Medicare)"
-
-#: templates/billing/payer_list.html:34
-msgid "Medicaid"
-msgstr "مساعدة طبية (Medicaid)"
-
-#: templates/billing/payer_list.html:35
-msgid "Self Pay"
-msgstr "دفع ذاتي"
-
-#: templates/billing/payer_list.html:36
-msgid "Workers' Comp"
-msgstr "تعويضات العمال"
-
-#: templates/billing/payer_list.html:37
-msgid "Tricare"
-msgstr "ترايكير (Tricare)"
-
-#: templates/billing/payer_list.html:38 templates/patients/add_patient.html:60
-#: templates/patients/add_patient.html:109
-#: templates/patients/edit_patient.html:180
-#: templates/patients/edit_patient.html:316
-#: templates/patients/patient_detail.html:112
-#: templates/patients/patient_list.html:107
-msgid "Other"
-msgstr "أخرى"
-
-#: templates/billing/payer_list.html:44 templates/reports/report_list.html:77
-msgid "All"
-msgstr "الكل"
-
-#: templates/billing/payer_list.html:51 templates/orders/worklist.html:151
-#: templates/reports/report_list.html:98
-msgid "Filter"
-msgstr "تصفية"
-
-#: templates/billing/payer_list.html:54
-msgid "Clear"
-msgstr "مسح"
-
-#: templates/billing/payer_list.html:68
-msgid "Total Payers"
-msgstr "إجمالي الدافعين"
-
-#: templates/billing/payer_list.html:107
-msgid "Government"
-msgstr "حكومي"
-
-#: templates/billing/payer_list.html:122
-msgid "records"
-msgstr "سجلات"
-
-#: templates/billing/payer_list.html:130
-msgid "Name"
-msgstr "الاسم"
-
-#: templates/billing/payer_list.html:131
-msgid "Type"
-msgstr "النوع"
-
-#: templates/billing/payer_list.html:132
-msgid "Contact"
-msgstr "جهة الاتصال"
-
-#: templates/billing/payer_list.html:135 templates/orders/worklist.html:207
-#: templates/patients/patient_list.html:81
-#: templates/reports/report_list.html:141
-#: templates/reports/study_reports.html:73 templates/users/manage_users.html:25
-msgid "Actions"
-msgstr "إجراءات"
-
-#: templates/billing/payer_list.html:175 templates/reports/report_form.html:192
-#: templates/reports/report_list.html:182
-msgid "View"
-msgstr "عرض"
-
-#: templates/billing/payer_list.html:187
-msgid "No payers found"
-msgstr "لم يتم العثور على دافعين"
-
-#: templates/layout.html:103 templates/orders/worklist.html:8
-msgid "Worklist"
-msgstr "قائمة العمل"
-
-#: templates/layout.html:115
-msgid "Patients"
-msgstr "المرضى"
-
-#: templates/layout.html:127 templates/reports/study_reports.html:55
-msgid "Reports"
-msgstr "التقارير"
-
-#: templates/layout.html:152
-msgid "Payers"
-msgstr "الدافعون"
-
-#: templates/layout.html:162
-msgid "Fee Schedules"
-msgstr "جداول الرسوم"
-
-#: templates/layout.html:247 templates/layout.html:248
-msgid "Toggle Theme"
-msgstr "تبديل المظهر"
-
-#: templates/layout.html:304
-msgid "Admin panel"
-msgstr "لوحة الإدارة"
-
-#: templates/layout.html:316
-msgid "Sign Out"
-msgstr "تسجيل الخروج"
-
-#: templates/layout.html:327
-msgid "Login"
-msgstr "تسجيل الدخول"
-
-#: templates/layout.html:373
-msgid "All rights reserved."
-msgstr "جميع الحقوق محفوظة."
-
-#: templates/orders/_device_options.html:5
-msgid "Select a device"
-msgstr "اختر جهازاً"
-
-#: templates/orders/_device_options.html:12
-msgid "No devices available"
-msgstr "لا توجد أجهزة متاحة"
-
-#: templates/orders/add_order.html:1
-msgid "Order Reservation"
-msgstr "حجز طلب"
-
-#: templates/orders/add_order.html:9
-msgid "Reserve Exam Order"
-msgstr "حجز طلب فحص"
-
-#: templates/orders/add_order.html:16 templates/reports/study_reports.html:21
-msgid "Back to Worklist"
-msgstr "الرجوع لقائمة العمل"
-
-#: templates/orders/add_order.html:29 templates/orders/edit_order.html:27
-#: templates/orders/order_detail.html:119
-#: templates/patients/add_patient.html:27
-#: templates/patients/edit_patient.html:42
-#: templates/patients/patient_detail.html:51
-msgid "Patient Information"
-msgstr "معلومات المريض"
-
-#: templates/orders/add_order.html:38
-msgid "Medical Record Number (MRN)"
-msgstr "رقم السجل الطبي (MRN)"
-
-#: templates/orders/add_order.html:47 templates/orders/edit_order.html:46
-msgid "Enter patient MRN"
-msgstr "أدخل رقم السجل الطبي للمريض"
-
-#: templates/orders/add_order.html:73 templates/orders/delete_order.html:60
-#: templates/patients/delete_patient.html:53
-#: templates/reports/report_form.html:228
-msgid "Patient Name"
-msgstr "اسم المريض"
-
-#: templates/orders/add_order.html:91 templates/orders/order_detail.html:156
-#: templates/patients/add_patient.html:96
-#: templates/patients/delete_patient.html:58
-#: templates/patients/edit_patient.html:254
-#: templates/patients/patient_detail.html:91
-msgid "Date of Birth"
-msgstr "تاريخ الميلاد"
-
-#: templates/orders/add_order.html:109 templates/orders/order_detail.html:162
-#: templates/patients/add_patient.html:103
-#: templates/patients/delete_patient.html:63
-#: templates/patients/edit_patient.html:270
-#: templates/patients/patient_detail.html:99
-#: templates/patients/patient_list.html:77
-msgid "Gender"
-msgstr "الجنس"
-
-#: templates/orders/add_order.html:145 templates/orders/edit_order.html:87
-#: templates/orders/order_detail.html:10
-msgid "Order Details"
-msgstr "تفاصيل الطلب"
-
-#: templates/orders/add_order.html:154 templates/orders/delete_order.html:51
-#: templates/orders/edit_order.html:96 templates/orders/order_detail.html:42
-msgid "Accession Number"
-msgstr "رقم الدخول"
-
-#: templates/orders/add_order.html:162 templates/orders/edit_order.html:106
-msgid "Enter accession number"
-msgstr "أدخل رقم الدخول"
-
-#: templates/orders/add_order.html:173 templates/orders/edit_order.html:113
-#: templates/orders/order_detail.html:86 templates/orders/worklist.html:96
-#: templates/orders/worklist.html:203
-msgid "Priority"
-msgstr "الأولوية"
-
-#: templates/orders/add_order.html:183 templates/orders/order_detail.html:99
-#: templates/orders/worklist.html:243
-msgid "Routine"
-msgstr "روتيني"
-
-#: templates/orders/add_order.html:186 templates/orders/order_detail.html:95
-#: templates/orders/worklist.html:239
-msgid "Urgent"
-msgstr "عاجل"
-
-#: templates/orders/add_order.html:189
-msgid "Stat"
-msgstr "فوري (Stat)"
-
-#: templates/orders/add_order.html:200
-msgid "Device"
-msgstr "الجهاز"
-
-#: templates/orders/add_order.html:214
-msgid "Loading devices..."
-msgstr "جاري تحميل الأجهزة..."
-
-#: templates/orders/add_order.html:225 templates/orders/edit_order.html:228
-#: templates/orders/order_detail.html:201
-msgid "Procedure Code"
-msgstr "رمز الإجراء"
-
-#: templates/orders/add_order.html:235
-msgid "Select procedure code"
-msgstr "اختر رمز الإجراء"
-
-#: templates/orders/add_order.html:237
-msgid "CT Procedures"
-msgstr "إجراءات الأشعة المقطعية"
-
-#: templates/orders/add_order.html:240
-msgid "CT Head without contrast"
-msgstr "أشعة مقطعية للرأس بدون صبغة"
-
-#: templates/orders/add_order.html:243
-msgid "CT Head with contrast"
-msgstr "أشعة مقطعية للرأس مع صبغة"
-
-#: templates/orders/add_order.html:246
-msgid "CT Chest without contrast"
-msgstr "أشعة مقطعية للصدر بدون صبغة"
-
-#: templates/orders/add_order.html:249
-msgid "CT Chest with contrast"
-msgstr "أشعة مقطعية للصدر مع صبغة"
-
-#: templates/orders/add_order.html:252
-msgid "CT Abdomen without contrast"
-msgstr "أشعة مقطعية للبطن بدون صبغة"
-
-#: templates/orders/add_order.html:255
-msgid "CT Abdomen with contrast"
-msgstr "أشعة مقطعية للبطن مع صبغة"
-
-#: templates/orders/add_order.html:258
-msgid "CT Pelvis without contrast"
-msgstr "أشعة مقطعية للحوض بدون صبغة"
-
-#: templates/orders/add_order.html:261
-msgid "CT Pelvis with contrast"
-msgstr "أشعة مقطعية للحوض مع صبغة"
-
-#: templates/orders/add_order.html:264
-msgid "CT Cervical spine with contrast"
-msgstr "أشعة مقطعية للعمود الفقري العنقي مع صبغة"
-
-#: templates/orders/add_order.html:267
-msgid "CT Angiography"
-msgstr "تصوير الأوعية المقطعي (CT Angiography)"
-
-#: templates/orders/add_order.html:270
-msgid "MR Procedures"
-msgstr "إجراءات الرنين المغناطيسي"
-
-#: templates/orders/add_order.html:273
-msgid "MRI Brain without contrast"
-msgstr "رنين مغناطيسي للدماغ بدون صبغة"
-
-#: templates/orders/add_order.html:276
-msgid "MRI Brain with contrast"
-msgstr "رنين مغناطيسي للدماغ مع صبغة"
-
-#: templates/orders/add_order.html:279
-msgid "MRI Cervical spine without contrast"
-msgstr "رنين مغناطيسي للعمود الفقري العنقي بدون صبغة"
-
-#: templates/orders/add_order.html:282
-msgid "MRI Thoracic spine without contrast"
-msgstr "رنين مغناطيسي للعمود الفقري الصدري بدون صبغة"
-
-#: templates/orders/add_order.html:285
-msgid "MRI Lumbar spine without contrast"
-msgstr "رنين مغناطيسي للعمود الفقري القطني بدون صبغة"
-
-#: templates/orders/add_order.html:288
-msgid "MRI Knee without contrast"
-msgstr "رنين مغناطيسي للركبة بدون صبغة"
-
-#: templates/orders/add_order.html:291
-msgid "MRI Shoulder without contrast"
-msgstr "رنين مغناطيسي للكتف بدون صبغة"
-
-#: templates/orders/add_order.html:294
-msgid "MRI Joint without contrast"
-msgstr "رنين مغناطيسي للمفصل بدون صبغة"
-
-#: templates/orders/add_order.html:297
-msgid "MR Angiography"
-msgstr "تصوير الأوعية بالرنين المغناطيسي"
-
-#: templates/orders/add_order.html:300
-msgid "X-Ray Procedures"
-msgstr "إجراءات الأشعة السينية"
-
-#: templates/orders/add_order.html:303
-msgid "Chest X-Ray"
-msgstr "أشعة سينية للصدر"
-
-#: templates/orders/add_order.html:306
-msgid "X-Ray Skull"
-msgstr "أشعة سينية للجمجمة"
-
-#: templates/orders/add_order.html:309
-msgid "X-Ray Ribs"
-msgstr "أشعة سينية للأضلاع"
-
-#: templates/orders/add_order.html:312
-msgid "X-Ray Cervical spine"
-msgstr "أشعة سينية للعمود الفقري العنقي"
-
-#: templates/orders/add_order.html:315
-msgid "X-Ray Thoracic spine"
-msgstr "أشعة سينية للعمود الفقري الصدري"
-
-#: templates/orders/add_order.html:318
-msgid "X-Ray Lumbar spine"
-msgstr "أشعة سينية للعمود الفقري القطني"
-
-#: templates/orders/add_order.html:321
-msgid "X-Ray Pelvis"
-msgstr "أشعة سينية للحوض"
-
-#: templates/orders/add_order.html:324
-msgid "X-Ray Hip"
-msgstr "أشعة سينية للورك"
-
-#: templates/orders/add_order.html:327
-msgid "X-Ray Femur"
-msgstr "أشعة سينية للفخذ"
-
-#: templates/orders/add_order.html:330
-msgid "X-Ray Knee"
-msgstr "أشعة سينية للركبة"
-
-#: templates/orders/add_order.html:333
-msgid "X-Ray Tibia/Fibula"
-msgstr "أشعة سينية للقصبة/الشظية"
-
-#: templates/orders/add_order.html:336
-msgid "X-Ray Ankle"
-msgstr "أشعة سينية للكاحل"
-
-#: templates/orders/add_order.html:339
-msgid "X-Ray Foot"
-msgstr "أشعة سينية للقدم"
-
-#: templates/orders/add_order.html:342
-msgid "X-Ray Shoulder"
-msgstr "أشعة سينية للكتف"
-
-#: templates/orders/add_order.html:345
-msgid "X-Ray Humerus"
-msgstr "أشعة سينية للعضد"
-
-#: templates/orders/add_order.html:348
-msgid "X-Ray Elbow"
-msgstr "أشعة سينية للمرفق"
-
-#: templates/orders/add_order.html:351
-msgid "X-Ray Forearm"
-msgstr "أشعة سينية للساعد"
-
-#: templates/orders/add_order.html:354
-msgid "X-Ray Wrist"
-msgstr "أشعة سينية للمعصم"
-
-#: templates/orders/add_order.html:357
-msgid "X-Ray Hand"
-msgstr "أشعة سينية لليد"
-
-#: templates/orders/add_order.html:360
-msgid "X-Ray Finger"
-msgstr "أشعة سينية للإصبع"
-
-#: templates/orders/add_order.html:363
-msgid "Mammography"
-msgstr "تصوير الثدي الشعاعي (ماموجرام)"
-
-#: templates/orders/add_order.html:366
-msgid "Ultrasound Procedures"
-msgstr "إجراءات الموجات فوق الصوتية"
-
-#: templates/orders/add_order.html:369
-msgid "Ultrasound Abdomen"
-msgstr "موجات فوق صوتية للبطن"
-
-#: templates/orders/add_order.html:372
-msgid "Ultrasound Pelvis"
-msgstr "موجات فوق صوتية للحوض"
-
-#: templates/orders/add_order.html:375
-msgid "Ultrasound Obstetric"
-msgstr "موجات فوق صوتية للولادة"
-
-#: templates/orders/add_order.html:378
-msgid "Ultrasound Thyroid"
-msgstr "موجات فوق صوتية للغدة الدرقية"
-
-#: templates/orders/add_order.html:381
-msgid "Ultrasound Breast"
-msgstr "موجات فوق صوتية للثدي"
-
-#: templates/orders/add_order.html:384
-msgid "Ultrasound Scrotal"
-msgstr "موجات فوق صوتية لكيس الصفن"
-
-#: templates/orders/add_order.html:387
-msgid "Ultrasound Doppler"
-msgstr "دوبلر الموجات فوق الصوتية"
-
-#: templates/orders/add_order.html:390
-msgid "Echocardiography"
-msgstr "تخطيط صدى القلب"
-
-#: templates/orders/add_order.html:393
-msgid "Nuclear Medicine Procedures"
-msgstr "إجراءات الطب النووي"
-
-#: templates/orders/add_order.html:396
-msgid "Bone Scan"
-msgstr "فحص العظام"
-
-#: templates/orders/add_order.html:399
-msgid "Cardiac Stress Test"
-msgstr "اختبار إجهاد القلب"
-
-#: templates/orders/add_order.html:402
-msgid "Thyroid Scan"
-msgstr "فحص الغدة الدرقية"
-
-#: templates/orders/add_order.html:409
-msgid "Renal Scan"
-msgstr "فحص الكلى"
-
-#: templates/orders/add_order.html:412
-msgid "Hepatobiliary Scan"
-msgstr "فحص الكبد والقنوات الصفراوية"
-
-#: templates/orders/add_order.html:415
-msgid "PET Procedures"
-msgstr "إجراءات التصوير المقطعي بالإصدار البوزيتروني (PET)"
-
-#: templates/orders/add_order.html:418
-msgid "PET-CT Whole Body"
-msgstr "التصوير المقطعي بالإصدار البوزيتروني/المقطعي لكامل الجسم"
-
-#: templates/orders/add_order.html:421
-msgid "PET Brain"
-msgstr "التصوير المقطعي بالإصدار البوزيتروني للدماغ"
-
-#: templates/orders/add_order.html:428
-msgid "Barium Swallow/Meal"
-msgstr "ابتلاع الباريوم / وجبة الباريوم"
-
-#: templates/orders/add_order.html:431
-msgid "Barium Enema"
-msgstr "حقنة الباريوم الشرجية"
-
-#: templates/orders/add_order.html:434
-msgid "IVP/Urogram"
-msgstr "تصوير الحويضة الوريدية / تصوير المسالك البولية"
-
-#: templates/orders/add_order.html:437
-msgid "Hysterosalpingography"
-msgstr "تصوير الرحم والبوق"
-
-#: templates/orders/add_order.html:440
-msgid "VCUG"
-msgstr "تصوير المثانة والإحليل الإفراغي (VCUG)"
-
-#: templates/orders/add_order.html:443
-msgid "Interventional Procedures"
-msgstr "الإجراءات التداخلية"
-
-#: templates/orders/add_order.html:446
-msgid "Image-guided Biopsy"
-msgstr "خزعة موجهة بالصور"
-
-#: templates/orders/add_order.html:449
-msgid "Image-guided Drainage"
-msgstr "تصريف موجه بالصور"
-
-#: templates/orders/add_order.html:452
-msgid "Image-guided Injection"
-msgstr "حقن موجه بالصور"
-
-#: templates/orders/add_order.html:464 templates/orders/edit_order.html:262
-#: templates/orders/order_detail.html:207
-msgid "Procedure Name (English)"
-msgstr "اسم الإجراء (باللغة الإنجليزية)"
-
-#: templates/orders/add_order.html:472 templates/orders/edit_order.html:272
-msgid "Enter procedure name in English"
-msgstr "أدخل اسم الإجراء باللغة الإنجليزية"
-
-#: templates/orders/add_order.html:484 templates/orders/order_detail.html:214
-msgid "Procedure Name (Arabic)"
-msgstr "اسم الإجراء (بالعربية)"
-
-#: templates/orders/add_order.html:492 templates/orders/edit_order.html:290
-msgid "أدخل اسم الإجراء بالعربية"
-msgstr "أدخل اسم الإجراء بالعربية"
-
-#: templates/orders/add_order.html:503 templates/orders/edit_order.html:300
-#: templates/orders/order_detail.html:267
-#: templates/reports/report_detail.html:88
-msgid "Referring Physician"
-msgstr "الطبيب المحول"
-
-#: templates/orders/add_order.html:510
-msgid "Enter physician name"
-msgstr "أدخل اسم الطبيب"
-
-#: templates/orders/add_order.html:520 templates/orders/edit_order.html:315
-#: templates/orders/order_detail.html:221
-msgid "Laterality"
-msgstr "الجهة"
-
-#: templates/orders/add_order.html:528
-msgid "Not Applicable"
-msgstr "لا ينطبق"
-
-#: templates/orders/add_order.html:531 templates/orders/edit_order.html:335
-#: templates/orders/order_detail.html:224
-msgid "Left"
-msgstr "يسار"
-
-#: templates/orders/add_order.html:534 templates/orders/edit_order.html:347
-#: templates/orders/order_detail.html:224
-msgid "Right"
-msgstr "يمين"
-
-#: templates/orders/add_order.html:537 templates/orders/edit_order.html:359
-#: templates/orders/order_detail.html:225
-msgid "Bilateral"
-msgstr "ثنائي (الجانبين)"
-
-#: templates/orders/add_order.html:548 templates/orders/edit_order.html:367
-#: templates/orders/order_detail.html:230
-msgid "Body Part"
-msgstr "جزء الجسم"
-
-#: templates/orders/add_order.html:555
-msgid "e.g., Head, Knee, Chest"
-msgstr "مثال: الرأس، الركبة، الصدر"
-
-#: templates/orders/add_order.html:562 templates/orders/edit_order.html:382
-#: templates/orders/order_detail.html:236
-msgid "Contrast Required"
-msgstr "مطلوب صبغة"
-
-#: templates/orders/add_order.html:575
-msgid "Yes, contrast is required"
-msgstr "نعم، الصبغة مطلوبة"
-
-#: templates/orders/add_order.html:586
-msgid "Clinical Information"
-msgstr "المعلومات السريرية"
-
-#: templates/orders/add_order.html:595 templates/orders/edit_order.html:442
-#: templates/orders/order_detail.html:307
-msgid "Clinical Indication"
-msgstr "الدواعي السريرية"
-
-#: templates/orders/add_order.html:602
-msgid "Describe clinical symptoms, diagnosis, or reason for examination..."
-msgstr "صف الأعراض السريرية، أو التشخيص، أو سبب الفحص..."
-
-#: templates/orders/add_order.html:612
-msgid "Scheduling"
-msgstr "الجدولة"
-
-#: templates/orders/add_order.html:621
-msgid "Scheduled Date & Time"
-msgstr "التاريخ والوقت المجدول"
-
-#: templates/orders/add_order.html:637 templates/orders/edit_order.html:424
-#: templates/orders/order_detail.html:294
-msgid "Duration (minutes)"
-msgstr "المدة (بالدقائق)"
-
-#: templates/orders/add_order.html:656
-msgid "Room / Station"
-msgstr "الغرفة / المحطة"
-
-#: templates/orders/add_order.html:664
-msgid "Auto-assign"
-msgstr "تعيين تلقائي"
-
-#: templates/orders/add_order.html:667
-msgid "Room 1"
-msgstr "غرفة 1"
-
-#: templates/orders/add_order.html:670
-msgid "Room 2"
-msgstr "غرفة 2"
-
-#: templates/orders/add_order.html:673
-msgid "Room 3"
-msgstr "غرفة 3"
-
-#: templates/orders/add_order.html:689
-msgid "Clear Form"
-msgstr "مسح النموذج"
-
-#: templates/orders/add_order.html:694
-msgid "Reserve Order"
-msgstr "حجز الطلب"
-
-#: templates/orders/delete_order.html:1 templates/orders/delete_order.html:9
-msgid "Delete Order"
-msgstr "حذف الطلب"
-
-#: templates/orders/delete_order.html:16 templates/orders/edit_order.html:14
-#: templates/orders/order_detail.html:18
-msgid "Order List"
-msgstr "قائمة الطلبات"
-
-#: templates/orders/delete_order.html:25
-#: templates/patients/delete_patient.html:25
-msgid "Confirm Deletion"
-msgstr "تأكيد الحذف"
-
-#: templates/orders/delete_order.html:32
-#: templates/patients/delete_patient.html:32
-#: templates/reports/report_confirm_delete.html:26
-msgid "Warning:"
-msgstr "تحذير:"
-
-#: templates/orders/delete_order.html:33
-#: templates/patients/delete_patient.html:33
+#: billing/templates/billing/_delete_confirm.html:8
+msgid "Are you sure you want to delete"
+msgstr "هل أنت متأكد من رغبتك في الحذف"
+
+#: billing/templates/billing/_delete_confirm.html:9
+#: orders/templates/orders/delete_order.html:33
+#: patients/templates/patients/delete_patient.html:33
 msgid "This action cannot be undone."
 msgstr "لا يمكن التراجع عن هذا الإجراء."
 
-#: templates/orders/delete_order.html:38
-msgid "Are you sure you want to delete order"
-msgstr "هل أنت متأكد أنك تريد حذف الطلب"
+#: billing/templates/billing/_delete_confirm.html:12
+#: billing/templates/billing/_form_page.html:16
+#: billing/templates/billing/fee_schedule_confirm_delete.html:16
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:16
+#: billing/templates/billing/patient_statement_form.html:108
+#: billing/templates/billing/payer_confirm_delete.html:16
+#: billing/templates/billing/payer_form.html:221
+#: billing/templates/billing/payment_plan_form.html:98
+#: billing/templates/billing/service_line_form.html:157
+#: orders/templates/orders/delete_order.html:126
+#: orders/templates/orders/edit_order.html:463
+#: patients/templates/patients/add_patient.html:207
+#: patients/templates/patients/delete_patient.html:109
+#: patients/templates/patients/edit_patient.html:552
+#: patients/templates/patients/edit_patient.html:609
+#: reports/templates/reports/report_confirm_delete.html:33
+#: reports/templates/reports/report_verify.html:75
+msgid "Cancel"
+msgstr "إلغاء"
 
-#: templates/orders/delete_order.html:46
-msgid "Order Summary"
-msgstr "ملخص الطلب"
+#: billing/templates/billing/_delete_confirm.html:13
+msgid "Confirm delete"
+msgstr "تأكيد الحذف"
 
-#: templates/orders/delete_order.html:56 templates/orders/edit_order.html:36
-msgid "Patient MRN"
-msgstr "رقم السجل الطبي للمريض"
+#: billing/templates/billing/_form_page.html:2
+#: billing/templates/billing/authorization_form.html:36
+#: billing/templates/billing/clearinghouse_form.html:36
+#: billing/templates/billing/patient_account_form.html:26
+#: billing/templates/billing/patient_insurance_form.html:36
+#: billing/templates/billing/service_line_form.html:158
+msgid "Save"
+msgstr "حفظ"
 
-#: templates/orders/delete_order.html:64 templates/orders/worklist.html:202
-#: templates/reports/report_detail.html:84
-#: templates/reports/report_form.html:236
-#: templates/reports/study_reports.html:36
-msgid "Procedure"
-msgstr "الإجراء"
+#: billing/templates/billing/appeal_list.html:4
+#: billing/templates/billing/appeal_list.html:9
+msgid "Claims Appeals"
+msgstr "استئنافات المطالبات"
 
-#: templates/orders/delete_order.html:67 templates/orders/order_detail.html:193
-#: templates/orders/worklist.html:70 templates/orders/worklist.html:201
-#: templates/reports/report_detail.html:80
-#: templates/reports/report_form.html:240 templates/reports/report_list.html:62
-#: templates/reports/report_list.html:136
-#: templates/reports/study_reports.html:32
-msgid "Modality"
-msgstr "الوضع (Modality)"
+#: billing/templates/billing/appeal_list.html:9
+msgid "Appeal tracking is available from the billing claims workspace."
+msgstr "يمكن متابعة الاستئنافات من مساحة عمل المطالبات والفوترة."
 
-#: templates/orders/delete_order.html:73 templates/orders/order_detail.html:55
-#: templates/orders/worklist.html:250
-msgid "Registered"
-msgstr "مسجل"
+#: billing/templates/billing/appeal_list.html:10
+msgid "Open claim appeals"
+msgstr "فتح استئنافات المطالبات"
 
-#: templates/orders/delete_order.html:77 templates/orders/order_detail.html:59
-#: templates/orders/worklist.html:205 templates/orders/worklist.html:254
-msgid "Scheduled"
-msgstr "مجدول"
+#: billing/templates/billing/authorization_form.html:4
+#: billing/templates/billing/authorization_form.html:8
+msgid "Authorization"
+msgstr "التفويض"
 
-#: templates/orders/delete_order.html:81 templates/orders/order_detail.html:63
-#: templates/orders/worklist.html:258
-msgid "In Progress"
-msgstr "قيد التنفيذ"
+#: billing/templates/billing/claim_appeal_confirm_delete.html:3
+#: billing/templates/billing/claim_appeal_confirm_delete.html:6
+msgid "Delete claim appeal"
+msgstr "حذف استئناف المطالبة"
 
-#: templates/orders/delete_order.html:85 templates/orders/order_detail.html:67
-#: templates/orders/worklist.html:262
-msgid "Completed"
-msgstr "مكتمل"
+#: billing/templates/billing/claim_appeal_detail.html:3
+#: billing/templates/billing/claim_appeal_detail.html:6
+msgid "Appeal"
+msgstr "استئناف"
 
-#: templates/orders/delete_order.html:89 templates/orders/order_detail.html:71
-#: templates/orders/worklist.html:266
-msgid "Reported"
-msgstr "تم التقرير"
+#: billing/templates/billing/claim_appeal_detail.html:6
+#: billing/templates/billing/claim_appeal_list.html:3
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Claim appeals"
+msgstr "استئنافات المطالبات"
 
-#: templates/orders/delete_order.html:93 templates/orders/order_detail.html:75
-#: templates/orders/worklist.html:270 templates/reports/report_detail.html:55
-msgid "Finalized"
-msgstr "نهائي"
+#: billing/templates/billing/claim_appeal_detail.html:6
+msgid "Update appeal"
+msgstr "تعديل الاستئناف"
 
-#: templates/orders/delete_order.html:97 templates/orders/order_detail.html:79
-#: templates/orders/worklist.html:274
-msgid "Cancelled"
-msgstr "ملغى"
-
-#: templates/orders/delete_order.html:102
-#: templates/orders/order_detail.html:106
-#: templates/patients/delete_patient.html:85
-msgid "Created At"
-msgstr "تاريخ الإنشاء"
-
-#: templates/orders/delete_order.html:118
-#: templates/patients/delete_patient.html:101
-msgid "Back to Details"
-msgstr "العودة للتفاصيل"
-
-#: templates/orders/delete_order.html:131
-msgid "Yes, Delete Order"
-msgstr "نعم، احذف الطلب"
-
-#: templates/orders/edit_order.html:1 templates/orders/edit_order.html:8
-#: templates/orders/order_detail.html:24
-msgid "Edit Order"
-msgstr "تعديل الطلب"
-
-#: templates/orders/edit_order.html:49
-msgid "Enter the patient MRN to lookup"
-msgstr "أدخل رقم السجل الطبي للمريض للبحث"
-
-#: templates/orders/edit_order.html:59
-msgid "Lookup Patient"
-msgstr "البحث عن المريض"
-
-#: templates/orders/edit_order.html:171 templates/orders/order_detail.html:273
-msgid "Facility"
-msgstr "المنشأة"
-
-#: templates/orders/edit_order.html:179
-msgid "Select Facility"
-msgstr "اختر المنشأة"
-
-#: templates/orders/edit_order.html:201
-msgid "Device/Room"
-msgstr "الجهاز/الغرفة"
-
-#: templates/orders/edit_order.html:212
-msgid "Select Device"
-msgstr "اختر الجهاز"
-
-#: templates/orders/edit_order.html:238
-msgid "Select Procedure"
-msgstr "اختر الإجراء"
-
-#: templates/orders/edit_order.html:308
-msgid "Enter referring physician name"
-msgstr "أدخل اسم الطبيب المحول"
-
-#: templates/orders/edit_order.html:323 templates/patients/add_patient.html:53
-#: templates/patients/add_patient.html:106
-#: templates/patients/edit_patient.html:96
-#: templates/patients/edit_patient.html:280
-msgid "Select"
-msgstr "تحديد"
-
-#: templates/orders/edit_order.html:375
-msgid "Enter body part"
-msgstr "أدخل جزء الجسم"
-
-#: templates/orders/edit_order.html:400 templates/orders/order_detail.html:241
-#: templates/patients/patient_detail.html:257
-#: templates/reports/report_list.html:78 templates/reports/report_list.html:171
-msgid "Yes"
-msgstr "نعم"
-
-#: templates/orders/edit_order.html:410 templates/orders/order_detail.html:285
-msgid "Scheduled DateTime"
-msgstr "التاريخ والوقت المجدول"
-
-#: templates/orders/edit_order.html:449
-msgid "Enter clinical indication or reason for exam"
-msgstr "أدخل الدواعي السريرية أو سبب الفحص"
-
-#: templates/orders/edit_order.html:469 templates/orders/order_detail.html:341
-#: templates/orders/worklist.html:313 templates/patients/edit_patient.html:618
-#: templates/patients/patient_detail.html:30
+#: billing/templates/billing/claim_appeal_detail.html:6
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/fee_schedule_confirm_delete.html:15
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:15
+#: billing/templates/billing/patient_statement_detail.html:8
+#: billing/templates/billing/patient_statement_list.html:145
+#: billing/templates/billing/payer_confirm_delete.html:15
+#: billing/templates/billing/payment_detail.html:8
+#: billing/templates/billing/payment_plan_detail.html:8
+#: billing/templates/billing/payment_plan_list.html:126
+#: billing/templates/billing/payment_posting_detail.html:8
+#: billing/templates/billing/service_line_detail.html:8
+#: billing/templates/billing/service_line_list.html:145
+#: orders/templates/orders/edit_order.html:469
+#: orders/templates/orders/order_detail.html:341
+#: orders/templates/orders/worklist.html:313
+#: patients/templates/patients/edit_patient.html:618
+#: patients/templates/patients/patient_detail.html:30
 msgid "Delete"
 msgstr "حذف"
 
-#: templates/orders/edit_order.html:473
-msgid "Save Changes"
-msgstr "حفظ التغييرات"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Appeal record"
+msgstr "سجل الاستئناف"
 
-#: templates/orders/edit_order.html:495
-msgid "Please enter an MRN"
-msgstr "الرجاء إدخال رقم السجل الطبي"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/claim_appeal_list.html:8
+#: billing/templates/billing/claim_detail.html:4
+#: billing/templates/billing/claim_detail.html:11
+#: billing/templates/billing/payment_posting_detail.html:12
+#: billing/templates/billing/payment_posting_list.html:23
+#: billing/templates/billing/service_line_detail.html:16
+msgid "Claim"
+msgstr "مطالبة"
 
-#: templates/orders/edit_order.html:512
-msgid "Patient not found"
-msgstr "لم يتم العثور على المريض"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Claim line"
+msgstr "بند المطالبة"
 
-#: templates/orders/edit_order.html:521
-msgid "Error looking up patient"
-msgstr "خطأ في البحث عن المريض"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Appeal level"
+msgstr "مستوى الاستئناف"
 
-#: templates/orders/order_detail.html:34
-msgid "Order Information"
-msgstr "معلومات الطلب"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Filed date"
+msgstr "تاريخ التقديم"
 
-#: templates/orders/order_detail.html:91 templates/orders/worklist.html:235
-msgid "STAT"
-msgstr "فوري (STAT)"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/patient_statement_detail.html:14
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Due date"
+msgstr "تاريخ الاستحقاق"
 
-#: templates/orders/order_detail.html:127
-#: templates/patients/add_patient.html:33
-#: templates/patients/delete_patient.html:49
-#: templates/patients/edit_patient.html:51
-#: templates/patients/patient_detail.html:59
-#: templates/patients/patient_list.html:73
-#: templates/reports/report_detail.html:76
-#: templates/reports/report_form.html:232
-msgid "MRN"
-msgstr "رقم السجل الطبي"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Decision date"
+msgstr "تاريخ القرار"
 
-#: templates/orders/order_detail.html:138
-msgid "Name (English)"
-msgstr "الاسم (إنجليزي)"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Submitted by"
+msgstr "مقدم الطلب"
 
-#: templates/orders/order_detail.html:147
-msgid "Name (Arabic)"
-msgstr "الاسم (عربي)"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Decision"
+msgstr "القرار"
 
-#: templates/orders/order_detail.html:165
-#: templates/patients/add_patient.html:107
-#: templates/patients/delete_patient.html:65
-#: templates/patients/edit_patient.html:292
-#: templates/patients/patient_detail.html:104
-#: templates/patients/patient_list.html:99
-msgid "Male"
-msgstr "ذكر"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Reason"
+msgstr "السبب"
 
-#: templates/orders/order_detail.html:166
-#: templates/patients/add_patient.html:108
-#: templates/patients/delete_patient.html:67
-#: templates/patients/edit_patient.html:304
-#: templates/patients/patient_detail.html:108
-#: templates/patients/patient_list.html:103
-msgid "Female"
-msgstr "أنثى"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Decision details"
+msgstr "تفاصيل القرار"
 
-#: templates/orders/order_detail.html:185
-msgid "Procedure Information"
-msgstr "معلومات الإجراء"
+#: billing/templates/billing/claim_appeal_detail.html:9
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Reversal amount"
+msgstr "مبلغ العكس"
 
-#: templates/orders/order_detail.html:245
-#: templates/patients/patient_detail.html:261
-#: templates/reports/report_list.html:79
-msgid "No"
-msgstr "لا"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Supporting documents"
+msgstr "المستندات الداعمة"
 
-#: templates/orders/order_detail.html:259
-msgid "Additional Information"
-msgstr "معلومات إضافية"
+#: billing/templates/billing/claim_appeal_form.html:3
+#: billing/templates/billing/claim_appeal_form.html:6
+msgid "Edit claim appeal"
+msgstr "تعديل استئناف المطالبة"
 
-#: templates/orders/order_detail.html:279
-msgid "Room/Station"
-msgstr "الغرفة/المحطة"
+#: billing/templates/billing/claim_appeal_form.html:3
+#: billing/templates/billing/claim_appeal_form.html:6
+msgid "Create claim appeal"
+msgstr "إنشاء استئناف مطالبة"
 
-#: templates/orders/order_detail.html:300
-msgid "Billing Status"
-msgstr "حالة الفواتير"
+#: billing/templates/billing/claim_appeal_form.html:7
+msgid "Save appeal"
+msgstr "حفظ الاستئناف"
 
-#: templates/orders/order_detail.html:328 templates/orders/worklist.html:297
-msgid "View Reports"
-msgstr "عرض التقارير"
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Track appeal deadlines, submissions and payer decisions."
+msgstr "تابع المواعيد النهائية للاستئناف وطلبات التقديم وقرارات الجهات الدافعة."
 
-#: templates/orders/worklist.html:11
-msgid "Add New Order"
-msgstr "إضافة طلب جديد"
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Create appeal"
+msgstr "إنشاء استئناف"
 
-#: templates/orders/worklist.html:37
-msgid "Accession, MRN, Patient, Procedure"
-msgstr "رقم الدخول، رقم السجل الطبي، المريض، الإجراء"
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Appeal number"
+msgstr "رقم الاستئناف"
 
-#: templates/orders/worklist.html:49 templates/reports/report_list.html:38
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Level"
+msgstr "المستوى"
+
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Filed"
+msgstr "تاريخ التقديم"
+
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Due"
+msgstr "الاستحقاق"
+
+#: billing/templates/billing/claim_appeal_list.html:8
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/claim_list.html:28
+#: billing/templates/billing/claim_list.html:78
+#: billing/templates/billing/clearinghouse_list.html:24
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+#: billing/templates/billing/patient_account_detail.html:39
+#: billing/templates/billing/patient_account_detail.html:58
+#: billing/templates/billing/patient_statement_detail.html:30
+#: billing/templates/billing/patient_statement_form.html:54
+#: billing/templates/billing/patient_statement_list.html:28
+#: billing/templates/billing/patient_statement_list.html:89
+#: billing/templates/billing/payer_detail.html:86
+#: billing/templates/billing/payer_list.html:42
+#: billing/templates/billing/payer_list.html:134
+#: billing/templates/billing/payment_plan_detail.html:28
+#: billing/templates/billing/payment_plan_list.html:38
+#: billing/templates/billing/payment_plan_list.html:78
+#: billing/templates/billing/payment_posting_list.html:16
+#: billing/templates/billing/payment_posting_list.html:23
+#: billing/templates/billing/service_line_list.html:63
+#: billing/templates/billing/service_line_list.html:116
+#: orders/templates/orders/delete_order.html:70
+#: orders/templates/orders/edit_order.html:142
+#: orders/templates/orders/order_detail.html:50
+#: orders/templates/orders/worklist.html:45
+#: orders/templates/orders/worklist.html:204
+#: reports/templates/reports/report_detail.html:36
+#: reports/templates/reports/report_list.html:36
+#: reports/templates/reports/report_list.html:138
+#: reports/templates/reports/study_reports.html:40
+#: reports/templates/reports/study_reports.html:70
+msgid "Status"
+msgstr "الحالة"
+
+#: billing/templates/billing/claim_appeal_list.html:10
+#: billing/templates/billing/clearinghouse_list.html:41
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/patient_statement_list.html:139
+#: billing/templates/billing/payer_list.html:175
+#: billing/templates/billing/payment_list.html:67
+#: billing/templates/billing/payment_plan_list.html:120
+#: billing/templates/billing/payment_posting_list.html:33
+#: billing/templates/billing/service_line_list.html:139
+msgid "View"
+msgstr "عرض"
+
+#: billing/templates/billing/claim_appeal_list.html:11
+msgid "No appeals have been recorded."
+msgstr "لم يتم تسجيل أي استئنافات."
+
+#: billing/templates/billing/claim_confirm_delete.html:3
+#: billing/templates/billing/claim_confirm_delete.html:6
+msgid "Delete claim"
+msgstr "حذف المطالبة"
+
+#: billing/templates/billing/claim_detail.html:10
+msgid "All claims"
+msgstr "جميع المطالبات"
+
+#: billing/templates/billing/claim_detail.html:16
+#: billing/templates/billing/claim_detail.html:70
+#: billing/templates/billing/clearinghouse_detail.html:13
+#: billing/templates/billing/clearinghouse_list.html:42
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/patient_statement_detail.html:8
+#: billing/templates/billing/patient_statement_list.html:142
+#: billing/templates/billing/payer_detail.html:16
+#: billing/templates/billing/payer_list.html:178
+#: billing/templates/billing/payment_detail.html:8
+#: billing/templates/billing/payment_detail.html:28
+#: billing/templates/billing/payment_plan_detail.html:8
+#: billing/templates/billing/payment_plan_list.html:123
+#: billing/templates/billing/payment_posting_detail.html:8
+#: billing/templates/billing/payment_posting_detail.html:26
+#: billing/templates/billing/service_line_detail.html:8
+#: billing/templates/billing/service_line_list.html:142
+#: orders/templates/orders/order_detail.html:335
+#: orders/templates/orders/worklist.html:306
+#: patients/templates/patients/patient_detail.html:24
+#: reports/templates/reports/report_detail.html:23
+#: reports/templates/reports/report_list.html:184
+msgid "Edit"
+msgstr "تعديل"
+
+#: billing/templates/billing/claim_detail.html:17
+msgid "Generate 837"
+msgstr "إنشاء ملف 837"
+
+#: billing/templates/billing/claim_detail.html:20
+msgid "Submit to clearinghouse"
+msgstr "الإرسال إلى غرفة المقاصة"
+
+#: billing/templates/billing/claim_detail.html:23
+msgid "Check status"
+msgstr "التحقق من الحالة"
+
+#: billing/templates/billing/claim_detail.html:28
+msgid "Payer response"
+msgstr "رد الجهة الدافعة"
+
+#: billing/templates/billing/claim_detail.html:32
+msgid "Claim information"
+msgstr "معلومات المطالبة"
+
+#: billing/templates/billing/claim_detail.html:34
+msgid "Claim type"
+msgstr "نوع المطالبة"
+
+#: billing/templates/billing/claim_detail.html:35
+#: billing/templates/billing/patient_statement_detail.html:12
+#: billing/templates/billing/payment_detail.html:12
+#: billing/templates/billing/payment_list.html:52
+#: billing/templates/billing/payment_plan_detail.html:12
+#: billing/templates/billing/service_line_detail.html:13
+msgid "Patient account"
+msgstr "حساب المريض"
+
+#: billing/templates/billing/claim_detail.html:36
+#: billing/templates/billing/claim_list.html:74
+#: billing/templates/billing/payment_posting_detail.html:13
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Payer"
+msgstr "الجهة الدافعة"
+
+#: billing/templates/billing/claim_detail.html:37
+msgid "Service dates"
+msgstr "تواريخ الخدمة"
+
+#: billing/templates/billing/claim_detail.html:38
+#: billing/templates/billing/claim_list.html:18
+#: billing/templates/billing/claim_list.html:35
+msgid "Submitted"
+msgstr "تم التقديم"
+
+#: billing/templates/billing/claim_detail.html:39
+msgid "Clearinghouse status"
+msgstr "حالة غرفة المقاصة"
+
+#: billing/templates/billing/claim_detail.html:40
+msgid "Transmission ID"
+msgstr "معرّف الإرسال"
+
+#: billing/templates/billing/claim_detail.html:43
+msgid "Financial summary"
+msgstr "الملخص المالي"
+
+#: billing/templates/billing/claim_detail.html:45
+msgid "Total charges"
+msgstr "إجمالي الرسوم"
+
+#: billing/templates/billing/claim_detail.html:46
+msgid "Expected insurance"
+msgstr "المبلغ المتوقع من التأمين"
+
+#: billing/templates/billing/claim_detail.html:47
+msgid "Expected patient"
+msgstr "المبلغ المتوقع من المريض"
+
+#: billing/templates/billing/claim_detail.html:48
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/claim_list.html:19
+#: billing/templates/billing/claim_list.html:37
+#: billing/templates/billing/patient_statement_list.html:33
+#: billing/templates/billing/payment_posting_detail.html:23
+#: billing/templates/billing/service_line_list.html:69
+msgid "Paid"
+msgstr "مدفوع"
+
+#: billing/templates/billing/claim_detail.html:49
+msgid "Adjustments"
+msgstr "التسويات"
+
+#: billing/templates/billing/claim_detail.html:50
+msgid "Patient responsibility"
+msgstr "المبلغ المستحق على المريض"
+
+#: billing/templates/billing/claim_detail.html:57
+msgid "Claim lines"
+msgstr "بنود المطالبة"
+
+#: billing/templates/billing/claim_detail.html:58
+msgid "Add line"
+msgstr "إضافة بند"
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "CPT/HCPCS"
+msgstr "رمز CPT/HCPCS"
+
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/payment_detail.html:25
+#: billing/templates/billing/service_line_detail.html:3
+msgid "Service line"
+msgstr "بند الخدمة"
+
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/patient_statement_detail.html:30
+msgid "Charge"
+msgstr "الرسوم"
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "Allowed"
+msgstr "المبلغ المسموح"
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "Adjustment"
+msgstr "تسوية"
+
+#: billing/templates/billing/claim_detail.html:71
+#: billing/templates/billing/payment_detail.html:28
+#: billing/templates/billing/payment_posting_detail.html:26
+msgid "Remove"
+msgstr "إزالة"
+
+#: billing/templates/billing/claim_detail.html:74
+msgid "No claim lines have been added."
+msgstr "لم تتم إضافة أي بنود للمطالبة."
+
+#: billing/templates/billing/claim_error.html:3
+#: billing/templates/billing/claim_error.html:7
+msgid "Claim action unavailable"
+msgstr "إجراء المطالبة غير متاح"
+
+#: billing/templates/billing/claim_error.html:9
+msgid "Return to claims"
+msgstr "العودة إلى المطالبات"
+
+#: billing/templates/billing/claim_form.html:3
+msgid "Edit claim"
+msgstr "تعديل المطالبة"
+
+#: billing/templates/billing/claim_form.html:3
+msgid "Create claim"
+msgstr "إنشاء مطالبة"
+
+#: billing/templates/billing/claim_form.html:6
+msgid "Edit insurance claim"
+msgstr "تعديل مطالبة التأمين"
+
+#: billing/templates/billing/claim_form.html:6
+msgid "Create insurance claim"
+msgstr "إنشاء مطالبة تأمين"
+
+#: billing/templates/billing/claim_form.html:7
+msgid "Save claim"
+msgstr "حفظ المطالبة"
+
+#: billing/templates/billing/claim_line_confirm_delete.html:3
+#: billing/templates/billing/claim_line_confirm_delete.html:6
+msgid "Remove claim line"
+msgstr "إزالة بند المطالبة"
+
+#: billing/templates/billing/claim_line_form.html:3
+#: billing/templates/billing/claim_line_form.html:6
+msgid "Edit claim line"
+msgstr "تعديل بند المطالبة"
+
+#: billing/templates/billing/claim_line_form.html:3
+#: billing/templates/billing/claim_line_form.html:6
+msgid "Add claim line"
+msgstr "إضافة بند مطالبة"
+
+#: billing/templates/billing/claim_line_form.html:7
+msgid "Save claim line"
+msgstr "حفظ بند المطالبة"
+
+#: billing/templates/billing/claim_list.html:4
+#: dashboard/templates/dashboard/stats.html:152 templates/layout.html:196
+msgid "Claims"
+msgstr "المطالبات"
+
+#: billing/templates/billing/claim_list.html:10
+msgid "Insurance Claims"
+msgstr "مطالبات التأمين"
+
+#: billing/templates/billing/claim_list.html:16
+#: billing/templates/billing/patient_statement_list.html:16
+#: billing/templates/billing/service_line_list.html:19
+msgid "Total"
+msgstr "الإجمالي"
+
+#: billing/templates/billing/claim_list.html:17
+#: billing/templates/billing/claim_list.html:34
+#: billing/templates/billing/patient_statement_list.html:17
+#: billing/templates/billing/patient_statement_list.html:31
+msgid "Draft"
+msgstr "مسودة"
+
+#: billing/templates/billing/claim_list.html:20
+#: billing/templates/billing/claim_list.html:38
+#: billing/templates/billing/service_line_list.html:51
+#: billing/templates/billing/service_line_list.html:70
+msgid "Denied"
+msgstr "مرفوض"
+
+#: billing/templates/billing/claim_list.html:30
+#: billing/templates/billing/patient_statement_list.html:30
+#: billing/templates/billing/payment_plan_list.html:40
+#: billing/templates/billing/service_line_list.html:65
+#: orders/templates/orders/worklist.html:49
+#: reports/templates/reports/report_list.html:38
 msgid "All Statuses"
 msgstr "جميع الحالات"
 
-#: templates/orders/worklist.html:74 templates/reports/report_list.html:64
-msgid "All Modalities"
-msgstr "جميع الأوضاع"
+#: billing/templates/billing/claim_list.html:36
+msgid "Accepted"
+msgstr "مقبول"
 
-#: templates/orders/worklist.html:100
-msgid "All Priorities"
-msgstr "جميع الأولويات"
-
-#: templates/orders/worklist.html:122 templates/reports/report_list.html:85
+#: billing/templates/billing/claim_list.html:42
+#: billing/templates/billing/patient_statement_list.html:49
+#: billing/templates/billing/service_line_list.html:74
+#: orders/templates/orders/worklist.html:122
+#: reports/templates/reports/report_list.html:85
 msgid "From Date"
 msgstr "من تاريخ"
 
-#: templates/orders/worklist.html:135 templates/reports/report_list.html:91
+#: billing/templates/billing/claim_list.html:46
+#: billing/templates/billing/patient_statement_list.html:53
+#: billing/templates/billing/service_line_list.html:78
+#: orders/templates/orders/worklist.html:135
+#: reports/templates/reports/report_list.html:91
 msgid "To Date"
 msgstr "إلى تاريخ"
 
-#: templates/orders/worklist.html:163 templates/reports/report_list.html:107
+#: billing/templates/billing/claim_list.html:50
+#: billing/templates/billing/patient_statement_list.html:57
+#: billing/templates/billing/payer_list.html:24
+#: billing/templates/billing/payment_list.html:39
+#: billing/templates/billing/payment_plan_list.html:48
+#: billing/templates/billing/service_line_list.html:82
+#: orders/templates/orders/worklist.html:26
+#: patients/templates/patients/patient_list.html:49
+#: reports/templates/reports/report_list.html:26
+msgid "Search"
+msgstr "بحث"
+
+#: billing/templates/billing/claim_list.html:51
+msgid "Claim number"
+msgstr "رقم المطالبة"
+
+#: billing/templates/billing/claim_list.html:54
+#: billing/templates/billing/patient_statement_list.html:61
+#: billing/templates/billing/payer_list.html:51
+#: billing/templates/billing/payment_list.html:43
+#: billing/templates/billing/payment_plan_list.html:52
+#: billing/templates/billing/payment_posting_list.html:19
+#: billing/templates/billing/service_line_list.html:86
+#: orders/templates/orders/worklist.html:151
+#: reports/templates/reports/report_list.html:98
+msgid "Filter"
+msgstr "تصفية"
+
+#: billing/templates/billing/claim_list.html:63
+msgid "Create Claim"
+msgstr "إنشاء مطالبة"
+
+#: billing/templates/billing/claim_list.html:72
+msgid "Claim Number"
+msgstr "رقم المطالبة"
+
+#: billing/templates/billing/claim_list.html:73
+#: billing/templates/billing/patient_account_form.html:4
+#: billing/templates/billing/patient_statement_form.html:21
+#: billing/templates/billing/patient_statement_list.html:81
+#: billing/templates/billing/payment_plan_form.html:23
+#: billing/templates/billing/payment_plan_list.html:71
+#: billing/templates/billing/service_line_form.html:26
+#: billing/templates/billing/service_line_list.html:112
+msgid "Patient Account"
+msgstr "حساب المريض"
+
+#: billing/templates/billing/claim_list.html:75
+msgid "DOS From"
+msgstr "تاريخ الخدمة من"
+
+#: billing/templates/billing/claim_list.html:76
+msgid "DOS To"
+msgstr "تاريخ الخدمة إلى"
+
+#: billing/templates/billing/claim_list.html:77
+#: billing/templates/billing/patient_account_detail.html:23
+msgid "Total Charges"
+msgstr "إجمالي الرسوم"
+
+#: billing/templates/billing/claim_list.html:79
+#: billing/templates/billing/clearinghouse_list.html:25
+#: billing/templates/billing/patient_statement_list.html:91
+#: billing/templates/billing/payer_list.html:135
+#: billing/templates/billing/payment_plan_list.html:79
+#: billing/templates/billing/service_line_list.html:118
+#: orders/templates/orders/worklist.html:207
+#: patients/templates/patients/patient_list.html:81
+#: reports/templates/reports/report_list.html:141
+#: reports/templates/reports/study_reports.html:73
+#: users/templates/users/manage_users.html:25
+msgid "Actions"
+msgstr "إجراءات"
+
+#: billing/templates/billing/claim_list.html:101
+msgid "No claims found."
+msgstr "لم يتم العثور على مطالبات."
+
+#: billing/templates/billing/claim_list.html:110
+#: billing/templates/billing/patient_statement_list.html:159
+#: billing/templates/billing/payment_list.html:80
+#: billing/templates/billing/payment_plan_list.html:140
+#: billing/templates/billing/payment_posting_list.html:39
+#: billing/templates/billing/service_line_list.html:168
+msgid "Previous"
+msgstr "السابق"
+
+#: billing/templates/billing/claim_list.html:111
+#: billing/templates/billing/patient_statement_list.html:163
+#: billing/templates/billing/payment_list.html:82
+#: billing/templates/billing/payment_plan_list.html:144
+#: billing/templates/billing/payment_posting_list.html:41
+#: billing/templates/billing/service_line_list.html:182
+msgid "Next"
+msgstr "التالي"
+
+#: billing/templates/billing/clearinghouse_detail.html:20
+msgid "Clearinghouse Details"
+msgstr "تفاصيل غرفة المقاصة"
+
+#: billing/templates/billing/clearinghouse_detail.html:23
+msgid "Sender ID:"
+msgstr "معرّف المرسل:"
+
+#: billing/templates/billing/clearinghouse_detail.html:24
+msgid "Receiver ID:"
+msgstr "معرّف المستلم:"
+
+#: billing/templates/billing/clearinghouse_detail.html:25
+msgid "API Endpoint:"
+msgstr "نقطة نهاية API:"
+
+#: billing/templates/billing/clearinghouse_detail.html:26
+msgid "Status:"
+msgstr "الحالة:"
+
+#: billing/templates/billing/clearinghouse_detail.html:28
+#: billing/templates/billing/clearinghouse_list.html:35
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payer_detail.html:88
+#: billing/templates/billing/payer_form.html:68
+#: billing/templates/billing/payer_list.html:45
+#: billing/templates/billing/payer_list.html:81
+#: billing/templates/billing/payer_list.html:169
+#: billing/templates/billing/payment_plan_list.html:17
+#: billing/templates/billing/payment_plan_list.html:41
+#: users/templates/users/manage_users.html:23
+msgid "Active"
+msgstr "نشط"
+
+#: billing/templates/billing/clearinghouse_detail.html:30
+#: billing/templates/billing/clearinghouse_list.html:37
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payer_detail.html:90
+#: billing/templates/billing/payer_list.html:46
+#: billing/templates/billing/payer_list.html:171
+msgid "Inactive"
+msgstr "غير نشط"
+
+#: billing/templates/billing/clearinghouse_form.html:4
+#: billing/templates/billing/payer_detail.html:72
+#: billing/templates/billing/payer_form.html:180
+msgid "Clearinghouse"
+msgstr "غرفة المقاصة (Clearinghouse)"
+
+#: billing/templates/billing/clearinghouse_form.html:8
+msgid "Edit Clearinghouse"
+msgstr "تعديل غرفة المقاصة"
+
+#: billing/templates/billing/clearinghouse_form.html:8
+msgid "Create Clearinghouse"
+msgstr "إنشاء غرفة مقاصة"
+
+#: billing/templates/billing/clearinghouse_list.html:4
+#: templates/layout.html:168
+msgid "Clearinghouses"
+msgstr "غرف المقاصة"
+
+#: billing/templates/billing/clearinghouse_list.html:10
+msgid "EDI Clearinghouses"
+msgstr "غرف المقاصة لتبادل البيانات الإلكتروني"
+
+#: billing/templates/billing/clearinghouse_list.html:13
+msgid "Add Clearinghouse"
+msgstr "إضافة غرفة مقاصة"
+
+#: billing/templates/billing/clearinghouse_list.html:22
+#: billing/templates/billing/payer_list.html:130
+msgid "Name"
+msgstr "الاسم"
+
+#: billing/templates/billing/clearinghouse_list.html:23
+msgid "Sender ID"
+msgstr "معرّف المرسل"
+
+#: billing/templates/billing/clearinghouse_list.html:47
+msgid "No clearinghouses found"
+msgstr "لم يتم العثور على غرف مقاصة."
+
+#: billing/templates/billing/denial_list.html:4
+msgid "Denials"
+msgstr "حالات الرفض"
+
+#: billing/templates/billing/denial_list.html:8
+msgid "Denials and Appeals"
+msgstr "حالات الرفض والاستئناف"
+
+#: billing/templates/billing/denial_list.html:9
+msgid ""
+"Review denial patterns, maintain adjustment reason codes, and follow payer "
+"appeal decisions."
+msgstr "راجع أنماط الرفض، وأدر رموز أسباب التسوية، وتابع قرارات استئناف الجهات الدافعة."
+
+#: billing/templates/billing/denial_list.html:11
+msgid "Manage denial reason codes"
+msgstr "إدارة رموز أسباب الرفض"
+
+#: billing/templates/billing/denial_list.html:12
+msgid "View denial management report"
+msgstr "عرض تقرير إدارة حالات الرفض"
+
+#: billing/templates/billing/denial_list.html:13
+msgid "Track claim appeals"
+msgstr "متابعة استئنافات المطالبات"
+
+#: billing/templates/billing/denial_reason_confirm_delete.html:3
+msgid "Delete denial reason"
+msgstr "حذف سبب الرفض"
+
+#: billing/templates/billing/denial_reason_confirm_delete.html:6
+msgid "Delete denial reason code"
+msgstr "حذف رمز سبب الرفض"
+
+#: billing/templates/billing/denial_reason_detail.html:3
+msgid "Denial reason"
+msgstr "سبب الرفض"
+
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:3
+msgid "Denial reasons"
+msgstr "أسباب الرفض"
+
+#: billing/templates/billing/denial_reason_detail.html:7
+msgid "Code guidance"
+msgstr "إرشادات الرمز"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Description"
+msgstr "الوصف"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Category"
+msgstr "الفئة"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+msgid "Requires appeal"
+msgstr "يتطلب استئنافاً"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payment_plan_detail.html:17
+#: orders/templates/orders/edit_order.html:400
+#: orders/templates/orders/order_detail.html:241
+#: patients/templates/patients/patient_detail.html:257
+#: reports/templates/reports/report_list.html:78
+#: reports/templates/reports/report_list.html:171
+msgid "Yes"
+msgstr "نعم"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payment_plan_detail.html:17
+#: orders/templates/orders/order_detail.html:245
+#: patients/templates/patients/patient_detail.html:261
+#: reports/templates/reports/report_list.html:79
+msgid "No"
+msgstr "لا"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Appeal deadline"
+msgstr "المهلة النهائية للاستئناف"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+msgid "days"
+msgstr "أيام"
+
+#: billing/templates/billing/denial_reason_detail.html:8
+msgid "Common resolution"
+msgstr "الإجراء الشائع"
+
+#: billing/templates/billing/denial_reason_form.html:3
+msgid "Edit denial reason"
+msgstr "تعديل سبب الرفض"
+
+#: billing/templates/billing/denial_reason_form.html:3
+msgid "Add denial reason"
+msgstr "إضافة سبب رفض"
+
+#: billing/templates/billing/denial_reason_form.html:6
+msgid "Edit denial reason code"
+msgstr "تعديل رمز سبب الرفض"
+
+#: billing/templates/billing/denial_reason_form.html:6
+msgid "Add denial reason code"
+msgstr "إضافة رمز سبب الرفض"
+
+#: billing/templates/billing/denial_reason_form.html:7
+msgid "Save reason code"
+msgstr "حفظ رمز السبب"
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Denial reason codes"
+msgstr "رموز أسباب الرفض"
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Reference codes and recommended follow-up for denied claims."
+msgstr "الرموز المرجعية وإجراءات المتابعة الموصى بها للمطالبات المرفوضة."
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Add reason code"
+msgstr "إضافة رمز سبب"
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "System"
+msgstr "النظام"
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Code"
+msgstr "الرمز"
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Appeal required"
+msgstr "يتطلب استئنافاً"
+
+#: billing/templates/billing/denial_reason_list.html:12
+msgid "No denial reason codes have been configured."
+msgstr "لم يتم إعداد أي رموز لأسباب الرفض."
+
+#: billing/templates/billing/era_upload.html:3
+msgid "Upload ERA file"
+msgstr "تحميل ملف ERA"
+
+#: billing/templates/billing/era_upload.html:6
+#: billing/templates/billing/payment_posting_detail.html:7
+#: billing/templates/billing/payment_posting_list.html:3
+#: billing/templates/billing/payment_posting_list.html:7
+msgid "Payment postings"
+msgstr "ترحيلات الدفعات"
+
+#: billing/templates/billing/era_upload.html:6
+msgid "Upload ERA / EOB file"
+msgstr "تحميل ملف ERA / EOB"
+
+#: billing/templates/billing/era_upload.html:6
+msgid "Upload an 835 remittance file to create payment postings."
+msgstr "حمّل ملف حوالة 835 لإنشاء ترحيلات الدفعات."
+
+#: billing/templates/billing/era_upload.html:10
+msgid "Remittance file"
+msgstr "ملف الحوالة"
+
+#: billing/templates/billing/era_upload.html:12
+msgid ""
+"Choose an 835 ERA/EOB file. The file is processed securely and is not stored "
+"by this page."
+msgstr "اختر ملف ERA/EOB بصيغة 835. تتم معالجة الملف بأمان ولا تحفظه هذه الصفحة."
+
+#: billing/templates/billing/era_upload.html:13
+msgid "Upload and process"
+msgstr "تحميل ومعالجة"
+
+#: billing/templates/billing/era_upload.html:26
+msgid "Processing remittance file…"
+msgstr "جارٍ معالجة ملف الحوالة…"
+
+#: billing/templates/billing/era_upload.html:31
+msgid "The file could not be processed."
+msgstr "تعذرت معالجة الملف."
+
+#: billing/templates/billing/era_upload.html:35
+msgid "The upload failed. Check your connection and try again."
+msgstr "فشل التحميل. تحقق من اتصالك وحاول مرة أخرى."
+
+#: billing/templates/billing/fee_schedule_confirm_delete.html:4
+#: billing/templates/billing/fee_schedule_confirm_delete.html:10
+msgid "Delete Fee Schedule"
+msgstr "حذف جدول الرسوم"
+
+#: billing/templates/billing/fee_schedule_confirm_delete.html:11
+#: billing/templates/billing/payer_confirm_delete.html:11
+#, python-format
+msgid "Are you sure you want to delete \"%(name)s\"?"
+msgstr "هل أنت متأكد من رغبتك في حذف \"%(name)s\"؟"
+
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:4
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:10
+msgid "Delete Fee Schedule Item"
+msgstr "حذف بند جدول الرسوم"
+
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:11
+#, python-format
+msgid "Are you sure you want to delete \"%(code)s\"?"
+msgstr "هل أنت متأكد من رغبتك في حذف \"%(code)s\"؟"
+
+#: billing/templates/billing/fee_schedule_item_form.html:3
+#: billing/templates/billing/fee_schedule_item_form.html:6
+msgid "Edit fee schedule item"
+msgstr "تعديل بند جدول الرسوم"
+
+#: billing/templates/billing/fee_schedule_item_form.html:3
+#: billing/templates/billing/fee_schedule_item_form.html:6
+msgid "Add fee schedule item"
+msgstr "إضافة بند إلى جدول الرسوم"
+
+#: billing/templates/billing/fee_schedule_item_form.html:7
+msgid "Save item"
+msgstr "حفظ البند"
+
+#: billing/templates/billing/patient_account_detail.html:15
+#: billing/templates/billing/patient_statement_form.html:88
+#: billing/templates/billing/patient_statement_list.html:88
+msgid "Current Balance"
+msgstr "الرصيد الحالي"
+
+#: billing/templates/billing/patient_account_detail.html:31
+msgid "Total Payments"
+msgstr "إجمالي الدفعات"
+
+#: billing/templates/billing/patient_account_detail.html:49
+msgid "Recent Charges"
+msgstr "الرسوم الأخيرة"
+
+#: billing/templates/billing/patient_account_detail.html:55
+#: billing/templates/billing/service_line_form.html:34
+#: billing/templates/billing/service_line_list.html:109
+msgid "Service Date"
+msgstr "تاريخ الخدمة"
+
+#: billing/templates/billing/patient_account_detail.html:56
+#: billing/templates/billing/patient_statement_detail.html:30
+#: orders/templates/orders/delete_order.html:64
+#: orders/templates/orders/worklist.html:202
+#: reports/templates/reports/report_detail.html:84
+#: reports/templates/reports/report_form.html:269
+#: reports/templates/reports/report_verify.html:38
+#: reports/templates/reports/study_reports.html:36
+msgid "Procedure"
+msgstr "الإجراء"
+
+#: billing/templates/billing/patient_account_detail.html:57
+#: billing/templates/billing/patient_account_detail.html:89
+#: billing/templates/billing/payment_detail.html:14
+#: billing/templates/billing/payment_list.html:53
+#: billing/templates/billing/payment_posting_detail.html:16
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Amount"
+msgstr "المبلغ"
+
+#: billing/templates/billing/patient_account_detail.html:71
+msgid "No charges"
+msgstr "لا توجد رسوم"
+
+#: billing/templates/billing/patient_account_detail.html:82
+msgid "Recent Payments"
+msgstr "الدفعات الأخيرة"
+
+#: billing/templates/billing/patient_account_detail.html:88
+#: billing/templates/billing/payment_list.html:52
+msgid "Date"
+msgstr "التاريخ"
+
+#: billing/templates/billing/patient_account_detail.html:90
+#: billing/templates/billing/payment_detail.html:15
+#: billing/templates/billing/payment_list.html:52
+#: billing/templates/billing/payment_posting_list.html:17
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Method"
+msgstr "الطريقة"
+
+#: billing/templates/billing/patient_account_detail.html:102
+msgid "No payments"
+msgstr "لا توجد دفعات"
+
+#: billing/templates/billing/patient_account_form.html:8
+msgid "Edit Account"
+msgstr "تعديل الحساب"
+
+#: billing/templates/billing/patient_account_form.html:8
+msgid "Create Account"
+msgstr "إنشاء حساب"
+
+#: billing/templates/billing/patient_insurance_form.html:4
+#: billing/templates/billing/patient_insurance_form.html:8
+#: templates/layout.html:177
+msgid "Patient Insurance"
+msgstr "تأمين المريض"
+
+#: billing/templates/billing/patient_statement_confirm_delete.html:3
+#: billing/templates/billing/patient_statement_confirm_delete.html:6
+msgid "Delete patient statement"
+msgstr "حذف كشف حساب المريض"
+
+#: billing/templates/billing/patient_statement_detail.html:3
+#: billing/templates/billing/patient_statement_detail.html:7
+msgid "Statement"
+msgstr "كشف الحساب"
+
+#: billing/templates/billing/patient_statement_detail.html:7
+msgid "Patient statements"
+msgstr "كشوف حساب المرضى"
+
+#: billing/templates/billing/patient_statement_detail.html:11
+msgid "Statement details"
+msgstr "تفاصيل كشف الحساب"
+
+#: billing/templates/billing/patient_statement_detail.html:13
+msgid "Statement date"
+msgstr "تاريخ كشف الحساب"
+
+#: billing/templates/billing/patient_statement_detail.html:15
+msgid "Service period"
+msgstr "فترة الخدمة"
+
+#: billing/templates/billing/patient_statement_detail.html:16
+msgid "Delivery method"
+msgstr "طريقة التسليم"
+
+#: billing/templates/billing/patient_statement_detail.html:17
+msgid "Sent date"
+msgstr "تاريخ الإرسال"
+
+#: billing/templates/billing/patient_statement_detail.html:19
+msgid "Balance summary"
+msgstr "ملخص الرصيد"
+
+#: billing/templates/billing/patient_statement_detail.html:20
+msgid "Previous balance"
+msgstr "الرصيد السابق"
+
+#: billing/templates/billing/patient_statement_detail.html:21
+msgid "Charges this period"
+msgstr "رسوم هذه الفترة"
+
+#: billing/templates/billing/patient_statement_detail.html:22
+msgid "Payments this period"
+msgstr "دفعات هذه الفترة"
+
+#: billing/templates/billing/patient_statement_detail.html:23
+msgid "Adjustments this period"
+msgstr "تسويات هذه الفترة"
+
+#: billing/templates/billing/patient_statement_detail.html:24
+msgid "Current balance"
+msgstr "الرصيد الحالي"
+
+#: billing/templates/billing/patient_statement_detail.html:25
+msgid "Minimum due"
+msgstr "الحد الأدنى المستحق"
+
+#: billing/templates/billing/patient_statement_detail.html:28
+#: billing/templates/billing/patient_statement_form.html:101
+#: billing/templates/billing/payment_detail.html:21
+#: billing/templates/billing/payment_detail.html:25
+#: billing/templates/billing/payment_plan_form.html:86
+msgid "Notes"
+msgstr "ملاحظات"
+
+#: billing/templates/billing/patient_statement_detail.html:29
+msgid "Account service lines"
+msgstr "بنود خدمات الحساب"
+
+#: billing/templates/billing/patient_statement_detail.html:30
+#: billing/templates/billing/payment_detail.html:25
+msgid "Service date"
+msgstr "تاريخ الخدمة"
+
+#: billing/templates/billing/patient_statement_detail.html:33
+msgid "No service lines on this account."
+msgstr "لا توجد بنود خدمة لهذا الحساب."
+
+#: billing/templates/billing/patient_statement_form.html:4
+msgid "Edit Statement"
+msgstr "تعديل كشف الحساب"
+
+#: billing/templates/billing/patient_statement_form.html:4
+#: billing/templates/billing/patient_statement_list.html:70
+msgid "Create Statement"
+msgstr "إنشاء كشف حساب"
+
+#: billing/templates/billing/patient_statement_form.html:10
+msgid "Edit Patient Statement"
+msgstr "تعديل كشف حساب المريض"
+
+#: billing/templates/billing/patient_statement_form.html:10
+msgid "Create Patient Statement"
+msgstr "إنشاء كشف حساب للمريض"
+
+#: billing/templates/billing/patient_statement_form.html:26
+#: billing/templates/billing/patient_statement_list.html:82
+msgid "Statement Date"
+msgstr "تاريخ كشف الحساب"
+
+#: billing/templates/billing/patient_statement_form.html:31
+#: billing/templates/billing/patient_statement_list.html:83
+msgid "Due Date"
+msgstr "تاريخ الاستحقاق"
+
+#: billing/templates/billing/patient_statement_form.html:39
+msgid "Service Date From"
+msgstr "تاريخ الخدمة من"
+
+#: billing/templates/billing/patient_statement_form.html:44
+msgid "Service Date To"
+msgstr "تاريخ الخدمة إلى"
+
+#: billing/templates/billing/patient_statement_form.html:49
+#: billing/templates/billing/patient_statement_list.html:40
+msgid "Delivery Method"
+msgstr "طريقة التسليم"
+
+#: billing/templates/billing/patient_statement_form.html:61
+msgid "Financial Summary"
+msgstr "الملخص المالي"
+
+#: billing/templates/billing/patient_statement_form.html:65
+#: billing/templates/billing/patient_statement_list.html:85
+msgid "Previous Balance"
+msgstr "الرصيد السابق"
+
+#: billing/templates/billing/patient_statement_form.html:70
+msgid "Charges This Period"
+msgstr "رسوم هذه الفترة"
+
+#: billing/templates/billing/patient_statement_form.html:75
+msgid "Payments This Period"
+msgstr "دفعات هذه الفترة"
+
+#: billing/templates/billing/patient_statement_form.html:83
+msgid "Adjustments This Period"
+msgstr "تسويات هذه الفترة"
+
+#: billing/templates/billing/patient_statement_form.html:93
+msgid "Minimum Payment Due"
+msgstr "الحد الأدنى للدفعة المستحقة"
+
+#: billing/templates/billing/patient_statement_form.html:109
+msgid "Save Statement"
+msgstr "حفظ كشف الحساب"
+
+#: billing/templates/billing/patient_statement_list.html:4
+#: templates/layout.html:215
+msgid "Patient Statements"
+msgstr "كشوف حساب المرضى"
+
+#: billing/templates/billing/patient_statement_list.html:10
+msgid "Patient Billing Statements"
+msgstr "كشوف فواتير المرضى"
+
+#: billing/templates/billing/patient_statement_list.html:18
+#: billing/templates/billing/patient_statement_list.html:32
+msgid "Sent"
+msgstr "مرسل"
+
+#: billing/templates/billing/patient_statement_list.html:19
+#: billing/templates/billing/patient_statement_list.html:35
+#: billing/templates/billing/patient_statement_list.html:106
+msgid "Overdue"
+msgstr "متأخر"
+
+#: billing/templates/billing/patient_statement_list.html:20
+msgid "Total Balance"
+msgstr "إجمالي الرصيد"
+
+#: billing/templates/billing/patient_statement_list.html:34
+msgid "Partial"
+msgstr "جزئي"
+
+#: billing/templates/billing/patient_statement_list.html:36
+msgid "Void"
+msgstr "ملغى"
+
+#: billing/templates/billing/patient_statement_list.html:42
+msgid "All Methods"
+msgstr "جميع الطرق"
+
+#: billing/templates/billing/patient_statement_list.html:43
+msgid "Mail"
+msgstr "البريد"
+
+#: billing/templates/billing/patient_statement_list.html:44
+#: billing/templates/billing/payer_form.html:140
+#: patients/templates/patients/add_patient.html:122
+#: patients/templates/patients/delete_patient.html:77
+#: patients/templates/patients/edit_patient.html:339
+#: patients/templates/patients/patient_detail.html:135
+#: users/templates/users/login.html:31
+#: users/templates/users/manage_users.html:21
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: billing/templates/billing/patient_statement_list.html:45
+msgid "Portal"
+msgstr "البوابة"
+
+#: billing/templates/billing/patient_statement_list.html:58
+msgid "Statement # or Patient"
+msgstr "رقم كشف الحساب أو المريض"
+
+#: billing/templates/billing/patient_statement_list.html:80
+msgid "Statement Number"
+msgstr "رقم كشف الحساب"
+
+#: billing/templates/billing/patient_statement_list.html:84
+msgid "Service Period"
+msgstr "فترة الخدمة"
+
+#: billing/templates/billing/patient_statement_list.html:86
+msgid "Charges"
+msgstr "الرسوم"
+
+#: billing/templates/billing/patient_statement_list.html:87
+msgid "Payments"
+msgstr "الدفعات"
+
+#: billing/templates/billing/patient_statement_list.html:90
+msgid "Delivery"
+msgstr "التسليم"
+
+#: billing/templates/billing/patient_statement_list.html:134
+msgid "Sent:"
+msgstr "تاريخ الإرسال:"
+
+#: billing/templates/billing/patient_statement_list.html:171
+msgid "No patient statements found."
+msgstr "لم يتم العثور على كشوف حساب للمرضى."
+
+#: billing/templates/billing/payer_confirm_delete.html:4
+#: billing/templates/billing/payer_confirm_delete.html:10
+msgid "Delete Payer"
+msgstr "حذف الجهة الدافعة"
+
+#: billing/templates/billing/payer_detail.html:30
+#: billing/templates/billing/payer_form.html:79
+msgid "Contact Information"
+msgstr "معلومات الاتصال"
+
+#: billing/templates/billing/payer_detail.html:35
+#: patients/templates/patients/add_patient.html:131
+#: patients/templates/patients/edit_patient.html:356
+#: patients/templates/patients/patient_detail.html:143
+msgid "Address"
+msgstr "العنوان"
+
+#: billing/templates/billing/payer_detail.html:44
+msgid "Communication"
+msgstr "التواصل"
+
+#: billing/templates/billing/payer_detail.html:59
+#: billing/templates/billing/payer_form.html:160
+msgid "EDI Configuration"
+msgstr "إعدادات التبادل الإلكتروني للبيانات (EDI)"
+
+#: billing/templates/billing/payer_detail.html:64
+#: billing/templates/billing/payer_form.html:165
+msgid "EDI Qualifier"
+msgstr "معرف الـ EDI"
+
+#: billing/templates/billing/payer_detail.html:68
+#: billing/templates/billing/payer_form.html:173
+msgid "EDI Receiver ID"
+msgstr "معرف مستلم الـ EDI"
+
+#: billing/templates/billing/payer_detail.html:94
+#: billing/templates/billing/payer_form.html:44
+#: billing/templates/billing/payer_list.html:29
+msgid "Payer Type"
+msgstr "نوع الدافع"
+
+#: billing/templates/billing/payer_detail.html:98
+msgid "Patients Insured"
+msgstr "المرضى المؤمن عليهم"
+
+#: billing/templates/billing/payer_detail.html:107
+#: billing/templates/billing/payer_form.html:193
+msgid "Financial Settings"
+msgstr "الإعدادات المالية"
+
+#: billing/templates/billing/payer_detail.html:111
+#: billing/templates/billing/payer_form.html:198
+#: billing/templates/billing/payer_list.html:133
+msgid "Fee Schedule"
+msgstr "جدول الرسوم"
+
+#: billing/templates/billing/payer_detail.html:119
+#: billing/templates/billing/payer_form.html:205
+msgid "Default Copay"
+msgstr "الدفعة المشتركة الافتراضية"
+
+#: billing/templates/billing/payer_form.html:4
+#: billing/templates/billing/payer_form.html:15
+msgid "Edit Payer"
+msgstr "تعديل الدافع"
+
+#: billing/templates/billing/payer_form.html:4
+#: billing/templates/billing/payer_list.html:15
+msgid "Add Payer"
+msgstr "إضافة دافع"
+
+#: billing/templates/billing/payer_form.html:15
+msgid "Add New Payer"
+msgstr "إضافة دافع جديد"
+
+#: billing/templates/billing/payer_form.html:17
+msgid "Insurance company/payer information"
+msgstr "معلومات شركة التأمين/الدافع"
+
+#: billing/templates/billing/payer_form.html:20
+#: orders/templates/orders/order_detail.html:320
+#: patients/templates/patients/patient_detail.html:17
+msgid "Back to List"
+msgstr "الرجوع للقائمة"
+
+#: billing/templates/billing/payer_form.html:31
+msgid "Basic Information"
+msgstr "المعلومات الأساسية"
+
+#: billing/templates/billing/payer_form.html:36
+#: billing/templates/billing/payer_list.html:129
+msgid "Payer ID"
+msgstr "معرف الدافع"
+
+#: billing/templates/billing/payer_form.html:41
+msgid "EDI payer identifier"
+msgstr "معرف الدافع EDI"
+
+#: billing/templates/billing/payer_form.html:51
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
+#: billing/templates/billing/payer_form.html:58
+msgid "Short Name"
+msgstr "الاسم المختصر"
+
+#: billing/templates/billing/payer_form.html:84
+msgid "Address Line 1"
+msgstr "سطر العنوان 1"
+
+#: billing/templates/billing/payer_form.html:91
+msgid "Address Line 2"
+msgstr "سطر العنوان 2"
+
+#: billing/templates/billing/payer_form.html:98
+msgid "City"
+msgstr "المدينة"
+
+#: billing/templates/billing/payer_form.html:105
+msgid "State/Province"
+msgstr "الولاية/المنطقة"
+
+#: billing/templates/billing/payer_form.html:112
+msgid "Postal Code"
+msgstr "الرمز البريدي"
+
+#: billing/templates/billing/payer_form.html:119
+msgid "Country"
+msgstr "البلد"
+
+#: billing/templates/billing/payer_form.html:126
+#: orders/templates/orders/order_detail.html:172
+#: patients/templates/patients/add_patient.html:115
+#: patients/templates/patients/delete_patient.html:73
+#: patients/templates/patients/edit_patient.html:324
+#: patients/templates/patients/patient_detail.html:127
+#: patients/templates/patients/patient_list.html:78
+msgid "Phone"
+msgstr "رقم الهاتف"
+
+#: billing/templates/billing/payer_form.html:133
+msgid "Fax"
+msgstr "الفاكس"
+
+#: billing/templates/billing/payer_form.html:147
+msgid "Website"
+msgstr "الموقع الإلكتروني"
+
+#: billing/templates/billing/payer_form.html:170
+msgid "e.g., PI, XV"
+msgstr "مثال: PI, XV"
+
+#: billing/templates/billing/payer_form.html:224
+msgid "Update Payer"
+msgstr "تحديث الدافع"
+
+#: billing/templates/billing/payer_form.html:224
+msgid "Create Payer"
+msgstr "إنشاء دافع"
+
+#: billing/templates/billing/payer_list.html:4
+#: billing/templates/billing/payer_list.html:11
+#: billing/templates/billing/payer_list.html:121
+#: dashboard/templates/dashboard/stats.html:221
+msgid "Insurance Payers"
+msgstr "دافعو التأمين"
+
+#: billing/templates/billing/payer_list.html:12
+msgid "Manage insurance companies and payers"
+msgstr "إدارة شركات التأمين والدافعين"
+
+#: billing/templates/billing/payer_list.html:26
+msgid "Name or Payer ID"
+msgstr "الاسم أو معرف الدافع"
+
+#: billing/templates/billing/payer_list.html:31
+msgid "All Types"
+msgstr "جميع الأنواع"
+
+#: billing/templates/billing/payer_list.html:32
+#: billing/templates/billing/payer_list.html:94
+msgid "Commercial"
+msgstr "تجاري"
+
+#: billing/templates/billing/payer_list.html:33
+msgid "Medicare"
+msgstr "رعاية طبية (Medicare)"
+
+#: billing/templates/billing/payer_list.html:34
+msgid "Medicaid"
+msgstr "مساعدة طبية (Medicaid)"
+
+#: billing/templates/billing/payer_list.html:35
+msgid "Self Pay"
+msgstr "دفع ذاتي"
+
+#: billing/templates/billing/payer_list.html:36
+msgid "Workers' Comp"
+msgstr "تعويضات العمال"
+
+#: billing/templates/billing/payer_list.html:37
+msgid "Tricare"
+msgstr "ترايكير (Tricare)"
+
+#: billing/templates/billing/payer_list.html:38
+#: orders/templates/orders/add_order.html:1045
+#: patients/templates/patients/add_patient.html:60
+#: patients/templates/patients/add_patient.html:109
+#: patients/templates/patients/edit_patient.html:180
+#: patients/templates/patients/edit_patient.html:316
+#: patients/templates/patients/patient_detail.html:112
+#: patients/templates/patients/patient_list.html:107
+msgid "Other"
+msgstr "أخرى"
+
+#: billing/templates/billing/payer_list.html:44
+#: reports/templates/reports/report_list.html:77
+msgid "All"
+msgstr "الكل"
+
+#: billing/templates/billing/payer_list.html:54
+msgid "Clear"
+msgstr "مسح"
+
+#: billing/templates/billing/payer_list.html:68
+msgid "Total Payers"
+msgstr "إجمالي الدافعين"
+
+#: billing/templates/billing/payer_list.html:107
+msgid "Government"
+msgstr "حكومي"
+
+#: billing/templates/billing/payer_list.html:122
+msgid "records"
+msgstr "سجلات"
+
+#: billing/templates/billing/payer_list.html:131
+msgid "Type"
+msgstr "النوع"
+
+#: billing/templates/billing/payer_list.html:132
+msgid "Contact"
+msgstr "جهة الاتصال"
+
+#: billing/templates/billing/payer_list.html:187
+msgid "No payers found"
+msgstr "لم يتم العثور على دافعين"
+
+#: billing/templates/billing/payment_allocation_confirm_delete.html:3
+#: billing/templates/billing/payment_allocation_confirm_delete.html:6
+msgid "Remove payment allocation"
+msgstr "إزالة تخصيص الدفعة"
+
+#: billing/templates/billing/payment_allocation_form.html:3
+#: billing/templates/billing/payment_allocation_form.html:6
+msgid "Edit payment allocation"
+msgstr "تعديل تخصيص الدفعة"
+
+#: billing/templates/billing/payment_allocation_form.html:3
+#: billing/templates/billing/payment_allocation_form.html:6
+#: billing/templates/billing/payment_detail.html:8
+msgid "Allocate payment"
+msgstr "تخصيص الدفعة"
+
+#: billing/templates/billing/payment_allocation_form.html:7
+msgid "Save allocation"
+msgstr "حفظ التخصيص"
+
+#: billing/templates/billing/payment_confirm_delete.html:3
+#: billing/templates/billing/payment_confirm_delete.html:6
+msgid "Delete patient payment"
+msgstr "حذف دفعة المريض"
+
+#: billing/templates/billing/payment_detail.html:3
+#: billing/templates/billing/payment_detail.html:7
+msgid "Payment details"
+msgstr "تفاصيل الدفعة"
+
+#: billing/templates/billing/payment_detail.html:7
+msgid "Patient payments"
+msgstr "دفعات المرضى"
+
+#: billing/templates/billing/payment_detail.html:11
+msgid "Transaction"
+msgstr "المعاملة"
+
+#: billing/templates/billing/payment_detail.html:13
+msgid "Payment date"
+msgstr "تاريخ الدفع"
+
+#: billing/templates/billing/payment_detail.html:16
+#: billing/templates/billing/payment_posting_detail.html:17
+msgid "Check number"
+msgstr "رقم الشيك"
+
+#: billing/templates/billing/payment_detail.html:17
+msgid "Card"
+msgstr "بطاقة"
+
+#: billing/templates/billing/payment_detail.html:18
+msgid "Transaction ID"
+msgstr "معرّف المعاملة"
+
+#: billing/templates/billing/payment_detail.html:19
+#: billing/templates/billing/payment_list.html:54
+msgid "Received by"
+msgstr "تم الاستلام بواسطة"
+
+#: billing/templates/billing/payment_detail.html:20
+msgid "Unapplied amount"
+msgstr "المبلغ غير المخصص"
+
+#: billing/templates/billing/payment_detail.html:24
+msgid "Allocations"
+msgstr "التخصيصات"
+
+#: billing/templates/billing/payment_detail.html:25
+msgid "Allocated amount"
+msgstr "المبلغ المخصص"
+
+#: billing/templates/billing/payment_detail.html:29
+msgid "This payment has not been allocated to service lines."
+msgstr "لم يتم تخصيص هذه الدفعة لبنود الخدمة."
+
+#: billing/templates/billing/payment_detail_confirm_delete.html:3
+#: billing/templates/billing/payment_detail_confirm_delete.html:6
+msgid "Delete payment detail"
+msgstr "حذف تفاصيل الدفعة"
+
+#: billing/templates/billing/payment_detail_form.html:3
+#: billing/templates/billing/payment_detail_form.html:6
+msgid "Edit payment detail"
+msgstr "تعديل تفاصيل الدفعة"
+
+#: billing/templates/billing/payment_detail_form.html:3
+#: billing/templates/billing/payment_detail_form.html:6
+#: billing/templates/billing/payment_posting_detail.html:8
+msgid "Add payment detail"
+msgstr "إضافة تفاصيل الدفعة"
+
+#: billing/templates/billing/payment_detail_form.html:7
+msgid "Save detail"
+msgstr "حفظ التفاصيل"
+
+#: billing/templates/billing/payment_form.html:3
+#: billing/templates/billing/payment_form.html:6
+msgid "Edit patient payment"
+msgstr "تعديل دفعة المريض"
+
+#: billing/templates/billing/payment_form.html:3
+#: billing/templates/billing/payment_form.html:6
+msgid "Record patient payment"
+msgstr "تسجيل دفعة المريض"
+
+#: billing/templates/billing/payment_form.html:7
+msgid "Save payment"
+msgstr "حفظ الدفعة"
+
+#: billing/templates/billing/payment_list.html:4
+#: billing/templates/billing/payment_list.html:10 templates/layout.html:210
+msgid "Patient Payments"
+msgstr "دفعات المرضى"
+
+#: billing/templates/billing/payment_list.html:11
+msgid "Review and manage patient payment transactions."
+msgstr "راجع معاملات دفعات المرضى وأدرها."
+
+#: billing/templates/billing/payment_list.html:14
+msgid "Record Payment"
+msgstr "تسجيل دفعة"
+
+#: billing/templates/billing/payment_list.html:21
+msgid "Today's collections"
+msgstr "تحصيلات اليوم"
+
+#: billing/templates/billing/payment_list.html:30
+#: billing/templates/billing/payment_posting_detail.html:15
+msgid "Payment method"
+msgstr "طريقة الدفع"
+
+#: billing/templates/billing/payment_list.html:32
+#: billing/templates/billing/payment_posting_list.html:17
+msgid "All methods"
+msgstr "جميع الطرق"
+
+#: billing/templates/billing/payment_list.html:40
+msgid "Check number or transaction ID"
+msgstr "رقم الشيك أو معرّف المعاملة"
+
+#: billing/templates/billing/payment_list.html:44
+#: billing/templates/billing/payment_posting_list.html:19
+msgid "Clear filters"
+msgstr "مسح عوامل التصفية"
+
+#: billing/templates/billing/payment_list.html:53
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Reference"
+msgstr "المرجع"
+
+#: billing/templates/billing/payment_list.html:54
+msgid "Unapplied"
+msgstr "غير مخصص"
+
+#: billing/templates/billing/payment_list.html:71
+msgid "No payments match your filters."
+msgstr "لا توجد دفعات تطابق عوامل التصفية."
+
+#: billing/templates/billing/payment_list.html:78
+msgid "Payment pages"
+msgstr "صفحات الدفعات"
+
+#: billing/templates/billing/payment_plan_confirm_delete.html:3
+#: billing/templates/billing/payment_plan_confirm_delete.html:6
+msgid "Delete payment plan"
+msgstr "حذف خطة الدفع"
+
+#: billing/templates/billing/payment_plan_detail.html:3
+#: billing/templates/billing/payment_plan_detail.html:7
+msgid "Payment plan"
+msgstr "خطة دفع"
+
+#: billing/templates/billing/payment_plan_detail.html:7
+msgid "Payment plans"
+msgstr "خطط الدفع"
+
+#: billing/templates/billing/payment_plan_detail.html:11
+msgid "Plan terms"
+msgstr "شروط الخطة"
+
+#: billing/templates/billing/payment_plan_detail.html:13
+msgid "Total amount"
+msgstr "المبلغ الإجمالي"
+
+#: billing/templates/billing/payment_plan_detail.html:14
+msgid "Monthly payment"
+msgstr "الدفعة الشهرية"
+
+#: billing/templates/billing/payment_plan_detail.html:15
+msgid "First payment date"
+msgstr "تاريخ الدفعة الأولى"
+
+#: billing/templates/billing/payment_plan_detail.html:16
+msgid "Payment day"
+msgstr "يوم الدفع"
+
+#: billing/templates/billing/payment_plan_detail.html:17
+msgid "Agreement signed"
+msgstr "تم توقيع الاتفاقية"
+
+#: billing/templates/billing/payment_plan_detail.html:19
+#: billing/templates/billing/payment_plan_list.html:76
+msgid "Progress"
+msgstr "التقدم"
+
+#: billing/templates/billing/payment_plan_detail.html:20
+#, python-format
+msgid "%(paid)s of %(total)s installments paid"
+msgstr "تم سداد %(paid)s من أصل %(total)s دفعة"
+
+#: billing/templates/billing/payment_plan_detail.html:22
+msgid "Plan progress"
+msgstr "تقدم الخطة"
+
+#: billing/templates/billing/payment_plan_detail.html:23
+msgid "Remaining balance"
+msgstr "الرصيد المتبقي"
+
+#: billing/templates/billing/payment_plan_detail.html:27
+msgid "Installments"
+msgstr "الأقساط"
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Amount due"
+msgstr "المبلغ المستحق"
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Amount paid"
+msgstr "المبلغ المدفوع"
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Payment"
+msgstr "الدفعة"
+
+#: billing/templates/billing/payment_plan_detail.html:32
+msgid "Update"
+msgstr "تحديث"
+
+#: billing/templates/billing/payment_plan_detail.html:33
+msgid "No installments are scheduled."
+msgstr "لا توجد أقساط مجدولة."
+
+#: billing/templates/billing/payment_plan_form.html:4
+#: billing/templates/billing/payment_plan_form.html:10
+msgid "Edit Payment Plan"
+msgstr "تعديل خطة الدفع"
+
+#: billing/templates/billing/payment_plan_form.html:4
+#: billing/templates/billing/payment_plan_form.html:10
+#: billing/templates/billing/payment_plan_list.html:61
+msgid "Create Payment Plan"
+msgstr "إنشاء خطة دفع"
+
+#: billing/templates/billing/payment_plan_form.html:19
+msgid "Plan Details"
+msgstr "تفاصيل الخطة"
+
+#: billing/templates/billing/payment_plan_form.html:28
+msgid "First Payment Date"
+msgstr "تاريخ الدفعة الأولى"
+
+#: billing/templates/billing/payment_plan_form.html:33
+msgid "Payment Day of Month"
+msgstr "يوم الدفع من الشهر"
+
+#: billing/templates/billing/payment_plan_form.html:35
+msgid "Day (1-28)"
+msgstr "اليوم (1-28)"
+
+#: billing/templates/billing/payment_plan_form.html:41
+msgid "Financial Terms"
+msgstr "الشروط المالية"
+
+#: billing/templates/billing/payment_plan_form.html:45
+#: billing/templates/billing/payment_plan_list.html:73
+msgid "Total Amount"
+msgstr "المبلغ الإجمالي"
+
+#: billing/templates/billing/payment_plan_form.html:50
+msgid "Remaining Balance"
+msgstr "الرصيد المتبقي"
+
+#: billing/templates/billing/payment_plan_form.html:55
+#: billing/templates/billing/payment_plan_list.html:74
+msgid "Monthly Payment"
+msgstr "الدفعة الشهرية"
+
+#: billing/templates/billing/payment_plan_form.html:63
+msgid "Number of Payments"
+msgstr "عدد الدفعات"
+
+#: billing/templates/billing/payment_plan_form.html:68
+msgid "Agreement Signed"
+msgstr "تم توقيع الاتفاقية"
+
+#: billing/templates/billing/payment_plan_form.html:72
+msgid "Patient has signed the agreement"
+msgstr "وقّع المريض الاتفاقية"
+
+#: billing/templates/billing/payment_plan_form.html:78
+msgid "Agreement Date"
+msgstr "تاريخ الاتفاقية"
+
+#: billing/templates/billing/payment_plan_form.html:94
+msgid ""
+"Installments will be automatically generated based on the plan terms when "
+"you create the payment plan."
+msgstr "سيتم إنشاء الأقساط تلقائياً وفقاً لشروط الخطة عند إنشاء خطة الدفع."
+
+#: billing/templates/billing/payment_plan_form.html:99
+msgid "Save Payment Plan"
+msgstr "حفظ خطة الدفع"
+
+#: billing/templates/billing/payment_plan_installment_form.html:3
+msgid "Update installment"
+msgstr "تعديل القسط"
+
+#: billing/templates/billing/payment_plan_installment_form.html:6
+msgid "Update payment plan installment"
+msgstr "تعديل قسط خطة الدفع"
+
+#: billing/templates/billing/payment_plan_installment_form.html:7
+msgid "Save installment"
+msgstr "حفظ القسط"
+
+#: billing/templates/billing/payment_plan_list.html:4 templates/layout.html:220
+msgid "Payment Plans"
+msgstr "خطط الدفع"
+
+#: billing/templates/billing/payment_plan_list.html:10
+msgid "Patient Payment Plans"
+msgstr "خطط دفع المرضى"
+
+#: billing/templates/billing/payment_plan_list.html:16
+msgid "Total Plans"
+msgstr "إجمالي الخطط"
+
+#: billing/templates/billing/payment_plan_list.html:18
+#: billing/templates/billing/payment_plan_list.html:42
+#: orders/templates/orders/delete_order.html:85
+#: orders/templates/orders/order_detail.html:67
+#: orders/templates/orders/worklist.html:262
+msgid "Completed"
+msgstr "مكتمل"
+
+#: billing/templates/billing/payment_plan_list.html:19
+#: billing/templates/billing/payment_plan_list.html:43
+msgid "Defaulted"
+msgstr "متعثر"
+
+#: billing/templates/billing/payment_plan_list.html:26
+msgid "Total Remaining Balance"
+msgstr "إجمالي الرصيد المتبقي"
+
+#: billing/templates/billing/payment_plan_list.html:44
+#: orders/templates/orders/delete_order.html:97
+#: orders/templates/orders/order_detail.html:79
+#: orders/templates/orders/worklist.html:274
+msgid "Cancelled"
+msgstr "ملغى"
+
+#: billing/templates/billing/payment_plan_list.html:49
+msgid "Patient MRN or Name"
+msgstr "رقم السجل الطبي للمريض أو اسمه"
+
+#: billing/templates/billing/payment_plan_list.html:72
+#: patients/templates/patients/patient_detail.html:281
+#: reports/templates/reports/report_detail.html:46
+#: reports/templates/reports/report_list.html:140
+#: reports/templates/reports/study_reports.html:71
+msgid "Created"
+msgstr "تم الإنشاء"
+
+#: billing/templates/billing/payment_plan_list.html:75
+msgid "Remaining"
+msgstr "المتبقي"
+
+#: billing/templates/billing/payment_plan_list.html:77
+msgid "First Payment"
+msgstr "الدفعة الأولى"
+
+#: billing/templates/billing/payment_plan_list.html:152
+msgid "No payment plans found."
+msgstr "لم يتم العثور على خطط دفع."
+
+#: billing/templates/billing/payment_posting_confirm_delete.html:3
+#: billing/templates/billing/payment_posting_confirm_delete.html:6
+msgid "Delete payment posting"
+msgstr "حذف ترحيل الدفعة"
+
+#: billing/templates/billing/payment_posting_detail.html:3
+#: billing/templates/billing/payment_posting_detail.html:7
+msgid "Payment posting"
+msgstr "ترحيل الدفعة"
+
+#: billing/templates/billing/payment_posting_detail.html:11
+msgid "Remittance"
+msgstr "الحوالة"
+
+#: billing/templates/billing/payment_posting_detail.html:14
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Posting date"
+msgstr "تاريخ الترحيل"
+
+#: billing/templates/billing/payment_posting_detail.html:18
+msgid "ERA trace"
+msgstr "رقم تتبع ERA"
+
+#: billing/templates/billing/payment_posting_detail.html:19
+msgid "Posted by"
+msgstr "تم الترحيل بواسطة"
+
+#: billing/templates/billing/payment_posting_detail.html:22
+msgid "Claim line adjudication"
+msgstr "تسوية بند المطالبة"
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Deductible"
+msgstr "الخصم التأميني"
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Copay"
+msgstr "المشاركة الثابتة"
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Coinsurance"
+msgstr "التأمين المشترك"
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Denial"
+msgstr "الرفض"
+
+#: billing/templates/billing/payment_posting_detail.html:28
+msgid "No payment details have been posted for this remittance."
+msgstr "لم يتم ترحيل أي تفاصيل دفعة لهذه الحوالة."
+
+#: billing/templates/billing/payment_posting_error.html:3
+#: billing/templates/billing/payment_posting_error.html:6
+msgid "Payment posting action unavailable"
+msgstr "إجراء ترحيل الدفعة غير متاح"
+
+#: billing/templates/billing/payment_posting_error.html:8
+msgid "Return to payment postings"
+msgstr "العودة إلى ترحيلات الدفعات"
+
+#: billing/templates/billing/payment_posting_form.html:3
+#: billing/templates/billing/payment_posting_form.html:6
+msgid "Edit payment posting"
+msgstr "تعديل ترحيل الدفعة"
+
+#: billing/templates/billing/payment_posting_form.html:3
+msgid "New payment posting"
+msgstr "ترحيل دفعة جديد"
+
+#: billing/templates/billing/payment_posting_form.html:6
+msgid "Record payment posting"
+msgstr "تسجيل ترحيل دفعة"
+
+#: billing/templates/billing/payment_posting_form.html:7
+msgid "Save posting"
+msgstr "حفظ الترحيل"
+
+#: billing/templates/billing/payment_posting_list.html:7
+msgid "Review remittances and reconcile payer payments."
+msgstr "راجع الحوالات وطابق دفعات الجهات الدافعة."
+
+#: billing/templates/billing/payment_posting_list.html:8
+msgid "Upload ERA"
+msgstr "تحميل ERA"
+
+#: billing/templates/billing/payment_posting_list.html:8
+msgid "Add posting"
+msgstr "إضافة ترحيل"
+
+#: billing/templates/billing/payment_posting_list.html:11
+msgid "Unposted"
+msgstr "غير مرحّل"
+
+#: billing/templates/billing/payment_posting_list.html:12
+msgid "Posted"
+msgstr "مرحّل"
+
+#: billing/templates/billing/payment_posting_list.html:16
+msgid "All statuses"
+msgstr "جميع الحالات"
+
+#: billing/templates/billing/payment_posting_list.html:18
+msgid "Check / ERA trace"
+msgstr "رقم الشيك / تتبع ERA"
+
+#: billing/templates/billing/payment_posting_list.html:35
+msgid "No payment postings found."
+msgstr "لم يتم العثور على ترحيلات دفعات."
+
+#: billing/templates/billing/payment_posting_list.html:38
+msgid "Payment posting pages"
+msgstr "صفحات ترحيل الدفعات"
+
+#: billing/templates/billing/service_line_confirm_delete.html:3
+#: billing/templates/billing/service_line_confirm_delete.html:6
+msgid "Delete service line"
+msgstr "حذف بند الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:7
+msgid "Service lines"
+msgstr "بنود الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:11
+msgid "Service details"
+msgstr "تفاصيل الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:12
+msgid "Date of service"
+msgstr "تاريخ الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:14
+msgid "Exam order"
+msgstr "طلب الفحص"
+
+#: billing/templates/billing/service_line_detail.html:15
+msgid "Billing status"
+msgstr "حالة الفوترة"
+
+#: billing/templates/billing/service_line_detail.html:17
+msgid "Rendering provider"
+msgstr "مقدم الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:18
+#: billing/templates/billing/service_line_form.html:139
+#: dashboard/templates/dashboard/stats.html:414
+#: orders/templates/orders/add_order.html:181
+#: orders/templates/orders/edit_order.html:171
+#: orders/templates/orders/order_detail.html:273
+msgid "Facility"
+msgstr "المنشأة"
+
+#: billing/templates/billing/service_line_detail.html:20
+msgid "Charge details"
+msgstr "تفاصيل الرسوم"
+
+#: billing/templates/billing/service_line_detail.html:21
+#: billing/templates/billing/service_line_form.html:98
+msgid "Quantity"
+msgstr "الكمية"
+
+#: billing/templates/billing/service_line_detail.html:22
+msgid "Unit price"
+msgstr "سعر الوحدة"
+
+#: billing/templates/billing/service_line_detail.html:23
+msgid "Total charge"
+msgstr "إجمالي الرسوم"
+
+#: billing/templates/billing/service_line_detail.html:24
+msgid "Place of service"
+msgstr "مكان تقديم الخدمة"
+
+#: billing/templates/billing/service_line_detail.html:25
+msgid "Diagnosis codes"
+msgstr "رموز التشخيص"
+
+#: billing/templates/billing/service_line_detail.html:26
+msgid "Modifiers"
+msgstr "المعدّلات"
+
+#: billing/templates/billing/service_line_form.html:4
+#: billing/templates/billing/service_line_form.html:10
+msgid "Edit Service Line"
+msgstr "تعديل بند الخدمة"
+
+#: billing/templates/billing/service_line_form.html:4
+#: billing/templates/billing/service_line_form.html:10
+#: billing/templates/billing/service_line_list.html:97
+msgid "Add Service Line"
+msgstr "إضافة بند خدمة"
+
+#: billing/templates/billing/service_line_form.html:21
+msgid "Exam Order"
+msgstr "طلب الفحص"
+
+#: billing/templates/billing/service_line_form.html:39
+#: billing/templates/billing/service_line_list.html:110
+#: orders/templates/orders/add_order.html:234
+#: orders/templates/orders/edit_order.html:228
+#: orders/templates/orders/order_detail.html:201
+msgid "Procedure Code"
+msgstr "رمز الإجراء"
+
+#: billing/templates/billing/service_line_form.html:44
+#: billing/templates/billing/service_line_list.html:111
+msgid "Procedure Name"
+msgstr "اسم الإجراء"
+
+#: billing/templates/billing/service_line_form.html:103
+msgid "Units of Service"
+msgstr "وحدات الخدمة"
+
+#: billing/templates/billing/service_line_form.html:108
+#: billing/templates/billing/service_line_list.html:114
+msgid "Unit Price"
+msgstr "سعر الوحدة"
+
+#: billing/templates/billing/service_line_form.html:113
+#: billing/templates/billing/service_line_list.html:115
+msgid "Total Charge"
+msgstr "إجمالي الرسوم"
+
+#: billing/templates/billing/service_line_form.html:121
+#: billing/templates/billing/service_line_list.html:117
+msgid "Rendering Provider"
+msgstr "مقدم الخدمة"
+
+#: billing/templates/billing/service_line_form.html:126
+msgid "Supervising Provider"
+msgstr "الطبيب المشرف"
+
+#: billing/templates/billing/service_line_form.html:131
+msgid "Place of Service"
+msgstr "مكان تقديم الخدمة"
+
+#: billing/templates/billing/service_line_form.html:144
+#: orders/templates/orders/order_detail.html:300
+msgid "Billing Status"
+msgstr "حالة الفواتير"
+
+#: billing/templates/billing/service_line_form.html:151
+msgid "Audit Notes"
+msgstr "ملاحظات التدقيق"
+
+#: billing/templates/billing/service_line_list.html:4 templates/layout.html:191
+msgid "Service Lines"
+msgstr "بنود الخدمة"
+
+#: billing/templates/billing/service_line_list.html:10
+msgid "Service Lines (Charge Capture)"
+msgstr "بنود الخدمة (تسجيل الرسوم)"
+
+#: billing/templates/billing/service_line_list.html:27
+msgid "Pending"
+msgstr "قيد الانتظار"
+
+#: billing/templates/billing/service_line_list.html:35
+msgid "Ready"
+msgstr "جاهز"
+
+#: billing/templates/billing/service_line_list.html:43
+#: billing/templates/billing/service_line_list.html:68
+msgid "Billed"
+msgstr "تمت الفوترة"
+
+#: billing/templates/billing/service_line_list.html:66
+msgid "Pending Review"
+msgstr "بانتظار المراجعة"
+
+#: billing/templates/billing/service_line_list.html:67
+msgid "Ready to Bill"
+msgstr "جاهز للفوترة"
+
+#: billing/templates/billing/service_line_list.html:83
+msgid "Procedure code or name"
+msgstr "رمز الإجراء أو اسمه"
+
+#: billing/templates/billing/service_line_list.html:113
+msgid "Qty"
+msgstr "الكمية"
+
+#: billing/templates/billing/service_line_list.html:153
+msgid "No service lines found."
+msgstr "لم يتم العثور على بنود خدمة."
+
+#: dashboard/templates/dashboard/stats.html:4
+msgid "Dashboard - App Statistics"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:93 templates/layout.html:111
+msgid "Dashboard"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:95
+msgid "Refresh"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:107 templates/layout.html:123
+msgid "Patients"
+msgstr "المرضى"
+
+#: dashboard/templates/dashboard/stats.html:122
+#: dashboard/templates/dashboard/stats.html:416
+#, fuzzy
+#| msgid "Order List"
+msgid "Orders"
+msgstr "قائمة الطلبات"
+
+#: dashboard/templates/dashboard/stats.html:137
+#: reports/templates/reports/study_reports.html:55 templates/layout.html:135
+msgid "Reports"
+msgstr "التقارير"
+
+#: dashboard/templates/dashboard/stats.html:170
+#, fuzzy
+#| msgid "Facility"
+msgid "Facilities"
+msgstr "المنشأة"
+
+#: dashboard/templates/dashboard/stats.html:187
+#: dashboard/templates/dashboard/stats.html:415
+#, fuzzy
+#| msgid "Device"
+msgid "Devices"
+msgstr "الجهاز"
+
+#: dashboard/templates/dashboard/stats.html:204
+#, fuzzy
+#| msgid "All Modalities"
+msgid "Modalities"
+msgstr "جميع الأوضاع"
+
+#: dashboard/templates/dashboard/stats.html:238
+msgid "Today's Activity"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:246
+#, fuzzy
+#| msgid "New Order"
+msgid "New Orders"
+msgstr "طلب جديد"
+
+#: dashboard/templates/dashboard/stats.html:253
+#, fuzzy
+#| msgid "Report Templates"
+msgid "Reports Completed"
+msgstr "قوالب التقارير"
+
+#: dashboard/templates/dashboard/stats.html:265
+#, fuzzy
+#| msgid "Last Name"
+msgid "Last 7 Days"
+msgstr "اسم العائلة"
+
+#: dashboard/templates/dashboard/stats.html:272
+#, fuzzy
+#| msgid "Total Payers"
+msgid "Total Orders"
+msgstr "إجمالي الدافعين"
+
+#: dashboard/templates/dashboard/stats.html:278
+#, fuzzy
+#| msgid "Normal Report"
+msgid "Total Reports"
+msgstr "تقرير طبيعي"
+
+#: dashboard/templates/dashboard/stats.html:293
+msgid "Orders Trend (Last 30 Days)"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:307
+#, fuzzy
+#| msgid "Order Details"
+msgid "Order Status"
+msgstr "تفاصيل الطلب"
+
+#: dashboard/templates/dashboard/stats.html:324
+#, fuzzy
+#| msgid "Modality"
+msgid "Orders by Modality"
+msgstr "الوضع (Modality)"
+
+#: dashboard/templates/dashboard/stats.html:338
+#, fuzzy
+#| msgid "Billing Status"
+msgid "Claims Status"
+msgstr "حالة الفواتير"
+
+#: dashboard/templates/dashboard/stats.html:354
+msgid "Billing Overview"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:360
+msgid "Total Billed"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:366
+#, fuzzy
+#| msgid "Total Payers"
+msgid "Total Paid"
+msgstr "إجمالي الدافعين"
+
+#: dashboard/templates/dashboard/stats.html:372
+msgid "Pending Claims"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:378
+msgid "Denied Claims"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:391
+msgid "Top Payers by Revenue"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:407
+msgid "Top Facilities by Volume"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:431
+#, fuzzy
+#| msgid "No devices available"
+msgid "No facility data available"
+msgstr "لا توجد أجهزة متاحة"
+
+#: orders/templates/orders/_device_options.html:5
+msgid "Select a device"
+msgstr "اختر جهازاً"
+
+#: orders/templates/orders/_device_options.html:12
+msgid "No devices available"
+msgstr "لا توجد أجهزة متاحة"
+
+#: orders/templates/orders/add_order.html:1
+msgid "Order Reservation"
+msgstr "حجز طلب"
+
+#: orders/templates/orders/add_order.html:9
+msgid "Reserve Exam Order"
+msgstr "حجز طلب فحص"
+
+#: orders/templates/orders/add_order.html:16
+#: reports/templates/reports/study_reports.html:21
+msgid "Back to Worklist"
+msgstr "الرجوع لقائمة العمل"
+
+#: orders/templates/orders/add_order.html:31
+#: orders/templates/orders/edit_order.html:27
+#: orders/templates/orders/order_detail.html:119
+#: patients/templates/patients/add_patient.html:27
+#: patients/templates/patients/edit_patient.html:42
+#: patients/templates/patients/patient_detail.html:51
+msgid "Patient Information"
+msgstr "معلومات المريض"
+
+#: orders/templates/orders/add_order.html:40
+#, fuzzy
+#| msgid "Save Patient"
+msgid "Search Patient"
+msgstr "حفظ المريض"
+
+#: orders/templates/orders/add_order.html:53
+#: orders/templates/orders/add_order.html:1140
+#, fuzzy
+#| msgid "Search by MRN, Name, National ID, or Phone"
+msgid "Type MRN, name, or national ID to search..."
+msgstr "ابحث برقم السجل الطبي أو الاسم أو الهوية الوطنية أو الهاتف"
+
+#: orders/templates/orders/add_order.html:62
+#, fuzzy
+#| msgid "Clear Form"
+msgid "Clear search"
+msgstr "مسح النموذج"
+
+#: orders/templates/orders/add_order.html:77
+msgid ""
+"Start typing to search patients. You can search by MRN, name (English or "
+"Arabic), or national ID."
+msgstr ""
+
+#: orders/templates/orders/add_order.html:104
+#, fuzzy
+#| msgid "Delete Patient"
+msgid "Select different patient"
+msgstr "حذف المريض"
+
+#: orders/templates/orders/add_order.html:107
+#, fuzzy
+#| msgid "Save Changes"
+msgid "Change"
+msgstr "حفظ التغييرات"
+
+#: orders/templates/orders/add_order.html:126
+#: orders/templates/orders/edit_order.html:87
+#: orders/templates/orders/order_detail.html:10
+msgid "Order Details"
+msgstr "تفاصيل الطلب"
+
+#: orders/templates/orders/add_order.html:135
+#: orders/templates/orders/delete_order.html:51
+#: orders/templates/orders/edit_order.html:96
+#: orders/templates/orders/order_detail.html:42
+#: reports/templates/reports/report_verify.html:26
+msgid "Accession Number"
+msgstr "رقم الدخول"
+
+#: orders/templates/orders/add_order.html:143
+#: orders/templates/orders/edit_order.html:106
+msgid "Enter accession number"
+msgstr "أدخل رقم الدخول"
+
+#: orders/templates/orders/add_order.html:154
+#: orders/templates/orders/edit_order.html:113
+#: orders/templates/orders/order_detail.html:86
+#: orders/templates/orders/worklist.html:96
+#: orders/templates/orders/worklist.html:203
+msgid "Priority"
+msgstr "الأولوية"
+
+#: orders/templates/orders/add_order.html:164
+#: orders/templates/orders/order_detail.html:99
+#: orders/templates/orders/worklist.html:243
+msgid "Routine"
+msgstr "روتيني"
+
+#: orders/templates/orders/add_order.html:167
+#: orders/templates/orders/order_detail.html:95
+#: orders/templates/orders/worklist.html:239
+msgid "Urgent"
+msgstr "عاجل"
+
+#: orders/templates/orders/add_order.html:170
+msgid "Stat"
+msgstr "فوري (Stat)"
+
+#: orders/templates/orders/add_order.html:193
+#, fuzzy
+#| msgid "Select Facility"
+msgid "Select a facility"
+msgstr "اختر المنشأة"
+
+#: orders/templates/orders/add_order.html:208
+msgid "Device"
+msgstr "الجهاز"
+
+#: orders/templates/orders/add_order.html:223
+#, fuzzy
+#| msgid "Select Facility"
+msgid "Select a facility first"
+msgstr "اختر المنشأة"
+
+#: orders/templates/orders/add_order.html:244
+msgid "Select procedure code"
+msgstr "اختر رمز الإجراء"
+
+#: orders/templates/orders/add_order.html:246
+msgid "CT Procedures"
+msgstr "إجراءات الأشعة المقطعية"
+
+#: orders/templates/orders/add_order.html:249
+msgid "CT Head without contrast"
+msgstr "أشعة مقطعية للرأس بدون صبغة"
+
+#: orders/templates/orders/add_order.html:252
+msgid "CT Head with contrast"
+msgstr "أشعة مقطعية للرأس مع صبغة"
+
+#: orders/templates/orders/add_order.html:255
+msgid "CT Chest without contrast"
+msgstr "أشعة مقطعية للصدر بدون صبغة"
+
+#: orders/templates/orders/add_order.html:258
+msgid "CT Chest with contrast"
+msgstr "أشعة مقطعية للصدر مع صبغة"
+
+#: orders/templates/orders/add_order.html:261
+msgid "CT Abdomen without contrast"
+msgstr "أشعة مقطعية للبطن بدون صبغة"
+
+#: orders/templates/orders/add_order.html:264
+msgid "CT Abdomen with contrast"
+msgstr "أشعة مقطعية للبطن مع صبغة"
+
+#: orders/templates/orders/add_order.html:267
+msgid "CT Pelvis without contrast"
+msgstr "أشعة مقطعية للحوض بدون صبغة"
+
+#: orders/templates/orders/add_order.html:270
+msgid "CT Pelvis with contrast"
+msgstr "أشعة مقطعية للحوض مع صبغة"
+
+#: orders/templates/orders/add_order.html:273
+msgid "CT Cervical spine with contrast"
+msgstr "أشعة مقطعية للعمود الفقري العنقي مع صبغة"
+
+#: orders/templates/orders/add_order.html:276
+msgid "CT Angiography"
+msgstr "تصوير الأوعية المقطعي (CT Angiography)"
+
+#: orders/templates/orders/add_order.html:279
+msgid "MR Procedures"
+msgstr "إجراءات الرنين المغناطيسي"
+
+#: orders/templates/orders/add_order.html:282
+msgid "MRI Brain without contrast"
+msgstr "رنين مغناطيسي للدماغ بدون صبغة"
+
+#: orders/templates/orders/add_order.html:285
+msgid "MRI Brain with contrast"
+msgstr "رنين مغناطيسي للدماغ مع صبغة"
+
+#: orders/templates/orders/add_order.html:288
+msgid "MRI Cervical spine without contrast"
+msgstr "رنين مغناطيسي للعمود الفقري العنقي بدون صبغة"
+
+#: orders/templates/orders/add_order.html:291
+msgid "MRI Thoracic spine without contrast"
+msgstr "رنين مغناطيسي للعمود الفقري الصدري بدون صبغة"
+
+#: orders/templates/orders/add_order.html:294
+msgid "MRI Lumbar spine without contrast"
+msgstr "رنين مغناطيسي للعمود الفقري القطني بدون صبغة"
+
+#: orders/templates/orders/add_order.html:297
+msgid "MRI Knee without contrast"
+msgstr "رنين مغناطيسي للركبة بدون صبغة"
+
+#: orders/templates/orders/add_order.html:300
+msgid "MRI Shoulder without contrast"
+msgstr "رنين مغناطيسي للكتف بدون صبغة"
+
+#: orders/templates/orders/add_order.html:303
+msgid "MRI Joint without contrast"
+msgstr "رنين مغناطيسي للمفصل بدون صبغة"
+
+#: orders/templates/orders/add_order.html:306
+msgid "MR Angiography"
+msgstr "تصوير الأوعية بالرنين المغناطيسي"
+
+#: orders/templates/orders/add_order.html:309
+msgid "X-Ray Procedures"
+msgstr "إجراءات الأشعة السينية"
+
+#: orders/templates/orders/add_order.html:312
+msgid "Chest X-Ray"
+msgstr "أشعة سينية للصدر"
+
+#: orders/templates/orders/add_order.html:315
+msgid "X-Ray Skull"
+msgstr "أشعة سينية للجمجمة"
+
+#: orders/templates/orders/add_order.html:318
+msgid "X-Ray Ribs"
+msgstr "أشعة سينية للأضلاع"
+
+#: orders/templates/orders/add_order.html:321
+msgid "X-Ray Cervical spine"
+msgstr "أشعة سينية للعمود الفقري العنقي"
+
+#: orders/templates/orders/add_order.html:324
+msgid "X-Ray Thoracic spine"
+msgstr "أشعة سينية للعمود الفقري الصدري"
+
+#: orders/templates/orders/add_order.html:327
+msgid "X-Ray Lumbar spine"
+msgstr "أشعة سينية للعمود الفقري القطني"
+
+#: orders/templates/orders/add_order.html:330
+msgid "X-Ray Pelvis"
+msgstr "أشعة سينية للحوض"
+
+#: orders/templates/orders/add_order.html:333
+msgid "X-Ray Hip"
+msgstr "أشعة سينية للورك"
+
+#: orders/templates/orders/add_order.html:336
+msgid "X-Ray Femur"
+msgstr "أشعة سينية للفخذ"
+
+#: orders/templates/orders/add_order.html:339
+msgid "X-Ray Knee"
+msgstr "أشعة سينية للركبة"
+
+#: orders/templates/orders/add_order.html:342
+msgid "X-Ray Tibia/Fibula"
+msgstr "أشعة سينية للقصبة/الشظية"
+
+#: orders/templates/orders/add_order.html:345
+msgid "X-Ray Ankle"
+msgstr "أشعة سينية للكاحل"
+
+#: orders/templates/orders/add_order.html:348
+msgid "X-Ray Foot"
+msgstr "أشعة سينية للقدم"
+
+#: orders/templates/orders/add_order.html:351
+msgid "X-Ray Shoulder"
+msgstr "أشعة سينية للكتف"
+
+#: orders/templates/orders/add_order.html:354
+msgid "X-Ray Humerus"
+msgstr "أشعة سينية للعضد"
+
+#: orders/templates/orders/add_order.html:357
+msgid "X-Ray Elbow"
+msgstr "أشعة سينية للمرفق"
+
+#: orders/templates/orders/add_order.html:360
+msgid "X-Ray Forearm"
+msgstr "أشعة سينية للساعد"
+
+#: orders/templates/orders/add_order.html:363
+msgid "X-Ray Wrist"
+msgstr "أشعة سينية للمعصم"
+
+#: orders/templates/orders/add_order.html:366
+msgid "X-Ray Hand"
+msgstr "أشعة سينية لليد"
+
+#: orders/templates/orders/add_order.html:369
+msgid "X-Ray Finger"
+msgstr "أشعة سينية للإصبع"
+
+#: orders/templates/orders/add_order.html:372
+msgid "Mammography"
+msgstr "تصوير الثدي الشعاعي (ماموجرام)"
+
+#: orders/templates/orders/add_order.html:375
+msgid "Ultrasound Procedures"
+msgstr "إجراءات الموجات فوق الصوتية"
+
+#: orders/templates/orders/add_order.html:378
+msgid "Ultrasound Abdomen"
+msgstr "موجات فوق صوتية للبطن"
+
+#: orders/templates/orders/add_order.html:381
+msgid "Ultrasound Pelvis"
+msgstr "موجات فوق صوتية للحوض"
+
+#: orders/templates/orders/add_order.html:384
+msgid "Ultrasound Obstetric"
+msgstr "موجات فوق صوتية للولادة"
+
+#: orders/templates/orders/add_order.html:387
+msgid "Ultrasound Thyroid"
+msgstr "موجات فوق صوتية للغدة الدرقية"
+
+#: orders/templates/orders/add_order.html:390
+msgid "Ultrasound Breast"
+msgstr "موجات فوق صوتية للثدي"
+
+#: orders/templates/orders/add_order.html:393
+msgid "Ultrasound Scrotal"
+msgstr "موجات فوق صوتية لكيس الصفن"
+
+#: orders/templates/orders/add_order.html:396
+msgid "Ultrasound Doppler"
+msgstr "دوبلر الموجات فوق الصوتية"
+
+#: orders/templates/orders/add_order.html:399
+msgid "Echocardiography"
+msgstr "تخطيط صدى القلب"
+
+#: orders/templates/orders/add_order.html:402
+msgid "Nuclear Medicine Procedures"
+msgstr "إجراءات الطب النووي"
+
+#: orders/templates/orders/add_order.html:405
+msgid "Bone Scan"
+msgstr "فحص العظام"
+
+#: orders/templates/orders/add_order.html:408
+msgid "Cardiac Stress Test"
+msgstr "اختبار إجهاد القلب"
+
+#: orders/templates/orders/add_order.html:411
+msgid "Thyroid Scan"
+msgstr "فحص الغدة الدرقية"
+
+#: orders/templates/orders/add_order.html:414
+msgid "Lung Perfusion/Ventilation"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:417
+msgid "Renal Scan"
+msgstr "فحص الكلى"
+
+#: orders/templates/orders/add_order.html:420
+msgid "Hepatobiliary Scan"
+msgstr "فحص الكبد والقنوات الصفراوية"
+
+#: orders/templates/orders/add_order.html:423
+msgid "PET Procedures"
+msgstr "إجراءات التصوير المقطعي بالإصدار البوزيتروني (PET)"
+
+#: orders/templates/orders/add_order.html:426
+msgid "PET-CT Whole Body"
+msgstr "التصوير المقطعي بالإصدار البوزيتروني/المقطعي لكامل الجسم"
+
+#: orders/templates/orders/add_order.html:429
+msgid "PET Brain"
+msgstr "التصوير المقطعي بالإصدار البوزيتروني للدماغ"
+
+#: orders/templates/orders/add_order.html:436
+msgid "Barium Swallow/Meal"
+msgstr "ابتلاع الباريوم / وجبة الباريوم"
+
+#: orders/templates/orders/add_order.html:439
+msgid "Barium Enema"
+msgstr "حقنة الباريوم الشرجية"
+
+#: orders/templates/orders/add_order.html:442
+msgid "IVP/Urogram"
+msgstr "تصوير الحويضة الوريدية / تصوير المسالك البولية"
+
+#: orders/templates/orders/add_order.html:445
+msgid "Hysterosalpingography"
+msgstr "تصوير الرحم والبوق"
+
+#: orders/templates/orders/add_order.html:448
+msgid "VCUG"
+msgstr "تصوير المثانة والإحليل الإفراغي (VCUG)"
+
+#: orders/templates/orders/add_order.html:451
+msgid "Interventional Procedures"
+msgstr "الإجراءات التداخلية"
+
+#: orders/templates/orders/add_order.html:454
+msgid "Image-guided Biopsy"
+msgstr "خزعة موجهة بالصور"
+
+#: orders/templates/orders/add_order.html:457
+msgid "Image-guided Drainage"
+msgstr "تصريف موجه بالصور"
+
+#: orders/templates/orders/add_order.html:460
+msgid "Image-guided Injection"
+msgstr "حقن موجه بالصور"
+
+#: orders/templates/orders/add_order.html:472
+#: orders/templates/orders/edit_order.html:262
+#: orders/templates/orders/order_detail.html:207
+msgid "Procedure Name (English)"
+msgstr "اسم الإجراء (باللغة الإنجليزية)"
+
+#: orders/templates/orders/add_order.html:480
+#: orders/templates/orders/edit_order.html:272
+msgid "Enter procedure name in English"
+msgstr "أدخل اسم الإجراء باللغة الإنجليزية"
+
+#: orders/templates/orders/add_order.html:492
+#: orders/templates/orders/order_detail.html:214
+msgid "Procedure Name (Arabic)"
+msgstr "اسم الإجراء (بالعربية)"
+
+#: orders/templates/orders/add_order.html:500
+#: orders/templates/orders/edit_order.html:290
+msgid "أدخل اسم الإجراء بالعربية"
+msgstr "أدخل اسم الإجراء بالعربية"
+
+#: orders/templates/orders/add_order.html:511
+#: orders/templates/orders/edit_order.html:300
+#: orders/templates/orders/order_detail.html:267
+#: reports/templates/reports/report_detail.html:88
+msgid "Referring Physician"
+msgstr "الطبيب المحول"
+
+#: orders/templates/orders/add_order.html:518
+msgid "Enter physician name"
+msgstr "أدخل اسم الطبيب"
+
+#: orders/templates/orders/add_order.html:528
+#: orders/templates/orders/edit_order.html:315
+#: orders/templates/orders/order_detail.html:221
+msgid "Laterality"
+msgstr "الجهة"
+
+#: orders/templates/orders/add_order.html:536
+msgid "Not Applicable"
+msgstr "لا ينطبق"
+
+#: orders/templates/orders/add_order.html:539
+#: orders/templates/orders/edit_order.html:335
+#: orders/templates/orders/order_detail.html:224
+msgid "Left"
+msgstr "يسار"
+
+#: orders/templates/orders/add_order.html:542
+#: orders/templates/orders/edit_order.html:347
+#: orders/templates/orders/order_detail.html:224
+msgid "Right"
+msgstr "يمين"
+
+#: orders/templates/orders/add_order.html:545
+#: orders/templates/orders/edit_order.html:359
+#: orders/templates/orders/order_detail.html:225
+msgid "Bilateral"
+msgstr "ثنائي (الجانبين)"
+
+#: orders/templates/orders/add_order.html:556
+#: orders/templates/orders/edit_order.html:367
+#: orders/templates/orders/order_detail.html:230
+msgid "Body Part"
+msgstr "جزء الجسم"
+
+#: orders/templates/orders/add_order.html:563
+msgid "e.g., Head, Knee, Chest"
+msgstr "مثال: الرأس، الركبة، الصدر"
+
+#: orders/templates/orders/add_order.html:570
+#: orders/templates/orders/edit_order.html:382
+#: orders/templates/orders/order_detail.html:236
+msgid "Contrast Required"
+msgstr "مطلوب صبغة"
+
+#: orders/templates/orders/add_order.html:583
+msgid "Yes, contrast is required"
+msgstr "نعم، الصبغة مطلوبة"
+
+#: orders/templates/orders/add_order.html:594
+msgid "Clinical Information"
+msgstr "المعلومات السريرية"
+
+#: orders/templates/orders/add_order.html:603
+#: orders/templates/orders/edit_order.html:442
+#: orders/templates/orders/order_detail.html:307
+msgid "Clinical Indication"
+msgstr "الدواعي السريرية"
+
+#: orders/templates/orders/add_order.html:610
+msgid "Describe clinical symptoms, diagnosis, or reason for examination..."
+msgstr "صف الأعراض السريرية، أو التشخيص، أو سبب الفحص..."
+
+#: orders/templates/orders/add_order.html:619
+msgid "Scheduling"
+msgstr "الجدولة"
+
+#: orders/templates/orders/add_order.html:628
+msgid "Scheduled Date & Time"
+msgstr "التاريخ والوقت المجدول"
+
+#: orders/templates/orders/add_order.html:644
+#: orders/templates/orders/edit_order.html:424
+#: orders/templates/orders/order_detail.html:294
+msgid "Duration (minutes)"
+msgstr "المدة (بالدقائق)"
+
+#: orders/templates/orders/add_order.html:663
+msgid "Room / Station"
+msgstr "الغرفة / المحطة"
+
+#: orders/templates/orders/add_order.html:671
+msgid "Auto-assign"
+msgstr "تعيين تلقائي"
+
+#: orders/templates/orders/add_order.html:674
+msgid "Room 1"
+msgstr "غرفة 1"
+
+#: orders/templates/orders/add_order.html:677
+msgid "Room 2"
+msgstr "غرفة 2"
+
+#: orders/templates/orders/add_order.html:680
+msgid "Room 3"
+msgstr "غرفة 3"
+
+#: orders/templates/orders/add_order.html:696
+msgid "Clear Form"
+msgstr "مسح النموذج"
+
+#: orders/templates/orders/add_order.html:701
+msgid "Reserve Order"
+msgstr "حجز الطلب"
+
+#: orders/templates/orders/add_order.html:765
+msgid "Please select a patient first"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:1042
+#: orders/templates/orders/order_detail.html:165
+#: patients/templates/patients/add_patient.html:107
+#: patients/templates/patients/delete_patient.html:65
+#: patients/templates/patients/edit_patient.html:292
+#: patients/templates/patients/patient_detail.html:104
+#: patients/templates/patients/patient_list.html:99
+msgid "Male"
+msgstr "ذكر"
+
+#: orders/templates/orders/add_order.html:1044
+#: orders/templates/orders/order_detail.html:166
+#: patients/templates/patients/add_patient.html:108
+#: patients/templates/patients/delete_patient.html:67
+#: patients/templates/patients/edit_patient.html:304
+#: patients/templates/patients/patient_detail.html:108
+#: patients/templates/patients/patient_list.html:103
+msgid "Female"
+msgstr "أنثى"
+
+#: orders/templates/orders/add_order.html:1117
+msgid "Patient selected - click Change to select different"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:1
+#: orders/templates/orders/delete_order.html:9
+msgid "Delete Order"
+msgstr "حذف الطلب"
+
+#: orders/templates/orders/delete_order.html:16
+#: orders/templates/orders/edit_order.html:14
+#: orders/templates/orders/order_detail.html:18
+msgid "Order List"
+msgstr "قائمة الطلبات"
+
+#: orders/templates/orders/delete_order.html:25
+#: patients/templates/patients/delete_patient.html:25
+msgid "Confirm Deletion"
+msgstr "تأكيد الحذف"
+
+#: orders/templates/orders/delete_order.html:32
+#: patients/templates/patients/delete_patient.html:32
+#: reports/templates/reports/report_confirm_delete.html:26
+msgid "Warning:"
+msgstr "تحذير:"
+
+#: orders/templates/orders/delete_order.html:38
+msgid "Are you sure you want to delete order"
+msgstr "هل أنت متأكد أنك تريد حذف الطلب"
+
+#: orders/templates/orders/delete_order.html:46
+msgid "Order Summary"
+msgstr "ملخص الطلب"
+
+#: orders/templates/orders/delete_order.html:56
+#: orders/templates/orders/edit_order.html:36
+msgid "Patient MRN"
+msgstr "رقم السجل الطبي للمريض"
+
+#: orders/templates/orders/delete_order.html:60
+#: patients/templates/patients/delete_patient.html:53
+#: reports/templates/reports/report_form.html:261
+msgid "Patient Name"
+msgstr "اسم المريض"
+
+#: orders/templates/orders/delete_order.html:67
+#: orders/templates/orders/order_detail.html:193
+#: orders/templates/orders/worklist.html:70
+#: orders/templates/orders/worklist.html:201
+#: reports/templates/reports/report_detail.html:80
+#: reports/templates/reports/report_form.html:273
+#: reports/templates/reports/report_list.html:62
+#: reports/templates/reports/report_list.html:136
+#: reports/templates/reports/study_reports.html:32
+msgid "Modality"
+msgstr "الوضع (Modality)"
+
+#: orders/templates/orders/delete_order.html:73
+#: orders/templates/orders/order_detail.html:55
+#: orders/templates/orders/worklist.html:250
+msgid "Registered"
+msgstr "مسجل"
+
+#: orders/templates/orders/delete_order.html:77
+#: orders/templates/orders/order_detail.html:59
+#: orders/templates/orders/worklist.html:205
+#: orders/templates/orders/worklist.html:254
+msgid "Scheduled"
+msgstr "مجدول"
+
+#: orders/templates/orders/delete_order.html:81
+#: orders/templates/orders/order_detail.html:63
+#: orders/templates/orders/worklist.html:258
+msgid "In Progress"
+msgstr "قيد التنفيذ"
+
+#: orders/templates/orders/delete_order.html:89
+#: orders/templates/orders/order_detail.html:71
+#: orders/templates/orders/worklist.html:266
+msgid "Reported"
+msgstr "تم التقرير"
+
+#: orders/templates/orders/delete_order.html:93
+#: orders/templates/orders/order_detail.html:75
+#: orders/templates/orders/worklist.html:270
+#: reports/templates/reports/report_detail.html:55
+msgid "Finalized"
+msgstr "نهائي"
+
+#: orders/templates/orders/delete_order.html:102
+#: orders/templates/orders/order_detail.html:106
+#: patients/templates/patients/delete_patient.html:85
+msgid "Created At"
+msgstr "تاريخ الإنشاء"
+
+#: orders/templates/orders/delete_order.html:118
+#: patients/templates/patients/delete_patient.html:101
+msgid "Back to Details"
+msgstr "العودة للتفاصيل"
+
+#: orders/templates/orders/delete_order.html:131
+msgid "Yes, Delete Order"
+msgstr "نعم، احذف الطلب"
+
+#: orders/templates/orders/edit_order.html:1
+#: orders/templates/orders/edit_order.html:8
+#: orders/templates/orders/order_detail.html:24
+msgid "Edit Order"
+msgstr "تعديل الطلب"
+
+#: orders/templates/orders/edit_order.html:46
+msgid "Enter patient MRN"
+msgstr "أدخل رقم السجل الطبي للمريض"
+
+#: orders/templates/orders/edit_order.html:49
+msgid "Enter the patient MRN to lookup"
+msgstr "أدخل رقم السجل الطبي للمريض للبحث"
+
+#: orders/templates/orders/edit_order.html:59
+msgid "Lookup Patient"
+msgstr "البحث عن المريض"
+
+#: orders/templates/orders/edit_order.html:179
+msgid "Select Facility"
+msgstr "اختر المنشأة"
+
+#: orders/templates/orders/edit_order.html:201
+msgid "Device/Room"
+msgstr "الجهاز/الغرفة"
+
+#: orders/templates/orders/edit_order.html:212
+msgid "Select Device"
+msgstr "اختر الجهاز"
+
+#: orders/templates/orders/edit_order.html:238
+msgid "Select Procedure"
+msgstr "اختر الإجراء"
+
+#: orders/templates/orders/edit_order.html:308
+msgid "Enter referring physician name"
+msgstr "أدخل اسم الطبيب المحول"
+
+#: orders/templates/orders/edit_order.html:323
+#: patients/templates/patients/add_patient.html:53
+#: patients/templates/patients/add_patient.html:106
+#: patients/templates/patients/edit_patient.html:96
+#: patients/templates/patients/edit_patient.html:280
+msgid "Select"
+msgstr "تحديد"
+
+#: orders/templates/orders/edit_order.html:375
+msgid "Enter body part"
+msgstr "أدخل جزء الجسم"
+
+#: orders/templates/orders/edit_order.html:410
+#: orders/templates/orders/order_detail.html:285
+msgid "Scheduled DateTime"
+msgstr "التاريخ والوقت المجدول"
+
+#: orders/templates/orders/edit_order.html:449
+msgid "Enter clinical indication or reason for exam"
+msgstr "أدخل الدواعي السريرية أو سبب الفحص"
+
+#: orders/templates/orders/edit_order.html:473
+msgid "Save Changes"
+msgstr "حفظ التغييرات"
+
+#: orders/templates/orders/edit_order.html:495
+msgid "Please enter an MRN"
+msgstr "الرجاء إدخال رقم السجل الطبي"
+
+#: orders/templates/orders/edit_order.html:512
+msgid "Patient not found"
+msgstr "لم يتم العثور على المريض"
+
+#: orders/templates/orders/edit_order.html:521
+msgid "Error looking up patient"
+msgstr "خطأ في البحث عن المريض"
+
+#: orders/templates/orders/order_detail.html:34
+msgid "Order Information"
+msgstr "معلومات الطلب"
+
+#: orders/templates/orders/order_detail.html:91
+#: orders/templates/orders/worklist.html:235
+msgid "STAT"
+msgstr "فوري (STAT)"
+
+#: orders/templates/orders/order_detail.html:127
+#: patients/templates/patients/add_patient.html:33
+#: patients/templates/patients/delete_patient.html:49
+#: patients/templates/patients/edit_patient.html:51
+#: patients/templates/patients/patient_detail.html:59
+#: patients/templates/patients/patient_list.html:73
+#: reports/templates/reports/report_detail.html:76
+#: reports/templates/reports/report_form.html:265
+#: reports/templates/reports/report_verify.html:34
+msgid "MRN"
+msgstr "رقم السجل الطبي"
+
+#: orders/templates/orders/order_detail.html:138
+msgid "Name (English)"
+msgstr "الاسم (إنجليزي)"
+
+#: orders/templates/orders/order_detail.html:147
+msgid "Name (Arabic)"
+msgstr "الاسم (عربي)"
+
+#: orders/templates/orders/order_detail.html:156
+#: patients/templates/patients/add_patient.html:96
+#: patients/templates/patients/delete_patient.html:58
+#: patients/templates/patients/edit_patient.html:254
+#: patients/templates/patients/patient_detail.html:91
+msgid "Date of Birth"
+msgstr "تاريخ الميلاد"
+
+#: orders/templates/orders/order_detail.html:162
+#: patients/templates/patients/add_patient.html:103
+#: patients/templates/patients/delete_patient.html:63
+#: patients/templates/patients/edit_patient.html:270
+#: patients/templates/patients/patient_detail.html:99
+#: patients/templates/patients/patient_list.html:77
+msgid "Gender"
+msgstr "الجنس"
+
+#: orders/templates/orders/order_detail.html:185
+msgid "Procedure Information"
+msgstr "معلومات الإجراء"
+
+#: orders/templates/orders/order_detail.html:259
+msgid "Additional Information"
+msgstr "معلومات إضافية"
+
+#: orders/templates/orders/order_detail.html:279
+msgid "Room/Station"
+msgstr "الغرفة/المحطة"
+
+#: orders/templates/orders/order_detail.html:328
+#: orders/templates/orders/worklist.html:297
+msgid "View Reports"
+msgstr "عرض التقارير"
+
+#: orders/templates/orders/worklist.html:8 templates/layout.html:100
+msgid "Worklist"
+msgstr "قائمة العمل"
+
+#: orders/templates/orders/worklist.html:11
+msgid "Add New Order"
+msgstr "إضافة طلب جديد"
+
+#: orders/templates/orders/worklist.html:37
+msgid "Accession, MRN, Patient, Procedure"
+msgstr "رقم الدخول، رقم السجل الطبي، المريض، الإجراء"
+
+#: orders/templates/orders/worklist.html:74
+#: reports/templates/reports/report_list.html:64
+msgid "All Modalities"
+msgstr "جميع الأوضاع"
+
+#: orders/templates/orders/worklist.html:100
+msgid "All Priorities"
+msgstr "جميع الأولويات"
+
+#: orders/templates/orders/worklist.html:163
+#: reports/templates/reports/report_list.html:107
 msgid "Clear All Filters"
 msgstr "مسح كافة عوامل التصفية"
 
-#: templates/orders/worklist.html:166 templates/reports/report_list.html:110
+#: orders/templates/orders/worklist.html:166
+#: reports/templates/reports/report_list.html:110
 msgid "Active filters:"
 msgstr "عوامل التصفية النشطة:"
 
-#: templates/orders/worklist.html:199 templates/reports/report_list.html:134
+#: orders/templates/orders/worklist.html:199
+#: reports/templates/reports/report_list.html:134
 msgid "Accession #"
 msgstr "رقم الدخول #"
 
-#: templates/orders/worklist.html:200 templates/reports/report_detail.html:72
-#: templates/reports/report_list.html:135
-#: templates/reports/study_reports.html:28
+#: orders/templates/orders/worklist.html:200
+#: reports/templates/reports/report_detail.html:72
+#: reports/templates/reports/report_list.html:135
+#: reports/templates/reports/report_verify.html:30
+#: reports/templates/reports/study_reports.html:28
 msgid "Patient"
 msgstr "المريض"
 
-#: templates/orders/worklist.html:327
+#: orders/templates/orders/worklist.html:327
 msgid "No orders found"
 msgstr "لم يتم العثور على طلبات"
 
-#: templates/orders/worklist.html:331 templates/reports/report_list.html:210
+#: orders/templates/orders/worklist.html:331
+#: reports/templates/reports/report_list.html:213
 msgid "Try adjusting your filter criteria"
 msgstr "جرب تعديل معايير التصفية"
 
-#: templates/orders/worklist.html:332
+#: orders/templates/orders/worklist.html:332
 msgid "Get started by adding your first order"
 msgstr "ابدأ بإضافة طلبك الأول"
 
-#: templates/orders/worklist.html:353
+#: orders/templates/orders/worklist.html:353
 #, python-format
 msgid ""
 " Showing {{\n"
@@ -1339,345 +3221,397 @@ msgid_plural ""
 msgstr[0] " عرض 0 طلب "
 msgstr[1] " عرض طلب واحد "
 msgstr[2] " عرض طلبين "
-msgstr[3] " عرض %(counter)s طلبات\n                    "
-msgstr[4] " عرض %(counter)s طلباً\n                    "
-msgstr[5] " عرض %(counter)s طلب\n                    "
+msgstr[3] ""
+" عرض %(counter)s طلبات\n"
+"                    "
+msgstr[4] ""
+" عرض %(counter)s طلباً\n"
+"                    "
+msgstr[5] ""
+" عرض %(counter)s طلب\n"
+"                    "
 
-#: templates/patients/add_patient.html:4
-#: templates/patients/patient_list.html:153
+#: orders/views.py:95 orders/views.py:248
+msgid "Please enter a valid MRN"
+msgstr "الرجاء إدخال رقم سجل طبي (MRN) صحيح"
+
+#: orders/views.py:99 orders/views.py:252
+msgid "Accession number is required"
+msgstr "رقم الدخول (Accession number) مطلوب"
+
+#: orders/views.py:103 orders/views.py:256
+msgid "Procedure code and name are required"
+msgstr "رمز واسم الإجراء مطلوبان"
+
+#: orders/views.py:113 orders/views.py:266
+#, python-format
+msgid "Patient with MRN %(mrn)s not found"
+msgstr "لم يتم العثور على المريض برقم السجل الطبي %(mrn)s"
+
+#: orders/views.py:122 orders/views.py:277
+msgid "An order with this accession number already exists"
+msgstr "يوجد طلب مسبق بنفس رقم الدخول"
+
+#: orders/views.py:134 orders/views.py:289
+msgid "Selected device not found"
+msgstr "الجهاز المحدد غير موجود"
+
+#: orders/views.py:169
+#, python-format
+msgid "Order created successfully! Accession: %(acc)s"
+msgstr "تم إنشاء الطلب بنجاح! رقم الدخول: %(acc)s"
+
+#: orders/views.py:175
+#, python-format
+msgid "Error creating order: %(error)s"
+msgstr "خطأ في إنشاء الطلب: %(error)s"
+
+#: orders/views.py:323
+msgid "Order updated successfully!"
+msgstr "تم تحديث الطلب بنجاح!"
+
+#: orders/views.py:327
+#, python-format
+msgid "Error updating order: %(error)s"
+msgstr "خطأ في تحديث الطلب: %(error)s"
+
+#: orders/views.py:380
+msgid "Order deleted successfully!"
+msgstr "تم حذف الطلب بنجاح!"
+
+#: orders/views.py:384
+#, python-format
+msgid "Error deleting order: %(error)s"
+msgstr "خطأ في حذف الطلب: %(error)s"
+
+#: patients/templates/patients/add_patient.html:4
+#: patients/templates/patients/patient_list.html:153
 msgid "Add Patient"
 msgstr "إضافة مريض"
 
-#: templates/patients/add_patient.html:13
-#: templates/patients/patient_list.html:16
+#: patients/templates/patients/add_patient.html:13
+#: patients/templates/patients/patient_list.html:16
 msgid "Add New Patient"
 msgstr "إضافة مريض جديد"
 
-#: templates/patients/add_patient.html:16
-#: templates/patients/delete_patient.html:16
-#: templates/patients/edit_patient.html:27
-#: templates/patients/patient_list.html:9
+#: patients/templates/patients/add_patient.html:16
+#: patients/templates/patients/delete_patient.html:16
+#: patients/templates/patients/edit_patient.html:27
+#: patients/templates/patients/patient_list.html:9
 msgid "Patient List"
 msgstr "قائمة المرضى"
 
-#: templates/patients/add_patient.html:36
-#: templates/patients/edit_patient.html:61
+#: patients/templates/patients/add_patient.html:36
+#: patients/templates/patients/edit_patient.html:61
 msgid "Enter MRN"
 msgstr "أدخل رقم السجل الطبي"
 
-#: templates/patients/add_patient.html:44
-#: templates/patients/edit_patient.html:73
-#: templates/patients/partials/search_results.html:11
-#: templates/patients/patient_detail.html:67
-#: templates/patients/patient_list.html:79
+#: patients/templates/patients/add_patient.html:44
+#: patients/templates/patients/edit_patient.html:73
+#: patients/templates/patients/partials/search_results.html:11
+#: patients/templates/patients/patient_detail.html:67
+#: patients/templates/patients/patient_list.html:79
 msgid "National ID"
 msgstr "الهوية الوطنية"
 
-#: templates/patients/add_patient.html:46
-#: templates/patients/edit_patient.html:81
+#: patients/templates/patients/add_patient.html:46
+#: patients/templates/patients/edit_patient.html:81
 msgid "Enter National ID"
 msgstr "أدخل الهوية الوطنية"
 
-#: templates/patients/add_patient.html:51
-#: templates/patients/delete_patient.html:81
-#: templates/patients/edit_patient.html:88
-#: templates/patients/patient_detail.html:119
+#: patients/templates/patients/add_patient.html:51
+#: patients/templates/patients/delete_patient.html:81
+#: patients/templates/patients/edit_patient.html:88
+#: patients/templates/patients/patient_detail.html:119
 msgid "Nationality"
 msgstr "الجنسية"
 
-#: templates/patients/add_patient.html:54
-#: templates/patients/edit_patient.html:108
+#: patients/templates/patients/add_patient.html:54
+#: patients/templates/patients/edit_patient.html:108
 msgid "Saudi Arabia"
 msgstr "المملكة العربية السعودية"
 
-#: templates/patients/add_patient.html:55
-#: templates/patients/edit_patient.html:120
+#: patients/templates/patients/add_patient.html:55
+#: patients/templates/patients/edit_patient.html:120
 msgid "Egypt"
 msgstr "مصر"
 
-#: templates/patients/add_patient.html:56
-#: templates/patients/edit_patient.html:132
+#: patients/templates/patients/add_patient.html:56
+#: patients/templates/patients/edit_patient.html:132
 msgid "India"
 msgstr "الهند"
 
-#: templates/patients/add_patient.html:57
-#: templates/patients/edit_patient.html:144
+#: patients/templates/patients/add_patient.html:57
+#: patients/templates/patients/edit_patient.html:144
 msgid "Pakistan"
 msgstr "باكستان"
 
-#: templates/patients/add_patient.html:58
-#: templates/patients/edit_patient.html:156
+#: patients/templates/patients/add_patient.html:58
+#: patients/templates/patients/edit_patient.html:156
 msgid "Philippines"
 msgstr "الفلبين"
 
-#: templates/patients/add_patient.html:59
-#: templates/patients/edit_patient.html:168
+#: patients/templates/patients/add_patient.html:59
+#: patients/templates/patients/edit_patient.html:168
 msgid "Bangladesh"
 msgstr "بنغلاديش"
 
-#: templates/patients/add_patient.html:66
-#: templates/patients/edit_patient.html:188
+#: patients/templates/patients/add_patient.html:66
+#: patients/templates/patients/edit_patient.html:188
 msgid "First Name (English)"
 msgstr "الاسم الأول (إنجليزي)"
 
-#: templates/patients/add_patient.html:69
-#: templates/patients/edit_patient.html:198
+#: patients/templates/patients/add_patient.html:69
+#: patients/templates/patients/edit_patient.html:198
 msgid "First Name"
 msgstr "الاسم الأول"
 
-#: templates/patients/add_patient.html:74
-#: templates/patients/edit_patient.html:205
+#: patients/templates/patients/add_patient.html:74
+#: patients/templates/patients/edit_patient.html:205
 msgid "Last Name (English)"
 msgstr "اسم العائلة (إنجليزي)"
 
-#: templates/patients/add_patient.html:77
-#: templates/patients/edit_patient.html:215
+#: patients/templates/patients/add_patient.html:77
+#: patients/templates/patients/edit_patient.html:215
 msgid "Last Name"
 msgstr "اسم العائلة"
 
-#: templates/patients/add_patient.html:82
-#: templates/patients/edit_patient.html:222
+#: patients/templates/patients/add_patient.html:82
+#: patients/templates/patients/edit_patient.html:222
 msgid "First Name (Arabic)"
 msgstr "الاسم الأول (عربي)"
 
-#: templates/patients/add_patient.html:84
-#: templates/patients/edit_patient.html:230
+#: patients/templates/patients/add_patient.html:84
+#: patients/templates/patients/edit_patient.html:230
 msgid "الاسم الأول"
 msgstr "الاسم الأول"
 
-#: templates/patients/add_patient.html:89
-#: templates/patients/edit_patient.html:238
+#: patients/templates/patients/add_patient.html:89
+#: patients/templates/patients/edit_patient.html:238
 msgid "Last Name (Arabic)"
 msgstr "اسم العائلة (عربي)"
 
-#: templates/patients/add_patient.html:91
-#: templates/patients/edit_patient.html:246
+#: patients/templates/patients/add_patient.html:91
+#: patients/templates/patients/edit_patient.html:246
 msgid "اسم العائلة"
 msgstr "اسم العائلة"
 
-#: templates/patients/add_patient.html:117
-#: templates/patients/edit_patient.html:332
+#: patients/templates/patients/add_patient.html:117
+#: patients/templates/patients/edit_patient.html:332
 msgid "Enter phone number"
 msgstr "أدخل رقم الهاتف"
 
-#: templates/patients/add_patient.html:124
-#: templates/patients/edit_patient.html:347
+#: patients/templates/patients/add_patient.html:124
+#: patients/templates/patients/edit_patient.html:347
 msgid "Enter email address"
 msgstr "أدخل البريد الإلكتروني"
 
-#: templates/patients/add_patient.html:133
-#: templates/patients/edit_patient.html:363
+#: patients/templates/patients/add_patient.html:133
+#: patients/templates/patients/edit_patient.html:363
 msgid "Enter full address"
 msgstr "أدخل العنوان الكامل"
 
-#: templates/patients/add_patient.html:142
-#: templates/patients/edit_patient.html:376
-#: templates/patients/patient_detail.html:158
+#: patients/templates/patients/add_patient.html:142
+#: patients/templates/patients/edit_patient.html:376
+#: patients/templates/patients/patient_detail.html:158
 msgid "Emergency Contact"
 msgstr "جهة اتصال للطوارئ"
 
-#: templates/patients/add_patient.html:147
-#: templates/patients/edit_patient.html:386
-#: templates/patients/patient_detail.html:166
+#: patients/templates/patients/add_patient.html:147
+#: patients/templates/patients/edit_patient.html:386
+#: patients/templates/patients/patient_detail.html:166
 msgid "Contact Name"
 msgstr "اسم جهة الاتصال"
 
-#: templates/patients/add_patient.html:149
-#: templates/patients/edit_patient.html:394
+#: patients/templates/patients/add_patient.html:149
+#: patients/templates/patients/edit_patient.html:394
 msgid "Enter contact name"
 msgstr "أدخل اسم جهة الاتصال"
 
-#: templates/patients/add_patient.html:152
-#: templates/patients/edit_patient.html:401
-#: templates/patients/patient_detail.html:174
+#: patients/templates/patients/add_patient.html:152
+#: patients/templates/patients/edit_patient.html:401
+#: patients/templates/patients/patient_detail.html:174
 msgid "Contact Phone"
 msgstr "هاتف جهة الاتصال"
 
-#: templates/patients/add_patient.html:154
-#: templates/patients/edit_patient.html:409
+#: patients/templates/patients/add_patient.html:154
+#: patients/templates/patients/edit_patient.html:409
 msgid "Enter contact phone"
 msgstr "أدخل هاتف جهة الاتصال"
 
-#: templates/patients/add_patient.html:163
-#: templates/patients/edit_patient.html:421
+#: patients/templates/patients/add_patient.html:163
+#: patients/templates/patients/edit_patient.html:421
 msgid "Insurance Information"
 msgstr "معلومات التأمين"
 
-#: templates/patients/add_patient.html:168
-#: templates/patients/edit_patient.html:431
+#: patients/templates/patients/add_patient.html:168
+#: patients/templates/patients/edit_patient.html:431
 msgid "Insurance Provider"
 msgstr "مقدم التأمين"
 
-#: templates/patients/add_patient.html:170
-#: templates/patients/edit_patient.html:439
+#: patients/templates/patients/add_patient.html:170
+#: patients/templates/patients/edit_patient.html:439
 msgid "Enter insurance provider"
 msgstr "أدخل مقدم التأمين"
 
-#: templates/patients/add_patient.html:173
-#: templates/patients/edit_patient.html:446
-#: templates/patients/patient_detail.html:207
+#: patients/templates/patients/add_patient.html:173
+#: patients/templates/patients/edit_patient.html:446
+#: patients/templates/patients/patient_detail.html:207
 msgid "Policy Number"
 msgstr "رقم البوليصة"
 
-#: templates/patients/add_patient.html:175
-#: templates/patients/edit_patient.html:454
+#: patients/templates/patients/add_patient.html:175
+#: patients/templates/patients/edit_patient.html:454
 msgid "Enter policy number"
 msgstr "أدخل رقم البوليصة"
 
-#: templates/patients/add_patient.html:184
-#: templates/patients/edit_patient.html:466
+#: patients/templates/patients/add_patient.html:184
+#: patients/templates/patients/edit_patient.html:466
 msgid "Additional Options"
 msgstr "خيارات إضافية"
 
-#: templates/patients/add_patient.html:192
-#: templates/patients/edit_patient.html:490
+#: patients/templates/patients/add_patient.html:192
+#: patients/templates/patients/edit_patient.html:490
 msgid "Consent to Data Sharing"
 msgstr "الموافقة على مشاركة البيانات"
 
-#: templates/patients/add_patient.html:197
-#: templates/patients/edit_patient.html:498
-#: templates/patients/patient_detail.html:244
+#: patients/templates/patients/add_patient.html:197
+#: patients/templates/patients/edit_patient.html:498
+#: patients/templates/patients/patient_detail.html:244
 msgid "Data Retention Until"
 msgstr "الاحتفاظ بالبيانات حتى"
 
-#: templates/patients/add_patient.html:210
+#: patients/templates/patients/add_patient.html:210
 msgid "Save Patient"
 msgstr "حفظ المريض"
 
-#: templates/patients/delete_patient.html:1
-#: templates/patients/delete_patient.html:9
-#: templates/patients/edit_patient.html:543
+#: patients/templates/patients/delete_patient.html:1
+#: patients/templates/patients/delete_patient.html:9
+#: patients/templates/patients/edit_patient.html:543
 msgid "Delete Patient"
 msgstr "حذف المريض"
 
-#: templates/patients/delete_patient.html:37
+#: patients/templates/patients/delete_patient.html:37
 msgid "Are you sure you want to delete patient"
 msgstr "هل أنت متأكد أنك تريد حذف المريض"
 
-#: templates/patients/delete_patient.html:45
+#: patients/templates/patients/delete_patient.html:45
 msgid "Patient Summary"
 msgstr "ملخص المريض"
 
-#: templates/patients/delete_patient.html:114
+#: patients/templates/patients/delete_patient.html:114
 msgid "Yes, Delete Patient"
 msgstr "نعم، احذف المريض"
 
-#: templates/patients/edit_patient.html:10
+#: patients/templates/patients/edit_patient.html:10
 msgid "Edit Patient"
 msgstr "تعديل المريض"
 
-#: templates/patients/edit_patient.html:19
+#: patients/templates/patients/edit_patient.html:19
 msgid "Back to Patient"
 msgstr "العودة إلى المريض"
 
-#: templates/patients/edit_patient.html:526
+#: patients/templates/patients/edit_patient.html:526
 msgid "Is Deceased"
 msgstr "متوفى"
 
-#: templates/patients/edit_patient.html:557
+#: patients/templates/patients/edit_patient.html:557
 msgid "Update Patient"
 msgstr "تحديث المريض"
 
-#: templates/patients/edit_patient.html:580
-#: templates/reports/report_confirm_delete.html:13
+#: patients/templates/patients/edit_patient.html:580
+#: reports/templates/reports/report_confirm_delete.html:13
 msgid "Confirm Delete"
 msgstr "تأكيد الحذف"
 
-#: templates/patients/edit_patient.html:592
+#: patients/templates/patients/edit_patient.html:592
 msgid "Are you sure you want to delete this patient?"
 msgstr "هل أنت متأكد أنك تريد حذف هذا المريض؟"
 
-#: templates/patients/edit_patient.html:595
+#: patients/templates/patients/edit_patient.html:595
 msgid "This action cannot be undone!"
 msgstr "لا يمكن التراجع عن هذا الإجراء!"
 
-#: templates/patients/partials/search_results.html:17
-#: templates/patients/patient_list.html:140
+#: patients/templates/patients/partials/search_results.html:17
+#: patients/templates/patients/patient_list.html:140
 msgid "No patients found"
 msgstr "لم يتم العثور على مرضى"
 
-#: templates/patients/patient_detail.html:2
+#: patients/templates/patients/patient_detail.html:2
 msgid "Patient Details"
 msgstr "تفاصيل المريض"
 
-#: templates/patients/patient_detail.html:37
-#: templates/patients/patient_list.html:126
+#: patients/templates/patients/patient_detail.html:37
+#: patients/templates/patients/patient_list.html:126
 msgid "Create Order"
 msgstr "إنشاء طلب"
 
-#: templates/patients/patient_detail.html:75
+#: patients/templates/patients/patient_detail.html:75
 msgid "Full Name (English)"
 msgstr "الاسم الكامل (إنجليزي)"
 
-#: templates/patients/patient_detail.html:83
+#: patients/templates/patients/patient_detail.html:83
 msgid "Full Name (Arabic)"
 msgstr "الاسم الكامل (عربي)"
 
-#: templates/patients/patient_detail.html:192
+#: patients/templates/patients/patient_detail.html:192
 msgid "Insurance"
 msgstr "التأمين"
 
-#: templates/patients/patient_detail.html:199
+#: patients/templates/patients/patient_detail.html:199
 msgid "Provider"
 msgstr "المزود"
 
-#: templates/patients/patient_detail.html:221
+#: patients/templates/patients/patient_detail.html:221
 msgid "Additional Info"
 msgstr "معلومات إضافية"
 
-#: templates/patients/patient_detail.html:228
+#: patients/templates/patients/patient_detail.html:228
 msgid "Data Sharing Consent"
 msgstr "موافقة مشاركة البيانات"
 
-#: templates/patients/patient_detail.html:233
+#: patients/templates/patients/patient_detail.html:233
 msgid "Granted"
 msgstr "ممنوح"
 
-#: templates/patients/patient_detail.html:237
+#: patients/templates/patients/patient_detail.html:237
 msgid "Not Granted"
 msgstr "غير ممنوح"
 
-#: templates/patients/patient_detail.html:252
+#: patients/templates/patients/patient_detail.html:252
 msgid "Deceased"
 msgstr "متوفى"
 
-#: templates/patients/patient_detail.html:274
+#: patients/templates/patients/patient_detail.html:274
 msgid "Record Metadata"
 msgstr "البيانات الوصفية للسجل"
 
-#: templates/patients/patient_detail.html:281
-#: templates/reports/report_detail.html:46
-#: templates/reports/report_list.html:140
-#: templates/reports/study_reports.html:71
-msgid "Created"
-msgstr "تم الإنشاء"
-
-#: templates/patients/patient_detail.html:289
-#: templates/reports/report_detail.html:50
+#: patients/templates/patients/patient_detail.html:289
+#: reports/templates/reports/report_detail.html:50
 msgid "Last Updated"
 msgstr "آخر تحديث"
 
-#: templates/patients/patient_list.html:39
+#: patients/templates/patients/patient_list.html:39
 msgid "Search by MRN, Name, National ID, or Phone"
 msgstr "ابحث برقم السجل الطبي أو الاسم أو الهوية الوطنية أو الهاتف"
 
-#: templates/patients/patient_list.html:74
+#: patients/templates/patients/patient_list.html:74
 msgid "Name (EN)"
 msgstr "الاسم (إنجليزي)"
 
-#: templates/patients/patient_list.html:75
+#: patients/templates/patients/patient_list.html:75
 msgid "Name (AR)"
 msgstr "الاسم (عربي)"
 
-#: templates/patients/patient_list.html:76
+#: patients/templates/patients/patient_list.html:76
 msgid "DOB"
 msgstr "تاريخ الميلاد"
 
-#: templates/patients/patient_list.html:119
+#: patients/templates/patients/patient_list.html:119
 msgid "View Details"
 msgstr "عرض التفاصيل"
 
-#: templates/patients/patient_list.html:166
+#: patients/templates/patients/patient_list.html:166
 #, python-format
 msgid ""
 " Showing\n"
@@ -1688,16 +3622,70 @@ msgid_plural ""
 msgstr[0] " عرض 0 مريض "
 msgstr[1] " عرض مريض واحد "
 msgstr[2] " عرض مريضين "
-msgstr[3] " عرض %(counter)s مرضى\n                    "
-msgstr[4] " عرض %(counter)s مريضاً\n                    "
-msgstr[5] " عرض %(counter)s مريض\n                    "
+msgstr[3] ""
+" عرض %(counter)s مرضى\n"
+"                    "
+msgstr[4] ""
+" عرض %(counter)s مريضاً\n"
+"                    "
+msgstr[5] ""
+" عرض %(counter)s مريض\n"
+"                    "
 
-#: templates/reports/report_confirm_delete.html:4
-#: templates/reports/report_confirm_delete.html:36
+#: patients/views.py:41 patients/views.py:163
+msgid "MRN is required"
+msgstr "رقم السجل الطبي مطلوب"
+
+#: patients/views.py:45 patients/views.py:167
+msgid "English first name and last name are required"
+msgstr "الاسم الأول واسم العائلة باللغة الإنجليزية مطلوبان"
+
+#: patients/views.py:49 patients/views.py:171
+msgid "Date of birth is required"
+msgstr "تاريخ الميلاد مطلوب"
+
+#: patients/views.py:53 patients/views.py:175
+msgid "Gender is required"
+msgstr "الجنس مطلوب"
+
+#: patients/views.py:59 patients/views.py:181
+msgid "A patient with this MRN already exists in your system"
+msgstr "يوجد مريض بهذا الرقم الطبي مسجل مسبقاً في النظام"
+
+#: patients/views.py:88
+#, python-format
+msgid "Patient added successfully! MRN: %(mrn)s"
+msgstr "تم إضافة المريض بنجاح! رقم السجل الطبي: %(mrn)s"
+
+#: patients/views.py:93
+#, python-format
+msgid "Error creating patient: %(error)s"
+msgstr "خطأ في إنشاء المريض: %(error)s"
+
+#: patients/views.py:208
+msgid "Patient updated successfully!"
+msgstr "تم تحديث المريض بنجاح!"
+
+#: patients/views.py:212
+#, python-format
+msgid "Error updating patient: %(error)s"
+msgstr "خطأ في تحديث المريض: %(error)s"
+
+#: patients/views.py:256
+msgid "Patient deleted successfully!"
+msgstr "تم حذف المريض بنجاح!"
+
+#: patients/views.py:260
+#, python-format
+msgid "Error deleting patient: %(error)s"
+msgstr "خطأ في حذف المريض: %(error)s"
+
+#: reports/templates/reports/report_confirm_delete.html:4
+#: reports/templates/reports/report_confirm_delete.html:36
 msgid "Delete Report"
 msgstr "حذف التقرير"
 
-#: templates/reports/report_confirm_delete.html:18
+#: reports/templates/reports/report_confirm_delete.html:18
 #, python-format
 msgid ""
 "\n"
@@ -1707,179 +3695,270 @@ msgid ""
 "                    "
 msgstr ""
 "\n"
-"                    هل أنت متأكد أنك تريد حذف التقرير رقم %(report_id)s للطلب %(order_accession)s؟\n"
+"                    هل أنت متأكد أنك تريد حذف التقرير رقم %(report_id)s "
+"للطلب %(order_accession)s؟\n"
 "                    لا يمكن التراجع عن هذا الإجراء.\n"
 "                    "
 
-#: templates/reports/report_confirm_delete.html:26
+#: reports/templates/reports/report_confirm_delete.html:26
 msgid ""
 "All report data including findings and impressions will be permanently "
 "deleted."
 msgstr "سيتم حذف كافة بيانات التقرير بما في ذلك النتائج والانطباعات بشكل دائم."
 
-#: templates/reports/report_detail.html:4
+#: reports/templates/reports/report_detail.html:4
 msgid "Report"
 msgstr "التقرير"
 
-#: templates/reports/report_detail.html:16
+#: reports/templates/reports/report_detail.html:16
 msgid "Radiology Report"
 msgstr "تقرير الأشعة"
 
-#: templates/reports/report_detail.html:27
+#: reports/templates/reports/report_detail.html:27
 msgid "Back to Reports"
 msgstr "الرجوع إلى التقارير"
 
-#: templates/reports/report_detail.html:42
-#: templates/reports/report_list.html:49 templates/reports/report_list.html:137
-#: templates/reports/study_reports.html:69
+#: reports/templates/reports/report_detail.html:42
+#: reports/templates/reports/report_list.html:49
+#: reports/templates/reports/report_list.html:137
+#: reports/templates/reports/study_reports.html:69
 msgid "Radiologist"
 msgstr "طبيب الأشعة"
 
-#: templates/reports/report_detail.html:63
+#: reports/templates/reports/report_detail.html:63
 msgid "CRITICAL FINDING"
 msgstr "نتيجة حرجة"
 
-#: templates/reports/report_detail.html:98
+#: reports/templates/reports/report_detail.html:98
 msgid "Findings"
 msgstr "النتائج"
 
-#: templates/reports/report_detail.html:111
+#: reports/templates/reports/report_detail.html:111
 msgid "النتائج"
 msgstr "النتائج"
 
-#: templates/reports/report_detail.html:124
+#: reports/templates/reports/report_detail.html:124
 msgid "Impression / Conclusion"
 msgstr "الانطباع / الخلاصة"
 
-#: templates/reports/report_detail.html:137
+#: reports/templates/reports/report_detail.html:137
 msgid "الانطباع / الخلاصة"
 msgstr "الانطباع / الخلاصة"
 
-#: templates/reports/report_detail.html:149
-#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
+#: reports/templates/reports/report_detail.html:150
+#: reports/templates/reports/report_form.html:4
+#: reports/templates/reports/report_form.html:181
+#: reports/templates/reports/study_reports.html:102
 msgid "Edit Report"
 msgstr "تعديل التقرير"
 
-#: templates/reports/report_detail.html:153
+#: reports/templates/reports/report_detail.html:156
+#: reports/templates/reports/report_list.html:190
+#: reports/templates/reports/study_reports.html:106
+#, fuzzy
+#| msgid "View Reports"
+msgid "View & Export"
+msgstr "عرض التقارير"
+
+#: reports/templates/reports/report_detail.html:163
+#: reports/templates/reports/report_verify.html:4
+#: reports/templates/reports/report_verify.html:14
+#, fuzzy
+#| msgid "View Reports"
+msgid "Verify Report"
+msgstr "عرض التقارير"
+
+#: reports/templates/reports/report_detail.html:168
 msgid "All Reports"
 msgstr "جميع التقارير"
 
-#: templates/reports/report_detail.html:156
-#: templates/reports/report_form.html:188
+#: reports/templates/reports/report_detail.html:174
+#: reports/templates/reports/report_form.html:197
+#: reports/templates/reports/report_form.html:210
 msgid "Print"
 msgstr "طباعة"
 
-#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
-#: templates/reports/report_form.html:262
-#: templates/reports/study_reports.html:126
+#: reports/templates/reports/report_detail.html:177
+#: reports/templates/reports/report_form.html:188
+#: reports/templates/reports/report_form.html:201
+#, fuzzy
+#| msgid "Export to PDF"
+msgid "Export as DICOM"
+msgstr "تصدير إلى PDF"
+
+#: reports/templates/reports/report_detail.html:180
+#, fuzzy
+#| msgid "Export to PDF"
+msgid "Export as PDF"
+msgstr "تصدير إلى PDF"
+
+#: reports/templates/reports/report_detail.html:183
+#, fuzzy
+#| msgid "Export to PDF"
+msgid "Export as JPG"
+msgstr "تصدير إلى PDF"
+
+#: reports/templates/reports/report_detail.html:188
+msgid "Report must be verified before print/export"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:4
+#: reports/templates/reports/report_form.html:181
+#: reports/templates/reports/report_form.html:295
+#: reports/templates/reports/study_reports.html:129
 msgid "Create Report"
 msgstr "إنشاء تقرير"
 
-#: templates/reports/report_form.html:185
+#: reports/templates/reports/report_form.html:191
+#: reports/templates/reports/report_form.html:204
 msgid "Export to PDF"
 msgstr "تصدير إلى PDF"
 
-#: templates/reports/report_form.html:212
+#: reports/templates/reports/report_form.html:194
+#: reports/templates/reports/report_form.html:207
+#, fuzzy
+#| msgid "Export to PDF"
+msgid "Export to JPG"
+msgstr "تصدير إلى PDF"
+
+#: reports/templates/reports/report_form.html:215
+msgid "Save the report first before export/print"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:220
+msgid "Report must be finalized before export/print"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:228
+#, fuzzy
+#| msgid "View Reports"
+msgid "View Report"
+msgstr "عرض التقارير"
+
+#: reports/templates/reports/report_form.html:245
 msgid "Report Editor"
 msgstr "محرر التقرير"
 
-#: templates/reports/report_form.html:249
+#: reports/templates/reports/report_form.html:282
+#: reports/templates/reports/report_verify.html:61
 msgid "Report Content"
 msgstr "محتوى التقرير"
 
-#: templates/reports/report_form.html:253
+#: reports/templates/reports/report_form.html:286
+#: reports/templates/reports/report_verify.html:66
 msgid "Impression:"
 msgstr "الانطباع:"
 
-#: templates/reports/report_form.html:262
+#: reports/templates/reports/report_form.html:295
 msgid "Update Report"
 msgstr "تحديث التقرير"
 
-#: templates/reports/report_form.html:266
+#: reports/templates/reports/report_form.html:299
 msgid "Save Draft"
 msgstr "حفظ كمسودة"
 
-#: templates/reports/report_form.html:270
+#: reports/templates/reports/report_form.html:303
 msgid "Templates"
 msgstr "القوالب"
 
-#: templates/reports/report_form.html:274
+#: reports/templates/reports/report_form.html:307
 msgid "Normal Report"
 msgstr "تقرير طبيعي"
 
-#: templates/reports/report_form.html:310
+#: reports/templates/reports/report_form.html:316
+#, fuzzy
+#| msgid "Finalized"
+msgid "Report is Finalized"
+msgstr "نهائي"
+
+#: reports/templates/reports/report_form.html:316
+msgid ""
+"This report is read-only. To make changes, please use the Amend function."
+msgstr ""
+
+#: reports/templates/reports/report_form.html:352
 msgid "Report Templates"
 msgstr "قوالب التقارير"
 
-#: templates/reports/report_form.html:330
-#: templates/reports/report_form.html:403
+#: reports/templates/reports/report_form.html:372
+#: reports/templates/reports/report_form.html:451
 msgid "Draft saved"
 msgstr "تم حفظ المسودة"
 
-#: templates/reports/report_form.html:384
+#: reports/templates/reports/report_form.html:432
 msgid "Saving..."
 msgstr "جاري الحفظ..."
 
-#: templates/reports/report_form.html:412
+#: reports/templates/reports/report_form.html:460
 msgid "Save failed"
 msgstr "فشل الحفظ"
 
-#: templates/reports/report_list.html:4 templates/reports/report_list.html:13
+#: reports/templates/reports/report_form.html:526
+#: reports/templates/reports/report_form.html:557 reports/views.py:379
+msgid "Only finalized reports can be exported."
+msgstr ""
+
+#: reports/templates/reports/report_form.html:585
+msgid "Only finalized reports can be printed."
+msgstr ""
+
+#: reports/templates/reports/report_list.html:4
+#: reports/templates/reports/report_list.html:13
 msgid "Reports List"
 msgstr "قائمة التقارير"
 
-#: templates/reports/report_list.html:16
+#: reports/templates/reports/report_list.html:16
 msgid "New Order"
 msgstr "طلب جديد"
 
-#: templates/reports/report_list.html:30
+#: reports/templates/reports/report_list.html:30
 msgid "Report ID, Accession, MRN, Patient, Findings"
 msgstr "رقم التقرير، رقم الدخول، رقم السجل الطبي، المريض، النتائج"
 
-#: templates/reports/report_list.html:51
+#: reports/templates/reports/report_list.html:51
 msgid "All Radiologists"
 msgstr "جميع أطباء الأشعة"
 
-#: templates/reports/report_list.html:75
+#: reports/templates/reports/report_list.html:75
 msgid "Critical Finding"
 msgstr "نتيجة حرجة"
 
-#: templates/reports/report_list.html:115
+#: reports/templates/reports/report_list.html:115
 msgid "Critical Only"
 msgstr "الحرجة فقط"
 
-#: templates/reports/report_list.html:116
+#: reports/templates/reports/report_list.html:116
 msgid "Non-Critical Only"
 msgstr "غير الحرجة فقط"
 
-#: templates/reports/report_list.html:133
-#: templates/reports/study_reports.html:68
+#: reports/templates/reports/report_list.html:133
+#: reports/templates/reports/study_reports.html:68
 msgid "Report ID"
 msgstr "معرف التقرير"
 
-#: templates/reports/report_list.html:139
+#: reports/templates/reports/report_list.html:139
 msgid "Critical"
 msgstr "حرج"
 
-#: templates/reports/report_list.html:194
-#: templates/reports/study_reports.html:4
-#: templates/reports/study_reports.html:16
+#: reports/templates/reports/report_list.html:197
+#: reports/templates/reports/study_reports.html:4
+#: reports/templates/reports/study_reports.html:16
 msgid "Study Reports"
 msgstr "تقارير الفحص"
 
-#: templates/reports/report_list.html:207
+#: reports/templates/reports/report_list.html:210
 msgid "No reports found"
 msgstr "لم يتم العثور على تقارير"
 
-#: templates/reports/report_list.html:212
+#: reports/templates/reports/report_list.html:215
 msgid "No reports have been created yet"
 msgstr "لم يتم إنشاء أي تقارير بعد"
 
-#: templates/reports/report_list.html:217
+#: reports/templates/reports/report_list.html:220
 msgid "Go to Worklist"
 msgstr "الذهاب لقائمة العمل"
 
-#: templates/reports/report_list.html:229
+#: reports/templates/reports/report_list.html:232
 #, python-format
 msgid ""
 "\n"
@@ -1889,82 +3968,315 @@ msgid_plural ""
 "\n"
 "                    Showing %(counter)s reports\n"
 "                    "
-msgstr[0] "\n                    عرض 0 تقرير\n                    "
-msgstr[1] "\n                    عرض تقرير واحد\n                    "
-msgstr[2] "\n                    عرض تقريرين\n                    "
-msgstr[3] "\n                    عرض %(counter)s تقارير\n                    "
-msgstr[4] "\n                    عرض %(counter)s تقريراً\n                    "
-msgstr[5] "\n                    عرض %(counter)s تقرير\n                    "
+msgstr[0] ""
+"\n"
+"                    عرض 0 تقرير\n"
+"                    "
+msgstr[1] ""
+"\n"
+"                    عرض تقرير واحد\n"
+"                    "
+msgstr[2] ""
+"\n"
+"                    عرض تقريرين\n"
+"                    "
+msgstr[3] ""
+"\n"
+"                    عرض %(counter)s تقارير\n"
+"                    "
+msgstr[4] ""
+"\n"
+"                    عرض %(counter)s تقريراً\n"
+"                    "
+msgstr[5] ""
+"\n"
+"                    عرض %(counter)s تقرير\n"
+"                    "
 
-#: templates/reports/study_reports.html:58
+#: reports/templates/reports/report_verify.html:20
+msgid ""
+"You are about to verify and finalize this report. Once finalized, the report "
+"will be locked and can only be amended by a supervising physician."
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:23
+#, fuzzy
+#| msgid "Order Details"
+msgid "Report Details"
+msgstr "تفاصيل الطلب"
+
+#: reports/templates/reports/report_verify.html:42
+#, fuzzy
+#| msgid "Status"
+msgid "Current Status"
+msgstr "الحالة"
+
+#: reports/templates/reports/report_verify.html:50
+msgid "Author"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:55
+#, fuzzy
+#| msgid "Finalized"
+msgid "Finalized At"
+msgstr "نهائي"
+
+#: reports/templates/reports/report_verify.html:80
+msgid "Verify & Finalize Report"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:86
+#, fuzzy
+#| msgid "New Report"
+msgid "Amend Report"
+msgstr "تقرير جديد"
+
+#: reports/templates/reports/study_reports.html:58
 msgid "New Report"
 msgstr "تقرير جديد"
 
-#: templates/reports/study_reports.html:72
+#: reports/templates/reports/study_reports.html:72
 msgid "Updated"
 msgstr "مُحَدَّث"
 
-#: templates/reports/study_reports.html:123
+#: reports/templates/reports/study_reports.html:126
 msgid "No reports yet"
 msgstr "لا توجد تقارير بعد"
 
-#: templates/reports/study_reports.html:124
+#: reports/templates/reports/study_reports.html:127
 msgid "Create the first report for this study."
 msgstr "أنشئ التقرير الأول لهذا الفحص."
 
-#: templates/users/login.html:20
+#: reports/views.py:42
+msgid "Report created successfully!"
+msgstr "تم إنشاء التقرير بنجاح!"
+
+#: reports/views.py:59
+#, fuzzy
+#| msgid "You don't have permission to edit this report."
+msgid "You don't have permission to access this report."
+msgstr "ليس لديك صلاحية لتعديل هذا التقرير."
+
+#: reports/views.py:64
+msgid "Amended reports can only be edited by supervising physicians."
+msgstr ""
+
+#: reports/views.py:70
+msgid ""
+"Finalized reports cannot be edited. Please use the Amend function to make "
+"changes."
+msgstr ""
+
+#: reports/views.py:81
+msgid "Only supervising physicians can finalize reports."
+msgstr ""
+
+#: reports/views.py:98
+msgid "Report updated successfully!"
+msgstr "تم تحديث التقرير بنجاح!"
+
+#: reports/views.py:115
+msgid "Only supervising physicians can verify reports."
+msgstr ""
+
+#: reports/views.py:149
+#, fuzzy
+#| msgid "Report created successfully!"
+msgid "Report verified and finalized successfully!"
+msgstr "تم إنشاء التقرير بنجاح!"
+
+#: reports/views.py:175
+msgid "Report marked as amended. Please update the content."
+msgstr ""
+
+#: reports/views.py:218
+msgid "You don't have permission to delete this report."
+msgstr "ليس لديك صلاحية لحذف هذا التقرير."
+
+#: reports/views.py:245
+msgid "Report deleted successfully!"
+msgstr "تم حذف التقرير بنجاح!"
+
+#: reports/views.py:248
+#, fuzzy, python-format
+#| msgid "Error deleting order: %(error)s"
+msgid "Error deleting report: %(error)s"
+msgstr "خطأ في حذف الطلب: %(error)s"
+
+#: reports/views.py:504
+#, fuzzy, python-format
+#| msgid "Error creating order: %(error)s"
+msgid "Error exporting report: %(error)s"
+msgstr "خطأ في إنشاء الطلب: %(error)s"
+
+#: templates/layout.html:149
+#, fuzzy
+#| msgid "Billing Status"
+msgid "Billing"
+msgstr "حالة الفواتير"
+
+#: templates/layout.html:158
+msgid "Payers"
+msgstr "الدافعون"
+
+#: templates/layout.html:163
+msgid "Fee Schedules"
+msgstr "جداول الرسوم"
+
+#: templates/layout.html:182
+msgid "Authorizations"
+msgstr ""
+
+#: templates/layout.html:205
+msgid "Payment Postings"
+msgstr ""
+
+#: templates/layout.html:229
+msgid "Denial Reasons"
+msgstr ""
+
+#: templates/layout.html:234
+msgid "Claim Appeals"
+msgstr ""
+
+#: templates/layout.html:243
+#, fuzzy
+#| msgid "Create Report"
+msgid "Charge Capture Report"
+msgstr "إنشاء تقرير"
+
+#: templates/layout.html:248
+msgid "Claim Submission Report"
+msgstr ""
+
+#: templates/layout.html:253
+msgid "Payment Posting Report"
+msgstr ""
+
+#: templates/layout.html:258
+#, fuzzy
+#| msgid "Radiology Report"
+msgid "A/R Aging Report"
+msgstr "تقرير الأشعة"
+
+#: templates/layout.html:263
+#, fuzzy
+#| msgid "Delete Report"
+msgid "Denial Management Report"
+msgstr "حذف التقرير"
+
+#: templates/layout.html:268
+msgid "Revenue Analysis Report"
+msgstr ""
+
+#: templates/layout.html:273
+msgid "Collection Metrics"
+msgstr ""
+
+#: templates/layout.html:357 templates/layout.html:358
+msgid "Toggle Theme"
+msgstr "تبديل المظهر"
+
+#: templates/layout.html:414
+msgid "Admin panel"
+msgstr "لوحة الإدارة"
+
+#: templates/layout.html:426
+msgid "Sign Out"
+msgstr "تسجيل الخروج"
+
+#: templates/layout.html:437
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+#: templates/layout.html:483
+msgid "All rights reserved."
+msgstr "جميع الحقوق محفوظة."
+
+#: templates/license/home.html:373
+#, fuzzy
+#| msgid "Patient Information"
+msgid "License Information"
+msgstr "معلومات المريض"
+
+#: templates/license/home.html:379
+#, fuzzy
+#| msgid "To Date"
+msgid "End Date"
+msgstr "إلى تاريخ"
+
+#: templates/license/home.html:384
+msgid "License expiration date"
+msgstr ""
+
+#: templates/license/home.html:387
+#, fuzzy
+#| msgid "No orders found"
+msgid "Orders Count"
+msgstr "لم يتم العثور على طلبات"
+
+#: templates/license/home.html:389
+msgid "Unlimited"
+msgstr ""
+
+#: templates/license/home.html:392
+msgid "Order usage limit"
+msgstr ""
+
+#: users/templates/users/login.html:20
 msgid "Sign in to your account"
 msgstr "تسجيل الدخول إلى حسابك"
 
-#: templates/users/login.html:38
+#: users/templates/users/login.html:38
 msgid "Enter your email"
 msgstr "أدخل بريدك الإلكتروني"
 
-#: templates/users/login.html:47
+#: users/templates/users/login.html:47
 msgid "Password"
 msgstr "كلمة المرور"
 
-#: templates/users/login.html:54
+#: users/templates/users/login.html:54
 msgid "Enter your password"
 msgstr "أدخل كلمة المرور"
 
-#: templates/users/login.html:71
+#: users/templates/users/login.html:71
 msgid "Remember me"
 msgstr "تذكرني"
 
-#: templates/users/login.html:75
+#: users/templates/users/login.html:75
 msgid "Forgot password?"
 msgstr "نسيت كلمة المرور؟"
 
-#: templates/users/login.html:91
+#: users/templates/users/login.html:91
 msgid "Need help?"
 msgstr "تحتاج مساعدة؟"
 
-#: templates/users/login.html:93
+#: users/templates/users/login.html:93
 msgid "Contact support"
 msgstr "اتصل بالدعم"
 
-#: templates/users/manage_users.html:3 templates/users/manage_users.html:8
+#: users/templates/users/manage_users.html:3
+#: users/templates/users/manage_users.html:8
 msgid "Manage Users"
 msgstr "إدارة المستخدمين"
 
-#: templates/users/manage_users.html:10
+#: users/templates/users/manage_users.html:10
 msgid "Add User"
 msgstr "إضافة مستخدم"
 
-#: templates/users/manage_users.html:20
+#: users/templates/users/manage_users.html:20
 msgid "Username"
 msgstr "اسم المستخدم"
 
-#: templates/users/manage_users.html:22
+#: users/templates/users/manage_users.html:22
 msgid "Role"
 msgstr "الدور"
 
-#: templates/users/manage_users.html:24
+#: users/templates/users/manage_users.html:24
 msgid "Last Login"
 msgstr "آخر تسجيل دخول"
 
-#: templates/users/manage_users.html:58
+#: users/templates/users/manage_users.html:58
 msgid "No users found."
 msgstr "لم يتم العثور على مستخدمين."
 
@@ -1980,3 +4292,12 @@ msgstr "البريد الإلكتروني أو كلمة المرور غير صا
 #: users/views.py:47
 msgid "You have been logged out."
 msgstr "لقد تم تسجيل خروجك."
+
+#~ msgid "Tenant not found. Please select a tenant."
+#~ msgstr "لم يتم العثور على المستأجر. الرجاء تحديد مستأجر."
+
+#~ msgid "Medical Record Number (MRN)"
+#~ msgstr "رقم السجل الطبي (MRN)"
+
+#~ msgid "Loading devices..."
+#~ msgstr "جاري تحميل الأجهزة..."

@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Statement' %} {{ statement.statement_number }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div><a href="{% url 'billing:statement_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Patient statements' %}</a><h1 class="mt-2">{% trans 'Statement' %} {{ statement.statement_number }}</h1><span class="badge {% if statement.status == 'PAID' %}text-bg-success{% elif statement.status == 'OVERDUE' %}text-bg-danger{% elif statement.status == 'SENT' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ statement.get_status_display }}</span></div>
+        <div class="d-flex gap-2"><a href="{% url 'billing:statement_update' statement.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:statement_delete' statement.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Statement details' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-5">{% trans 'Patient account' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:patient_account_detail' statement.patient_account.pk %}">{{ statement.patient_account.account_number }}</a></dd>
+            <dt class="col-sm-5">{% trans 'Statement date' %}</dt><dd class="col-sm-7">{{ statement.statement_date|date:"M d, Y" }}</dd>
+            <dt class="col-sm-5">{% trans 'Due date' %}</dt><dd class="col-sm-7">{{ statement.due_date|date:"M d, Y" }}</dd>
+            <dt class="col-sm-5">{% trans 'Service period' %}</dt><dd class="col-sm-7">{{ statement.service_date_from|date:"M d, Y" }} – {{ statement.service_date_to|date:"M d, Y" }}</dd>
+            <dt class="col-sm-5">{% trans 'Delivery method' %}</dt><dd class="col-sm-7">{{ statement.get_delivery_method_display }}</dd>
+            <dt class="col-sm-5">{% trans 'Sent date' %}</dt><dd class="col-sm-7">{{ statement.sent_date|date:"M d, Y"|default:"—" }}</dd>
+        </dl></div></div></div>
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Balance summary' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-7">{% trans 'Previous balance' %}</dt><dd class="col-sm-5 text-end">${{ statement.previous_balance|floatformat:2 }}</dd>
+            <dt class="col-sm-7">{% trans 'Charges this period' %}</dt><dd class="col-sm-5 text-end">${{ statement.charges_this_period|floatformat:2 }}</dd>
+            <dt class="col-sm-7">{% trans 'Payments this period' %}</dt><dd class="col-sm-5 text-end">−${{ statement.payments_this_period|floatformat:2 }}</dd>
+            <dt class="col-sm-7">{% trans 'Adjustments this period' %}</dt><dd class="col-sm-5 text-end">−${{ statement.adjustments_this_period|floatformat:2 }}</dd>
+            <dt class="col-sm-7 fw-semibold">{% trans 'Current balance' %}</dt><dd class="col-sm-5 text-end fw-semibold">${{ statement.current_balance|floatformat:2 }}</dd>
+            <dt class="col-sm-7">{% trans 'Minimum due' %}</dt><dd class="col-sm-5 text-end">${{ statement.minimum_payment_due|floatformat:2 }}</dd>
+        </dl></div></div></div>
+    </div>
+    {% if statement.notes %}<div class="card mb-4"><div class="card-header">{% trans 'Notes' %}</div><div class="card-body">{{ statement.notes|linebreaksbr }}</div></div>{% endif %}
+    <div class="card"><div class="card-header"><h2 class="h5 mb-0">{% trans 'Account service lines' %}</h2></div><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>{% trans 'Service date' %}</th><th>{% trans 'Procedure' %}</th><th>{% trans 'Status' %}</th><th class="text-end">{% trans 'Charge' %}</th></tr></thead>
+        <tbody>{% for line in statement.patient_account.service_lines.all %}
+            <tr><td>{{ line.service_date|date:"M d, Y" }}</td><td><a href="{% url 'billing:service_line_detail' line.pk %}">{{ line.procedure_code }} — {{ line.procedure_name }}</a></td><td>{{ line.get_billing_status_display }}</td><td class="text-end">${{ line.total_charge|floatformat:2 }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-center text-muted py-4">{% trans 'No service lines on this account.' %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+</div>
+{% endblock %}

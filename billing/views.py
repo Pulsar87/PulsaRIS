@@ -84,7 +84,7 @@ class FeeScheduleListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = FeeSchedule.objects.filter(tenant=self.request.tenant)
+        queryset = FeeSchedule.objects.all()
 
         # Filter by status
         status = self.request.GET.get("status")
@@ -108,20 +108,18 @@ class FeeScheduleListView(LoginRequiredMixin, ListView):
         if search:
             queryset = queryset.filter(
                 Q(name__icontains=search)
-                | Q(code__icontains=search)
                 | Q(description__icontains=search)
+                | Q(items__procedure_code__icontains=search)
             )
 
-        return queryset.select_related("payer").order_by("-effective_date")
+        return queryset.select_related("payer").distinct().order_by("-effective_date")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["active_count"] = FeeSchedule.objects.filter(
-            tenant=self.request.tenant, is_active=True
+             is_active=True
         ).count()
-        context["total_schedules"] = FeeSchedule.objects.filter(
-            tenant=self.request.tenant
-        ).count()
+        context["total_schedules"] = FeeSchedule.objects.all().count()
         return context
 
 
@@ -133,7 +131,7 @@ class FeeScheduleDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "fee_schedule"
 
     def get_queryset(self):
-        return FeeSchedule.objects.filter(tenant=self.request.tenant)
+        return FeeSchedule.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -175,12 +173,9 @@ class FeeScheduleCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
-        form.instance.created_by = self.request.user
         return super().form_valid(form)
 
 
@@ -193,7 +188,7 @@ class FeeScheduleUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("billing:fee_schedule_list")
 
     def get_queryset(self):
-        return FeeSchedule.objects.filter(tenant=self.request.tenant)
+        return FeeSchedule.objects.all()
 
     def form_valid(self, form):
         form.instance.modified_by = self.request.user
@@ -208,7 +203,7 @@ class FeeScheduleDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("billing:fee_schedule_list")
 
     def get_queryset(self):
-        return FeeSchedule.objects.filter(tenant=self.request.tenant)
+        return FeeSchedule.objects.all()
 
     def delete(self, request, *args, **kwargs):
         # Soft delete - just deactivate
@@ -232,15 +227,13 @@ class FeeScheduleItemCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
         fee_schedule = get_object_or_404(
-            FeeSchedule.objects.filter(tenant=self.request.tenant), pk=self.kwargs["pk"]
+            FeeSchedule.objects.all(), pk=self.kwargs["pk"]
         )
         form.instance.fee_schedule = fee_schedule
-        form.instance.tenant = self.request.tenant
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
@@ -258,12 +251,7 @@ class FeeScheduleItemUpdateView(LoginRequiredMixin, UpdateView):
         )
 
     def get_queryset(self):
-        return FeeScheduleItem.objects.filter(tenant=self.request.tenant)
-
-    def form_valid(self, form):
-        form.instance.modified_by = self.request.user
-        return super().form_valid(form)
-
+        return FeeScheduleItem.objects.all()
 
 class FeeScheduleItemDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a fee schedule item"""
@@ -277,7 +265,7 @@ class FeeScheduleItemDeleteView(LoginRequiredMixin, DeleteView):
         )
 
     def get_queryset(self):
-        return FeeScheduleItem.objects.filter(tenant=self.request.tenant)
+        return FeeScheduleItem.objects.all()
 
 
 def fee_lookup_api(request):
@@ -300,7 +288,7 @@ def fee_lookup_api(request):
     # Build query
     queryset = (
         FeeScheduleItem.objects.filter(
-            tenant=request.tenant,
+
             procedure_code=procedure_code,
             fee_schedule__is_active=True,
             fee_schedule__effective_date__lte=timezone.now().date(),
@@ -400,7 +388,7 @@ def fee_calculate_api(request):
 
         # Lookup fee
         queryset = FeeScheduleItem.objects.filter(
-            tenant=request.tenant,
+
             procedure_code=procedure_code,
             fee_schedule__is_active=True,
             fee_schedule__effective_date__lte=timezone.now().date(),
@@ -475,7 +463,7 @@ class InsurancePayerListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = InsurancePayer.objects.filter(tenant=self.request.tenant)
+        queryset = InsurancePayer.objects.all()
 
         # Filter by status
         status = self.request.GET.get("status")
@@ -502,17 +490,16 @@ class InsurancePayerListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tenant = self.request.tenant
 
-        context["total_payers"] = InsurancePayer.objects.filter(tenant=tenant).count()
+        context["total_payers"] = InsurancePayer.objects.all().count()
         context["active_count"] = InsurancePayer.objects.filter(
-            tenant=tenant, is_active=True
+             is_active=True
         ).count()
         context["commercial_count"] = InsurancePayer.objects.filter(
-            tenant=tenant, payer_type="COMMERCIAL"
+             payer_type="COMMERCIAL"
         ).count()
         context["government_count"] = InsurancePayer.objects.filter(
-            tenant=tenant, payer_type__in=["MEDICARE", "MEDICAID", "TRICARE", "CHAMPVA"]
+             payer_type__in=["MEDICARE", "MEDICAID", "TRICARE", "CHAMPVA"]
         ).count()
         return context
 
@@ -525,7 +512,7 @@ class InsurancePayerDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "payer"
 
     def get_queryset(self):
-        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+        return InsurancePayer.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -533,10 +520,10 @@ class InsurancePayerDetailView(LoginRequiredMixin, DetailView):
 
         # Get related data
         context["insurance_count"] = PatientInsurance.objects.filter(
-            tenant=self.request.tenant, payer=payer
+             payer=payer
         ).count()
         context["fee_schedules"] = FeeSchedule.objects.filter(
-            tenant=self.request.tenant, payer=payer
+             payer=payer
         )
 
         return context
@@ -552,11 +539,9 @@ class InsurancePayerCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -569,7 +554,7 @@ class InsurancePayerUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("billing:payer_list")
 
     def get_queryset(self):
-        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+        return InsurancePayer.objects.all()
 
 
 class InsurancePayerDeleteView(LoginRequiredMixin, DeleteView):
@@ -580,7 +565,7 @@ class InsurancePayerDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("billing:payer_list")
 
     def get_queryset(self):
-        return InsurancePayer.objects.filter(tenant=self.request.tenant)
+        return InsurancePayer.objects.all()
 
     def delete(self, request, *args, **kwargs):
         payer = self.get_object()
@@ -602,7 +587,7 @@ class ClearinghouseListView(LoginRequiredMixin, ListView):
     context_object_name = "clearinghouses"
 
     def get_queryset(self):
-        return Clearinghouse.objects.filter(tenant=self.request.tenant).order_by("name")
+        return Clearinghouse.objects.all().order_by("name")
 
 
 class ClearinghouseDetailView(LoginRequiredMixin, DetailView):
@@ -613,7 +598,7 @@ class ClearinghouseDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "clearinghouse"
 
     def get_queryset(self):
-        return Clearinghouse.objects.filter(tenant=self.request.tenant)
+        return Clearinghouse.objects.all()
 
 
 class ClearinghouseCreateView(LoginRequiredMixin, CreateView):
@@ -626,11 +611,9 @@ class ClearinghouseCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -643,7 +626,7 @@ class ClearinghouseUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy("billing:clearinghouse_list")
 
     def get_queryset(self):
-        return Clearinghouse.objects.filter(tenant=self.request.tenant)
+        return Clearinghouse.objects.all()
 
 
 # ============================================================================
@@ -665,11 +648,9 @@ class PatientInsuranceCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -686,7 +667,7 @@ class PatientInsuranceUpdateView(LoginRequiredMixin, UpdateView):
         )
 
     def get_queryset(self):
-        return PatientInsurance.objects.filter(tenant=self.request.tenant)
+        return PatientInsurance.objects.all()
 
 
 # ============================================================================
@@ -708,11 +689,9 @@ class AuthorizationCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -729,7 +708,7 @@ class AuthorizationUpdateView(LoginRequiredMixin, UpdateView):
         )
 
     def get_queryset(self):
-        return Authorization.objects.filter(tenant=self.request.tenant)
+        return Authorization.objects.all()
 
 
 # ============================================================================
@@ -745,7 +724,7 @@ class PatientAccountDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "account"
 
     def get_queryset(self):
-        return PatientAccount.objects.filter(tenant=self.request.tenant)
+        return PatientAccount.objects.all()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -756,7 +735,7 @@ class PatientAccountDetailView(LoginRequiredMixin, DetailView):
 
         # Get payments
         context["recent_payments"] = Payment.objects.filter(
-            tenant=self.request.tenant, patient_account=account
+             patient_account=account
         ).order_by("-payment_date")[:10]
 
         return context
@@ -776,11 +755,9 @@ class PatientAccountCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["initial"]["tenant"] = self.request.tenant
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         # Generate account number if not provided
         if not form.instance.account_number:
             import uuid
@@ -795,22 +772,22 @@ class PatientAccountCreateView(LoginRequiredMixin, CreateView):
 
 class ServiceLineListView(LoginRequiredMixin, ListView):
     """List all service lines with filtering and search"""
-    
+
     model = ServiceLine
     template_name = "billing/service_line_list.html"
     context_object_name = "service_lines"
     paginate_by = 25
-    
+
     def get_queryset(self):
-        queryset = ServiceLine.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = ServiceLine.objects.all().select_related(
             'exam_order', 'patient_account', 'rendering_provider', 'claim'
         )
-        
+
         # Filter by billing status
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(billing_status=status)
-        
+
         # Filter by date range
         date_from = self.request.GET.get('date_from')
         date_to = self.request.GET.get('date_to')
@@ -818,7 +795,7 @@ class ServiceLineListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(service_date__gte=date_from)
         if date_to:
             queryset = queryset.filter(service_date__lte=date_to)
-        
+
         # Search by procedure code
         search = self.request.GET.get('search')
         if search:
@@ -826,50 +803,47 @@ class ServiceLineListView(LoginRequiredMixin, ListView):
                 Q(procedure_code__icontains=search) |
                 Q(procedure_name__icontains=search)
             )
-        
+
         return queryset.order_by('-service_date')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tenant = self.request.tenant
-        
-        context['total_lines'] = ServiceLine.objects.filter(tenant=tenant).count()
-        context['pending_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='PENDING').count()
-        context['ready_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='READY').count()
-        context['billed_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='BILLED').count()
-        context['denied_count'] = ServiceLine.objects.filter(tenant=tenant, billing_status='DENIED').count()
-        
+
+        context['total_lines'] = ServiceLine.objects.all().count()
+        context['pending_count'] = ServiceLine.objects.filter( billing_status='PENDING').count()
+        context['ready_count'] = ServiceLine.objects.filter( billing_status='READY').count()
+        context['billed_count'] = ServiceLine.objects.filter( billing_status='BILLED').count()
+        context['denied_count'] = ServiceLine.objects.filter( billing_status='DENIED').count()
+
         return context
 
 
 class ServiceLineDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a service line item"""
-    
+
     model = ServiceLine
     template_name = "billing/service_line_detail.html"
     context_object_name = "service_line"
-    
+
     def get_queryset(self):
-        return ServiceLine.objects.filter(tenant=self.request.tenant).select_related(
+        return ServiceLine.objects.all().select_related(
             'exam_order', 'patient_account', 'rendering_provider', 'facility', 'claim'
         )
 
 
 class ServiceLineCreateView(LoginRequiredMixin, CreateView):
     """Create a new service line (charge capture)"""
-    
+
     model = ServiceLine
     form_class = ServiceLineForm
     template_name = "billing/service_line_form.html"
     success_url = reverse_lazy('billing:service_line_list')
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         return kwargs
-    
+
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         # Auto-calculate total charge if not provided
         if not form.instance.total_charge:
             form.instance.total_charge = form.instance.unit_price * form.instance.quantity
@@ -878,15 +852,15 @@ class ServiceLineCreateView(LoginRequiredMixin, CreateView):
 
 class ServiceLineUpdateView(LoginRequiredMixin, UpdateView):
     """Update a service line item"""
-    
+
     model = ServiceLine
     form_class = ServiceLineForm
     template_name = "billing/service_line_form.html"
     success_url = reverse_lazy('billing:service_line_list')
-    
+
     def get_queryset(self):
-        return ServiceLine.objects.filter(tenant=self.request.tenant)
-    
+        return ServiceLine.objects.all()
+
     def form_valid(self, form):
         # Auto-calculate total charge
         if form.cleaned_data.get('unit_price') and form.cleaned_data.get('quantity'):
@@ -896,13 +870,13 @@ class ServiceLineUpdateView(LoginRequiredMixin, UpdateView):
 
 class ServiceLineDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a service line item"""
-    
+
     model = ServiceLine
     template_name = "billing/service_line_confirm_delete.html"
     success_url = reverse_lazy('billing:service_line_list')
-    
+
     def get_queryset(self):
-        return ServiceLine.objects.filter(tenant=self.request.tenant)
+        return ServiceLine.objects.all()
 
 
 # ============================================================================
@@ -911,27 +885,27 @@ class ServiceLineDeleteView(LoginRequiredMixin, DeleteView):
 
 class ClaimListView(LoginRequiredMixin, ListView):
     """List all claims with filtering and search"""
-    
+
     model = Claim
     template_name = "billing/claim_list.html"
     context_object_name = "claims"
     paginate_by = 25
-    
+
     def get_queryset(self):
-        queryset = Claim.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = Claim.objects.all().select_related(
             'patient_account', 'payer'
         )
-        
+
         # Filter by status
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(status=status)
-        
+
         # Filter by claim type
         claim_type = self.request.GET.get('claim_type')
         if claim_type:
             queryset = queryset.filter(claim_type=claim_type)
-        
+
         # Filter by date range
         date_from = self.request.GET.get('date_from')
         date_to = self.request.GET.get('date_to')
@@ -939,7 +913,7 @@ class ClaimListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(date_of_service_from__gte=date_from)
         if date_to:
             queryset = queryset.filter(date_of_service_to__lte=date_to)
-        
+
         # Search by claim number
         search = self.request.GET.get('search')
         if search:
@@ -947,62 +921,59 @@ class ClaimListView(LoginRequiredMixin, ListView):
                 Q(claim_number__icontains=search) |
                 Q(internal_claim_id__icontains=search)
             )
-        
+
         return queryset.order_by('-date_of_service_from')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        tenant = self.request.tenant
-        
-        context['total_claims'] = Claim.objects.filter(tenant=tenant).count()
-        context['draft_count'] = Claim.objects.filter(tenant=tenant, status='DRAFT').count()
-        context['submitted_count'] = Claim.objects.filter(tenant=tenant, status='SUBMITTED').count()
-        context['accepted_count'] = Claim.objects.filter(tenant=tenant, status='ACCEPTED').count()
-        context['paid_count'] = Claim.objects.filter(tenant=tenant, status='PAID').count()
-        context['denied_count'] = Claim.objects.filter(tenant=tenant, status='DENIED').count()
-        
+
+        context['total_claims'] = Claim.objects.all().count()
+        context['draft_count'] = Claim.objects.filter( status='DRAFT').count()
+        context['submitted_count'] = Claim.objects.filter( status='SUBMITTED').count()
+        context['accepted_count'] = Claim.objects.filter( status='ACCEPTED').count()
+        context['paid_count'] = Claim.objects.filter( status='PAID').count()
+        context['denied_count'] = Claim.objects.filter( status='DENIED').count()
+
         return context
 
 
 class ClaimDetailView(LoginRequiredMixin, DetailView):
     """Detail view of a claim with all line items"""
-    
+
     model = Claim
     template_name = "billing/claim_detail.html"
     context_object_name = "claim"
-    
+
     def get_queryset(self):
-        return Claim.objects.filter(tenant=self.request.tenant).select_related(
+        return Claim.objects.all().select_related(
             'patient_account', 'payer'
         ).prefetch_related('lines', 'service_lines')
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         claim = self.object
-        
+
         context['line_count'] = claim.lines.count()
         context['total_charges'] = claim.lines.aggregate(total=Sum('charge_amount'))['total'] or Decimal('0.00')
         context['total_paid'] = claim.lines.aggregate(total=Sum('paid_amount'))['total'] or Decimal('0.00')
         context['total_adjustments'] = claim.lines.aggregate(total=Sum('adjustment_amount'))['total'] or Decimal('0.00')
-        
+
         return context
 
 
 class ClaimCreateView(LoginRequiredMixin, CreateView):
     """Create a new insurance claim"""
-    
+
     model = Claim
     form_class = ClaimForm
     template_name = "billing/claim_form.html"
     success_url = reverse_lazy('billing:claim_list')
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         return kwargs
-    
+
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         # Generate claim number if not provided
         if not form.instance.claim_number:
             import uuid
@@ -1015,26 +986,26 @@ class ClaimCreateView(LoginRequiredMixin, CreateView):
 
 class ClaimUpdateView(LoginRequiredMixin, UpdateView):
     """Update a claim"""
-    
+
     model = Claim
     form_class = ClaimForm
     template_name = "billing/claim_form.html"
     success_url = reverse_lazy('billing:claim_list')
-    
+
     def get_queryset(self):
-        return Claim.objects.filter(tenant=self.request.tenant)
+        return Claim.objects.all()
 
 
 class ClaimDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a claim (only drafts can be deleted)"""
-    
+
     model = Claim
     template_name = "billing/claim_confirm_delete.html"
     success_url = reverse_lazy('billing:claim_list')
-    
+
     def get_queryset(self):
-        return Claim.objects.filter(tenant=self.request.tenant)
-    
+        return Claim.objects.all()
+
     def delete(self, request, *args, **kwargs):
         claim = self.get_object()
         if claim.status != 'DRAFT':
@@ -1051,55 +1022,59 @@ class ClaimDeleteView(LoginRequiredMixin, DeleteView):
 
 class ClaimLineCreateView(LoginRequiredMixin, CreateView):
     """Add a line item to a claim"""
-    
+
     model = ClaimLine
     form_class = ClaimLineForm
     template_name = "billing/claim_line_form.html"
-    
+
     def get_success_url(self):
         return reverse_lazy('billing:claim_detail', kwargs={'pk': self.kwargs['claim_pk']})
-    
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         return kwargs
-    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["claim_pk"] = self.kwargs["claim_pk"]
+        return context
+
     def form_valid(self, form):
-        claim = get_object_or_404(Claim.objects.filter(tenant=self.request.tenant), pk=self.kwargs['claim_pk'])
+        claim = get_object_or_404(Claim.objects.all(), pk=self.kwargs['claim_pk'])
         form.instance.claim = claim
-        
+
         # Auto-set line number
         last_line = ClaimLine.objects.filter(claim=claim).order_by('-line_number').first()
         form.instance.line_number = (last_line.line_number + 1) if last_line else 1
-        
+
         return super().form_valid(form)
 
 
 class ClaimLineUpdateView(LoginRequiredMixin, UpdateView):
     """Update a claim line item"""
-    
+
     model = ClaimLine
     form_class = ClaimLineForm
     template_name = "billing/claim_line_form.html"
-    
+
     def get_success_url(self):
         return reverse_lazy('billing:claim_detail', kwargs={'pk': self.object.claim.pk})
-    
+
     def get_queryset(self):
-        return ClaimLine.objects.filter(claim__tenant=self.request.tenant)
+        return ClaimLine.objects.all()
 
 
 class ClaimLineDeleteView(LoginRequiredMixin, DeleteView):
     """Delete a claim line item"""
-    
+
     model = ClaimLine
     template_name = "billing/claim_line_confirm_delete.html"
-    
+
     def get_success_url(self):
         return reverse_lazy('billing:claim_detail', kwargs={'pk': self.object.claim.pk})
-    
+
     def get_queryset(self):
-        return ClaimLine.objects.filter(claim__tenant=self.request.tenant)
+        return ClaimLine.objects.all()
 
 
 # ============================================================================
@@ -1115,20 +1090,20 @@ class PaymentPostingListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = PaymentPosting.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = PaymentPosting.objects.all().select_related(
             'claim', 'payer', 'posted_by'
         ).order_by('-posting_date')
-        
+
         # Filter by status
         status = self.request.GET.get('status')
         if status:
             queryset = queryset.filter(status=status)
-        
+
         # Filter by payment method
         payment_method = self.request.GET.get('payment_method')
         if payment_method:
             queryset = queryset.filter(payment_method=payment_method)
-        
+
         # Search by check number or ERA trace
         search = self.request.GET.get('search')
         if search:
@@ -1136,22 +1111,22 @@ class PaymentPostingListView(LoginRequiredMixin, ListView):
                 Q(check_number__icontains=search) |
                 Q(era_trace_number__icontains=search)
             )
-        
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['statuses'] = ['UNPOSTED', 'POSTED', 'REVERSED']
         context['payment_methods'] = ['ERA', 'CHECK', 'EFT', 'CASH', 'CREDIT_CARD']
-        
+
         # Summary stats
         context['total_unposted'] = PaymentPosting.objects.filter(
-            tenant=self.request.tenant, status='UNPOSTED'
+             status='UNPOSTED'
         ).count()
         context['total_posted'] = PaymentPosting.objects.filter(
-            tenant=self.request.tenant, status='POSTED'
+             status='POSTED'
         ).count()
-        
+
         return context
 
 
@@ -1163,7 +1138,7 @@ class PaymentPostingDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "payment_posting"
 
     def get_queryset(self):
-        return PaymentPosting.objects.filter(tenant=self.request.tenant).select_related(
+        return PaymentPosting.objects.all().select_related(
             'claim', 'payer'
         ).prefetch_related('details__claim_line')
 
@@ -1178,12 +1153,10 @@ class PaymentPostingCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         kwargs['initial']['posting_date'] = timezone.now().date()
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -1196,7 +1169,7 @@ class PaymentPostingUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('billing:payment_posting_list')
 
     def get_queryset(self):
-        return PaymentPosting.objects.filter(tenant=self.request.tenant)
+        return PaymentPosting.objects.all()
 
 
 class PaymentPostingDeleteView(LoginRequiredMixin, DeleteView):
@@ -1207,7 +1180,7 @@ class PaymentPostingDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('billing:payment_posting_list')
 
     def get_queryset(self):
-        return PaymentPosting.objects.filter(tenant=self.request.tenant)
+        return PaymentPosting.objects.all()
 
     def delete(self, request, *args, **kwargs):
         posting = self.get_object()
@@ -1234,12 +1207,16 @@ class PaymentDetailCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["posting_pk"] = self.kwargs["posting_pk"]
+        return context
 
     def form_valid(self, form):
         posting = get_object_or_404(
-            PaymentPosting.objects.filter(tenant=self.request.tenant),
+            PaymentPosting.objects.all(),
             pk=self.kwargs['posting_pk']
         )
         form.instance.payment_posting = posting
@@ -1257,7 +1234,7 @@ class PaymentDetailUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:payment_posting_detail', kwargs={'pk': self.object.payment_posting.pk})
 
     def get_queryset(self):
-        return PaymentDetail.objects.filter(payment_posting__tenant=self.request.tenant)
+        return PaymentDetail.objects.all()
 
 
 class PaymentDetailDeleteView(LoginRequiredMixin, DeleteView):
@@ -1270,7 +1247,7 @@ class PaymentDetailDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:payment_posting_detail', kwargs={'pk': self.object.payment_posting.pk})
 
     def get_queryset(self):
-        return PaymentDetail.objects.filter(payment_posting__tenant=self.request.tenant)
+        return PaymentDetail.objects.all()
 
 
 # ============================================================================
@@ -1286,15 +1263,15 @@ class PaymentListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = Payment.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = Payment.objects.all().select_related(
             'patient_account', 'received_by'
         ).order_by('-payment_date')
-        
+
         # Filter by payment method
         payment_method = self.request.GET.get('payment_method')
         if payment_method:
             queryset = queryset.filter(payment_method=payment_method)
-        
+
         # Search by check number or transaction ID
         search = self.request.GET.get('search')
         if search:
@@ -1302,19 +1279,19 @@ class PaymentListView(LoginRequiredMixin, ListView):
                 Q(check_number__icontains=search) |
                 Q(transaction_id__icontains=search)
             )
-        
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['payment_methods'] = ['CASH', 'CHECK', 'CREDIT_CARD', 'DEBIT_CARD', 'EFT', 'ONLINE', 'PAYMENT_PLAN']
-        
+
         # Summary stats
         today = timezone.now().date()
         context['today_total'] = Payment.objects.filter(
-            tenant=self.request.tenant, payment_date__date=today
+             payment_date__date=today
         ).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-        
+
         return context
 
 
@@ -1326,7 +1303,7 @@ class PaymentDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "payment"
 
     def get_queryset(self):
-        return Payment.objects.filter(tenant=self.request.tenant).select_related(
+        return Payment.objects.all().select_related(
             'patient_account'
         ).prefetch_related('allocations__service_line')
 
@@ -1341,12 +1318,10 @@ class PaymentCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         kwargs['initial']['payment_date'] = timezone.now()
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         form.instance.received_by = self.request.user
         return super().form_valid(form)
 
@@ -1360,7 +1335,7 @@ class PaymentUpdateView(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('billing:payment_list')
 
     def get_queryset(self):
-        return Payment.objects.filter(tenant=self.request.tenant)
+        return Payment.objects.all()
 
 
 class PaymentDeleteView(LoginRequiredMixin, DeleteView):
@@ -1371,7 +1346,7 @@ class PaymentDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy('billing:payment_list')
 
     def get_queryset(self):
-        return Payment.objects.filter(tenant=self.request.tenant)
+        return Payment.objects.all()
 
 
 # ============================================================================
@@ -1390,12 +1365,16 @@ class PaymentAllocationCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['initial']['tenant'] = self.request.tenant
         return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["payment_pk"] = self.kwargs["payment_pk"]
+        return context
 
     def form_valid(self, form):
         payment = get_object_or_404(
-            Payment.objects.filter(tenant=self.request.tenant),
+            Payment.objects.all(),
             pk=self.kwargs['payment_pk']
         )
         form.instance.payment = payment
@@ -1413,7 +1392,7 @@ class PaymentAllocationUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:payment_detail', kwargs={'pk': self.object.payment.pk})
 
     def get_queryset(self):
-        return PaymentAllocation.objects.filter(payment__tenant=self.request.tenant)
+        return PaymentAllocation.objects.all()
 
 
 class PaymentAllocationDeleteView(LoginRequiredMixin, DeleteView):
@@ -1426,7 +1405,7 @@ class PaymentAllocationDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:payment_detail', kwargs={'pk': self.object.payment.pk})
 
     def get_queryset(self):
-        return PaymentAllocation.objects.filter(payment__tenant=self.request.tenant)
+        return PaymentAllocation.objects.all()
 
 
 # ============================================================================
@@ -1442,7 +1421,7 @@ class PatientStatementListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = PatientStatement.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = PatientStatement.objects.all().select_related(
             'patient_account', 'patient_account__patient'
         )
 
@@ -1479,21 +1458,17 @@ class PatientStatementListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_statements'] = PatientStatement.objects.filter(
-            tenant=self.request.tenant
-        ).count()
+        context['total_statements'] = PatientStatement.objects.all().count()
         context['draft_count'] = PatientStatement.objects.filter(
-            tenant=self.request.tenant, status='DRAFT'
+             status='DRAFT'
         ).count()
         context['sent_count'] = PatientStatement.objects.filter(
-            tenant=self.request.tenant, status='SENT'
+             status='SENT'
         ).count()
         context['overdue_count'] = PatientStatement.objects.filter(
-            tenant=self.request.tenant, status='OVERDUE'
+             status='OVERDUE'
         ).count()
-        context['total_balance'] = PatientStatement.objects.filter(
-            tenant=self.request.tenant
-        ).aggregate(total=models.Sum('current_balance'))['total'] or Decimal('0.00')
+        context['total_balance'] = PatientStatement.objects.all().aggregate(total=models.Sum('current_balance'))['total'] or Decimal('0.00')
         return context
 
 
@@ -1505,7 +1480,7 @@ class PatientStatementDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "statement"
 
     def get_queryset(self):
-        return PatientStatement.objects.filter(tenant=self.request.tenant).select_related(
+        return PatientStatement.objects.all().select_related(
             'patient_account', 'patient_account__patient'
         ).prefetch_related('patient_account__service_lines')
 
@@ -1522,11 +1497,9 @@ class PatientStatementCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         # Generate unique statement number
         prefix = "STMT"
         timestamp = timezone.now().strftime("%Y%m%d%H%M%S")
@@ -1546,11 +1519,10 @@ class PatientStatementUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:statement_detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
-        return PatientStatement.objects.filter(tenant=self.request.tenant)
+        return PatientStatement.objects.all()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
 
@@ -1564,7 +1536,7 @@ class PatientStatementDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:statement_list')
 
     def get_queryset(self):
-        return PatientStatement.objects.filter(tenant=self.request.tenant)
+        return PatientStatement.objects.all()
 
 
 # ============================================================================
@@ -1580,7 +1552,7 @@ class PaymentPlanListView(LoginRequiredMixin, ListView):
     paginate_by = 25
 
     def get_queryset(self):
-        queryset = PaymentPlan.objects.filter(tenant=self.request.tenant).select_related(
+        queryset = PaymentPlan.objects.all().select_related(
             'patient_account', 'patient_account__patient'
         )
 
@@ -1602,20 +1574,18 @@ class PaymentPlanListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_plans'] = PaymentPlan.objects.filter(
-            tenant=self.request.tenant
-        ).count()
+        context['total_plans'] = PaymentPlan.objects.all().count()
         context['active_count'] = PaymentPlan.objects.filter(
-            tenant=self.request.tenant, status='ACTIVE'
+             status='ACTIVE'
         ).count()
         context['completed_count'] = PaymentPlan.objects.filter(
-            tenant=self.request.tenant, status='COMPLETED'
+             status='COMPLETED'
         ).count()
         context['defaulted_count'] = PaymentPlan.objects.filter(
-            tenant=self.request.tenant, status='DEFAULTED'
+             status='DEFAULTED'
         ).count()
         context['total_remaining'] = PaymentPlan.objects.filter(
-            tenant=self.request.tenant, status='ACTIVE'
+             status='ACTIVE'
         ).aggregate(total=models.Sum('remaining_balance'))['total'] or Decimal('0.00')
         return context
 
@@ -1628,7 +1598,7 @@ class PaymentPlanDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "payment_plan"
 
     def get_queryset(self):
-        return PaymentPlan.objects.filter(tenant=self.request.tenant).select_related(
+        return PaymentPlan.objects.all().select_related(
             'patient_account', 'patient_account__patient'
         ).prefetch_related('installments', 'installments__payment')
 
@@ -1645,41 +1615,39 @@ class PaymentPlanCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         response = super().form_valid(form)
-        
+
         # Auto-generate installments after plan creation
         self._generate_installments(form.instance)
-        
+
         # Update patient account to mark as having payment plan
         account = form.instance.patient_account
         account.has_payment_plan = True
         account.payment_plan_balance = form.instance.remaining_balance
         account.monthly_payment = form.instance.monthly_payment
         account.save()
-        
+
         return response
 
     def _generate_installments(self, payment_plan):
         """Generate installment records based on plan terms"""
         from datetime import timedelta
         import calendar
-        
+
         current_date = payment_plan.first_payment_date
         monthly_payment = payment_plan.monthly_payment
         remaining = payment_plan.total_amount
-        
+
         for i in range(1, payment_plan.number_of_payments + 1):
             # Calculate amount for this installment (last one gets remainder)
             if i == payment_plan.number_of_payments:
                 amount = remaining
             else:
                 amount = min(monthly_payment, remaining)
-            
+
             PaymentPlanInstallment.objects.create(
                 payment_plan=payment_plan,
                 installment_number=i,
@@ -1687,16 +1655,16 @@ class PaymentPlanCreateView(LoginRequiredMixin, CreateView):
                 amount_due=amount,
                 status='PENDING'
             )
-            
+
             remaining -= amount
-            
+
             # Move to next month, adjusting for day of month
             next_month = current_date.month + 1
             next_year = current_date.year
             if next_month > 12:
                 next_month = 1
                 next_year += 1
-            
+
             # Handle months with fewer days (e.g., Feb 30 -> Feb 28)
             day = min(payment_plan.payment_day, calendar.monthrange(next_year, next_month)[1])
             current_date = current_date.replace(year=next_year, month=next_month, day=day)
@@ -1713,11 +1681,10 @@ class PaymentPlanUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:payment_plan_detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
-        return PaymentPlan.objects.filter(tenant=self.request.tenant)
+        return PaymentPlan.objects.all()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
 
@@ -1731,7 +1698,7 @@ class PaymentPlanDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:payment_plan_list')
 
     def get_queryset(self):
-        return PaymentPlan.objects.filter(tenant=self.request.tenant)
+        return PaymentPlan.objects.all()
 
     def delete(self, request, *args, **kwargs):
         """Also update the patient account when deleting a plan"""
@@ -1755,13 +1722,11 @@ class PaymentPlanInstallmentUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:payment_plan_detail', kwargs={'pk': self.object.payment_plan.pk})
 
     def get_queryset(self):
-        return PaymentPlanInstallment.objects.filter(
-            payment_plan__tenant=self.request.tenant
-        )
+        return PaymentPlanInstallment.objects.all()
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        
+
         # Update payment plan stats if installment was paid
         if form.instance.status == 'PAID' and form.instance.payment:
             plan = form.instance.payment_plan
@@ -1770,7 +1735,7 @@ class PaymentPlanInstallmentUpdateView(LoginRequiredMixin, UpdateView):
             if plan.payments_made >= plan.number_of_payments:
                 plan.status = 'COMPLETED'
             plan.save()
-            
+
             # Update patient account
             account = plan.patient_account
             account.payment_plan_balance = plan.remaining_balance
@@ -1779,7 +1744,7 @@ class PaymentPlanInstallmentUpdateView(LoginRequiredMixin, UpdateView):
                 account.payment_plan_balance = None
                 account.monthly_payment = None
             account.save()
-        
+
         return response
 from datetime import timedelta
 
@@ -1794,7 +1759,7 @@ class DenialReasonListView(LoginRequiredMixin, ListView):
     context_object_name = "denial_reasons"
 
     def get_queryset(self):
-        return DenialReason.objects.filter(tenant=self.request.tenant)
+        return DenialReason.objects.all()
 
 
 class DenialReasonDetailView(LoginRequiredMixin, DetailView):
@@ -1805,7 +1770,7 @@ class DenialReasonDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "denial_reason"
 
     def get_queryset(self):
-        return DenialReason.objects.filter(tenant=self.request.tenant)
+        return DenialReason.objects.all()
 
 
 class DenialReasonCreateView(LoginRequiredMixin, CreateView):
@@ -1819,7 +1784,6 @@ class DenialReasonCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('billing:denial_reason_list')
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         return super().form_valid(form)
 
 
@@ -1834,7 +1798,7 @@ class DenialReasonUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:denial_reason_list')
 
     def get_queryset(self):
-        return DenialReason.objects.filter(tenant=self.request.tenant)
+        return DenialReason.objects.all()
 
 
 class DenialReasonDeleteView(LoginRequiredMixin, DeleteView):
@@ -1847,7 +1811,7 @@ class DenialReasonDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:denial_reason_list')
 
     def get_queryset(self):
-        return DenialReason.objects.filter(tenant=self.request.tenant)
+        return DenialReason.objects.all()
 
 
 # Claim Appeal Views
@@ -1860,7 +1824,7 @@ class ClaimAppealListView(LoginRequiredMixin, ListView):
     context_object_name = "appeals"
 
     def get_queryset(self):
-        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant).select_related('claim', 'claim_line')
+        return ClaimAppeal.objects.all().select_related('claim', 'claim_line')
 
 
 class ClaimAppealDetailView(LoginRequiredMixin, DetailView):
@@ -1871,7 +1835,7 @@ class ClaimAppealDetailView(LoginRequiredMixin, DetailView):
     context_object_name = "appeal"
 
     def get_queryset(self):
-        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant).select_related('claim', 'claim_line')
+        return ClaimAppeal.objects.all().select_related('claim', 'claim_line')
 
 
 class ClaimAppealCreateView(LoginRequiredMixin, CreateView):
@@ -1885,7 +1849,6 @@ class ClaimAppealCreateView(LoginRequiredMixin, CreateView):
         return reverse_lazy('billing:claim_appeal_list')
 
     def form_valid(self, form):
-        form.instance.tenant = self.request.tenant
         # Auto-set filed_date if not provided
         if not form.instance.filed_date:
             form.instance.filed_date = timezone.now().date()
@@ -1900,7 +1863,6 @@ class ClaimAppealCreateView(LoginRequiredMixin, CreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
 
@@ -1915,11 +1877,10 @@ class ClaimAppealUpdateView(LoginRequiredMixin, UpdateView):
         return reverse_lazy('billing:claim_appeal_detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
-        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant)
+        return ClaimAppeal.objects.all()
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['request'] = self.request
         return kwargs
 
 
@@ -1933,7 +1894,7 @@ class ClaimAppealDeleteView(LoginRequiredMixin, DeleteView):
         return reverse_lazy('billing:claim_appeal_list')
 
     def get_queryset(self):
-        return ClaimAppeal.objects.filter(claim__tenant=self.request.tenant)
+        return ClaimAppeal.objects.all()
 
 
 # ============================================================================
@@ -1942,39 +1903,39 @@ class ClaimAppealDeleteView(LoginRequiredMixin, DeleteView):
 
 class ClaimGenerate837View(LoginRequiredMixin, View):
     """Generate 837 EDI file for a claim"""
-    
+
     def get(self, request, claim_id):
         if not EDI_AVAILABLE:
             return JsonResponse({'error': 'EDI services not available'}, status=503)
-        
+
         try:
-            claim = get_object_or_404(Claim.objects.filter(tenant=request.tenant), id=claim_id)
-            
+            claim = get_object_or_404(Claim.objects.all(), id=claim_id)
+
             # Generate 837 content
             edi_content = generate_claim_837(claim_id)
-            
+
             if not edi_content:
                 return JsonResponse({'error': 'Failed to generate 837 file'}, status=400)
-            
+
             # Return as downloadable file
             response = HttpResponse(edi_content, content_type='application/x12')
             response['Content-Disposition'] = f'attachment; filename="claim_{claim.claim_number}.837"'
             return response
-            
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 
 class ClaimSubmitToClearinghouseView(LoginRequiredMixin, View):
     """Submit claim to clearinghouse"""
-    
+
     def post(self, request, claim_id):
         if not EDI_AVAILABLE:
             return JsonResponse({'error': 'EDI services not available'}, status=503)
-        
+
         try:
             result = submit_claim_to_clearinghouse(claim_id)
-            
+
             if result.get('success'):
                 return JsonResponse({
                     'success': True,
@@ -1986,113 +1947,113 @@ class ClaimSubmitToClearinghouseView(LoginRequiredMixin, View):
                     'success': False,
                     'error': result.get('error', 'Unknown error'),
                 }, status=400)
-                
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 
 class ERAUploadView(LoginRequiredMixin, View):
     """Upload and process ERA file"""
-    
+
     def get(self, request):
         return render(request, 'billing/era_upload.html')
-    
+
     def post(self, request):
         if not EDI_AVAILABLE:
             return JsonResponse({'error': 'EDI services not available'}, status=503)
-        
+
         try:
             era_file = request.FILES.get('era_file')
-            
+
             if not era_file:
                 return JsonResponse({'error': 'No file uploaded'}, status=400)
-            
+
             # Read file content
             file_content = era_file.read().decode('utf-8')
-            
+
             # Process ERA
-            postings = process_era_file(file_content, request.tenant)
-            
+            postings = process_era_file(file_content)
+
             return JsonResponse({
                 'success': True,
                 'message': f'Successfully processed {len(postings)} payment posting(s)',
                 'postings_count': len(postings),
             })
-            
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 
 class ClaimStatusCheckView(LoginRequiredMixin, View):
     """Check claim status via clearinghouse (276/271)"""
-    
+
     def get(self, request, claim_id):
         if not EDI_AVAILABLE:
             return JsonResponse({'error': 'EDI services not available'}, status=503)
-        
+
         try:
             from .edi_services import ClearinghouseClient
-            
-            claim = get_object_or_404(Claim.objects.filter(tenant=request.tenant), id=claim_id)
-            
+
+            claim = get_object_or_404(Claim.objects.all(), id=claim_id)
+
             if not claim.payer or not claim.payer.clearinghouse:
                 return JsonResponse({
                     'error': 'No clearinghouse configured for this claim\'s payer'
                 }, status=400)
-            
+
             client = ClearinghouseClient(claim.payer.clearinghouse)
             status_result = client.check_claim_status(claim.claim_number)
-            
+
             if 'error' in status_result:
                 return JsonResponse({'error': status_result['error']}, status=400)
-            
+
             return JsonResponse(status_result)
-            
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 
 class FetchERAFilesView(LoginRequiredMixin, View):
     """Fetch ERA files from clearinghouse"""
-    
+
     def get(self, request):
         if not EDI_AVAILABLE:
             return JsonResponse({'error': 'EDI services not available'}, status=503)
-        
+
         try:
             from .edi_services import ClearinghouseClient
-            
+
             # Get optional date range
             start_date_str = request.GET.get('start_date')
             end_date_str = request.GET.get('end_date')
-            
+
             start_date = None
             end_date = None
-            
+
             if start_date_str:
                 start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
             if end_date_str:
                 end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
-            
+
             # Get active clearinghouses
             clearinghouses = Clearinghouse.objects.filter(
-                tenant=request.tenant,
+
                 is_active=True
             )
-            
+
             all_files = []
-            
+
             for ch in clearinghouses:
                 client = ClearinghouseClient(ch)
                 files = client.fetch_era(start_date, end_date)
                 all_files.extend(files)
-            
+
             return JsonResponse({
                 'success': True,
                 'files_count': len(all_files),
                 'message': f'Fetched {len(all_files)} ERA file(s)'
             })
-            
+
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
@@ -2103,26 +2064,26 @@ class FetchERAFilesView(LoginRequiredMixin, View):
 
 class ChargeCaptureReportView(LoginRequiredMixin, View):
     """Daily Charge Capture Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_charge_capture_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,
@@ -2134,26 +2095,26 @@ class ChargeCaptureReportView(LoginRequiredMixin, View):
 
 class ClaimSubmissionReportView(LoginRequiredMixin, View):
     """Claim Submission Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_claim_submission_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,
@@ -2165,26 +2126,26 @@ class ClaimSubmissionReportView(LoginRequiredMixin, View):
 
 class PaymentPostingReportView(LoginRequiredMixin, View):
     """Payment Posting Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_payment_posting_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,
@@ -2196,20 +2157,20 @@ class PaymentPostingReportView(LoginRequiredMixin, View):
 
 class ARAgingReportView(LoginRequiredMixin, View):
     """Accounts Receivable Aging Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         as_of_date_str = request.GET.get('as_of_date')
-        
+
         if not as_of_date_str:
             as_of_date = timezone.now().date()
         else:
             as_of_date = datetime.strptime(as_of_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_ar_aging_report(as_of_date)
-        
+
         context = {
             'data': data,
             'as_of_date': as_of_date,
@@ -2220,26 +2181,26 @@ class ARAgingReportView(LoginRequiredMixin, View):
 
 class DenialManagementReportView(LoginRequiredMixin, View):
     """Denial Management Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_denial_management_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,
@@ -2251,26 +2212,26 @@ class DenialManagementReportView(LoginRequiredMixin, View):
 
 class RevenueAnalysisReportView(LoginRequiredMixin, View):
     """Revenue Analysis Report"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_revenue_analysis_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,
@@ -2282,26 +2243,26 @@ class RevenueAnalysisReportView(LoginRequiredMixin, View):
 
 class CollectionMetricsReportView(LoginRequiredMixin, View):
     """Collection Metrics Dashboard"""
-    
+
     def get(self, request):
         from .reporting_service import ReportingService
-        
+
         start_date_str = request.GET.get('start_date')
         end_date_str = request.GET.get('end_date')
-        
+
         if not start_date_str:
             start_date = timezone.now().date() - timedelta(days=30)
         else:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
-        
+
         if not end_date_str:
             end_date = timezone.now().date()
         else:
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
-        
-        service = ReportingService(request.tenant)
+
+        service = ReportingService()
         data = service.get_collection_metrics_report(start_date, end_date)
-        
+
         context = {
             'data': data,
             'start_date': start_date,

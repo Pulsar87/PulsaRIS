@@ -121,7 +121,7 @@
                         <tbody>
                             {% for item in data.type_breakdown %}
                             <tr>
-                                <td>{{ item.posting_type }}</td>
+                                <td>{{ item.payment_method }}</td>
                                 <td>{{ item.count }}</td>
                                 <td>${{ item.total_payment|floatformat:2 }}</td>
                             </tr>

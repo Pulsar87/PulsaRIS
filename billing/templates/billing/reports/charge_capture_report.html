@@ -94,7 +94,7 @@
                         <tbody>
                             {% for item in data.status_breakdown %}
                             <tr>
-                                <td>{{ item.status }}</td>
+                                <td>{{ item.billing_status }}</td>
                                 <td>{{ item.count }}</td>
                                 <td>${{ item.total_charges|floatformat:2 }}</td>
                             </tr>
@@ -150,6 +150,7 @@
             <canvas id="dailyTrendChart" height="80"></canvas>
         </div>
     </div>
+    {{ data.daily_trend|json_script:"daily-trend-data" }}
 </div>
 {% endblock %}
 
@@ -158,7 +159,7 @@
 <script>
 // Daily Trend Chart
 const ctx = document.getElementById('dailyTrendChart').getContext('2d');
-const dailyData = {{ data.daily_trend|safe }};
+const dailyData = JSON.parse(document.getElementById('daily-trend-data').textContent);
 
 new Chart(ctx, {
     type: 'line',

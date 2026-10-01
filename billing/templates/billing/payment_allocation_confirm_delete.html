@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Remove payment allocation' %}{% endblock %}
+{% block content %}
+{% url 'billing:payment_detail' object.payment.pk as cancel_url %}
+{% trans 'Remove payment allocation' as page_title %}
+{% include 'billing/_delete_confirm.html' %}
+{% endblock %}

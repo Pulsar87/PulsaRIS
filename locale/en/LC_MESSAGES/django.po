@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-02 17:52+0000\n"
+"POT-Creation-Date: 2026-09-30 23:01+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,1316 +18,3156 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: orders/views.py:105 orders/views.py:251 templates/orders/add_order.html:720
-msgid "Please enter a valid MRN"
-msgstr ""
-
-#: orders/views.py:109 orders/views.py:255
-msgid "Accession number is required"
-msgstr ""
-
-#: orders/views.py:113 orders/views.py:259
-msgid "Procedure code and name are required"
-msgstr ""
-
-#: orders/views.py:119 orders/views.py:227 orders/views.py:366
-#: patients/views.py:91 patients/views.py:179 patients/views.py:275
-#: reports/views.py:17 reports/views.py:58 reports/views.py:100
-#: reports/views.py:116 reports/views.py:133
-msgid "Tenant not found. Please select a tenant."
-msgstr ""
-
-#: orders/views.py:129 orders/views.py:269
-#, python-format
-msgid "Patient with MRN %(mrn)s not found"
-msgstr ""
-
-#: orders/views.py:138 orders/views.py:280
-msgid "An order with this accession number already exists"
-msgstr ""
-
-#: orders/views.py:150 orders/views.py:292
-msgid "Selected device not found"
-msgstr ""
-
-#: orders/views.py:188
-#, python-format
-msgid "Order created successfully! Accession: %(acc)s"
-msgstr ""
-
-#: orders/views.py:194
-#, python-format
-msgid "Error creating order: %(error)s"
-msgstr ""
-
-#: orders/views.py:328
-msgid "Order updated successfully!"
-msgstr ""
-
-#: orders/views.py:332
-#, python-format
-msgid "Error updating order: %(error)s"
-msgstr ""
-
-#: orders/views.py:372
-msgid "Order deleted successfully!"
-msgstr ""
-
-#: orders/views.py:376
-#, python-format
-msgid "Error deleting order: %(error)s"
-msgstr ""
-
-#: patients/views.py:73 patients/views.py:210
-msgid "MRN is required"
-msgstr ""
-
-#: patients/views.py:77 patients/views.py:214
-msgid "English first name and last name are required"
-msgstr ""
-
-#: patients/views.py:81 patients/views.py:218
-msgid "Date of birth is required"
-msgstr ""
-
-#: patients/views.py:85 patients/views.py:222
-msgid "Gender is required"
-msgstr ""
-
-#: patients/views.py:97 patients/views.py:228
-msgid "A patient with this MRN already exists in your system"
-msgstr ""
-
-#: patients/views.py:127
-#, python-format
-msgid "Patient added successfully! MRN: %(mrn)s"
-msgstr ""
-
-#: patients/views.py:132
-#, python-format
-msgid "Error creating patient: %(error)s"
-msgstr ""
-
-#: patients/views.py:255
-msgid "Patient updated successfully!"
-msgstr ""
-
-#: patients/views.py:259
-#, python-format
-msgid "Error updating patient: %(error)s"
-msgstr ""
-
-#: patients/views.py:281
-msgid "Patient deleted successfully!"
-msgstr ""
-
-#: patients/views.py:285
-#, python-format
-msgid "Error deleting patient: %(error)s"
-msgstr ""
-
-#: reports/views.py:44
-msgid "Report created successfully!"
-msgstr ""
-
-#: reports/views.py:65
-msgid "You don't have permission to edit this report."
-msgstr ""
-
-#: reports/views.py:86
-msgid "Report updated successfully!"
-msgstr ""
-
-#: reports/views.py:141
-msgid "You don't have permission to delete this report."
-msgstr ""
-
-#: reports/views.py:146
-msgid "Report deleted successfully!"
-msgstr ""
-
-#: templates/billing/payer_detail.html:16 templates/billing/payer_list.html:178
-#: templates/orders/order_detail.html:335 templates/orders/worklist.html:306
-#: templates/patients/patient_detail.html:24
-#: templates/reports/report_detail.html:23
-#: templates/reports/report_list.html:188
-msgid "Edit"
-msgstr ""
-
-#: templates/billing/payer_detail.html:19
-#: templates/reports/report_form.html:196
+#: billing/templates/billing/_delete_confirm.html:4
+#: billing/templates/billing/_form_page.html:5
+#: billing/templates/billing/clearinghouse_detail.html:14
+#: billing/templates/billing/payer_detail.html:19
+#: reports/templates/reports/report_form.html:224
 msgid "Back"
 msgstr ""
 
-#: templates/billing/payer_detail.html:30 templates/billing/payer_form.html:79
-msgid "Contact Information"
+#: billing/templates/billing/_delete_confirm.html:8
+msgid "Are you sure you want to delete"
 msgstr ""
 
-#: templates/billing/payer_detail.html:35
-#: templates/patients/add_patient.html:131
-#: templates/patients/edit_patient.html:356
-#: templates/patients/patient_detail.html:143
-msgid "Address"
-msgstr ""
-
-#: templates/billing/payer_detail.html:44
-msgid "Communication"
-msgstr ""
-
-#: templates/billing/payer_detail.html:59 templates/billing/payer_form.html:160
-msgid "EDI Configuration"
-msgstr ""
-
-#: templates/billing/payer_detail.html:64 templates/billing/payer_form.html:165
-msgid "EDI Qualifier"
-msgstr ""
-
-#: templates/billing/payer_detail.html:68 templates/billing/payer_form.html:173
-msgid "EDI Receiver ID"
-msgstr ""
-
-#: templates/billing/payer_detail.html:72 templates/billing/payer_form.html:180
-msgid "Clearinghouse"
-msgstr ""
-
-#: templates/billing/payer_detail.html:86 templates/billing/payer_list.html:42
-#: templates/billing/payer_list.html:134 templates/orders/delete_order.html:70
-#: templates/orders/edit_order.html:142 templates/orders/order_detail.html:50
-#: templates/orders/worklist.html:45 templates/orders/worklist.html:204
-#: templates/reports/report_detail.html:36
-#: templates/reports/report_list.html:36 templates/reports/report_list.html:138
-#: templates/reports/study_reports.html:40
-#: templates/reports/study_reports.html:70
-msgid "Status"
-msgstr ""
-
-#: templates/billing/payer_detail.html:88 templates/billing/payer_form.html:68
-#: templates/billing/payer_list.html:45 templates/billing/payer_list.html:81
-#: templates/billing/payer_list.html:169 templates/users/manage_users.html:23
-msgid "Active"
-msgstr ""
-
-#: templates/billing/payer_detail.html:90 templates/billing/payer_list.html:46
-#: templates/billing/payer_list.html:171
-msgid "Inactive"
-msgstr ""
-
-#: templates/billing/payer_detail.html:94 templates/billing/payer_form.html:44
-#: templates/billing/payer_list.html:29
-msgid "Payer Type"
-msgstr ""
-
-#: templates/billing/payer_detail.html:98
-msgid "Patients Insured"
-msgstr ""
-
-#: templates/billing/payer_detail.html:107
-#: templates/billing/payer_form.html:193
-msgid "Financial Settings"
-msgstr ""
-
-#: templates/billing/payer_detail.html:111
-#: templates/billing/payer_form.html:198 templates/billing/payer_list.html:133
-msgid "Fee Schedule"
-msgstr ""
-
-#: templates/billing/payer_detail.html:119
-#: templates/billing/payer_form.html:205
-msgid "Default Copay"
-msgstr ""
-
-#: templates/billing/payer_form.html:4 templates/billing/payer_form.html:15
-msgid "Edit Payer"
-msgstr ""
-
-#: templates/billing/payer_form.html:4 templates/billing/payer_list.html:15
-msgid "Add Payer"
-msgstr ""
-
-#: templates/billing/payer_form.html:15
-msgid "Add New Payer"
-msgstr ""
-
-#: templates/billing/payer_form.html:17
-msgid "Insurance company/payer information"
-msgstr ""
-
-#: templates/billing/payer_form.html:20 templates/orders/order_detail.html:320
-#: templates/patients/patient_detail.html:17
-msgid "Back to List"
-msgstr ""
-
-#: templates/billing/payer_form.html:31
-msgid "Basic Information"
-msgstr ""
-
-#: templates/billing/payer_form.html:36 templates/billing/payer_list.html:129
-msgid "Payer ID"
-msgstr ""
-
-#: templates/billing/payer_form.html:41
-msgid "EDI payer identifier"
-msgstr ""
-
-#: templates/billing/payer_form.html:51
-msgid "Full Name"
-msgstr ""
-
-#: templates/billing/payer_form.html:58
-msgid "Short Name"
-msgstr ""
-
-#: templates/billing/payer_form.html:84
-msgid "Address Line 1"
-msgstr ""
-
-#: templates/billing/payer_form.html:91
-msgid "Address Line 2"
-msgstr ""
-
-#: templates/billing/payer_form.html:98
-msgid "City"
-msgstr ""
-
-#: templates/billing/payer_form.html:105
-msgid "State/Province"
-msgstr ""
-
-#: templates/billing/payer_form.html:112
-msgid "Postal Code"
-msgstr ""
-
-#: templates/billing/payer_form.html:119
-msgid "Country"
-msgstr ""
-
-#: templates/billing/payer_form.html:126 templates/orders/add_order.html:127
-#: templates/orders/order_detail.html:172
-#: templates/patients/add_patient.html:115
-#: templates/patients/delete_patient.html:73
-#: templates/patients/edit_patient.html:324
-#: templates/patients/patient_detail.html:127
-#: templates/patients/patient_list.html:78
-msgid "Phone"
-msgstr ""
-
-#: templates/billing/payer_form.html:133
-msgid "Fax"
-msgstr ""
-
-#: templates/billing/payer_form.html:140
-#: templates/patients/add_patient.html:122
-#: templates/patients/delete_patient.html:77
-#: templates/patients/edit_patient.html:339
-#: templates/patients/patient_detail.html:135 templates/users/login.html:31
-#: templates/users/manage_users.html:21
-msgid "Email"
-msgstr ""
-
-#: templates/billing/payer_form.html:147
-msgid "Website"
-msgstr ""
-
-#: templates/billing/payer_form.html:170
-msgid "e.g., PI, XV"
-msgstr ""
-
-#: templates/billing/payer_form.html:221 templates/orders/delete_order.html:126
-#: templates/orders/edit_order.html:463 templates/patients/add_patient.html:207
-#: templates/patients/delete_patient.html:109
-#: templates/patients/edit_patient.html:552
-#: templates/patients/edit_patient.html:609
-#: templates/reports/report_confirm_delete.html:33
-msgid "Cancel"
-msgstr ""
-
-#: templates/billing/payer_form.html:224
-msgid "Update Payer"
-msgstr ""
-
-#: templates/billing/payer_form.html:224
-msgid "Create Payer"
-msgstr ""
-
-#: templates/billing/payer_list.html:4 templates/billing/payer_list.html:11
-#: templates/billing/payer_list.html:121
-msgid "Insurance Payers"
-msgstr ""
-
-#: templates/billing/payer_list.html:12
-msgid "Manage insurance companies and payers"
-msgstr ""
-
-#: templates/billing/payer_list.html:24 templates/orders/worklist.html:26
-#: templates/patients/patient_list.html:49
-#: templates/reports/report_list.html:26
-msgid "Search"
-msgstr ""
-
-#: templates/billing/payer_list.html:26
-msgid "Name or Payer ID"
-msgstr ""
-
-#: templates/billing/payer_list.html:31
-msgid "All Types"
-msgstr ""
-
-#: templates/billing/payer_list.html:32 templates/billing/payer_list.html:94
-msgid "Commercial"
-msgstr ""
-
-#: templates/billing/payer_list.html:33
-msgid "Medicare"
-msgstr ""
-
-#: templates/billing/payer_list.html:34
-msgid "Medicaid"
-msgstr ""
-
-#: templates/billing/payer_list.html:35
-msgid "Self Pay"
-msgstr ""
-
-#: templates/billing/payer_list.html:36
-msgid "Workers' Comp"
-msgstr ""
-
-#: templates/billing/payer_list.html:37
-msgid "Tricare"
-msgstr ""
-
-#: templates/billing/payer_list.html:38 templates/patients/add_patient.html:60
-#: templates/patients/add_patient.html:109
-#: templates/patients/edit_patient.html:180
-#: templates/patients/edit_patient.html:316
-#: templates/patients/patient_detail.html:112
-#: templates/patients/patient_list.html:107
-msgid "Other"
-msgstr ""
-
-#: templates/billing/payer_list.html:44 templates/reports/report_list.html:77
-msgid "All"
-msgstr ""
-
-#: templates/billing/payer_list.html:51 templates/orders/worklist.html:151
-#: templates/reports/report_list.html:98
-msgid "Filter"
-msgstr ""
-
-#: templates/billing/payer_list.html:54
-msgid "Clear"
-msgstr ""
-
-#: templates/billing/payer_list.html:68
-msgid "Total Payers"
-msgstr ""
-
-#: templates/billing/payer_list.html:107
-msgid "Government"
-msgstr ""
-
-#: templates/billing/payer_list.html:122
-msgid "records"
-msgstr ""
-
-#: templates/billing/payer_list.html:130
-msgid "Name"
-msgstr ""
-
-#: templates/billing/payer_list.html:131
-msgid "Type"
-msgstr ""
-
-#: templates/billing/payer_list.html:132
-msgid "Contact"
-msgstr ""
-
-#: templates/billing/payer_list.html:135 templates/orders/worklist.html:207
-#: templates/patients/patient_list.html:81
-#: templates/reports/report_list.html:141
-#: templates/reports/study_reports.html:73 templates/users/manage_users.html:25
-msgid "Actions"
-msgstr ""
-
-#: templates/billing/payer_list.html:175 templates/reports/report_form.html:192
-#: templates/reports/report_list.html:182
-msgid "View"
-msgstr ""
-
-#: templates/billing/payer_list.html:187
-msgid "No payers found"
-msgstr ""
-
-#: templates/layout.html:103 templates/orders/worklist.html:8
-msgid "Worklist"
-msgstr ""
-
-#: templates/layout.html:115
-msgid "Patients"
-msgstr ""
-
-#: templates/layout.html:127 templates/reports/study_reports.html:55
-msgid "Reports"
-msgstr ""
-
-#: templates/layout.html:152
-msgid "Payers"
-msgstr ""
-
-#: templates/layout.html:162
-msgid "Fee Schedules"
-msgstr ""
-
-#: templates/layout.html:247 templates/layout.html:248
-msgid "Toggle Theme"
-msgstr ""
-
-#: templates/layout.html:304
-msgid "Admin panel"
-msgstr ""
-
-#: templates/layout.html:316
-msgid "Sign Out"
-msgstr ""
-
-#: templates/layout.html:327
-msgid "Login"
-msgstr ""
-
-#: templates/layout.html:373
-msgid "All rights reserved."
-msgstr ""
-
-#: templates/orders/_device_options.html:5
-msgid "Select a device"
-msgstr ""
-
-#: templates/orders/_device_options.html:12
-msgid "No devices available"
-msgstr ""
-
-#: templates/orders/add_order.html:1
-msgid "Order Reservation"
-msgstr ""
-
-#: templates/orders/add_order.html:9
-msgid "Reserve Exam Order"
-msgstr ""
-
-#: templates/orders/add_order.html:16 templates/reports/study_reports.html:21
-msgid "Back to Worklist"
-msgstr ""
-
-#: templates/orders/add_order.html:29 templates/orders/edit_order.html:27
-#: templates/orders/order_detail.html:119
-#: templates/patients/add_patient.html:27
-#: templates/patients/edit_patient.html:42
-#: templates/patients/patient_detail.html:51
-msgid "Patient Information"
-msgstr ""
-
-#: templates/orders/add_order.html:38
-msgid "Medical Record Number (MRN)"
-msgstr ""
-
-#: templates/orders/add_order.html:47 templates/orders/edit_order.html:46
-msgid "Enter patient MRN"
-msgstr ""
-
-#: templates/orders/add_order.html:73 templates/orders/delete_order.html:60
-#: templates/patients/delete_patient.html:53
-#: templates/reports/report_form.html:228
-msgid "Patient Name"
-msgstr ""
-
-#: templates/orders/add_order.html:91 templates/orders/order_detail.html:156
-#: templates/patients/add_patient.html:96
-#: templates/patients/delete_patient.html:58
-#: templates/patients/edit_patient.html:254
-#: templates/patients/patient_detail.html:91
-msgid "Date of Birth"
-msgstr ""
-
-#: templates/orders/add_order.html:109 templates/orders/order_detail.html:162
-#: templates/patients/add_patient.html:103
-#: templates/patients/delete_patient.html:63
-#: templates/patients/edit_patient.html:270
-#: templates/patients/patient_detail.html:99
-#: templates/patients/patient_list.html:77
-msgid "Gender"
-msgstr ""
-
-#: templates/orders/add_order.html:145 templates/orders/edit_order.html:87
-#: templates/orders/order_detail.html:10
-msgid "Order Details"
-msgstr ""
-
-#: templates/orders/add_order.html:154 templates/orders/delete_order.html:51
-#: templates/orders/edit_order.html:96 templates/orders/order_detail.html:42
-msgid "Accession Number"
-msgstr ""
-
-#: templates/orders/add_order.html:162 templates/orders/edit_order.html:106
-msgid "Enter accession number"
-msgstr ""
-
-#: templates/orders/add_order.html:173 templates/orders/edit_order.html:113
-#: templates/orders/order_detail.html:86 templates/orders/worklist.html:96
-#: templates/orders/worklist.html:203
-msgid "Priority"
-msgstr ""
-
-#: templates/orders/add_order.html:183 templates/orders/order_detail.html:99
-#: templates/orders/worklist.html:243
-msgid "Routine"
-msgstr ""
-
-#: templates/orders/add_order.html:186 templates/orders/order_detail.html:95
-#: templates/orders/worklist.html:239
-msgid "Urgent"
-msgstr ""
-
-#: templates/orders/add_order.html:189
-msgid "Stat"
-msgstr ""
-
-#: templates/orders/add_order.html:200
-msgid "Device"
-msgstr ""
-
-#: templates/orders/add_order.html:214
-msgid "Loading devices..."
-msgstr ""
-
-#: templates/orders/add_order.html:225 templates/orders/edit_order.html:228
-#: templates/orders/order_detail.html:201
-msgid "Procedure Code"
-msgstr ""
-
-#: templates/orders/add_order.html:235
-msgid "Select procedure code"
-msgstr ""
-
-#: templates/orders/add_order.html:237
-msgid "CT Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:240
-msgid "CT Head without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:243
-msgid "CT Head with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:246
-msgid "CT Chest without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:249
-msgid "CT Chest with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:252
-msgid "CT Abdomen without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:255
-msgid "CT Abdomen with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:258
-msgid "CT Pelvis without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:261
-msgid "CT Pelvis with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:264
-msgid "CT Cervical spine with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:267
-msgid "CT Angiography"
-msgstr ""
-
-#: templates/orders/add_order.html:270
-msgid "MR Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:273
-msgid "MRI Brain without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:276
-msgid "MRI Brain with contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:279
-msgid "MRI Cervical spine without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:282
-msgid "MRI Thoracic spine without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:285
-msgid "MRI Lumbar spine without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:288
-msgid "MRI Knee without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:291
-msgid "MRI Shoulder without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:294
-msgid "MRI Joint without contrast"
-msgstr ""
-
-#: templates/orders/add_order.html:297
-msgid "MR Angiography"
-msgstr ""
-
-#: templates/orders/add_order.html:300
-msgid "X-Ray Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:303
-msgid "Chest X-Ray"
-msgstr ""
-
-#: templates/orders/add_order.html:306
-msgid "X-Ray Skull"
-msgstr ""
-
-#: templates/orders/add_order.html:309
-msgid "X-Ray Ribs"
-msgstr ""
-
-#: templates/orders/add_order.html:312
-msgid "X-Ray Cervical spine"
-msgstr ""
-
-#: templates/orders/add_order.html:315
-msgid "X-Ray Thoracic spine"
-msgstr ""
-
-#: templates/orders/add_order.html:318
-msgid "X-Ray Lumbar spine"
-msgstr ""
-
-#: templates/orders/add_order.html:321
-msgid "X-Ray Pelvis"
-msgstr ""
-
-#: templates/orders/add_order.html:324
-msgid "X-Ray Hip"
-msgstr ""
-
-#: templates/orders/add_order.html:327
-msgid "X-Ray Femur"
-msgstr ""
-
-#: templates/orders/add_order.html:330
-msgid "X-Ray Knee"
-msgstr ""
-
-#: templates/orders/add_order.html:333
-msgid "X-Ray Tibia/Fibula"
-msgstr ""
-
-#: templates/orders/add_order.html:336
-msgid "X-Ray Ankle"
-msgstr ""
-
-#: templates/orders/add_order.html:339
-msgid "X-Ray Foot"
-msgstr ""
-
-#: templates/orders/add_order.html:342
-msgid "X-Ray Shoulder"
-msgstr ""
-
-#: templates/orders/add_order.html:345
-msgid "X-Ray Humerus"
-msgstr ""
-
-#: templates/orders/add_order.html:348
-msgid "X-Ray Elbow"
-msgstr ""
-
-#: templates/orders/add_order.html:351
-msgid "X-Ray Forearm"
-msgstr ""
-
-#: templates/orders/add_order.html:354
-msgid "X-Ray Wrist"
-msgstr ""
-
-#: templates/orders/add_order.html:357
-msgid "X-Ray Hand"
-msgstr ""
-
-#: templates/orders/add_order.html:360
-msgid "X-Ray Finger"
-msgstr ""
-
-#: templates/orders/add_order.html:363
-msgid "Mammography"
-msgstr ""
-
-#: templates/orders/add_order.html:366
-msgid "Ultrasound Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:369
-msgid "Ultrasound Abdomen"
-msgstr ""
-
-#: templates/orders/add_order.html:372
-msgid "Ultrasound Pelvis"
-msgstr ""
-
-#: templates/orders/add_order.html:375
-msgid "Ultrasound Obstetric"
-msgstr ""
-
-#: templates/orders/add_order.html:378
-msgid "Ultrasound Thyroid"
-msgstr ""
-
-#: templates/orders/add_order.html:381
-msgid "Ultrasound Breast"
-msgstr ""
-
-#: templates/orders/add_order.html:384
-msgid "Ultrasound Scrotal"
-msgstr ""
-
-#: templates/orders/add_order.html:387
-msgid "Ultrasound Doppler"
-msgstr ""
-
-#: templates/orders/add_order.html:390
-msgid "Echocardiography"
-msgstr ""
-
-#: templates/orders/add_order.html:393
-msgid "Nuclear Medicine Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:396
-msgid "Bone Scan"
-msgstr ""
-
-#: templates/orders/add_order.html:399
-msgid "Cardiac Stress Test"
-msgstr ""
-
-#: templates/orders/add_order.html:402
-msgid "Thyroid Scan"
-msgstr ""
-
-#: templates/orders/add_order.html:409
-msgid "Renal Scan"
-msgstr ""
-
-#: templates/orders/add_order.html:412
-msgid "Hepatobiliary Scan"
-msgstr ""
-
-#: templates/orders/add_order.html:415
-msgid "PET Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:418
-msgid "PET-CT Whole Body"
-msgstr ""
-
-#: templates/orders/add_order.html:421
-msgid "PET Brain"
-msgstr ""
-
-#: templates/orders/add_order.html:428
-msgid "Barium Swallow/Meal"
-msgstr ""
-
-#: templates/orders/add_order.html:431
-msgid "Barium Enema"
-msgstr ""
-
-#: templates/orders/add_order.html:434
-msgid "IVP/Urogram"
-msgstr ""
-
-#: templates/orders/add_order.html:437
-msgid "Hysterosalpingography"
-msgstr ""
-
-#: templates/orders/add_order.html:440
-msgid "VCUG"
-msgstr ""
-
-#: templates/orders/add_order.html:443
-msgid "Interventional Procedures"
-msgstr ""
-
-#: templates/orders/add_order.html:446
-msgid "Image-guided Biopsy"
-msgstr ""
-
-#: templates/orders/add_order.html:449
-msgid "Image-guided Drainage"
-msgstr ""
-
-#: templates/orders/add_order.html:452
-msgid "Image-guided Injection"
-msgstr ""
-
-#: templates/orders/add_order.html:464 templates/orders/edit_order.html:262
-#: templates/orders/order_detail.html:207
-msgid "Procedure Name (English)"
-msgstr ""
-
-#: templates/orders/add_order.html:472 templates/orders/edit_order.html:272
-msgid "Enter procedure name in English"
-msgstr ""
-
-#: templates/orders/add_order.html:484 templates/orders/order_detail.html:214
-msgid "Procedure Name (Arabic)"
-msgstr ""
-
-#: templates/orders/add_order.html:492 templates/orders/edit_order.html:290
-msgid "أدخل اسم الإجراء بالعربية"
-msgstr ""
-
-#: templates/orders/add_order.html:503 templates/orders/edit_order.html:300
-#: templates/orders/order_detail.html:267
-#: templates/reports/report_detail.html:88
-msgid "Referring Physician"
-msgstr ""
-
-#: templates/orders/add_order.html:510
-msgid "Enter physician name"
-msgstr ""
-
-#: templates/orders/add_order.html:520 templates/orders/edit_order.html:315
-#: templates/orders/order_detail.html:221
-msgid "Laterality"
-msgstr ""
-
-#: templates/orders/add_order.html:528
-msgid "Not Applicable"
-msgstr ""
-
-#: templates/orders/add_order.html:531 templates/orders/edit_order.html:335
-#: templates/orders/order_detail.html:224
-msgid "Left"
-msgstr ""
-
-#: templates/orders/add_order.html:534 templates/orders/edit_order.html:347
-#: templates/orders/order_detail.html:224
-msgid "Right"
-msgstr ""
-
-#: templates/orders/add_order.html:537 templates/orders/edit_order.html:359
-#: templates/orders/order_detail.html:225
-msgid "Bilateral"
-msgstr ""
-
-#: templates/orders/add_order.html:548 templates/orders/edit_order.html:367
-#: templates/orders/order_detail.html:230
-msgid "Body Part"
-msgstr ""
-
-#: templates/orders/add_order.html:555
-msgid "e.g., Head, Knee, Chest"
-msgstr ""
-
-#: templates/orders/add_order.html:562 templates/orders/edit_order.html:382
-#: templates/orders/order_detail.html:236
-msgid "Contrast Required"
-msgstr ""
-
-#: templates/orders/add_order.html:575
-msgid "Yes, contrast is required"
-msgstr ""
-
-#: templates/orders/add_order.html:586
-msgid "Clinical Information"
-msgstr ""
-
-#: templates/orders/add_order.html:595 templates/orders/edit_order.html:442
-#: templates/orders/order_detail.html:307
-msgid "Clinical Indication"
-msgstr ""
-
-#: templates/orders/add_order.html:602
-msgid "Describe clinical symptoms, diagnosis, or reason for examination..."
-msgstr ""
-
-#: templates/orders/add_order.html:612
-msgid "Scheduling"
-msgstr ""
-
-#: templates/orders/add_order.html:621
-msgid "Scheduled Date & Time"
-msgstr ""
-
-#: templates/orders/add_order.html:637 templates/orders/edit_order.html:424
-#: templates/orders/order_detail.html:294
-msgid "Duration (minutes)"
-msgstr ""
-
-#: templates/orders/add_order.html:656
-msgid "Room / Station"
-msgstr ""
-
-#: templates/orders/add_order.html:664
-msgid "Auto-assign"
-msgstr ""
-
-#: templates/orders/add_order.html:667
-msgid "Room 1"
-msgstr ""
-
-#: templates/orders/add_order.html:670
-msgid "Room 2"
-msgstr ""
-
-#: templates/orders/add_order.html:673
-msgid "Room 3"
-msgstr ""
-
-#: templates/orders/add_order.html:689
-msgid "Clear Form"
-msgstr ""
-
-#: templates/orders/add_order.html:694
-msgid "Reserve Order"
-msgstr ""
-
-#: templates/orders/delete_order.html:1 templates/orders/delete_order.html:9
-msgid "Delete Order"
-msgstr ""
-
-#: templates/orders/delete_order.html:16 templates/orders/edit_order.html:14
-#: templates/orders/order_detail.html:18
-msgid "Order List"
-msgstr ""
-
-#: templates/orders/delete_order.html:25
-#: templates/patients/delete_patient.html:25
-msgid "Confirm Deletion"
-msgstr ""
-
-#: templates/orders/delete_order.html:32
-#: templates/patients/delete_patient.html:32
-#: templates/reports/report_confirm_delete.html:26
-msgid "Warning:"
-msgstr ""
-
-#: templates/orders/delete_order.html:33
-#: templates/patients/delete_patient.html:33
+#: billing/templates/billing/_delete_confirm.html:9
+#: orders/templates/orders/delete_order.html:33
+#: patients/templates/patients/delete_patient.html:33
 msgid "This action cannot be undone."
 msgstr ""
 
-#: templates/orders/delete_order.html:38
-msgid "Are you sure you want to delete order"
+#: billing/templates/billing/_delete_confirm.html:12
+#: billing/templates/billing/_form_page.html:16
+#: billing/templates/billing/fee_schedule_confirm_delete.html:16
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:16
+#: billing/templates/billing/patient_statement_form.html:108
+#: billing/templates/billing/payer_confirm_delete.html:16
+#: billing/templates/billing/payer_form.html:221
+#: billing/templates/billing/payment_plan_form.html:98
+#: billing/templates/billing/service_line_form.html:157
+#: orders/templates/orders/delete_order.html:126
+#: orders/templates/orders/edit_order.html:463
+#: patients/templates/patients/add_patient.html:207
+#: patients/templates/patients/delete_patient.html:109
+#: patients/templates/patients/edit_patient.html:552
+#: patients/templates/patients/edit_patient.html:609
+#: reports/templates/reports/report_confirm_delete.html:33
+#: reports/templates/reports/report_verify.html:75
+msgid "Cancel"
 msgstr ""
 
-#: templates/orders/delete_order.html:46
-msgid "Order Summary"
+#: billing/templates/billing/_delete_confirm.html:13
+msgid "Confirm delete"
 msgstr ""
 
-#: templates/orders/delete_order.html:56 templates/orders/edit_order.html:36
-msgid "Patient MRN"
+#: billing/templates/billing/_form_page.html:2
+#: billing/templates/billing/authorization_form.html:36
+#: billing/templates/billing/clearinghouse_form.html:36
+#: billing/templates/billing/patient_account_form.html:26
+#: billing/templates/billing/patient_insurance_form.html:36
+#: billing/templates/billing/service_line_form.html:158
+msgid "Save"
 msgstr ""
 
-#: templates/orders/delete_order.html:64 templates/orders/worklist.html:202
-#: templates/reports/report_detail.html:84
-#: templates/reports/report_form.html:236
-#: templates/reports/study_reports.html:36
-msgid "Procedure"
+#: billing/templates/billing/appeal_list.html:4
+#: billing/templates/billing/appeal_list.html:9
+msgid "Claims Appeals"
 msgstr ""
 
-#: templates/orders/delete_order.html:67 templates/orders/order_detail.html:193
-#: templates/orders/worklist.html:70 templates/orders/worklist.html:201
-#: templates/reports/report_detail.html:80
-#: templates/reports/report_form.html:240 templates/reports/report_list.html:62
-#: templates/reports/report_list.html:136
-#: templates/reports/study_reports.html:32
-msgid "Modality"
+#: billing/templates/billing/appeal_list.html:9
+msgid "Appeal tracking is available from the billing claims workspace."
 msgstr ""
 
-#: templates/orders/delete_order.html:73 templates/orders/order_detail.html:55
-#: templates/orders/worklist.html:250
-msgid "Registered"
+#: billing/templates/billing/appeal_list.html:10
+msgid "Open claim appeals"
 msgstr ""
 
-#: templates/orders/delete_order.html:77 templates/orders/order_detail.html:59
-#: templates/orders/worklist.html:205 templates/orders/worklist.html:254
-msgid "Scheduled"
+#: billing/templates/billing/authorization_form.html:4
+#: billing/templates/billing/authorization_form.html:8
+msgid "Authorization"
 msgstr ""
 
-#: templates/orders/delete_order.html:81 templates/orders/order_detail.html:63
-#: templates/orders/worklist.html:258
-msgid "In Progress"
+#: billing/templates/billing/claim_appeal_confirm_delete.html:3
+#: billing/templates/billing/claim_appeal_confirm_delete.html:6
+msgid "Delete claim appeal"
 msgstr ""
 
-#: templates/orders/delete_order.html:85 templates/orders/order_detail.html:67
-#: templates/orders/worklist.html:262
-msgid "Completed"
+#: billing/templates/billing/claim_appeal_detail.html:3
+#: billing/templates/billing/claim_appeal_detail.html:6
+msgid "Appeal"
 msgstr ""
 
-#: templates/orders/delete_order.html:89 templates/orders/order_detail.html:71
-#: templates/orders/worklist.html:266
-msgid "Reported"
+#: billing/templates/billing/claim_appeal_detail.html:6
+#: billing/templates/billing/claim_appeal_list.html:3
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Claim appeals"
 msgstr ""
 
-#: templates/orders/delete_order.html:93 templates/orders/order_detail.html:75
-#: templates/orders/worklist.html:270 templates/reports/report_detail.html:55
-msgid "Finalized"
+#: billing/templates/billing/claim_appeal_detail.html:6
+msgid "Update appeal"
 msgstr ""
 
-#: templates/orders/delete_order.html:97 templates/orders/order_detail.html:79
-#: templates/orders/worklist.html:274
-msgid "Cancelled"
-msgstr ""
-
-#: templates/orders/delete_order.html:102
-#: templates/orders/order_detail.html:106
-#: templates/patients/delete_patient.html:85
-msgid "Created At"
-msgstr ""
-
-#: templates/orders/delete_order.html:118
-#: templates/patients/delete_patient.html:101
-msgid "Back to Details"
-msgstr ""
-
-#: templates/orders/delete_order.html:131
-msgid "Yes, Delete Order"
-msgstr ""
-
-#: templates/orders/edit_order.html:1 templates/orders/edit_order.html:8
-#: templates/orders/order_detail.html:24
-msgid "Edit Order"
-msgstr ""
-
-#: templates/orders/edit_order.html:49
-msgid "Enter the patient MRN to lookup"
-msgstr ""
-
-#: templates/orders/edit_order.html:59
-msgid "Lookup Patient"
-msgstr ""
-
-#: templates/orders/edit_order.html:171 templates/orders/order_detail.html:273
-msgid "Facility"
-msgstr ""
-
-#: templates/orders/edit_order.html:179
-msgid "Select Facility"
-msgstr ""
-
-#: templates/orders/edit_order.html:201
-msgid "Device/Room"
-msgstr ""
-
-#: templates/orders/edit_order.html:212
-msgid "Select Device"
-msgstr ""
-
-#: templates/orders/edit_order.html:238
-msgid "Select Procedure"
-msgstr ""
-
-#: templates/orders/edit_order.html:308
-msgid "Enter referring physician name"
-msgstr ""
-
-#: templates/orders/edit_order.html:323 templates/patients/add_patient.html:53
-#: templates/patients/add_patient.html:106
-#: templates/patients/edit_patient.html:96
-#: templates/patients/edit_patient.html:280
-msgid "Select"
-msgstr ""
-
-#: templates/orders/edit_order.html:375
-msgid "Enter body part"
-msgstr ""
-
-#: templates/orders/edit_order.html:400 templates/orders/order_detail.html:241
-#: templates/patients/patient_detail.html:257
-#: templates/reports/report_list.html:78 templates/reports/report_list.html:171
-msgid "Yes"
-msgstr ""
-
-#: templates/orders/edit_order.html:410 templates/orders/order_detail.html:285
-msgid "Scheduled DateTime"
-msgstr ""
-
-#: templates/orders/edit_order.html:449
-msgid "Enter clinical indication or reason for exam"
-msgstr ""
-
-#: templates/orders/edit_order.html:469 templates/orders/order_detail.html:341
-#: templates/orders/worklist.html:313 templates/patients/edit_patient.html:618
-#: templates/patients/patient_detail.html:30
+#: billing/templates/billing/claim_appeal_detail.html:6
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/fee_schedule_confirm_delete.html:15
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:15
+#: billing/templates/billing/patient_statement_detail.html:8
+#: billing/templates/billing/patient_statement_list.html:145
+#: billing/templates/billing/payer_confirm_delete.html:15
+#: billing/templates/billing/payment_detail.html:8
+#: billing/templates/billing/payment_plan_detail.html:8
+#: billing/templates/billing/payment_plan_list.html:126
+#: billing/templates/billing/payment_posting_detail.html:8
+#: billing/templates/billing/service_line_detail.html:8
+#: billing/templates/billing/service_line_list.html:145
+#: orders/templates/orders/edit_order.html:469
+#: orders/templates/orders/order_detail.html:341
+#: orders/templates/orders/worklist.html:313
+#: patients/templates/patients/edit_patient.html:618
+#: patients/templates/patients/patient_detail.html:30
 msgid "Delete"
 msgstr ""
 
-#: templates/orders/edit_order.html:473
-msgid "Save Changes"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Appeal record"
 msgstr ""
 
-#: templates/orders/edit_order.html:495
-msgid "Please enter an MRN"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/claim_appeal_list.html:8
+#: billing/templates/billing/claim_detail.html:4
+#: billing/templates/billing/claim_detail.html:11
+#: billing/templates/billing/payment_posting_detail.html:12
+#: billing/templates/billing/payment_posting_list.html:23
+#: billing/templates/billing/service_line_detail.html:16
+msgid "Claim"
 msgstr ""
 
-#: templates/orders/edit_order.html:512
-msgid "Patient not found"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Claim line"
 msgstr ""
 
-#: templates/orders/edit_order.html:521
-msgid "Error looking up patient"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Appeal level"
 msgstr ""
 
-#: templates/orders/order_detail.html:34
-msgid "Order Information"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Filed date"
 msgstr ""
 
-#: templates/orders/order_detail.html:91 templates/orders/worklist.html:235
-msgid "STAT"
+#: billing/templates/billing/claim_appeal_detail.html:8
+#: billing/templates/billing/patient_statement_detail.html:14
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Due date"
 msgstr ""
 
-#: templates/orders/order_detail.html:127
-#: templates/patients/add_patient.html:33
-#: templates/patients/delete_patient.html:49
-#: templates/patients/edit_patient.html:51
-#: templates/patients/patient_detail.html:59
-#: templates/patients/patient_list.html:73
-#: templates/reports/report_detail.html:76
-#: templates/reports/report_form.html:232
-msgid "MRN"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Decision date"
 msgstr ""
 
-#: templates/orders/order_detail.html:138
-msgid "Name (English)"
+#: billing/templates/billing/claim_appeal_detail.html:8
+msgid "Submitted by"
 msgstr ""
 
-#: templates/orders/order_detail.html:147
-msgid "Name (Arabic)"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Decision"
 msgstr ""
 
-#: templates/orders/order_detail.html:165
-#: templates/patients/add_patient.html:107
-#: templates/patients/delete_patient.html:65
-#: templates/patients/edit_patient.html:292
-#: templates/patients/patient_detail.html:104
-#: templates/patients/patient_list.html:99
-msgid "Male"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Reason"
 msgstr ""
 
-#: templates/orders/order_detail.html:166
-#: templates/patients/add_patient.html:108
-#: templates/patients/delete_patient.html:67
-#: templates/patients/edit_patient.html:304
-#: templates/patients/patient_detail.html:108
-#: templates/patients/patient_list.html:103
-msgid "Female"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Decision details"
 msgstr ""
 
-#: templates/orders/order_detail.html:185
-msgid "Procedure Information"
+#: billing/templates/billing/claim_appeal_detail.html:9
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Reversal amount"
 msgstr ""
 
-#: templates/orders/order_detail.html:245
-#: templates/patients/patient_detail.html:261
-#: templates/reports/report_list.html:79
-msgid "No"
+#: billing/templates/billing/claim_appeal_detail.html:9
+msgid "Supporting documents"
 msgstr ""
 
-#: templates/orders/order_detail.html:259
-msgid "Additional Information"
+#: billing/templates/billing/claim_appeal_form.html:3
+#: billing/templates/billing/claim_appeal_form.html:6
+msgid "Edit claim appeal"
 msgstr ""
 
-#: templates/orders/order_detail.html:279
-msgid "Room/Station"
+#: billing/templates/billing/claim_appeal_form.html:3
+#: billing/templates/billing/claim_appeal_form.html:6
+msgid "Create claim appeal"
 msgstr ""
 
-#: templates/orders/order_detail.html:300
-msgid "Billing Status"
+#: billing/templates/billing/claim_appeal_form.html:7
+msgid "Save appeal"
 msgstr ""
 
-#: templates/orders/order_detail.html:328 templates/orders/worklist.html:297
-msgid "View Reports"
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Track appeal deadlines, submissions and payer decisions."
 msgstr ""
 
-#: templates/orders/worklist.html:11
-msgid "Add New Order"
+#: billing/templates/billing/claim_appeal_list.html:6
+msgid "Create appeal"
 msgstr ""
 
-#: templates/orders/worklist.html:37
-msgid "Accession, MRN, Patient, Procedure"
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Appeal number"
 msgstr ""
 
-#: templates/orders/worklist.html:49 templates/reports/report_list.html:38
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Level"
+msgstr ""
+
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Filed"
+msgstr ""
+
+#: billing/templates/billing/claim_appeal_list.html:8
+msgid "Due"
+msgstr ""
+
+#: billing/templates/billing/claim_appeal_list.html:8
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/claim_list.html:28
+#: billing/templates/billing/claim_list.html:78
+#: billing/templates/billing/clearinghouse_list.html:24
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+#: billing/templates/billing/patient_account_detail.html:39
+#: billing/templates/billing/patient_account_detail.html:58
+#: billing/templates/billing/patient_statement_detail.html:30
+#: billing/templates/billing/patient_statement_form.html:54
+#: billing/templates/billing/patient_statement_list.html:28
+#: billing/templates/billing/patient_statement_list.html:89
+#: billing/templates/billing/payer_detail.html:86
+#: billing/templates/billing/payer_list.html:42
+#: billing/templates/billing/payer_list.html:134
+#: billing/templates/billing/payment_plan_detail.html:28
+#: billing/templates/billing/payment_plan_list.html:38
+#: billing/templates/billing/payment_plan_list.html:78
+#: billing/templates/billing/payment_posting_list.html:16
+#: billing/templates/billing/payment_posting_list.html:23
+#: billing/templates/billing/service_line_list.html:63
+#: billing/templates/billing/service_line_list.html:116
+#: orders/templates/orders/delete_order.html:70
+#: orders/templates/orders/edit_order.html:142
+#: orders/templates/orders/order_detail.html:50
+#: orders/templates/orders/worklist.html:45
+#: orders/templates/orders/worklist.html:204
+#: reports/templates/reports/report_detail.html:36
+#: reports/templates/reports/report_list.html:36
+#: reports/templates/reports/report_list.html:138
+#: reports/templates/reports/study_reports.html:40
+#: reports/templates/reports/study_reports.html:70
+msgid "Status"
+msgstr ""
+
+#: billing/templates/billing/claim_appeal_list.html:10
+#: billing/templates/billing/clearinghouse_list.html:41
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/patient_statement_list.html:139
+#: billing/templates/billing/payer_list.html:175
+#: billing/templates/billing/payment_list.html:67
+#: billing/templates/billing/payment_plan_list.html:120
+#: billing/templates/billing/payment_posting_list.html:33
+#: billing/templates/billing/service_line_list.html:139
+msgid "View"
+msgstr ""
+
+#: billing/templates/billing/claim_appeal_list.html:11
+msgid "No appeals have been recorded."
+msgstr ""
+
+#: billing/templates/billing/claim_confirm_delete.html:3
+#: billing/templates/billing/claim_confirm_delete.html:6
+msgid "Delete claim"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:10
+msgid "All claims"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:16
+#: billing/templates/billing/claim_detail.html:70
+#: billing/templates/billing/clearinghouse_detail.html:13
+#: billing/templates/billing/clearinghouse_list.html:42
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:11
+#: billing/templates/billing/patient_statement_detail.html:8
+#: billing/templates/billing/patient_statement_list.html:142
+#: billing/templates/billing/payer_detail.html:16
+#: billing/templates/billing/payer_list.html:178
+#: billing/templates/billing/payment_detail.html:8
+#: billing/templates/billing/payment_detail.html:28
+#: billing/templates/billing/payment_plan_detail.html:8
+#: billing/templates/billing/payment_plan_list.html:123
+#: billing/templates/billing/payment_posting_detail.html:8
+#: billing/templates/billing/payment_posting_detail.html:26
+#: billing/templates/billing/service_line_detail.html:8
+#: billing/templates/billing/service_line_list.html:142
+#: orders/templates/orders/order_detail.html:335
+#: orders/templates/orders/worklist.html:306
+#: patients/templates/patients/patient_detail.html:24
+#: reports/templates/reports/report_detail.html:23
+#: reports/templates/reports/report_list.html:184
+msgid "Edit"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:17
+msgid "Generate 837"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:20
+msgid "Submit to clearinghouse"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:23
+msgid "Check status"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:28
+msgid "Payer response"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:32
+msgid "Claim information"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:34
+msgid "Claim type"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:35
+#: billing/templates/billing/patient_statement_detail.html:12
+#: billing/templates/billing/payment_detail.html:12
+#: billing/templates/billing/payment_list.html:52
+#: billing/templates/billing/payment_plan_detail.html:12
+#: billing/templates/billing/service_line_detail.html:13
+msgid "Patient account"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:36
+#: billing/templates/billing/claim_list.html:74
+#: billing/templates/billing/payment_posting_detail.html:13
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Payer"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:37
+msgid "Service dates"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:38
+#: billing/templates/billing/claim_list.html:18
+#: billing/templates/billing/claim_list.html:35
+msgid "Submitted"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:39
+msgid "Clearinghouse status"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:40
+msgid "Transmission ID"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:43
+msgid "Financial summary"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:45
+msgid "Total charges"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:46
+msgid "Expected insurance"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:47
+msgid "Expected patient"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:48
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/claim_list.html:19
+#: billing/templates/billing/claim_list.html:37
+#: billing/templates/billing/patient_statement_list.html:33
+#: billing/templates/billing/payment_posting_detail.html:23
+#: billing/templates/billing/service_line_list.html:69
+msgid "Paid"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:49
+msgid "Adjustments"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:50
+msgid "Patient responsibility"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:57
+msgid "Claim lines"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:58
+msgid "Add line"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "CPT/HCPCS"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/payment_detail.html:25
+#: billing/templates/billing/service_line_detail.html:3
+msgid "Service line"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:61
+#: billing/templates/billing/patient_statement_detail.html:30
+msgid "Charge"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "Allowed"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:61
+msgid "Adjustment"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:71
+#: billing/templates/billing/payment_detail.html:28
+#: billing/templates/billing/payment_posting_detail.html:26
+msgid "Remove"
+msgstr ""
+
+#: billing/templates/billing/claim_detail.html:74
+msgid "No claim lines have been added."
+msgstr ""
+
+#: billing/templates/billing/claim_error.html:3
+#: billing/templates/billing/claim_error.html:7
+msgid "Claim action unavailable"
+msgstr ""
+
+#: billing/templates/billing/claim_error.html:9
+msgid "Return to claims"
+msgstr ""
+
+#: billing/templates/billing/claim_form.html:3
+msgid "Edit claim"
+msgstr ""
+
+#: billing/templates/billing/claim_form.html:3
+msgid "Create claim"
+msgstr ""
+
+#: billing/templates/billing/claim_form.html:6
+msgid "Edit insurance claim"
+msgstr ""
+
+#: billing/templates/billing/claim_form.html:6
+msgid "Create insurance claim"
+msgstr ""
+
+#: billing/templates/billing/claim_form.html:7
+msgid "Save claim"
+msgstr ""
+
+#: billing/templates/billing/claim_line_confirm_delete.html:3
+#: billing/templates/billing/claim_line_confirm_delete.html:6
+msgid "Remove claim line"
+msgstr ""
+
+#: billing/templates/billing/claim_line_form.html:3
+#: billing/templates/billing/claim_line_form.html:6
+msgid "Edit claim line"
+msgstr ""
+
+#: billing/templates/billing/claim_line_form.html:3
+#: billing/templates/billing/claim_line_form.html:6
+msgid "Add claim line"
+msgstr ""
+
+#: billing/templates/billing/claim_line_form.html:7
+msgid "Save claim line"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:4
+#: dashboard/templates/dashboard/stats.html:152 templates/layout.html:196
+msgid "Claims"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:10
+msgid "Insurance Claims"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:16
+#: billing/templates/billing/patient_statement_list.html:16
+#: billing/templates/billing/service_line_list.html:19
+msgid "Total"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:17
+#: billing/templates/billing/claim_list.html:34
+#: billing/templates/billing/patient_statement_list.html:17
+#: billing/templates/billing/patient_statement_list.html:31
+msgid "Draft"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:20
+#: billing/templates/billing/claim_list.html:38
+#: billing/templates/billing/service_line_list.html:51
+#: billing/templates/billing/service_line_list.html:70
+msgid "Denied"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:30
+#: billing/templates/billing/patient_statement_list.html:30
+#: billing/templates/billing/payment_plan_list.html:40
+#: billing/templates/billing/service_line_list.html:65
+#: orders/templates/orders/worklist.html:49
+#: reports/templates/reports/report_list.html:38
 msgid "All Statuses"
 msgstr ""
 
-#: templates/orders/worklist.html:74 templates/reports/report_list.html:64
-msgid "All Modalities"
+#: billing/templates/billing/claim_list.html:36
+msgid "Accepted"
 msgstr ""
 
-#: templates/orders/worklist.html:100
-msgid "All Priorities"
-msgstr ""
-
-#: templates/orders/worklist.html:122 templates/reports/report_list.html:85
+#: billing/templates/billing/claim_list.html:42
+#: billing/templates/billing/patient_statement_list.html:49
+#: billing/templates/billing/service_line_list.html:74
+#: orders/templates/orders/worklist.html:122
+#: reports/templates/reports/report_list.html:85
 msgid "From Date"
 msgstr ""
 
-#: templates/orders/worklist.html:135 templates/reports/report_list.html:91
+#: billing/templates/billing/claim_list.html:46
+#: billing/templates/billing/patient_statement_list.html:53
+#: billing/templates/billing/service_line_list.html:78
+#: orders/templates/orders/worklist.html:135
+#: reports/templates/reports/report_list.html:91
 msgid "To Date"
 msgstr ""
 
-#: templates/orders/worklist.html:163 templates/reports/report_list.html:107
+#: billing/templates/billing/claim_list.html:50
+#: billing/templates/billing/patient_statement_list.html:57
+#: billing/templates/billing/payer_list.html:24
+#: billing/templates/billing/payment_list.html:39
+#: billing/templates/billing/payment_plan_list.html:48
+#: billing/templates/billing/service_line_list.html:82
+#: orders/templates/orders/worklist.html:26
+#: patients/templates/patients/patient_list.html:49
+#: reports/templates/reports/report_list.html:26
+msgid "Search"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:51
+msgid "Claim number"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:54
+#: billing/templates/billing/patient_statement_list.html:61
+#: billing/templates/billing/payer_list.html:51
+#: billing/templates/billing/payment_list.html:43
+#: billing/templates/billing/payment_plan_list.html:52
+#: billing/templates/billing/payment_posting_list.html:19
+#: billing/templates/billing/service_line_list.html:86
+#: orders/templates/orders/worklist.html:151
+#: reports/templates/reports/report_list.html:98
+msgid "Filter"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:63
+msgid "Create Claim"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:72
+msgid "Claim Number"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:73
+#: billing/templates/billing/patient_account_form.html:4
+#: billing/templates/billing/patient_statement_form.html:21
+#: billing/templates/billing/patient_statement_list.html:81
+#: billing/templates/billing/payment_plan_form.html:23
+#: billing/templates/billing/payment_plan_list.html:71
+#: billing/templates/billing/service_line_form.html:26
+#: billing/templates/billing/service_line_list.html:112
+msgid "Patient Account"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:75
+msgid "DOS From"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:76
+msgid "DOS To"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:77
+#: billing/templates/billing/patient_account_detail.html:23
+msgid "Total Charges"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:79
+#: billing/templates/billing/clearinghouse_list.html:25
+#: billing/templates/billing/patient_statement_list.html:91
+#: billing/templates/billing/payer_list.html:135
+#: billing/templates/billing/payment_plan_list.html:79
+#: billing/templates/billing/service_line_list.html:118
+#: orders/templates/orders/worklist.html:207
+#: patients/templates/patients/patient_list.html:81
+#: reports/templates/reports/report_list.html:141
+#: reports/templates/reports/study_reports.html:73
+#: users/templates/users/manage_users.html:25
+msgid "Actions"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:101
+msgid "No claims found."
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:110
+#: billing/templates/billing/patient_statement_list.html:159
+#: billing/templates/billing/payment_list.html:80
+#: billing/templates/billing/payment_plan_list.html:140
+#: billing/templates/billing/payment_posting_list.html:39
+#: billing/templates/billing/service_line_list.html:168
+msgid "Previous"
+msgstr ""
+
+#: billing/templates/billing/claim_list.html:111
+#: billing/templates/billing/patient_statement_list.html:163
+#: billing/templates/billing/payment_list.html:82
+#: billing/templates/billing/payment_plan_list.html:144
+#: billing/templates/billing/payment_posting_list.html:41
+#: billing/templates/billing/service_line_list.html:182
+msgid "Next"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:20
+msgid "Clearinghouse Details"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:23
+msgid "Sender ID:"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:24
+msgid "Receiver ID:"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:25
+msgid "API Endpoint:"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:26
+msgid "Status:"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:28
+#: billing/templates/billing/clearinghouse_list.html:35
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payer_detail.html:88
+#: billing/templates/billing/payer_form.html:68
+#: billing/templates/billing/payer_list.html:45
+#: billing/templates/billing/payer_list.html:81
+#: billing/templates/billing/payer_list.html:169
+#: billing/templates/billing/payment_plan_list.html:17
+#: billing/templates/billing/payment_plan_list.html:41
+#: users/templates/users/manage_users.html:23
+msgid "Active"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_detail.html:30
+#: billing/templates/billing/clearinghouse_list.html:37
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payer_detail.html:90
+#: billing/templates/billing/payer_list.html:46
+#: billing/templates/billing/payer_list.html:171
+msgid "Inactive"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_form.html:4
+#: billing/templates/billing/payer_detail.html:72
+#: billing/templates/billing/payer_form.html:180
+msgid "Clearinghouse"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_form.html:8
+msgid "Edit Clearinghouse"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_form.html:8
+msgid "Create Clearinghouse"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:4
+#: templates/layout.html:168
+msgid "Clearinghouses"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:10
+msgid "EDI Clearinghouses"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:13
+msgid "Add Clearinghouse"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:22
+#: billing/templates/billing/payer_list.html:130
+msgid "Name"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:23
+msgid "Sender ID"
+msgstr ""
+
+#: billing/templates/billing/clearinghouse_list.html:47
+msgid "No clearinghouses found"
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:4
+msgid "Denials"
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:8
+msgid "Denials and Appeals"
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:9
+msgid ""
+"Review denial patterns, maintain adjustment reason codes, and follow payer "
+"appeal decisions."
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:11
+msgid "Manage denial reason codes"
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:12
+msgid "View denial management report"
+msgstr ""
+
+#: billing/templates/billing/denial_list.html:13
+msgid "Track claim appeals"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_confirm_delete.html:3
+msgid "Delete denial reason"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_confirm_delete.html:6
+msgid "Delete denial reason code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:3
+msgid "Denial reason"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:6
+#: billing/templates/billing/denial_reason_list.html:3
+msgid "Denial reasons"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:7
+msgid "Code guidance"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Description"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Category"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+msgid "Requires appeal"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payment_plan_detail.html:17
+#: orders/templates/orders/edit_order.html:400
+#: orders/templates/orders/order_detail.html:241
+#: patients/templates/patients/patient_detail.html:257
+#: reports/templates/reports/report_list.html:78
+#: reports/templates/reports/report_list.html:171
+msgid "Yes"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+#: billing/templates/billing/payment_plan_detail.html:17
+#: orders/templates/orders/order_detail.html:245
+#: patients/templates/patients/patient_detail.html:261
+#: reports/templates/reports/report_list.html:79
+msgid "No"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Appeal deadline"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+#: billing/templates/billing/denial_reason_list.html:10
+msgid "days"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_detail.html:8
+msgid "Common resolution"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_form.html:3
+msgid "Edit denial reason"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_form.html:3
+msgid "Add denial reason"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_form.html:6
+msgid "Edit denial reason code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_form.html:6
+msgid "Add denial reason code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_form.html:7
+msgid "Save reason code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Denial reason codes"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Reference codes and recommended follow-up for denied claims."
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:6
+msgid "Add reason code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "System"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Code"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:8
+msgid "Appeal required"
+msgstr ""
+
+#: billing/templates/billing/denial_reason_list.html:12
+msgid "No denial reason codes have been configured."
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:3
+msgid "Upload ERA file"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:6
+#: billing/templates/billing/payment_posting_detail.html:7
+#: billing/templates/billing/payment_posting_list.html:3
+#: billing/templates/billing/payment_posting_list.html:7
+msgid "Payment postings"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:6
+msgid "Upload ERA / EOB file"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:6
+msgid "Upload an 835 remittance file to create payment postings."
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:10
+msgid "Remittance file"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:12
+msgid ""
+"Choose an 835 ERA/EOB file. The file is processed securely and is not stored "
+"by this page."
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:13
+msgid "Upload and process"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:26
+msgid "Processing remittance file…"
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:31
+msgid "The file could not be processed."
+msgstr ""
+
+#: billing/templates/billing/era_upload.html:35
+msgid "The upload failed. Check your connection and try again."
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_confirm_delete.html:4
+#: billing/templates/billing/fee_schedule_confirm_delete.html:10
+msgid "Delete Fee Schedule"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_confirm_delete.html:11
+#: billing/templates/billing/payer_confirm_delete.html:11
+#, python-format
+msgid "Are you sure you want to delete \"%(name)s\"?"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:4
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:10
+msgid "Delete Fee Schedule Item"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_item_confirm_delete.html:11
+#, python-format
+msgid "Are you sure you want to delete \"%(code)s\"?"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_item_form.html:3
+#: billing/templates/billing/fee_schedule_item_form.html:6
+msgid "Edit fee schedule item"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_item_form.html:3
+#: billing/templates/billing/fee_schedule_item_form.html:6
+msgid "Add fee schedule item"
+msgstr ""
+
+#: billing/templates/billing/fee_schedule_item_form.html:7
+msgid "Save item"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:15
+#: billing/templates/billing/patient_statement_form.html:88
+#: billing/templates/billing/patient_statement_list.html:88
+msgid "Current Balance"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:31
+msgid "Total Payments"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:49
+msgid "Recent Charges"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:55
+#: billing/templates/billing/service_line_form.html:34
+#: billing/templates/billing/service_line_list.html:109
+msgid "Service Date"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:56
+#: billing/templates/billing/patient_statement_detail.html:30
+#: orders/templates/orders/delete_order.html:64
+#: orders/templates/orders/worklist.html:202
+#: reports/templates/reports/report_detail.html:84
+#: reports/templates/reports/report_form.html:269
+#: reports/templates/reports/report_verify.html:38
+#: reports/templates/reports/study_reports.html:36
+msgid "Procedure"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:57
+#: billing/templates/billing/patient_account_detail.html:89
+#: billing/templates/billing/payment_detail.html:14
+#: billing/templates/billing/payment_list.html:53
+#: billing/templates/billing/payment_posting_detail.html:16
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Amount"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:71
+msgid "No charges"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:82
+msgid "Recent Payments"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:88
+#: billing/templates/billing/payment_list.html:52
+msgid "Date"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:90
+#: billing/templates/billing/payment_detail.html:15
+#: billing/templates/billing/payment_list.html:52
+#: billing/templates/billing/payment_posting_list.html:17
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Method"
+msgstr ""
+
+#: billing/templates/billing/patient_account_detail.html:102
+msgid "No payments"
+msgstr ""
+
+#: billing/templates/billing/patient_account_form.html:8
+msgid "Edit Account"
+msgstr ""
+
+#: billing/templates/billing/patient_account_form.html:8
+msgid "Create Account"
+msgstr ""
+
+#: billing/templates/billing/patient_insurance_form.html:4
+#: billing/templates/billing/patient_insurance_form.html:8
+#: templates/layout.html:177
+msgid "Patient Insurance"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_confirm_delete.html:3
+#: billing/templates/billing/patient_statement_confirm_delete.html:6
+msgid "Delete patient statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:3
+#: billing/templates/billing/patient_statement_detail.html:7
+msgid "Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:7
+msgid "Patient statements"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:11
+msgid "Statement details"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:13
+msgid "Statement date"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:15
+msgid "Service period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:16
+msgid "Delivery method"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:17
+msgid "Sent date"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:19
+msgid "Balance summary"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:20
+msgid "Previous balance"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:21
+msgid "Charges this period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:22
+msgid "Payments this period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:23
+msgid "Adjustments this period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:24
+msgid "Current balance"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:25
+msgid "Minimum due"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:28
+#: billing/templates/billing/patient_statement_form.html:101
+#: billing/templates/billing/payment_detail.html:21
+#: billing/templates/billing/payment_detail.html:25
+#: billing/templates/billing/payment_plan_form.html:86
+msgid "Notes"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:29
+msgid "Account service lines"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:30
+#: billing/templates/billing/payment_detail.html:25
+msgid "Service date"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_detail.html:33
+msgid "No service lines on this account."
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:4
+msgid "Edit Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:4
+#: billing/templates/billing/patient_statement_list.html:70
+msgid "Create Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:10
+msgid "Edit Patient Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:10
+msgid "Create Patient Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:26
+#: billing/templates/billing/patient_statement_list.html:82
+msgid "Statement Date"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:31
+#: billing/templates/billing/patient_statement_list.html:83
+msgid "Due Date"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:39
+msgid "Service Date From"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:44
+msgid "Service Date To"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:49
+#: billing/templates/billing/patient_statement_list.html:40
+msgid "Delivery Method"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:61
+msgid "Financial Summary"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:65
+#: billing/templates/billing/patient_statement_list.html:85
+msgid "Previous Balance"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:70
+msgid "Charges This Period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:75
+msgid "Payments This Period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:83
+msgid "Adjustments This Period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:93
+msgid "Minimum Payment Due"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_form.html:109
+msgid "Save Statement"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:4
+#: templates/layout.html:215
+msgid "Patient Statements"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:10
+msgid "Patient Billing Statements"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:18
+#: billing/templates/billing/patient_statement_list.html:32
+msgid "Sent"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:19
+#: billing/templates/billing/patient_statement_list.html:35
+#: billing/templates/billing/patient_statement_list.html:106
+msgid "Overdue"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:20
+msgid "Total Balance"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:34
+msgid "Partial"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:36
+msgid "Void"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:42
+msgid "All Methods"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:43
+msgid "Mail"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:44
+#: billing/templates/billing/payer_form.html:140
+#: patients/templates/patients/add_patient.html:122
+#: patients/templates/patients/delete_patient.html:77
+#: patients/templates/patients/edit_patient.html:339
+#: patients/templates/patients/patient_detail.html:135
+#: users/templates/users/login.html:31
+#: users/templates/users/manage_users.html:21
+msgid "Email"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:45
+msgid "Portal"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:58
+msgid "Statement # or Patient"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:80
+msgid "Statement Number"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:84
+msgid "Service Period"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:86
+msgid "Charges"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:87
+msgid "Payments"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:90
+msgid "Delivery"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:134
+msgid "Sent:"
+msgstr ""
+
+#: billing/templates/billing/patient_statement_list.html:171
+msgid "No patient statements found."
+msgstr ""
+
+#: billing/templates/billing/payer_confirm_delete.html:4
+#: billing/templates/billing/payer_confirm_delete.html:10
+msgid "Delete Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:30
+#: billing/templates/billing/payer_form.html:79
+msgid "Contact Information"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:35
+#: patients/templates/patients/add_patient.html:131
+#: patients/templates/patients/edit_patient.html:356
+#: patients/templates/patients/patient_detail.html:143
+msgid "Address"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:44
+msgid "Communication"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:59
+#: billing/templates/billing/payer_form.html:160
+msgid "EDI Configuration"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:64
+#: billing/templates/billing/payer_form.html:165
+msgid "EDI Qualifier"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:68
+#: billing/templates/billing/payer_form.html:173
+msgid "EDI Receiver ID"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:94
+#: billing/templates/billing/payer_form.html:44
+#: billing/templates/billing/payer_list.html:29
+msgid "Payer Type"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:98
+msgid "Patients Insured"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:107
+#: billing/templates/billing/payer_form.html:193
+msgid "Financial Settings"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:111
+#: billing/templates/billing/payer_form.html:198
+#: billing/templates/billing/payer_list.html:133
+msgid "Fee Schedule"
+msgstr ""
+
+#: billing/templates/billing/payer_detail.html:119
+#: billing/templates/billing/payer_form.html:205
+msgid "Default Copay"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:4
+#: billing/templates/billing/payer_form.html:15
+msgid "Edit Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:4
+#: billing/templates/billing/payer_list.html:15
+msgid "Add Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:15
+msgid "Add New Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:17
+msgid "Insurance company/payer information"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:20
+#: orders/templates/orders/order_detail.html:320
+#: patients/templates/patients/patient_detail.html:17
+msgid "Back to List"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:31
+msgid "Basic Information"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:36
+#: billing/templates/billing/payer_list.html:129
+msgid "Payer ID"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:41
+msgid "EDI payer identifier"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:51
+msgid "Full Name"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:58
+msgid "Short Name"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:84
+msgid "Address Line 1"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:91
+msgid "Address Line 2"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:98
+msgid "City"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:105
+msgid "State/Province"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:112
+msgid "Postal Code"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:119
+msgid "Country"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:126
+#: orders/templates/orders/order_detail.html:172
+#: patients/templates/patients/add_patient.html:115
+#: patients/templates/patients/delete_patient.html:73
+#: patients/templates/patients/edit_patient.html:324
+#: patients/templates/patients/patient_detail.html:127
+#: patients/templates/patients/patient_list.html:78
+msgid "Phone"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:133
+msgid "Fax"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:147
+msgid "Website"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:170
+msgid "e.g., PI, XV"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:224
+msgid "Update Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_form.html:224
+msgid "Create Payer"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:4
+#: billing/templates/billing/payer_list.html:11
+#: billing/templates/billing/payer_list.html:121
+#: dashboard/templates/dashboard/stats.html:221
+msgid "Insurance Payers"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:12
+msgid "Manage insurance companies and payers"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:26
+msgid "Name or Payer ID"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:31
+msgid "All Types"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:32
+#: billing/templates/billing/payer_list.html:94
+msgid "Commercial"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:33
+msgid "Medicare"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:34
+msgid "Medicaid"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:35
+msgid "Self Pay"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:36
+msgid "Workers' Comp"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:37
+msgid "Tricare"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:38
+#: orders/templates/orders/add_order.html:1045
+#: patients/templates/patients/add_patient.html:60
+#: patients/templates/patients/add_patient.html:109
+#: patients/templates/patients/edit_patient.html:180
+#: patients/templates/patients/edit_patient.html:316
+#: patients/templates/patients/patient_detail.html:112
+#: patients/templates/patients/patient_list.html:107
+msgid "Other"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:44
+#: reports/templates/reports/report_list.html:77
+msgid "All"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:54
+msgid "Clear"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:68
+msgid "Total Payers"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:107
+msgid "Government"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:122
+msgid "records"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:131
+msgid "Type"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:132
+msgid "Contact"
+msgstr ""
+
+#: billing/templates/billing/payer_list.html:187
+msgid "No payers found"
+msgstr ""
+
+#: billing/templates/billing/payment_allocation_confirm_delete.html:3
+#: billing/templates/billing/payment_allocation_confirm_delete.html:6
+msgid "Remove payment allocation"
+msgstr ""
+
+#: billing/templates/billing/payment_allocation_form.html:3
+#: billing/templates/billing/payment_allocation_form.html:6
+msgid "Edit payment allocation"
+msgstr ""
+
+#: billing/templates/billing/payment_allocation_form.html:3
+#: billing/templates/billing/payment_allocation_form.html:6
+#: billing/templates/billing/payment_detail.html:8
+msgid "Allocate payment"
+msgstr ""
+
+#: billing/templates/billing/payment_allocation_form.html:7
+msgid "Save allocation"
+msgstr ""
+
+#: billing/templates/billing/payment_confirm_delete.html:3
+#: billing/templates/billing/payment_confirm_delete.html:6
+msgid "Delete patient payment"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:3
+#: billing/templates/billing/payment_detail.html:7
+msgid "Payment details"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:7
+msgid "Patient payments"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:11
+msgid "Transaction"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:13
+msgid "Payment date"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:16
+#: billing/templates/billing/payment_posting_detail.html:17
+msgid "Check number"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:17
+msgid "Card"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:18
+msgid "Transaction ID"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:19
+#: billing/templates/billing/payment_list.html:54
+msgid "Received by"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:20
+msgid "Unapplied amount"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:24
+msgid "Allocations"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:25
+msgid "Allocated amount"
+msgstr ""
+
+#: billing/templates/billing/payment_detail.html:29
+msgid "This payment has not been allocated to service lines."
+msgstr ""
+
+#: billing/templates/billing/payment_detail_confirm_delete.html:3
+#: billing/templates/billing/payment_detail_confirm_delete.html:6
+msgid "Delete payment detail"
+msgstr ""
+
+#: billing/templates/billing/payment_detail_form.html:3
+#: billing/templates/billing/payment_detail_form.html:6
+msgid "Edit payment detail"
+msgstr ""
+
+#: billing/templates/billing/payment_detail_form.html:3
+#: billing/templates/billing/payment_detail_form.html:6
+#: billing/templates/billing/payment_posting_detail.html:8
+msgid "Add payment detail"
+msgstr ""
+
+#: billing/templates/billing/payment_detail_form.html:7
+msgid "Save detail"
+msgstr ""
+
+#: billing/templates/billing/payment_form.html:3
+#: billing/templates/billing/payment_form.html:6
+msgid "Edit patient payment"
+msgstr ""
+
+#: billing/templates/billing/payment_form.html:3
+#: billing/templates/billing/payment_form.html:6
+msgid "Record patient payment"
+msgstr ""
+
+#: billing/templates/billing/payment_form.html:7
+msgid "Save payment"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:4
+#: billing/templates/billing/payment_list.html:10 templates/layout.html:210
+msgid "Patient Payments"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:11
+msgid "Review and manage patient payment transactions."
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:14
+msgid "Record Payment"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:21
+msgid "Today's collections"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:30
+#: billing/templates/billing/payment_posting_detail.html:15
+msgid "Payment method"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:32
+#: billing/templates/billing/payment_posting_list.html:17
+msgid "All methods"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:40
+msgid "Check number or transaction ID"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:44
+#: billing/templates/billing/payment_posting_list.html:19
+msgid "Clear filters"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:53
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Reference"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:54
+msgid "Unapplied"
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:71
+msgid "No payments match your filters."
+msgstr ""
+
+#: billing/templates/billing/payment_list.html:78
+msgid "Payment pages"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_confirm_delete.html:3
+#: billing/templates/billing/payment_plan_confirm_delete.html:6
+msgid "Delete payment plan"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:3
+#: billing/templates/billing/payment_plan_detail.html:7
+msgid "Payment plan"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:7
+msgid "Payment plans"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:11
+msgid "Plan terms"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:13
+msgid "Total amount"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:14
+msgid "Monthly payment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:15
+msgid "First payment date"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:16
+msgid "Payment day"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:17
+msgid "Agreement signed"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:19
+#: billing/templates/billing/payment_plan_list.html:76
+msgid "Progress"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:20
+#, python-format
+msgid "%(paid)s of %(total)s installments paid"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:22
+msgid "Plan progress"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:23
+msgid "Remaining balance"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:27
+msgid "Installments"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Amount due"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Amount paid"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:28
+msgid "Payment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:32
+msgid "Update"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_detail.html:33
+msgid "No installments are scheduled."
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:4
+#: billing/templates/billing/payment_plan_form.html:10
+msgid "Edit Payment Plan"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:4
+#: billing/templates/billing/payment_plan_form.html:10
+#: billing/templates/billing/payment_plan_list.html:61
+msgid "Create Payment Plan"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:19
+msgid "Plan Details"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:28
+msgid "First Payment Date"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:33
+msgid "Payment Day of Month"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:35
+msgid "Day (1-28)"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:41
+msgid "Financial Terms"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:45
+#: billing/templates/billing/payment_plan_list.html:73
+msgid "Total Amount"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:50
+msgid "Remaining Balance"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:55
+#: billing/templates/billing/payment_plan_list.html:74
+msgid "Monthly Payment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:63
+msgid "Number of Payments"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:68
+msgid "Agreement Signed"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:72
+msgid "Patient has signed the agreement"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:78
+msgid "Agreement Date"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:94
+msgid ""
+"Installments will be automatically generated based on the plan terms when "
+"you create the payment plan."
+msgstr ""
+
+#: billing/templates/billing/payment_plan_form.html:99
+msgid "Save Payment Plan"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_installment_form.html:3
+msgid "Update installment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_installment_form.html:6
+msgid "Update payment plan installment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_installment_form.html:7
+msgid "Save installment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:4 templates/layout.html:220
+msgid "Payment Plans"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:10
+msgid "Patient Payment Plans"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:16
+msgid "Total Plans"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:18
+#: billing/templates/billing/payment_plan_list.html:42
+#: orders/templates/orders/delete_order.html:85
+#: orders/templates/orders/order_detail.html:67
+#: orders/templates/orders/worklist.html:262
+msgid "Completed"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:19
+#: billing/templates/billing/payment_plan_list.html:43
+msgid "Defaulted"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:26
+msgid "Total Remaining Balance"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:44
+#: orders/templates/orders/delete_order.html:97
+#: orders/templates/orders/order_detail.html:79
+#: orders/templates/orders/worklist.html:274
+msgid "Cancelled"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:49
+msgid "Patient MRN or Name"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:72
+#: patients/templates/patients/patient_detail.html:281
+#: reports/templates/reports/report_detail.html:46
+#: reports/templates/reports/report_list.html:140
+#: reports/templates/reports/study_reports.html:71
+msgid "Created"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:75
+msgid "Remaining"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:77
+msgid "First Payment"
+msgstr ""
+
+#: billing/templates/billing/payment_plan_list.html:152
+msgid "No payment plans found."
+msgstr ""
+
+#: billing/templates/billing/payment_posting_confirm_delete.html:3
+#: billing/templates/billing/payment_posting_confirm_delete.html:6
+msgid "Delete payment posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:3
+#: billing/templates/billing/payment_posting_detail.html:7
+msgid "Payment posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:11
+msgid "Remittance"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:14
+#: billing/templates/billing/payment_posting_list.html:23
+msgid "Posting date"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:18
+msgid "ERA trace"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:19
+msgid "Posted by"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:22
+msgid "Claim line adjudication"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Deductible"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Copay"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Coinsurance"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:23
+msgid "Denial"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_detail.html:28
+msgid "No payment details have been posted for this remittance."
+msgstr ""
+
+#: billing/templates/billing/payment_posting_error.html:3
+#: billing/templates/billing/payment_posting_error.html:6
+msgid "Payment posting action unavailable"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_error.html:8
+msgid "Return to payment postings"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_form.html:3
+#: billing/templates/billing/payment_posting_form.html:6
+msgid "Edit payment posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_form.html:3
+msgid "New payment posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_form.html:6
+msgid "Record payment posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_form.html:7
+msgid "Save posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:7
+msgid "Review remittances and reconcile payer payments."
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:8
+msgid "Upload ERA"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:8
+msgid "Add posting"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:11
+msgid "Unposted"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:12
+msgid "Posted"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:16
+msgid "All statuses"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:18
+msgid "Check / ERA trace"
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:35
+msgid "No payment postings found."
+msgstr ""
+
+#: billing/templates/billing/payment_posting_list.html:38
+msgid "Payment posting pages"
+msgstr ""
+
+#: billing/templates/billing/service_line_confirm_delete.html:3
+#: billing/templates/billing/service_line_confirm_delete.html:6
+msgid "Delete service line"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:7
+msgid "Service lines"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:11
+msgid "Service details"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:12
+msgid "Date of service"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:14
+msgid "Exam order"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:15
+msgid "Billing status"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:17
+msgid "Rendering provider"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:18
+#: billing/templates/billing/service_line_form.html:139
+#: dashboard/templates/dashboard/stats.html:414
+#: orders/templates/orders/add_order.html:181
+#: orders/templates/orders/edit_order.html:171
+#: orders/templates/orders/order_detail.html:273
+msgid "Facility"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:20
+msgid "Charge details"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:21
+#: billing/templates/billing/service_line_form.html:98
+msgid "Quantity"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:22
+msgid "Unit price"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:23
+msgid "Total charge"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:24
+msgid "Place of service"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:25
+msgid "Diagnosis codes"
+msgstr ""
+
+#: billing/templates/billing/service_line_detail.html:26
+msgid "Modifiers"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:4
+#: billing/templates/billing/service_line_form.html:10
+msgid "Edit Service Line"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:4
+#: billing/templates/billing/service_line_form.html:10
+#: billing/templates/billing/service_line_list.html:97
+msgid "Add Service Line"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:21
+msgid "Exam Order"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:39
+#: billing/templates/billing/service_line_list.html:110
+#: orders/templates/orders/add_order.html:234
+#: orders/templates/orders/edit_order.html:228
+#: orders/templates/orders/order_detail.html:201
+msgid "Procedure Code"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:44
+#: billing/templates/billing/service_line_list.html:111
+msgid "Procedure Name"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:103
+msgid "Units of Service"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:108
+#: billing/templates/billing/service_line_list.html:114
+msgid "Unit Price"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:113
+#: billing/templates/billing/service_line_list.html:115
+msgid "Total Charge"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:121
+#: billing/templates/billing/service_line_list.html:117
+msgid "Rendering Provider"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:126
+msgid "Supervising Provider"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:131
+msgid "Place of Service"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:144
+#: orders/templates/orders/order_detail.html:300
+msgid "Billing Status"
+msgstr ""
+
+#: billing/templates/billing/service_line_form.html:151
+msgid "Audit Notes"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:4 templates/layout.html:191
+msgid "Service Lines"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:10
+msgid "Service Lines (Charge Capture)"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:27
+msgid "Pending"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:35
+msgid "Ready"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:43
+#: billing/templates/billing/service_line_list.html:68
+msgid "Billed"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:66
+msgid "Pending Review"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:67
+msgid "Ready to Bill"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:83
+msgid "Procedure code or name"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:113
+msgid "Qty"
+msgstr ""
+
+#: billing/templates/billing/service_line_list.html:153
+msgid "No service lines found."
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:4
+msgid "Dashboard - App Statistics"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:93 templates/layout.html:111
+msgid "Dashboard"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:95
+msgid "Refresh"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:107 templates/layout.html:123
+msgid "Patients"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:122
+#: dashboard/templates/dashboard/stats.html:416
+msgid "Orders"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:137
+#: reports/templates/reports/study_reports.html:55 templates/layout.html:135
+msgid "Reports"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:170
+msgid "Facilities"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:187
+#: dashboard/templates/dashboard/stats.html:415
+msgid "Devices"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:204
+msgid "Modalities"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:238
+msgid "Today's Activity"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:246
+msgid "New Orders"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:253
+msgid "Reports Completed"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:265
+msgid "Last 7 Days"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:272
+msgid "Total Orders"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:278
+msgid "Total Reports"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:293
+msgid "Orders Trend (Last 30 Days)"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:307
+msgid "Order Status"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:324
+msgid "Orders by Modality"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:338
+msgid "Claims Status"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:354
+msgid "Billing Overview"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:360
+msgid "Total Billed"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:366
+msgid "Total Paid"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:372
+msgid "Pending Claims"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:378
+msgid "Denied Claims"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:391
+msgid "Top Payers by Revenue"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:407
+msgid "Top Facilities by Volume"
+msgstr ""
+
+#: dashboard/templates/dashboard/stats.html:431
+msgid "No facility data available"
+msgstr ""
+
+#: orders/templates/orders/_device_options.html:5
+msgid "Select a device"
+msgstr ""
+
+#: orders/templates/orders/_device_options.html:12
+msgid "No devices available"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:1
+msgid "Order Reservation"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:9
+msgid "Reserve Exam Order"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:16
+#: reports/templates/reports/study_reports.html:21
+msgid "Back to Worklist"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:31
+#: orders/templates/orders/edit_order.html:27
+#: orders/templates/orders/order_detail.html:119
+#: patients/templates/patients/add_patient.html:27
+#: patients/templates/patients/edit_patient.html:42
+#: patients/templates/patients/patient_detail.html:51
+msgid "Patient Information"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:40
+msgid "Search Patient"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:53
+#: orders/templates/orders/add_order.html:1140
+msgid "Type MRN, name, or national ID to search..."
+msgstr ""
+
+#: orders/templates/orders/add_order.html:62
+msgid "Clear search"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:77
+msgid ""
+"Start typing to search patients. You can search by MRN, name (English or "
+"Arabic), or national ID."
+msgstr ""
+
+#: orders/templates/orders/add_order.html:104
+msgid "Select different patient"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:107
+msgid "Change"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:126
+#: orders/templates/orders/edit_order.html:87
+#: orders/templates/orders/order_detail.html:10
+msgid "Order Details"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:135
+#: orders/templates/orders/delete_order.html:51
+#: orders/templates/orders/edit_order.html:96
+#: orders/templates/orders/order_detail.html:42
+#: reports/templates/reports/report_verify.html:26
+msgid "Accession Number"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:143
+#: orders/templates/orders/edit_order.html:106
+msgid "Enter accession number"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:154
+#: orders/templates/orders/edit_order.html:113
+#: orders/templates/orders/order_detail.html:86
+#: orders/templates/orders/worklist.html:96
+#: orders/templates/orders/worklist.html:203
+msgid "Priority"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:164
+#: orders/templates/orders/order_detail.html:99
+#: orders/templates/orders/worklist.html:243
+msgid "Routine"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:167
+#: orders/templates/orders/order_detail.html:95
+#: orders/templates/orders/worklist.html:239
+msgid "Urgent"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:170
+msgid "Stat"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:193
+msgid "Select a facility"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:208
+msgid "Device"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:223
+msgid "Select a facility first"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:244
+msgid "Select procedure code"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:246
+msgid "CT Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:249
+msgid "CT Head without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:252
+msgid "CT Head with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:255
+msgid "CT Chest without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:258
+msgid "CT Chest with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:261
+msgid "CT Abdomen without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:264
+msgid "CT Abdomen with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:267
+msgid "CT Pelvis without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:270
+msgid "CT Pelvis with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:273
+msgid "CT Cervical spine with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:276
+msgid "CT Angiography"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:279
+msgid "MR Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:282
+msgid "MRI Brain without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:285
+msgid "MRI Brain with contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:288
+msgid "MRI Cervical spine without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:291
+msgid "MRI Thoracic spine without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:294
+msgid "MRI Lumbar spine without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:297
+msgid "MRI Knee without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:300
+msgid "MRI Shoulder without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:303
+msgid "MRI Joint without contrast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:306
+msgid "MR Angiography"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:309
+msgid "X-Ray Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:312
+msgid "Chest X-Ray"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:315
+msgid "X-Ray Skull"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:318
+msgid "X-Ray Ribs"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:321
+msgid "X-Ray Cervical spine"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:324
+msgid "X-Ray Thoracic spine"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:327
+msgid "X-Ray Lumbar spine"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:330
+msgid "X-Ray Pelvis"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:333
+msgid "X-Ray Hip"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:336
+msgid "X-Ray Femur"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:339
+msgid "X-Ray Knee"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:342
+msgid "X-Ray Tibia/Fibula"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:345
+msgid "X-Ray Ankle"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:348
+msgid "X-Ray Foot"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:351
+msgid "X-Ray Shoulder"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:354
+msgid "X-Ray Humerus"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:357
+msgid "X-Ray Elbow"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:360
+msgid "X-Ray Forearm"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:363
+msgid "X-Ray Wrist"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:366
+msgid "X-Ray Hand"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:369
+msgid "X-Ray Finger"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:372
+msgid "Mammography"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:375
+msgid "Ultrasound Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:378
+msgid "Ultrasound Abdomen"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:381
+msgid "Ultrasound Pelvis"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:384
+msgid "Ultrasound Obstetric"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:387
+msgid "Ultrasound Thyroid"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:390
+msgid "Ultrasound Breast"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:393
+msgid "Ultrasound Scrotal"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:396
+msgid "Ultrasound Doppler"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:399
+msgid "Echocardiography"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:402
+msgid "Nuclear Medicine Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:405
+msgid "Bone Scan"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:408
+msgid "Cardiac Stress Test"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:411
+msgid "Thyroid Scan"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:414
+msgid "Lung Perfusion/Ventilation"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:417
+msgid "Renal Scan"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:420
+msgid "Hepatobiliary Scan"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:423
+msgid "PET Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:426
+msgid "PET-CT Whole Body"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:429
+msgid "PET Brain"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:436
+msgid "Barium Swallow/Meal"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:439
+msgid "Barium Enema"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:442
+msgid "IVP/Urogram"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:445
+msgid "Hysterosalpingography"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:448
+msgid "VCUG"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:451
+msgid "Interventional Procedures"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:454
+msgid "Image-guided Biopsy"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:457
+msgid "Image-guided Drainage"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:460
+msgid "Image-guided Injection"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:472
+#: orders/templates/orders/edit_order.html:262
+#: orders/templates/orders/order_detail.html:207
+msgid "Procedure Name (English)"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:480
+#: orders/templates/orders/edit_order.html:272
+msgid "Enter procedure name in English"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:492
+#: orders/templates/orders/order_detail.html:214
+msgid "Procedure Name (Arabic)"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:500
+#: orders/templates/orders/edit_order.html:290
+msgid "أدخل اسم الإجراء بالعربية"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:511
+#: orders/templates/orders/edit_order.html:300
+#: orders/templates/orders/order_detail.html:267
+#: reports/templates/reports/report_detail.html:88
+msgid "Referring Physician"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:518
+msgid "Enter physician name"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:528
+#: orders/templates/orders/edit_order.html:315
+#: orders/templates/orders/order_detail.html:221
+msgid "Laterality"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:536
+msgid "Not Applicable"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:539
+#: orders/templates/orders/edit_order.html:335
+#: orders/templates/orders/order_detail.html:224
+msgid "Left"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:542
+#: orders/templates/orders/edit_order.html:347
+#: orders/templates/orders/order_detail.html:224
+msgid "Right"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:545
+#: orders/templates/orders/edit_order.html:359
+#: orders/templates/orders/order_detail.html:225
+msgid "Bilateral"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:556
+#: orders/templates/orders/edit_order.html:367
+#: orders/templates/orders/order_detail.html:230
+msgid "Body Part"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:563
+msgid "e.g., Head, Knee, Chest"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:570
+#: orders/templates/orders/edit_order.html:382
+#: orders/templates/orders/order_detail.html:236
+msgid "Contrast Required"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:583
+msgid "Yes, contrast is required"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:594
+msgid "Clinical Information"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:603
+#: orders/templates/orders/edit_order.html:442
+#: orders/templates/orders/order_detail.html:307
+msgid "Clinical Indication"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:610
+msgid "Describe clinical symptoms, diagnosis, or reason for examination..."
+msgstr ""
+
+#: orders/templates/orders/add_order.html:619
+msgid "Scheduling"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:628
+msgid "Scheduled Date & Time"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:644
+#: orders/templates/orders/edit_order.html:424
+#: orders/templates/orders/order_detail.html:294
+msgid "Duration (minutes)"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:663
+msgid "Room / Station"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:671
+msgid "Auto-assign"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:674
+msgid "Room 1"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:677
+msgid "Room 2"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:680
+msgid "Room 3"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:696
+msgid "Clear Form"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:701
+msgid "Reserve Order"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:765
+msgid "Please select a patient first"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:1042
+#: orders/templates/orders/order_detail.html:165
+#: patients/templates/patients/add_patient.html:107
+#: patients/templates/patients/delete_patient.html:65
+#: patients/templates/patients/edit_patient.html:292
+#: patients/templates/patients/patient_detail.html:104
+#: patients/templates/patients/patient_list.html:99
+msgid "Male"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:1044
+#: orders/templates/orders/order_detail.html:166
+#: patients/templates/patients/add_patient.html:108
+#: patients/templates/patients/delete_patient.html:67
+#: patients/templates/patients/edit_patient.html:304
+#: patients/templates/patients/patient_detail.html:108
+#: patients/templates/patients/patient_list.html:103
+msgid "Female"
+msgstr ""
+
+#: orders/templates/orders/add_order.html:1117
+msgid "Patient selected - click Change to select different"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:1
+#: orders/templates/orders/delete_order.html:9
+msgid "Delete Order"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:16
+#: orders/templates/orders/edit_order.html:14
+#: orders/templates/orders/order_detail.html:18
+msgid "Order List"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:25
+#: patients/templates/patients/delete_patient.html:25
+msgid "Confirm Deletion"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:32
+#: patients/templates/patients/delete_patient.html:32
+#: reports/templates/reports/report_confirm_delete.html:26
+msgid "Warning:"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:38
+msgid "Are you sure you want to delete order"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:46
+msgid "Order Summary"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:56
+#: orders/templates/orders/edit_order.html:36
+msgid "Patient MRN"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:60
+#: patients/templates/patients/delete_patient.html:53
+#: reports/templates/reports/report_form.html:261
+msgid "Patient Name"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:67
+#: orders/templates/orders/order_detail.html:193
+#: orders/templates/orders/worklist.html:70
+#: orders/templates/orders/worklist.html:201
+#: reports/templates/reports/report_detail.html:80
+#: reports/templates/reports/report_form.html:273
+#: reports/templates/reports/report_list.html:62
+#: reports/templates/reports/report_list.html:136
+#: reports/templates/reports/study_reports.html:32
+msgid "Modality"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:73
+#: orders/templates/orders/order_detail.html:55
+#: orders/templates/orders/worklist.html:250
+msgid "Registered"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:77
+#: orders/templates/orders/order_detail.html:59
+#: orders/templates/orders/worklist.html:205
+#: orders/templates/orders/worklist.html:254
+msgid "Scheduled"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:81
+#: orders/templates/orders/order_detail.html:63
+#: orders/templates/orders/worklist.html:258
+msgid "In Progress"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:89
+#: orders/templates/orders/order_detail.html:71
+#: orders/templates/orders/worklist.html:266
+msgid "Reported"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:93
+#: orders/templates/orders/order_detail.html:75
+#: orders/templates/orders/worklist.html:270
+#: reports/templates/reports/report_detail.html:55
+msgid "Finalized"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:102
+#: orders/templates/orders/order_detail.html:106
+#: patients/templates/patients/delete_patient.html:85
+msgid "Created At"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:118
+#: patients/templates/patients/delete_patient.html:101
+msgid "Back to Details"
+msgstr ""
+
+#: orders/templates/orders/delete_order.html:131
+msgid "Yes, Delete Order"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:1
+#: orders/templates/orders/edit_order.html:8
+#: orders/templates/orders/order_detail.html:24
+msgid "Edit Order"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:46
+msgid "Enter patient MRN"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:49
+msgid "Enter the patient MRN to lookup"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:59
+msgid "Lookup Patient"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:179
+msgid "Select Facility"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:201
+msgid "Device/Room"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:212
+msgid "Select Device"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:238
+msgid "Select Procedure"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:308
+msgid "Enter referring physician name"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:323
+#: patients/templates/patients/add_patient.html:53
+#: patients/templates/patients/add_patient.html:106
+#: patients/templates/patients/edit_patient.html:96
+#: patients/templates/patients/edit_patient.html:280
+msgid "Select"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:375
+msgid "Enter body part"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:410
+#: orders/templates/orders/order_detail.html:285
+msgid "Scheduled DateTime"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:449
+msgid "Enter clinical indication or reason for exam"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:473
+msgid "Save Changes"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:495
+msgid "Please enter an MRN"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:512
+msgid "Patient not found"
+msgstr ""
+
+#: orders/templates/orders/edit_order.html:521
+msgid "Error looking up patient"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:34
+msgid "Order Information"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:91
+#: orders/templates/orders/worklist.html:235
+msgid "STAT"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:127
+#: patients/templates/patients/add_patient.html:33
+#: patients/templates/patients/delete_patient.html:49
+#: patients/templates/patients/edit_patient.html:51
+#: patients/templates/patients/patient_detail.html:59
+#: patients/templates/patients/patient_list.html:73
+#: reports/templates/reports/report_detail.html:76
+#: reports/templates/reports/report_form.html:265
+#: reports/templates/reports/report_verify.html:34
+msgid "MRN"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:138
+msgid "Name (English)"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:147
+msgid "Name (Arabic)"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:156
+#: patients/templates/patients/add_patient.html:96
+#: patients/templates/patients/delete_patient.html:58
+#: patients/templates/patients/edit_patient.html:254
+#: patients/templates/patients/patient_detail.html:91
+msgid "Date of Birth"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:162
+#: patients/templates/patients/add_patient.html:103
+#: patients/templates/patients/delete_patient.html:63
+#: patients/templates/patients/edit_patient.html:270
+#: patients/templates/patients/patient_detail.html:99
+#: patients/templates/patients/patient_list.html:77
+msgid "Gender"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:185
+msgid "Procedure Information"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:259
+msgid "Additional Information"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:279
+msgid "Room/Station"
+msgstr ""
+
+#: orders/templates/orders/order_detail.html:328
+#: orders/templates/orders/worklist.html:297
+msgid "View Reports"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:8 templates/layout.html:100
+msgid "Worklist"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:11
+msgid "Add New Order"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:37
+msgid "Accession, MRN, Patient, Procedure"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:74
+#: reports/templates/reports/report_list.html:64
+msgid "All Modalities"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:100
+msgid "All Priorities"
+msgstr ""
+
+#: orders/templates/orders/worklist.html:163
+#: reports/templates/reports/report_list.html:107
 msgid "Clear All Filters"
 msgstr ""
 
-#: templates/orders/worklist.html:166 templates/reports/report_list.html:110
+#: orders/templates/orders/worklist.html:166
+#: reports/templates/reports/report_list.html:110
 msgid "Active filters:"
 msgstr ""
 
-#: templates/orders/worklist.html:199 templates/reports/report_list.html:134
+#: orders/templates/orders/worklist.html:199
+#: reports/templates/reports/report_list.html:134
 msgid "Accession #"
 msgstr ""
 
-#: templates/orders/worklist.html:200 templates/reports/report_detail.html:72
-#: templates/reports/report_list.html:135
-#: templates/reports/study_reports.html:28
+#: orders/templates/orders/worklist.html:200
+#: reports/templates/reports/report_detail.html:72
+#: reports/templates/reports/report_list.html:135
+#: reports/templates/reports/report_verify.html:30
+#: reports/templates/reports/study_reports.html:28
 msgid "Patient"
 msgstr ""
 
-#: templates/orders/worklist.html:327
+#: orders/templates/orders/worklist.html:327
 msgid "No orders found"
 msgstr ""
 
-#: templates/orders/worklist.html:331 templates/reports/report_list.html:210
+#: orders/templates/orders/worklist.html:331
+#: reports/templates/reports/report_list.html:213
 msgid "Try adjusting your filter criteria"
 msgstr ""
 
-#: templates/orders/worklist.html:332
+#: orders/templates/orders/worklist.html:332
 msgid "Get started by adding your first order"
 msgstr ""
 
-#: templates/orders/worklist.html:353
+#: orders/templates/orders/worklist.html:353
 #, python-format
 msgid ""
 " Showing {{\n"
@@ -1338,341 +3178,387 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/patients/add_patient.html:4
-#: templates/patients/patient_list.html:153
+#: orders/views.py:95 orders/views.py:248
+msgid "Please enter a valid MRN"
+msgstr ""
+
+#: orders/views.py:99 orders/views.py:252
+msgid "Accession number is required"
+msgstr ""
+
+#: orders/views.py:103 orders/views.py:256
+msgid "Procedure code and name are required"
+msgstr ""
+
+#: orders/views.py:113 orders/views.py:266
+#, python-format
+msgid "Patient with MRN %(mrn)s not found"
+msgstr ""
+
+#: orders/views.py:122 orders/views.py:277
+msgid "An order with this accession number already exists"
+msgstr ""
+
+#: orders/views.py:134 orders/views.py:289
+msgid "Selected device not found"
+msgstr ""
+
+#: orders/views.py:169
+#, python-format
+msgid "Order created successfully! Accession: %(acc)s"
+msgstr ""
+
+#: orders/views.py:175
+#, python-format
+msgid "Error creating order: %(error)s"
+msgstr ""
+
+#: orders/views.py:323
+msgid "Order updated successfully!"
+msgstr ""
+
+#: orders/views.py:327
+#, python-format
+msgid "Error updating order: %(error)s"
+msgstr ""
+
+#: orders/views.py:380
+msgid "Order deleted successfully!"
+msgstr ""
+
+#: orders/views.py:384
+#, python-format
+msgid "Error deleting order: %(error)s"
+msgstr ""
+
+#: patients/templates/patients/add_patient.html:4
+#: patients/templates/patients/patient_list.html:153
 msgid "Add Patient"
 msgstr ""
 
-#: templates/patients/add_patient.html:13
-#: templates/patients/patient_list.html:16
+#: patients/templates/patients/add_patient.html:13
+#: patients/templates/patients/patient_list.html:16
 msgid "Add New Patient"
 msgstr ""
 
-#: templates/patients/add_patient.html:16
-#: templates/patients/delete_patient.html:16
-#: templates/patients/edit_patient.html:27
-#: templates/patients/patient_list.html:9
+#: patients/templates/patients/add_patient.html:16
+#: patients/templates/patients/delete_patient.html:16
+#: patients/templates/patients/edit_patient.html:27
+#: patients/templates/patients/patient_list.html:9
 msgid "Patient List"
 msgstr ""
 
-#: templates/patients/add_patient.html:36
-#: templates/patients/edit_patient.html:61
+#: patients/templates/patients/add_patient.html:36
+#: patients/templates/patients/edit_patient.html:61
 msgid "Enter MRN"
 msgstr ""
 
-#: templates/patients/add_patient.html:44
-#: templates/patients/edit_patient.html:73
-#: templates/patients/partials/search_results.html:11
-#: templates/patients/patient_detail.html:67
-#: templates/patients/patient_list.html:79
+#: patients/templates/patients/add_patient.html:44
+#: patients/templates/patients/edit_patient.html:73
+#: patients/templates/patients/partials/search_results.html:11
+#: patients/templates/patients/patient_detail.html:67
+#: patients/templates/patients/patient_list.html:79
 msgid "National ID"
 msgstr ""
 
-#: templates/patients/add_patient.html:46
-#: templates/patients/edit_patient.html:81
+#: patients/templates/patients/add_patient.html:46
+#: patients/templates/patients/edit_patient.html:81
 msgid "Enter National ID"
 msgstr ""
 
-#: templates/patients/add_patient.html:51
-#: templates/patients/delete_patient.html:81
-#: templates/patients/edit_patient.html:88
-#: templates/patients/patient_detail.html:119
+#: patients/templates/patients/add_patient.html:51
+#: patients/templates/patients/delete_patient.html:81
+#: patients/templates/patients/edit_patient.html:88
+#: patients/templates/patients/patient_detail.html:119
 msgid "Nationality"
 msgstr ""
 
-#: templates/patients/add_patient.html:54
-#: templates/patients/edit_patient.html:108
+#: patients/templates/patients/add_patient.html:54
+#: patients/templates/patients/edit_patient.html:108
 msgid "Saudi Arabia"
 msgstr ""
 
-#: templates/patients/add_patient.html:55
-#: templates/patients/edit_patient.html:120
+#: patients/templates/patients/add_patient.html:55
+#: patients/templates/patients/edit_patient.html:120
 msgid "Egypt"
 msgstr ""
 
-#: templates/patients/add_patient.html:56
-#: templates/patients/edit_patient.html:132
+#: patients/templates/patients/add_patient.html:56
+#: patients/templates/patients/edit_patient.html:132
 msgid "India"
 msgstr ""
 
-#: templates/patients/add_patient.html:57
-#: templates/patients/edit_patient.html:144
+#: patients/templates/patients/add_patient.html:57
+#: patients/templates/patients/edit_patient.html:144
 msgid "Pakistan"
 msgstr ""
 
-#: templates/patients/add_patient.html:58
-#: templates/patients/edit_patient.html:156
+#: patients/templates/patients/add_patient.html:58
+#: patients/templates/patients/edit_patient.html:156
 msgid "Philippines"
 msgstr ""
 
-#: templates/patients/add_patient.html:59
-#: templates/patients/edit_patient.html:168
+#: patients/templates/patients/add_patient.html:59
+#: patients/templates/patients/edit_patient.html:168
 msgid "Bangladesh"
 msgstr ""
 
-#: templates/patients/add_patient.html:66
-#: templates/patients/edit_patient.html:188
+#: patients/templates/patients/add_patient.html:66
+#: patients/templates/patients/edit_patient.html:188
 msgid "First Name (English)"
 msgstr ""
 
-#: templates/patients/add_patient.html:69
-#: templates/patients/edit_patient.html:198
+#: patients/templates/patients/add_patient.html:69
+#: patients/templates/patients/edit_patient.html:198
 msgid "First Name"
 msgstr ""
 
-#: templates/patients/add_patient.html:74
-#: templates/patients/edit_patient.html:205
+#: patients/templates/patients/add_patient.html:74
+#: patients/templates/patients/edit_patient.html:205
 msgid "Last Name (English)"
 msgstr ""
 
-#: templates/patients/add_patient.html:77
-#: templates/patients/edit_patient.html:215
+#: patients/templates/patients/add_patient.html:77
+#: patients/templates/patients/edit_patient.html:215
 msgid "Last Name"
 msgstr ""
 
-#: templates/patients/add_patient.html:82
-#: templates/patients/edit_patient.html:222
+#: patients/templates/patients/add_patient.html:82
+#: patients/templates/patients/edit_patient.html:222
 msgid "First Name (Arabic)"
 msgstr ""
 
-#: templates/patients/add_patient.html:84
-#: templates/patients/edit_patient.html:230
+#: patients/templates/patients/add_patient.html:84
+#: patients/templates/patients/edit_patient.html:230
 msgid "الاسم الأول"
 msgstr ""
 
-#: templates/patients/add_patient.html:89
-#: templates/patients/edit_patient.html:238
+#: patients/templates/patients/add_patient.html:89
+#: patients/templates/patients/edit_patient.html:238
 msgid "Last Name (Arabic)"
 msgstr ""
 
-#: templates/patients/add_patient.html:91
-#: templates/patients/edit_patient.html:246
+#: patients/templates/patients/add_patient.html:91
+#: patients/templates/patients/edit_patient.html:246
 msgid "اسم العائلة"
 msgstr ""
 
-#: templates/patients/add_patient.html:117
-#: templates/patients/edit_patient.html:332
+#: patients/templates/patients/add_patient.html:117
+#: patients/templates/patients/edit_patient.html:332
 msgid "Enter phone number"
 msgstr ""
 
-#: templates/patients/add_patient.html:124
-#: templates/patients/edit_patient.html:347
+#: patients/templates/patients/add_patient.html:124
+#: patients/templates/patients/edit_patient.html:347
 msgid "Enter email address"
 msgstr ""
 
-#: templates/patients/add_patient.html:133
-#: templates/patients/edit_patient.html:363
+#: patients/templates/patients/add_patient.html:133
+#: patients/templates/patients/edit_patient.html:363
 msgid "Enter full address"
 msgstr ""
 
-#: templates/patients/add_patient.html:142
-#: templates/patients/edit_patient.html:376
-#: templates/patients/patient_detail.html:158
+#: patients/templates/patients/add_patient.html:142
+#: patients/templates/patients/edit_patient.html:376
+#: patients/templates/patients/patient_detail.html:158
 msgid "Emergency Contact"
 msgstr ""
 
-#: templates/patients/add_patient.html:147
-#: templates/patients/edit_patient.html:386
-#: templates/patients/patient_detail.html:166
+#: patients/templates/patients/add_patient.html:147
+#: patients/templates/patients/edit_patient.html:386
+#: patients/templates/patients/patient_detail.html:166
 msgid "Contact Name"
 msgstr ""
 
-#: templates/patients/add_patient.html:149
-#: templates/patients/edit_patient.html:394
+#: patients/templates/patients/add_patient.html:149
+#: patients/templates/patients/edit_patient.html:394
 msgid "Enter contact name"
 msgstr ""
 
-#: templates/patients/add_patient.html:152
-#: templates/patients/edit_patient.html:401
-#: templates/patients/patient_detail.html:174
+#: patients/templates/patients/add_patient.html:152
+#: patients/templates/patients/edit_patient.html:401
+#: patients/templates/patients/patient_detail.html:174
 msgid "Contact Phone"
 msgstr ""
 
-#: templates/patients/add_patient.html:154
-#: templates/patients/edit_patient.html:409
+#: patients/templates/patients/add_patient.html:154
+#: patients/templates/patients/edit_patient.html:409
 msgid "Enter contact phone"
 msgstr ""
 
-#: templates/patients/add_patient.html:163
-#: templates/patients/edit_patient.html:421
+#: patients/templates/patients/add_patient.html:163
+#: patients/templates/patients/edit_patient.html:421
 msgid "Insurance Information"
 msgstr ""
 
-#: templates/patients/add_patient.html:168
-#: templates/patients/edit_patient.html:431
+#: patients/templates/patients/add_patient.html:168
+#: patients/templates/patients/edit_patient.html:431
 msgid "Insurance Provider"
 msgstr ""
 
-#: templates/patients/add_patient.html:170
-#: templates/patients/edit_patient.html:439
+#: patients/templates/patients/add_patient.html:170
+#: patients/templates/patients/edit_patient.html:439
 msgid "Enter insurance provider"
 msgstr ""
 
-#: templates/patients/add_patient.html:173
-#: templates/patients/edit_patient.html:446
-#: templates/patients/patient_detail.html:207
+#: patients/templates/patients/add_patient.html:173
+#: patients/templates/patients/edit_patient.html:446
+#: patients/templates/patients/patient_detail.html:207
 msgid "Policy Number"
 msgstr ""
 
-#: templates/patients/add_patient.html:175
-#: templates/patients/edit_patient.html:454
+#: patients/templates/patients/add_patient.html:175
+#: patients/templates/patients/edit_patient.html:454
 msgid "Enter policy number"
 msgstr ""
 
-#: templates/patients/add_patient.html:184
-#: templates/patients/edit_patient.html:466
+#: patients/templates/patients/add_patient.html:184
+#: patients/templates/patients/edit_patient.html:466
 msgid "Additional Options"
 msgstr ""
 
-#: templates/patients/add_patient.html:192
-#: templates/patients/edit_patient.html:490
+#: patients/templates/patients/add_patient.html:192
+#: patients/templates/patients/edit_patient.html:490
 msgid "Consent to Data Sharing"
 msgstr ""
 
-#: templates/patients/add_patient.html:197
-#: templates/patients/edit_patient.html:498
-#: templates/patients/patient_detail.html:244
+#: patients/templates/patients/add_patient.html:197
+#: patients/templates/patients/edit_patient.html:498
+#: patients/templates/patients/patient_detail.html:244
 msgid "Data Retention Until"
 msgstr ""
 
-#: templates/patients/add_patient.html:210
+#: patients/templates/patients/add_patient.html:210
 msgid "Save Patient"
 msgstr ""
 
-#: templates/patients/delete_patient.html:1
-#: templates/patients/delete_patient.html:9
-#: templates/patients/edit_patient.html:543
+#: patients/templates/patients/delete_patient.html:1
+#: patients/templates/patients/delete_patient.html:9
+#: patients/templates/patients/edit_patient.html:543
 msgid "Delete Patient"
 msgstr ""
 
-#: templates/patients/delete_patient.html:37
+#: patients/templates/patients/delete_patient.html:37
 msgid "Are you sure you want to delete patient"
 msgstr ""
 
-#: templates/patients/delete_patient.html:45
+#: patients/templates/patients/delete_patient.html:45
 msgid "Patient Summary"
 msgstr ""
 
-#: templates/patients/delete_patient.html:114
+#: patients/templates/patients/delete_patient.html:114
 msgid "Yes, Delete Patient"
 msgstr ""
 
-#: templates/patients/edit_patient.html:10
+#: patients/templates/patients/edit_patient.html:10
 msgid "Edit Patient"
 msgstr ""
 
-#: templates/patients/edit_patient.html:19
+#: patients/templates/patients/edit_patient.html:19
 msgid "Back to Patient"
 msgstr ""
 
-#: templates/patients/edit_patient.html:526
+#: patients/templates/patients/edit_patient.html:526
 msgid "Is Deceased"
 msgstr ""
 
-#: templates/patients/edit_patient.html:557
+#: patients/templates/patients/edit_patient.html:557
 msgid "Update Patient"
 msgstr ""
 
-#: templates/patients/edit_patient.html:580
-#: templates/reports/report_confirm_delete.html:13
+#: patients/templates/patients/edit_patient.html:580
+#: reports/templates/reports/report_confirm_delete.html:13
 msgid "Confirm Delete"
 msgstr ""
 
-#: templates/patients/edit_patient.html:592
+#: patients/templates/patients/edit_patient.html:592
 msgid "Are you sure you want to delete this patient?"
 msgstr ""
 
-#: templates/patients/edit_patient.html:595
+#: patients/templates/patients/edit_patient.html:595
 msgid "This action cannot be undone!"
 msgstr ""
 
-#: templates/patients/partials/search_results.html:17
-#: templates/patients/patient_list.html:140
+#: patients/templates/patients/partials/search_results.html:17
+#: patients/templates/patients/patient_list.html:140
 msgid "No patients found"
 msgstr ""
 
-#: templates/patients/patient_detail.html:2
+#: patients/templates/patients/patient_detail.html:2
 msgid "Patient Details"
 msgstr ""
 
-#: templates/patients/patient_detail.html:37
-#: templates/patients/patient_list.html:126
+#: patients/templates/patients/patient_detail.html:37
+#: patients/templates/patients/patient_list.html:126
 msgid "Create Order"
 msgstr ""
 
-#: templates/patients/patient_detail.html:75
+#: patients/templates/patients/patient_detail.html:75
 msgid "Full Name (English)"
 msgstr ""
 
-#: templates/patients/patient_detail.html:83
+#: patients/templates/patients/patient_detail.html:83
 msgid "Full Name (Arabic)"
 msgstr ""
 
-#: templates/patients/patient_detail.html:192
+#: patients/templates/patients/patient_detail.html:192
 msgid "Insurance"
 msgstr ""
 
-#: templates/patients/patient_detail.html:199
+#: patients/templates/patients/patient_detail.html:199
 msgid "Provider"
 msgstr ""
 
-#: templates/patients/patient_detail.html:221
+#: patients/templates/patients/patient_detail.html:221
 msgid "Additional Info"
 msgstr ""
 
-#: templates/patients/patient_detail.html:228
+#: patients/templates/patients/patient_detail.html:228
 msgid "Data Sharing Consent"
 msgstr ""
 
-#: templates/patients/patient_detail.html:233
+#: patients/templates/patients/patient_detail.html:233
 msgid "Granted"
 msgstr ""
 
-#: templates/patients/patient_detail.html:237
+#: patients/templates/patients/patient_detail.html:237
 msgid "Not Granted"
 msgstr ""
 
-#: templates/patients/patient_detail.html:252
+#: patients/templates/patients/patient_detail.html:252
 msgid "Deceased"
 msgstr ""
 
-#: templates/patients/patient_detail.html:274
+#: patients/templates/patients/patient_detail.html:274
 msgid "Record Metadata"
 msgstr ""
 
-#: templates/patients/patient_detail.html:281
-#: templates/reports/report_detail.html:46
-#: templates/reports/report_list.html:140
-#: templates/reports/study_reports.html:71
-msgid "Created"
-msgstr ""
-
-#: templates/patients/patient_detail.html:289
-#: templates/reports/report_detail.html:50
+#: patients/templates/patients/patient_detail.html:289
+#: reports/templates/reports/report_detail.html:50
 msgid "Last Updated"
 msgstr ""
 
-#: templates/patients/patient_list.html:39
+#: patients/templates/patients/patient_list.html:39
 msgid "Search by MRN, Name, National ID, or Phone"
 msgstr ""
 
-#: templates/patients/patient_list.html:74
+#: patients/templates/patients/patient_list.html:74
 msgid "Name (EN)"
 msgstr ""
 
-#: templates/patients/patient_list.html:75
+#: patients/templates/patients/patient_list.html:75
 msgid "Name (AR)"
 msgstr ""
 
-#: templates/patients/patient_list.html:76
+#: patients/templates/patients/patient_list.html:76
 msgid "DOB"
 msgstr ""
 
-#: templates/patients/patient_list.html:119
+#: patients/templates/patients/patient_list.html:119
 msgid "View Details"
 msgstr ""
 
-#: templates/patients/patient_list.html:166
+#: patients/templates/patients/patient_list.html:166
 #, python-format
 msgid ""
 " Showing\n"
@@ -1683,12 +3569,60 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/reports/report_confirm_delete.html:4
-#: templates/reports/report_confirm_delete.html:36
+#: patients/views.py:41 patients/views.py:163
+msgid "MRN is required"
+msgstr ""
+
+#: patients/views.py:45 patients/views.py:167
+msgid "English first name and last name are required"
+msgstr ""
+
+#: patients/views.py:49 patients/views.py:171
+msgid "Date of birth is required"
+msgstr ""
+
+#: patients/views.py:53 patients/views.py:175
+msgid "Gender is required"
+msgstr ""
+
+#: patients/views.py:59 patients/views.py:181
+msgid "A patient with this MRN already exists in your system"
+msgstr ""
+
+#: patients/views.py:88
+#, python-format
+msgid "Patient added successfully! MRN: %(mrn)s"
+msgstr ""
+
+#: patients/views.py:93
+#, python-format
+msgid "Error creating patient: %(error)s"
+msgstr ""
+
+#: patients/views.py:208
+msgid "Patient updated successfully!"
+msgstr ""
+
+#: patients/views.py:212
+#, python-format
+msgid "Error updating patient: %(error)s"
+msgstr ""
+
+#: patients/views.py:256
+msgid "Patient deleted successfully!"
+msgstr ""
+
+#: patients/views.py:260
+#, python-format
+msgid "Error deleting patient: %(error)s"
+msgstr ""
+
+#: reports/templates/reports/report_confirm_delete.html:4
+#: reports/templates/reports/report_confirm_delete.html:36
 msgid "Delete Report"
 msgstr ""
 
-#: templates/reports/report_confirm_delete.html:18
+#: reports/templates/reports/report_confirm_delete.html:18
 #, python-format
 msgid ""
 "\n"
@@ -1698,175 +3632,249 @@ msgid ""
 "                    "
 msgstr ""
 
-#: templates/reports/report_confirm_delete.html:26
+#: reports/templates/reports/report_confirm_delete.html:26
 msgid ""
 "All report data including findings and impressions will be permanently "
 "deleted."
 msgstr ""
 
-#: templates/reports/report_detail.html:4
+#: reports/templates/reports/report_detail.html:4
 msgid "Report"
 msgstr ""
 
-#: templates/reports/report_detail.html:16
+#: reports/templates/reports/report_detail.html:16
 msgid "Radiology Report"
 msgstr ""
 
-#: templates/reports/report_detail.html:27
+#: reports/templates/reports/report_detail.html:27
 msgid "Back to Reports"
 msgstr ""
 
-#: templates/reports/report_detail.html:42
-#: templates/reports/report_list.html:49 templates/reports/report_list.html:137
-#: templates/reports/study_reports.html:69
+#: reports/templates/reports/report_detail.html:42
+#: reports/templates/reports/report_list.html:49
+#: reports/templates/reports/report_list.html:137
+#: reports/templates/reports/study_reports.html:69
 msgid "Radiologist"
 msgstr ""
 
-#: templates/reports/report_detail.html:63
+#: reports/templates/reports/report_detail.html:63
 msgid "CRITICAL FINDING"
 msgstr ""
 
-#: templates/reports/report_detail.html:98
+#: reports/templates/reports/report_detail.html:98
 msgid "Findings"
 msgstr ""
 
-#: templates/reports/report_detail.html:111
+#: reports/templates/reports/report_detail.html:111
 msgid "النتائج"
 msgstr ""
 
-#: templates/reports/report_detail.html:124
+#: reports/templates/reports/report_detail.html:124
 msgid "Impression / Conclusion"
 msgstr ""
 
-#: templates/reports/report_detail.html:137
+#: reports/templates/reports/report_detail.html:137
 msgid "الانطباع / الخلاصة"
 msgstr ""
 
-#: templates/reports/report_detail.html:149
-#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
+#: reports/templates/reports/report_detail.html:150
+#: reports/templates/reports/report_form.html:4
+#: reports/templates/reports/report_form.html:181
+#: reports/templates/reports/study_reports.html:102
 msgid "Edit Report"
 msgstr ""
 
-#: templates/reports/report_detail.html:153
+#: reports/templates/reports/report_detail.html:156
+#: reports/templates/reports/report_list.html:190
+#: reports/templates/reports/study_reports.html:106
+msgid "View & Export"
+msgstr ""
+
+#: reports/templates/reports/report_detail.html:163
+#: reports/templates/reports/report_verify.html:4
+#: reports/templates/reports/report_verify.html:14
+msgid "Verify Report"
+msgstr ""
+
+#: reports/templates/reports/report_detail.html:168
 msgid "All Reports"
 msgstr ""
 
-#: templates/reports/report_detail.html:156
-#: templates/reports/report_form.html:188
+#: reports/templates/reports/report_detail.html:174
+#: reports/templates/reports/report_form.html:197
+#: reports/templates/reports/report_form.html:210
 msgid "Print"
 msgstr ""
 
-#: templates/reports/report_form.html:4 templates/reports/report_form.html:179
-#: templates/reports/report_form.html:262
-#: templates/reports/study_reports.html:126
+#: reports/templates/reports/report_detail.html:177
+#: reports/templates/reports/report_form.html:188
+#: reports/templates/reports/report_form.html:201
+msgid "Export as DICOM"
+msgstr ""
+
+#: reports/templates/reports/report_detail.html:180
+msgid "Export as PDF"
+msgstr ""
+
+#: reports/templates/reports/report_detail.html:183
+msgid "Export as JPG"
+msgstr ""
+
+#: reports/templates/reports/report_detail.html:188
+msgid "Report must be verified before print/export"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:4
+#: reports/templates/reports/report_form.html:181
+#: reports/templates/reports/report_form.html:295
+#: reports/templates/reports/study_reports.html:129
 msgid "Create Report"
 msgstr ""
 
-#: templates/reports/report_form.html:185
+#: reports/templates/reports/report_form.html:191
+#: reports/templates/reports/report_form.html:204
 msgid "Export to PDF"
 msgstr ""
 
-#: templates/reports/report_form.html:212
+#: reports/templates/reports/report_form.html:194
+#: reports/templates/reports/report_form.html:207
+msgid "Export to JPG"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:215
+msgid "Save the report first before export/print"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:220
+msgid "Report must be finalized before export/print"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:228
+msgid "View Report"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:245
 msgid "Report Editor"
 msgstr ""
 
-#: templates/reports/report_form.html:249
+#: reports/templates/reports/report_form.html:282
+#: reports/templates/reports/report_verify.html:61
 msgid "Report Content"
 msgstr ""
 
-#: templates/reports/report_form.html:253
+#: reports/templates/reports/report_form.html:286
+#: reports/templates/reports/report_verify.html:66
 msgid "Impression:"
 msgstr ""
 
-#: templates/reports/report_form.html:262
+#: reports/templates/reports/report_form.html:295
 msgid "Update Report"
 msgstr ""
 
-#: templates/reports/report_form.html:266
+#: reports/templates/reports/report_form.html:299
 msgid "Save Draft"
 msgstr ""
 
-#: templates/reports/report_form.html:270
+#: reports/templates/reports/report_form.html:303
 msgid "Templates"
 msgstr ""
 
-#: templates/reports/report_form.html:274
+#: reports/templates/reports/report_form.html:307
 msgid "Normal Report"
 msgstr ""
 
-#: templates/reports/report_form.html:310
+#: reports/templates/reports/report_form.html:316
+msgid "Report is Finalized"
+msgstr ""
+
+#: reports/templates/reports/report_form.html:316
+msgid ""
+"This report is read-only. To make changes, please use the Amend function."
+msgstr ""
+
+#: reports/templates/reports/report_form.html:352
 msgid "Report Templates"
 msgstr ""
 
-#: templates/reports/report_form.html:330
-#: templates/reports/report_form.html:403
+#: reports/templates/reports/report_form.html:372
+#: reports/templates/reports/report_form.html:451
 msgid "Draft saved"
 msgstr ""
 
-#: templates/reports/report_form.html:384
+#: reports/templates/reports/report_form.html:432
 msgid "Saving..."
 msgstr ""
 
-#: templates/reports/report_form.html:412
+#: reports/templates/reports/report_form.html:460
 msgid "Save failed"
 msgstr ""
 
-#: templates/reports/report_list.html:4 templates/reports/report_list.html:13
+#: reports/templates/reports/report_form.html:526
+#: reports/templates/reports/report_form.html:557 reports/views.py:379
+msgid "Only finalized reports can be exported."
+msgstr ""
+
+#: reports/templates/reports/report_form.html:585
+msgid "Only finalized reports can be printed."
+msgstr ""
+
+#: reports/templates/reports/report_list.html:4
+#: reports/templates/reports/report_list.html:13
 msgid "Reports List"
 msgstr ""
 
-#: templates/reports/report_list.html:16
+#: reports/templates/reports/report_list.html:16
 msgid "New Order"
 msgstr ""
 
-#: templates/reports/report_list.html:30
+#: reports/templates/reports/report_list.html:30
 msgid "Report ID, Accession, MRN, Patient, Findings"
 msgstr ""
 
-#: templates/reports/report_list.html:51
+#: reports/templates/reports/report_list.html:51
 msgid "All Radiologists"
 msgstr ""
 
-#: templates/reports/report_list.html:75
+#: reports/templates/reports/report_list.html:75
 msgid "Critical Finding"
 msgstr ""
 
-#: templates/reports/report_list.html:115
+#: reports/templates/reports/report_list.html:115
 msgid "Critical Only"
 msgstr ""
 
-#: templates/reports/report_list.html:116
+#: reports/templates/reports/report_list.html:116
 msgid "Non-Critical Only"
 msgstr ""
 
-#: templates/reports/report_list.html:133
-#: templates/reports/study_reports.html:68
+#: reports/templates/reports/report_list.html:133
+#: reports/templates/reports/study_reports.html:68
 msgid "Report ID"
 msgstr ""
 
-#: templates/reports/report_list.html:139
+#: reports/templates/reports/report_list.html:139
 msgid "Critical"
 msgstr ""
 
-#: templates/reports/report_list.html:194
-#: templates/reports/study_reports.html:4
-#: templates/reports/study_reports.html:16
+#: reports/templates/reports/report_list.html:197
+#: reports/templates/reports/study_reports.html:4
+#: reports/templates/reports/study_reports.html:16
 msgid "Study Reports"
 msgstr ""
 
-#: templates/reports/report_list.html:207
+#: reports/templates/reports/report_list.html:210
 msgid "No reports found"
 msgstr ""
 
-#: templates/reports/report_list.html:212
+#: reports/templates/reports/report_list.html:215
 msgid "No reports have been created yet"
 msgstr ""
 
-#: templates/reports/report_list.html:217
+#: reports/templates/reports/report_list.html:220
 msgid "Go to Worklist"
 msgstr ""
 
-#: templates/reports/report_list.html:229
+#: reports/templates/reports/report_list.html:232
 #, python-format
 msgid ""
 "\n"
@@ -1879,75 +3887,262 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/reports/study_reports.html:58
+#: reports/templates/reports/report_verify.html:20
+msgid ""
+"You are about to verify and finalize this report. Once finalized, the report "
+"will be locked and can only be amended by a supervising physician."
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:23
+msgid "Report Details"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:42
+msgid "Current Status"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:50
+msgid "Author"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:55
+msgid "Finalized At"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:80
+msgid "Verify & Finalize Report"
+msgstr ""
+
+#: reports/templates/reports/report_verify.html:86
+msgid "Amend Report"
+msgstr ""
+
+#: reports/templates/reports/study_reports.html:58
 msgid "New Report"
 msgstr ""
 
-#: templates/reports/study_reports.html:72
+#: reports/templates/reports/study_reports.html:72
 msgid "Updated"
 msgstr ""
 
-#: templates/reports/study_reports.html:123
+#: reports/templates/reports/study_reports.html:126
 msgid "No reports yet"
 msgstr ""
 
-#: templates/reports/study_reports.html:124
+#: reports/templates/reports/study_reports.html:127
 msgid "Create the first report for this study."
 msgstr ""
 
-#: templates/users/login.html:20
+#: reports/views.py:42
+msgid "Report created successfully!"
+msgstr ""
+
+#: reports/views.py:59
+msgid "You don't have permission to access this report."
+msgstr ""
+
+#: reports/views.py:64
+msgid "Amended reports can only be edited by supervising physicians."
+msgstr ""
+
+#: reports/views.py:70
+msgid ""
+"Finalized reports cannot be edited. Please use the Amend function to make "
+"changes."
+msgstr ""
+
+#: reports/views.py:81
+msgid "Only supervising physicians can finalize reports."
+msgstr ""
+
+#: reports/views.py:98
+msgid "Report updated successfully!"
+msgstr ""
+
+#: reports/views.py:115
+msgid "Only supervising physicians can verify reports."
+msgstr ""
+
+#: reports/views.py:149
+msgid "Report verified and finalized successfully!"
+msgstr ""
+
+#: reports/views.py:175
+msgid "Report marked as amended. Please update the content."
+msgstr ""
+
+#: reports/views.py:218
+msgid "You don't have permission to delete this report."
+msgstr ""
+
+#: reports/views.py:245
+msgid "Report deleted successfully!"
+msgstr ""
+
+#: reports/views.py:248
+#, python-format
+msgid "Error deleting report: %(error)s"
+msgstr ""
+
+#: reports/views.py:504
+#, python-format
+msgid "Error exporting report: %(error)s"
+msgstr ""
+
+#: templates/layout.html:149
+msgid "Billing"
+msgstr ""
+
+#: templates/layout.html:158
+msgid "Payers"
+msgstr ""
+
+#: templates/layout.html:163
+msgid "Fee Schedules"
+msgstr ""
+
+#: templates/layout.html:182
+msgid "Authorizations"
+msgstr ""
+
+#: templates/layout.html:205
+msgid "Payment Postings"
+msgstr ""
+
+#: templates/layout.html:229
+msgid "Denial Reasons"
+msgstr ""
+
+#: templates/layout.html:234
+msgid "Claim Appeals"
+msgstr ""
+
+#: templates/layout.html:243
+msgid "Charge Capture Report"
+msgstr ""
+
+#: templates/layout.html:248
+msgid "Claim Submission Report"
+msgstr ""
+
+#: templates/layout.html:253
+msgid "Payment Posting Report"
+msgstr ""
+
+#: templates/layout.html:258
+msgid "A/R Aging Report"
+msgstr ""
+
+#: templates/layout.html:263
+msgid "Denial Management Report"
+msgstr ""
+
+#: templates/layout.html:268
+msgid "Revenue Analysis Report"
+msgstr ""
+
+#: templates/layout.html:273
+msgid "Collection Metrics"
+msgstr ""
+
+#: templates/layout.html:357 templates/layout.html:358
+msgid "Toggle Theme"
+msgstr ""
+
+#: templates/layout.html:414
+msgid "Admin panel"
+msgstr ""
+
+#: templates/layout.html:426
+msgid "Sign Out"
+msgstr ""
+
+#: templates/layout.html:437
+msgid "Login"
+msgstr ""
+
+#: templates/layout.html:483
+msgid "All rights reserved."
+msgstr ""
+
+#: templates/license/home.html:373
+msgid "License Information"
+msgstr ""
+
+#: templates/license/home.html:379
+msgid "End Date"
+msgstr ""
+
+#: templates/license/home.html:384
+msgid "License expiration date"
+msgstr ""
+
+#: templates/license/home.html:387
+msgid "Orders Count"
+msgstr ""
+
+#: templates/license/home.html:389
+msgid "Unlimited"
+msgstr ""
+
+#: templates/license/home.html:392
+msgid "Order usage limit"
+msgstr ""
+
+#: users/templates/users/login.html:20
 msgid "Sign in to your account"
 msgstr ""
 
-#: templates/users/login.html:38
+#: users/templates/users/login.html:38
 msgid "Enter your email"
 msgstr ""
 
-#: templates/users/login.html:47
+#: users/templates/users/login.html:47
 msgid "Password"
 msgstr ""
 
-#: templates/users/login.html:54
+#: users/templates/users/login.html:54
 msgid "Enter your password"
 msgstr ""
 
-#: templates/users/login.html:71
+#: users/templates/users/login.html:71
 msgid "Remember me"
 msgstr ""
 
-#: templates/users/login.html:75
+#: users/templates/users/login.html:75
 msgid "Forgot password?"
 msgstr ""
 
-#: templates/users/login.html:91
+#: users/templates/users/login.html:91
 msgid "Need help?"
 msgstr ""
 
-#: templates/users/login.html:93
+#: users/templates/users/login.html:93
 msgid "Contact support"
 msgstr ""
 
-#: templates/users/manage_users.html:3 templates/users/manage_users.html:8
+#: users/templates/users/manage_users.html:3
+#: users/templates/users/manage_users.html:8
 msgid "Manage Users"
 msgstr ""
 
-#: templates/users/manage_users.html:10
+#: users/templates/users/manage_users.html:10
 msgid "Add User"
 msgstr ""
 
-#: templates/users/manage_users.html:20
+#: users/templates/users/manage_users.html:20
 msgid "Username"
 msgstr ""
 
-#: templates/users/manage_users.html:22
+#: users/templates/users/manage_users.html:22
 msgid "Role"
 msgstr ""
 
-#: templates/users/manage_users.html:24
+#: users/templates/users/manage_users.html:24
 msgid "Last Login"
 msgstr ""
 
-#: templates/users/manage_users.html:58
+#: users/templates/users/manage_users.html:58
 msgid "No users found."
 msgstr ""
 

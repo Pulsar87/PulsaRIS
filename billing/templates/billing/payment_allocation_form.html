@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans 'Edit payment allocation' %}{% else %}{% trans 'Allocate payment' %}{% endif %}{% endblock %}
+{% block content %}
+{% if object %}{% url 'billing:payment_detail' object.payment.pk as cancel_url %}{% else %}{% url 'billing:payment_detail' payment_pk as cancel_url %}{% endif %}
+{% if object %}{% trans 'Edit payment allocation' as page_title %}{% else %}{% trans 'Allocate payment' as page_title %}{% endif %}
+{% trans 'Save allocation' as submit_label %}
+{% include 'billing/_form_page.html' %}
+{% endblock %}

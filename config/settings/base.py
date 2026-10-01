@@ -78,12 +78,10 @@ MIDDLEWARE = [
 # ─────────────────────────────────────────────────────────────
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("POSTGRES_DB", default="pulsaris"),
-        "USER": env("POSTGRES_USER", default="pulsaris"),
-        "PASSWORD": env("POSTGRES_PASSWORD", default="pulsaris"),
-        "HOST": env("POSTGRES_HOST", default="postgres"),  # use "postgres" in Docker
-        "PORT": env("POSTGRES_PORT", default="5432"),
+        **env.db_url(
+            "DATABASE_URL",
+            default="postgresql://ris_user:ris_pass@postgres:5432/ris_db",
+        ),
         "ATOMIC_REQUESTS": True,
     }
 }

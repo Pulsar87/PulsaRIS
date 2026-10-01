@@ -84,7 +84,7 @@
                                 <td>{{ item.payment_method|default:"Unknown" }}</td>
                                 <td>{{ item.count }}</td>
                                 <td>${{ item.total|floatformat:2 }}</td>
-                                <td>${{ item.total|divide:item.count|floatformat:2 }}</td>
+                                <td class="average-payment" data-total="{{ item.total }}" data-count="{{ item.count }}">—</td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -140,7 +140,17 @@
             <canvas id="monthlyTrendChart" height="80"></canvas>
         </div>
     </div>
+    {{ data.monthly_trend|json_script:"monthly-trend-data" }}
 </div>
+<script>
+    document.querySelectorAll('.average-payment').forEach((cell) => {
+        const total = Number(cell.dataset.total);
+        const count = Number(cell.dataset.count);
+        if (Number.isFinite(total) && Number.isFinite(count) && count > 0) {
+            cell.textContent = `$${(total / count).toFixed(2)}`;
+        }
+    });
+</script>
 {% endblock %}
 
 {% block extra_js %}
@@ -148,7 +158,7 @@
 <script>
 // Monthly Trend Chart
 const ctx = document.getElementById('monthlyTrendChart').getContext('2d');
-const monthlyData = {{ data.monthly_trend|safe }};
+const monthlyData = JSON.parse(document.getElementById('monthly-trend-data').textContent);
 
 new Chart(ctx, {
     type: 'bar',

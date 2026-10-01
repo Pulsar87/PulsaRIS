@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Delete patient payment' %}{% endblock %}
+{% block content %}
+{% url 'billing:payment_list' as cancel_url %}
+{% trans 'Delete patient payment' as page_title %}
+{% include 'billing/_delete_confirm.html' %}
+{% endblock %}

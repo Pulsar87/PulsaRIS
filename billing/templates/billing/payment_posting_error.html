@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Payment posting action unavailable' %}{% endblock %}
+{% block content %}
+<div class="container-fluid"><div class="alert alert-warning" role="alert">
+    <h1 class="h4">{% trans 'Payment posting action unavailable' %}</h1>
+    <p class="mb-3">{{ message }}</p>
+    <a href="{% url 'billing:payment_posting_list' %}" class="btn btn-outline-secondary">{% trans 'Return to payment postings' %}</a>
+</div></div>
+{% endblock %}

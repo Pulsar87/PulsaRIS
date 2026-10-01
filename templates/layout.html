@@ -139,14 +139,14 @@
                         <!-- Billing Dropdown -->
                         <li class="nav-item dropdown">
                             <a
-                                class="nav-link dropdown-toggle {% if 'payer' in request.resolver_match.url_name or 'fee' in request.resolver_match.url_name or 'service-line' in request.resolver_match.url_name or 'claim' in request.resolver_match.url_name or 'payment' in request.resolver_match.url_name or 'statement' in request.resolver_match.url_name or 'denial' in request.resolver_match.url_name or 'appeal' in request.resolver_match.url_name or 'clearinghouse' in request.resolver_match.url_name or 'patient-insurance' in request.resolver_match.url_name or 'patient-account' in request.resolver_match.url_name or 'authorization' in request.resolver_match.url_name %}active{% endif %}"
+                                class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'billing' %}active{% endif %}"
                                 href="#"
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true"
                                 aria-expanded="false"
                             >
                                 <i class="bi bi-currency-dollar me-1"></i
-                                ><trans>Billing</trans>
+                                >{% trans "Billing" %}
                             </a>
                             <ul
                                 class="dropdown-menu border-0 shadow-sm rounded-3"

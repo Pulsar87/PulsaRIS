@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <a href="{{ cancel_url }}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Back' %}</a>
+        <h1 class="mt-2">{{ page_title }}</h1>
+    </div>
+    <div class="card border-danger"><div class="card-body">
+        <p>{% trans 'Are you sure you want to delete' %} <strong>{{ object }}</strong>?</p>
+        <p class="text-muted">{% trans 'This action cannot be undone.' %}</p>
+        <form method="post">
+            {% csrf_token %}
+            <a href="{{ cancel_url }}" class="btn btn-outline-secondary">{% trans 'Cancel' %}</a>
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>{% trans 'Confirm delete' %}</button>
+        </form>
+    </div></div>
+</div>

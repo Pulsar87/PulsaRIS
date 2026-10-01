@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Delete payment detail' %}{% endblock %}
+{% block content %}
+{% url 'billing:payment_posting_detail' object.payment_posting.pk as cancel_url %}
+{% trans 'Delete payment detail' as page_title %}
+{% include 'billing/_delete_confirm.html' %}
+{% endblock %}

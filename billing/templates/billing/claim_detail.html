@@ -1,11 +1,79 @@
 {% extends 'layout.html' %}
 {% load i18n %}
 
-{% block title %}{% trans 'Claim' %}{% endblock %}
+{% block title %}{% trans 'Claim' %} {{ claim.claim_number }}{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-    <h1>{% trans 'Claim' %}</h1>
-    <!-- TODO: Implement claim detail view -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <a href="{% url 'billing:claim_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'All claims' %}</a>
+            <h1 class="mt-2 mb-1">{% trans 'Claim' %} {{ claim.claim_number }}</h1>
+            <span class="badge {% if claim.status == 'PAID' %}text-bg-success{% elif claim.status == 'DENIED' or claim.status == 'REJECTED' %}text-bg-danger{% elif claim.status == 'SUBMITTED' or claim.status == 'ACCEPTED' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ claim.get_status_display }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            {% if claim.status == 'DRAFT' %}
+            <a href="{% url 'billing:claim_update' claim.pk %}" class="btn btn-outline-secondary"><i class="bi bi-pencil me-1"></i>{% trans 'Edit' %}</a>
+            <a href="{% url 'billing:claim_generate_837' claim.pk %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-arrow-down me-1"></i>{% trans 'Generate 837' %}</a>
+            {% endif %}
+            {% if claim.payer.clearinghouse %}
+            <a href="{% url 'billing:claim_submit_clearinghouse' claim.pk %}" class="btn btn-primary">{% trans 'Submit to clearinghouse' %}</a>
+            {% endif %}
+            {% if claim.status == 'SUBMITTED' or claim.status == 'ACCEPTED' %}
+            <a href="{% url 'billing:claim_status_check' claim.pk %}" class="btn btn-outline-primary">{% trans 'Check status' %}</a>
+            {% endif %}
+        </div>
+    </div>
+    {% if claim.rejection_reason %}
+    <div class="alert alert-warning"><strong>{% trans 'Payer response' %}:</strong> {{ claim.rejection_reason }}</div>
+    {% endif %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6"><div class="card h-100"><div class="card-header">{% trans 'Claim information' %}</div><div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-5">{% trans 'Claim type' %}</dt><dd class="col-sm-7">{{ claim.get_claim_type_display }}</dd>
+                <dt class="col-sm-5">{% trans 'Patient account' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:patient_account_detail' claim.patient_account.pk %}">{{ claim.patient_account.account_number }}</a></dd>
+                <dt class="col-sm-5">{% trans 'Payer' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:payer_detail' claim.payer.pk %}">{{ claim.payer.name }}</a></dd>
+                <dt class="col-sm-5">{% trans 'Service dates' %}</dt><dd class="col-sm-7">{{ claim.date_of_service_from|date:"M d, Y" }} – {{ claim.date_of_service_to|date:"M d, Y" }}</dd>
+                <dt class="col-sm-5">{% trans 'Submitted' %}</dt><dd class="col-sm-7">{{ claim.submission_date|date:"M d, Y"|default:"—" }}</dd>
+                <dt class="col-sm-5">{% trans 'Clearinghouse status' %}</dt><dd class="col-sm-7">{{ claim.clearinghouse_status|default:"—" }}</dd>
+                <dt class="col-sm-5">{% trans 'Transmission ID' %}</dt><dd class="col-sm-7">{{ claim.edi_transmission_id|default:"—" }}</dd>
+            </dl>
+        </div></div></div>
+        <div class="col-md-6"><div class="card h-100"><div class="card-header">{% trans 'Financial summary' %}</div><div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-7">{% trans 'Total charges' %}</dt><dd class="col-sm-5 text-end">${{ claim.total_charges|floatformat:2 }}</dd>
+                <dt class="col-sm-7">{% trans 'Expected insurance' %}</dt><dd class="col-sm-5 text-end">${{ claim.expected_insurance|default_if_none:0|floatformat:2 }}</dd>
+                <dt class="col-sm-7">{% trans 'Expected patient' %}</dt><dd class="col-sm-5 text-end">${{ claim.expected_patient|default_if_none:0|floatformat:2 }}</dd>
+                <dt class="col-sm-7">{% trans 'Paid' %}</dt><dd class="col-sm-5 text-end text-success">${{ total_paid|floatformat:2 }}</dd>
+                <dt class="col-sm-7">{% trans 'Adjustments' %}</dt><dd class="col-sm-5 text-end">${{ total_adjustments|floatformat:2 }}</dd>
+                <dt class="col-sm-7">{% trans 'Patient responsibility' %}</dt><dd class="col-sm-5 text-end">${{ claim.patient_responsibility|floatformat:2 }}</dd>
+            </dl>
+        </div></div></div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h2 class="h5 mb-0">{% trans 'Claim lines' %} <span class="badge text-bg-secondary">{{ line_count }}</span></h2>
+            <a href="{% url 'billing:claim_line_add' claim.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>{% trans 'Add line' %}</a>
+        </div>
+        <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+            <thead><tr><th>#</th><th>{% trans 'CPT/HCPCS' %}</th><th>{% trans 'Service line' %}</th><th>{% trans 'Status' %}</th><th class="text-end">{% trans 'Charge' %}</th><th class="text-end">{% trans 'Allowed' %}</th><th class="text-end">{% trans 'Paid' %}</th><th class="text-end">{% trans 'Adjustment' %}</th><th></th></tr></thead>
+            <tbody>
+                {% for line in claim.lines.all %}
+                <tr>
+                    <td>{{ line.line_number }}</td><td>{{ line.cpt_code }}</td><td>{{ line.service_line }}</td>
+                    <td>{{ line.get_status_display }}</td><td class="text-end">${{ line.charge_amount|floatformat:2 }}</td>
+                    <td class="text-end">${{ line.allowed_amount|default_if_none:"—"|floatformat:2 }}</td>
+                    <td class="text-end">${{ line.paid_amount|floatformat:2 }}</td><td class="text-end">${{ line.adjustment_amount|floatformat:2 }}</td>
+                    <td class="text-end text-nowrap">
+                        <a href="{% url 'billing:claim_line_update' line.pk %}" class="btn btn-sm btn-outline-secondary">{% trans 'Edit' %}</a>
+                        <a href="{% url 'billing:claim_line_delete' line.pk %}" class="btn btn-sm btn-outline-danger">{% trans 'Remove' %}</a>
+                    </td>
+                </tr>
+                {% empty %}<tr><td colspan="9" class="text-center text-muted py-4">{% trans 'No claim lines have been added.' %}</td></tr>{% endfor %}
+            </tbody>
+        </table></div>
+    </div>
 </div>
 {% endblock %}

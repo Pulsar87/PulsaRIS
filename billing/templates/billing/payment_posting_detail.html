@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Payment posting' %} {{ payment_posting.pk }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div><a href="{% url 'billing:payment_posting_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Payment postings' %}</a><h1 class="mt-2">{% trans 'Payment posting' %}</h1><span class="badge {% if payment_posting.status == 'POSTED' %}text-bg-success{% elif payment_posting.status == 'UNPOSTED' %}text-bg-warning{% else %}text-bg-secondary{% endif %}">{{ payment_posting.get_status_display }}</span></div>
+        <div class="d-flex gap-2">{% if payment_posting.status != 'POSTED' %}<a href="{% url 'billing:payment_posting_update' payment_posting.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:payment_posting_delete' payment_posting.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a>{% endif %}<a href="{% url 'billing:payment_detail_add' payment_posting.pk %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>{% trans 'Add payment detail' %}</a></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6"><div class="card h-100"><div class="card-header">{% trans 'Remittance' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-5">{% trans 'Claim' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:claim_detail' payment_posting.claim.pk %}">{{ payment_posting.claim.claim_number }}</a></dd>
+            <dt class="col-sm-5">{% trans 'Payer' %}</dt><dd class="col-sm-7">{{ payment_posting.payer|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Posting date' %}</dt><dd class="col-sm-7">{{ payment_posting.posting_date|date:"M d, Y" }}</dd>
+            <dt class="col-sm-5">{% trans 'Payment method' %}</dt><dd class="col-sm-7">{{ payment_posting.get_payment_method_display }}</dd>
+            <dt class="col-sm-5">{% trans 'Amount' %}</dt><dd class="col-sm-7 fw-semibold">${{ payment_posting.payment_amount|floatformat:2 }}</dd>
+            <dt class="col-sm-5">{% trans 'Check number' %}</dt><dd class="col-sm-7">{{ payment_posting.check_number|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'ERA trace' %}</dt><dd class="col-sm-7">{{ payment_posting.era_trace_number|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Posted by' %}</dt><dd class="col-sm-7">{{ payment_posting.posted_by|default:"—" }}</dd>
+        </dl></div></div></div>
+    </div>
+    <div class="card"><div class="card-header"><h2 class="h5 mb-0">{% trans 'Claim line adjudication' %}</h2></div><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>{% trans 'Claim line' %}</th><th class="text-end">{% trans 'Paid' %}</th><th class="text-end">{% trans 'Deductible' %}</th><th class="text-end">{% trans 'Copay' %}</th><th class="text-end">{% trans 'Coinsurance' %}</th><th>{% trans 'Denial' %}</th><th></th></tr></thead>
+        <tbody>{% for detail in payment_posting.details.all %}
+            <tr><td>{{ detail.claim_line }}</td><td class="text-end">${{ detail.paid_amount|floatformat:2 }}</td><td class="text-end">${{ detail.patient_deductible|floatformat:2 }}</td><td class="text-end">${{ detail.patient_copay|floatformat:2 }}</td><td class="text-end">${{ detail.patient_coinsurance|floatformat:2 }}</td><td>{% if detail.is_denied %}{{ detail.denial_code }} — {{ detail.denial_reason }}{% else %}—{% endif %}</td>
+                <td class="text-end text-nowrap"><a href="{% url 'billing:payment_detail_update' detail.pk %}" class="btn btn-sm btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:payment_detail_delete' detail.pk %}" class="btn btn-sm btn-outline-danger">{% trans 'Remove' %}</a></td>
+            </tr>
+        {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">{% trans 'No payment details have been posted for this remittance.' %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+</div>
+{% endblock %}

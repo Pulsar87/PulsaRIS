@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Denial reason' %} {{ denial_reason.code }}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-start gap-3 mb-4"><div><a href="{% url 'billing:denial_reason_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Denial reasons' %}</a><h1 class="mt-2">{{ denial_reason.get_code_system_display }} · {{ denial_reason.code }}</h1></div><div class="d-flex gap-2"><a href="{% url 'billing:denial_reason_update' denial_reason.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:denial_reason_delete' denial_reason.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a></div></div>
+    <div class="card"><div class="card-header">{% trans 'Code guidance' %}</div><div class="card-body">
+        <dl class="row"><dt class="col-md-3">{% trans 'Description' %}</dt><dd class="col-md-9">{{ denial_reason.description|linebreaksbr }}</dd><dt class="col-md-3">{% trans 'Category' %}</dt><dd class="col-md-9">{{ denial_reason.category|default:"—" }}</dd><dt class="col-md-3">{% trans 'Requires appeal' %}</dt><dd class="col-md-9">{% if denial_reason.requires_appeal %}{% trans 'Yes' %}{% else %}{% trans 'No' %}{% endif %}</dd><dt class="col-md-3">{% trans 'Appeal deadline' %}</dt><dd class="col-md-9">{{ denial_reason.appeal_deadline_days }} {% trans 'days' %}</dd><dt class="col-md-3">{% trans 'Common resolution' %}</dt><dd class="col-md-9">{{ denial_reason.common_resolution|linebreaksbr|default:"—" }}</dd><dt class="col-md-3">{% trans 'Status' %}</dt><dd class="col-md-9">{% if denial_reason.is_active %}{% trans 'Active' %}{% else %}{% trans 'Inactive' %}{% endif %}</dd></dl>
+    </div></div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Claim appeals' %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"><div><h1 class="mb-1"><i class="bi bi-arrow-repeat me-2"></i>{% trans 'Claim appeals' %}</h1><p class="text-muted mb-0">{% trans 'Track appeal deadlines, submissions and payer decisions.' %}</p></div><a href="{% url 'billing:claim_appeal_create' %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>{% trans 'Create appeal' %}</a></div>
+    <div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>{% trans 'Appeal number' %}</th><th>{% trans 'Claim' %}</th><th>{% trans 'Level' %}</th><th>{% trans 'Filed' %}</th><th>{% trans 'Due' %}</th><th>{% trans 'Status' %}</th><th>{% trans 'Reversal amount' %}</th><th></th></tr></thead>
+        <tbody>{% for appeal in appeals %}
+            <tr><td><a href="{% url 'billing:claim_appeal_detail' appeal.pk %}">{{ appeal.appeal_number }}</a></td><td><a href="{% url 'billing:claim_detail' appeal.claim.pk %}">{{ appeal.claim.claim_number }}</a></td><td>{{ appeal.get_appeal_level_display }}</td><td>{{ appeal.filed_date|date:"M d, Y" }}</td><td>{{ appeal.due_date|date:"M d, Y" }}</td><td><span class="badge {% if appeal.status == 'APPROVED' %}text-bg-success{% elif appeal.status == 'DENIED' %}text-bg-danger{% elif appeal.status == 'PENDING' %}text-bg-warning{% else %}text-bg-info{% endif %}">{{ appeal.get_status_display }}</span></td><td>{% if appeal.reversal_amount %}${{ appeal.reversal_amount|floatformat:2 }}{% else %}—{% endif %}</td><td class="text-end"><a href="{% url 'billing:claim_appeal_detail' appeal.pk %}" class="btn btn-sm btn-outline-primary">{% trans 'View' %}</a></td></tr>
+        {% empty %}<tr><td colspan="8" class="text-center text-muted py-5">{% trans 'No appeals have been recorded.' %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+</div>
+{% endblock %}

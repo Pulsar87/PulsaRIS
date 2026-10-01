@@ -80,7 +80,7 @@
                         <tbody>
                             {% for item in data.status_breakdown %}
                             <tr>
-                                <td><span class="badge bg-secondary">{{ item.claim_status }}</span></td>
+                                <td><span class="badge bg-secondary">{{ item.status }}</span></td>
                                 <td>{{ item.count }}</td>
                                 <td>${{ item.total_billed|floatformat:2 }}</td>
                             </tr>
@@ -138,7 +138,7 @@
                 <div class="col-md-4 mb-3">
                     <div class="card bg-light">
                         <div class="card-body text-center">
-                            <h5>{{ item.submission_method|default:"Manual" }}</h5>
+                            <h5>{{ item.claim_type }}</h5>
                             <h3 class="text-primary">{{ item.count }}</h3>
                             <small class="text-muted">claims</small>
                         </div>

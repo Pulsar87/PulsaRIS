@@ -1,0 +1,12 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Claim action unavailable' %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="alert alert-warning" role="alert">
+        <h1 class="h4">{% trans 'Claim action unavailable' %}</h1>
+        <p class="mb-3">{{ message }}</p>
+        <a href="{% url 'billing:claim_list' %}" class="btn btn-outline-secondary">{% trans 'Return to claims' %}</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans 'Edit payment detail' %}{% else %}{% trans 'Add payment detail' %}{% endif %}{% endblock %}
+{% block content %}
+{% if object %}{% url 'billing:payment_posting_detail' object.payment_posting.pk as cancel_url %}{% else %}{% url 'billing:payment_posting_detail' posting_pk as cancel_url %}{% endif %}
+{% if object %}{% trans 'Edit payment detail' as page_title %}{% else %}{% trans 'Add payment detail' as page_title %}{% endif %}
+{% trans 'Save detail' as submit_label %}
+{% include 'billing/_form_page.html' %}
+{% endblock %}

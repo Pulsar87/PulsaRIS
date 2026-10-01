@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans 'Edit patient payment' %}{% else %}{% trans 'Record patient payment' %}{% endif %}{% endblock %}
+{% block content %}
+{% url 'billing:payment_list' as cancel_url %}
+{% if object %}{% trans 'Edit patient payment' as page_title %}{% else %}{% trans 'Record patient payment' as page_title %}{% endif %}
+{% trans 'Save payment' as submit_label %}
+{% include 'billing/_form_page.html' %}
+{% endblock %}

@@ -6,6 +6,11 @@
 {% block content %}
 <div class="container-fluid">
     <h1>{% trans 'Denials and Appeals' %}</h1>
-    <!-- TODO: Implement denial management view -->
+    <p class="text-muted">{% trans 'Review denial patterns, maintain adjustment reason codes, and follow payer appeal decisions.' %}</p>
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'billing:denial_reason_list' %}" class="btn btn-outline-primary">{% trans 'Manage denial reason codes' %}</a>
+        <a href="{% url 'billing:report_denial_management' %}" class="btn btn-primary">{% trans 'View denial management report' %}</a>
+        <a href="{% url 'billing:claim_appeal_list' %}" class="btn btn-outline-secondary">{% trans 'Track claim appeals' %}</a>
+    </div>
 </div>
 {% endblock %}

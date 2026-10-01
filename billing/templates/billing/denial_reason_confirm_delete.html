@@ -1,0 +1,8 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Delete denial reason' %}{% endblock %}
+{% block content %}
+{% url 'billing:denial_reason_list' as cancel_url %}
+{% trans 'Delete denial reason code' as page_title %}
+{% include 'billing/_delete_confirm.html' %}
+{% endblock %}

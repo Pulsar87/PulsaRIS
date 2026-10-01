@@ -1,0 +1,32 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Payment details' %}{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div><a href="{% url 'billing:payment_list' %}" class="text-decoration-none"><i class="bi bi-arrow-left me-1"></i>{% trans 'Patient payments' %}</a><h1 class="mt-2">{% trans 'Payment details' %}</h1></div>
+        <div class="d-flex gap-2"><a href="{% url 'billing:payment_update' payment.pk %}" class="btn btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:payment_delete' payment.pk %}" class="btn btn-outline-danger">{% trans 'Delete' %}</a><a href="{% url 'billing:payment_allocation_add' payment.pk %}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>{% trans 'Allocate payment' %}</a></div>
+    </div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-7"><div class="card h-100"><div class="card-header">{% trans 'Transaction' %}</div><div class="card-body"><dl class="row mb-0">
+            <dt class="col-sm-5">{% trans 'Patient account' %}</dt><dd class="col-sm-7"><a href="{% url 'billing:patient_account_detail' payment.patient_account.pk %}">{{ payment.patient_account.account_number }}</a></dd>
+            <dt class="col-sm-5">{% trans 'Payment date' %}</dt><dd class="col-sm-7">{{ payment.payment_date|date:"M d, Y H:i" }}</dd>
+            <dt class="col-sm-5">{% trans 'Amount' %}</dt><dd class="col-sm-7 fw-semibold">${{ payment.amount|floatformat:2 }}</dd>
+            <dt class="col-sm-5">{% trans 'Method' %}</dt><dd class="col-sm-7">{{ payment.get_payment_method_display }}</dd>
+            <dt class="col-sm-5">{% trans 'Check number' %}</dt><dd class="col-sm-7">{{ payment.check_number|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Card' %}</dt><dd class="col-sm-7">{% if payment.card_type or payment.card_last_four %}{{ payment.card_type }} •••• {{ payment.card_last_four }}{% else %}—{% endif %}</dd>
+            <dt class="col-sm-5">{% trans 'Transaction ID' %}</dt><dd class="col-sm-7">{{ payment.transaction_id|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Received by' %}</dt><dd class="col-sm-7">{{ payment.received_by|default:"—" }}</dd>
+            <dt class="col-sm-5">{% trans 'Unapplied amount' %}</dt><dd class="col-sm-7">${{ payment.unapplied_amount|floatformat:2 }}</dd>
+            {% if payment.notes %}<dt class="col-sm-5">{% trans 'Notes' %}</dt><dd class="col-sm-7">{{ payment.notes|linebreaksbr }}</dd>{% endif %}
+        </dl></div></div></div>
+    </div>
+    <div class="card"><div class="card-header"><h2 class="h5 mb-0">{% trans 'Allocations' %}</h2></div><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>{% trans 'Service date' %}</th><th>{% trans 'Service line' %}</th><th class="text-end">{% trans 'Allocated amount' %}</th><th>{% trans 'Notes' %}</th><th></th></tr></thead>
+        <tbody>{% for allocation in payment.allocations.all %}
+            <tr><td>{{ allocation.service_line.service_date|date:"M d, Y" }}</td><td><a href="{% url 'billing:service_line_detail' allocation.service_line.pk %}">{{ allocation.service_line.procedure_code }} — {{ allocation.service_line.procedure_name }}</a></td><td class="text-end">${{ allocation.allocated_amount|floatformat:2 }}</td><td>{{ allocation.notes|default:"—" }}</td>
+                <td class="text-end text-nowrap"><a href="{% url 'billing:payment_allocation_update' allocation.pk %}" class="btn btn-sm btn-outline-secondary">{% trans 'Edit' %}</a><a href="{% url 'billing:payment_allocation_delete' allocation.pk %}" class="btn btn-sm btn-outline-danger">{% trans 'Remove' %}</a></td></tr>
+        {% empty %}<tr><td colspan="5" class="text-center text-muted py-4">{% trans 'This payment has not been allocated to service lines.' %}</td></tr>{% endfor %}</tbody>
+    </table></div></div>
+</div>
+{% endblock %}

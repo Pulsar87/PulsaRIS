@@ -1,0 +1,9 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% if object %}{% trans 'Edit claim line' %}{% else %}{% trans 'Add claim line' %}{% endif %}{% endblock %}
+{% block content %}
+{% if object %}{% url 'billing:claim_detail' object.claim.pk as cancel_url %}{% else %}{% url 'billing:claim_detail' claim_pk as cancel_url %}{% endif %}
+{% if object %}{% trans 'Edit claim line' as page_title %}{% else %}{% trans 'Add claim line' as page_title %}{% endif %}
+{% trans 'Save claim line' as submit_label %}
+{% include 'billing/_form_page.html' %}
+{% endblock %}
