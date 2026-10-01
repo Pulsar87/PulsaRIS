@@ -168,7 +168,7 @@
                         <i class="bi bi-list-ul me-1"></i> {% trans "All Reports" %}
                     </a>
                     
-                    <!-- Print and Export buttons - only visible for finalized reports -->
+                    <!-- Print and Export buttons - only visible for finalized reports 
                     {% if report.status == 'FINAL' or report.status == 'AMENDED' %}
                     <button onclick="window.print()" class="btn btn-outline-primary">
                         <i class="bi bi-printer me-1"></i> {% trans "Print" %}
@@ -188,6 +188,7 @@
                         {% trans "Report must be verified before print/export" %}
                     </span>
                     {% endif %}
+                    -->
                 </div>
             </div>
         </div>
