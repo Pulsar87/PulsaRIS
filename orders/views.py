@@ -64,8 +64,13 @@ def worklist(request):
 def order_detail(request, pk):
     """Display order details."""
     order = get_object_or_404(ExamOrder, pk=pk)
+    from inventory.models import InventoryItem
+
     context = {
         "order": order,
+        "inventory_items": InventoryItem.objects.select_related("category")
+        .filter(is_active=True)
+        .order_by("name"),
     }
     return render(request, "orders/order_detail.html", context)
 

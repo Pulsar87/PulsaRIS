@@ -125,6 +125,16 @@
                             </a>
                         </li>
 
+                        <!-- Radiology Inventory -->
+                        <li class="nav-item">
+                            <a
+                                class="nav-link {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
+                                href="{% url 'inventory:dashboard' %}"
+                            >
+                                <i class="bi bi-box-seam me-1">{% trans "Inventory" %}</i>
+                            </a>
+                        </li>
+
                         <!-- Reports Dropdown -->
                         <li class="nav-item dropdown">
                             <a

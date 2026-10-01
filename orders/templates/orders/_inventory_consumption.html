@@ -1,0 +1,155 @@
+{% load i18n %}
+<section
+    class="card border-0 shadow-sm mb-4"
+    id="exam-inventory-consumption"
+    data-endpoint="{% url 'inventory:exam_consumption' %}"
+    data-exam-id="{{ order.pk }}"
+>
+    <div class="card-header bg-white py-3">
+        <h2 class="h5 mb-1"><i class="bi bi-box-seam me-2 text-primary"></i>{% trans "Consumables used" %}</h2>
+        <p class="text-muted small mb-0">{% trans "Record items used for this study. Stock is checked and deducted when submitted." %}</p>
+    </div>
+    <div class="card-body">
+        {% if inventory_items %}
+        <div id="exam-consumption-feedback" class="d-none mb-3" role="status" aria-live="polite"></div>
+        <form id="exam-consumption-form">
+            {% csrf_token %}
+            <div id="exam-consumption-rows">
+                <div class="row g-2 align-items-end mb-2 consumption-row">
+                    <div class="col-12 col-md-7">
+                        <label class="form-label">{% trans "Consumable" %}</label>
+                        <select class="form-select consumption-item" required>
+                            <option value="">{% trans "Choose an item" %}</option>
+                            {% for item in inventory_items %}
+                            <option value="{{ item.pk }}">{{ item.name }} — {{ item.current_stock_level|floatformat:"-3" }} {{ item.unit_of_measure }} available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-8 col-md-3">
+                        <label class="form-label">{% trans "Quantity used" %}</label>
+                        <input class="form-control consumption-quantity" type="number" min="0.001" step="0.001" inputmode="decimal" placeholder="0.000" required>
+                    </div>
+                    <div class="col-4 col-md-2 d-grid">
+                        <button class="btn btn-outline-danger remove-consumption-row" type="button" aria-label="{% trans 'Remove item' %}" disabled>
+                            <i class="bi bi-trash"></i><span class="d-md-none ms-1">{% trans "Remove" %}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <template id="exam-consumption-row-template">
+                <div class="row g-2 align-items-end mb-2 consumption-row">
+                    <div class="col-12 col-md-7">
+                        <label class="form-label">{% trans "Consumable" %}</label>
+                        <select class="form-select consumption-item" required>
+                            <option value="">{% trans "Choose an item" %}</option>
+                            {% for item in inventory_items %}
+                            <option value="{{ item.pk }}">{{ item.name }} — {{ item.current_stock_level|floatformat:"-3" }} {{ item.unit_of_measure }} available</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-8 col-md-3">
+                        <label class="form-label">{% trans "Quantity used" %}</label>
+                        <input class="form-control consumption-quantity" type="number" min="0.001" step="0.001" inputmode="decimal" placeholder="0.000" required>
+                    </div>
+                    <div class="col-4 col-md-2 d-grid">
+                        <button class="btn btn-outline-danger remove-consumption-row" type="button" aria-label="{% trans 'Remove item' %}">
+                            <i class="bi bi-trash"></i><span class="d-md-none ms-1">{% trans "Remove" %}</span>
+                        </button>
+                    </div>
+                </div>
+            </template>
+            <div class="d-flex flex-column flex-sm-row gap-2 justify-content-between mt-3">
+                <button class="btn btn-outline-secondary" id="add-consumption-row" type="button">
+                    <i class="bi bi-plus-lg me-1"></i>{% trans "Add another item" %}
+                </button>
+                <button class="btn btn-primary" id="submit-exam-consumption" type="submit">
+                    <i class="bi bi-check2-circle me-1"></i>{% trans "Record consumption" %}
+                </button>
+            </div>
+        </form>
+        {% else %}
+        <p class="text-muted mb-0">{% trans "No active inventory items are available to consume." %}</p>
+        {% endif %}
+    </div>
+</section>
+
+{% if inventory_items %}
+<script>
+    (() => {
+        const section = document.getElementById("exam-inventory-consumption");
+        const form = document.getElementById("exam-consumption-form");
+        const rows = document.getElementById("exam-consumption-rows");
+        const rowTemplate = document.getElementById("exam-consumption-row-template");
+        const feedback = document.getElementById("exam-consumption-feedback");
+        const submitButton = document.getElementById("submit-exam-consumption");
+        const csrfToken = form.querySelector("[name=csrfmiddlewaretoken]").value;
+
+        const showFeedback = (message, kind) => {
+            feedback.className = `alert alert-${kind} mb-3`;
+            feedback.textContent = message;
+        };
+
+        document.getElementById("add-consumption-row").addEventListener("click", () => {
+            rows.appendChild(rowTemplate.content.cloneNode(true));
+        });
+
+        rows.addEventListener("click", (event) => {
+            const removeButton = event.target.closest(".remove-consumption-row");
+            if (removeButton && rows.querySelectorAll(".consumption-row").length > 1) {
+                removeButton.closest(".consumption-row").remove();
+            }
+        });
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const items = Array.from(rows.querySelectorAll(".consumption-row")).map((row) => ({
+                item_id: row.querySelector(".consumption-item").value,
+                quantity: row.querySelector(".consumption-quantity").value,
+            }));
+
+            if (items.some((entry) => !entry.item_id || !entry.quantity)) {
+                showFeedback("{% trans 'Select an item and enter a quantity for each row.' %}", "warning");
+                return;
+            }
+
+            submitButton.disabled = true;
+            try {
+                const response = await fetch(section.dataset.endpoint, {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": csrfToken,
+                    },
+                    body: JSON.stringify({
+                        exam_id: section.dataset.examId,
+                        items,
+                    }),
+                });
+                const result = await response.json();
+                if (!response.ok) {
+                    showFeedback(result.error || "{% trans 'Unable to record consumption.' %}", "danger");
+                    return;
+                }
+
+                const lowStock = result.low_stock_items || [];
+                const message = lowStock.length
+                    ? `{% trans 'Consumption recorded. Low stock:' %} ${lowStock.map((item) => `${item.name} (${item.current_stock_level} ${item.unit_of_measure})`).join(", ")}`
+                    : "{% trans 'Consumption recorded successfully.' %}";
+                showFeedback(message, lowStock.length ? "warning" : "success");
+
+                const firstRow = rows.querySelector(".consumption-row");
+                firstRow.querySelector(".consumption-item").value = "";
+                firstRow.querySelector(".consumption-quantity").value = "";
+                rows.querySelectorAll(".consumption-row").forEach((row, index) => {
+                    if (index > 0) row.remove();
+                });
+            } catch (error) {
+                showFeedback("{% trans 'A network error prevented this consumption from being recorded. Please retry.' %}", "danger");
+            } finally {
+                submitButton.disabled = false;
+            }
+        });
+    })();
+</script>
+{% endif %}

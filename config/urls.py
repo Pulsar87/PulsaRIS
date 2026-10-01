@@ -45,6 +45,7 @@ urlpatterns = [
     path("patients/", include("patients.urls")),
     path("reports/", include("reports.urls")),
     path("billing/", include("billing.urls")),
+    path("inventory/", include("inventory.urls")),
     path("core/", include("core.urls")),
     # path("activation-required/", licenseview.activation_required, name="activation"),
     # License check as first step

@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Inventory" %} - Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1"><i class="bi bi-box-seam me-2 text-primary"></i>{% trans "Radiology Inventory" %}</h1>
+            <p class="text-muted mb-0">{% trans "View consumables and update department stock." %}</p>
+        </div>
+        <a class="btn btn-outline-primary" href="{% url 'inventory:dashboard' %}">
+            <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Clear filters" %}
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <label for="category-filter" class="form-label">{% trans "Filter by category" %}</label>
+                    <select id="category-filter" class="form-select" name="category">
+                        <option value="">{% trans "All categories" %}</option>
+                        {% for category in categories %}
+                        <option value="{{ category.pk }}" {% if category_filter == category.pk|stringformat:"s" %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-funnel me-1"></i>{% trans "Apply filter" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0">{% trans "Current stock" %}</h2>
+            <span class="badge text-bg-secondary">{{ items|length }} {% trans "items" %}</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">{% trans "Item name" %}</th>
+                        <th scope="col">{% trans "SKU" %}</th>
+                        <th scope="col">{% trans "Category" %}</th>
+                        <th scope="col">{% trans "Unit" %}</th>
+                        <th scope="col">{% trans "Current stock" %}</th>
+                        <th scope="col" class="text-end">{% trans "Action" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr class="{% if item.is_low_stock %}table-danger{% endif %}">
+                        <td class="fw-semibold">
+                            {{ item.name }}
+                            {% if not item.is_active %}
+                            <span class="badge text-bg-secondary ms-1">{% trans "Inactive" %}</span>
+                            {% endif %}
+                            {% if item.is_low_stock %}
+                            <span class="badge text-bg-danger ms-1">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i>{% trans "Low stock" %}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td><code>{{ item.sku }}</code></td>
+                        <td>{{ item.category.name }}</td>
+                        <td>{{ item.unit_of_measure }}</td>
+                        <td>
+                            <span class="{% if item.is_low_stock %}text-danger fw-bold{% else %}fw-semibold{% endif %}">
+                                {{ item.current_stock_level|floatformat:"-3" }}
+                            </span>
+                            <span class="text-muted">{{ item.unit_of_measure }}</span>
+                            {% if item.is_low_stock %}
+                            <div class="small text-danger">{% trans "Threshold" %}: {{ item.low_stock_threshold|floatformat:"-3" }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-primary js-stock-update"
+                                data-action="{% url 'inventory:stock_update' item.pk %}{% if category_filter %}?category={{ category_filter|urlencode }}{% endif %}"
+                                data-item-name="{{ item.name }}"
+                                data-stock="{{ item.current_stock_level|floatformat:'-3' }}"
+                                data-unit="{{ item.unit_of_measure }}"
+                                data-bs-toggle="modal"
+                                data-bs-target="#stockUpdateModal"
+                                {% if not item.is_active %}disabled title="{% trans 'Inactive items cannot be updated.' %}"{% endif %}
+                            >
+                                <i class="bi bi-arrow-left-right me-1"></i>{% trans "Update stock" %}
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <i class="bi bi-inboxes display-6 text-muted"></i>
+                            <p class="text-muted mt-2 mb-0">{% trans "No active inventory items found." %}</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="stockUpdateModal" tabindex="-1" aria-labelledby="stockUpdateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form id="stock-update-form" method="post" action="{% if selected_item %}{% url 'inventory:stock_update' selected_item.pk %}{% else %}#{% endif %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <div>
+                        <h2 class="modal-title fs-5" id="stockUpdateModalLabel">{% trans "Update stock" %}</h2>
+                        <div class="small text-muted" id="stock-item-summary"></div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                </div>
+                <div class="modal-body">
+                    {% if stock_form.non_field_errors %}
+                    <div class="alert alert-danger" role="alert">{{ stock_form.non_field_errors }}</div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ stock_form.transaction_type.id_for_label }}">{% trans "Transaction type" %}</label>
+                        {{ stock_form.transaction_type }}
+                        {% for error in stock_form.transaction_type.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ stock_form.quantity.id_for_label }}">{% trans "Quantity" %}</label>
+                        {{ stock_form.quantity }}
+                        {% for error in stock_form.quantity.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ stock_form.reference_exam.id_for_label }}">{% trans "Reference exam (optional)" %}</label>
+                        {{ stock_form.reference_exam }}
+                        <div class="form-text">{% trans "Choose a study to associate with this stock movement." %}</div>
+                        {% for error in stock_form.reference_exam.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+                    </div>
+                    <div class="alert alert-info small mb-0">
+                        <i class="bi bi-info-circle me-1"></i>{% trans "Stock Out cannot exceed the available quantity." %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check2-circle me-1"></i>{% trans "Save movement" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    (() => {
+        const modal = document.getElementById("stockUpdateModal");
+        const form = document.getElementById("stock-update-form");
+        const summary = document.getElementById("stock-item-summary");
+        if (!modal || !form) return;
+
+        document.querySelectorAll(".js-stock-update").forEach((button) => {
+            button.addEventListener("click", () => {
+                form.action = button.dataset.action;
+                summary.textContent = `${button.dataset.itemName} — ${button.dataset.stock} ${button.dataset.unit}`;
+            });
+        });
+
+        {% if selected_item %}
+        form.action = "{% url 'inventory:stock_update' selected_item.pk %}{% if category_filter %}?category={{ category_filter|urlencode }}{% endif %}";
+        summary.textContent = "{{ selected_item.name|escapejs }} — {{ selected_item.current_stock_level|floatformat:'-3' }} {{ selected_item.unit_of_measure|escapejs }}";
+        bootstrap.Modal.getOrCreateInstance(modal).show();
+        {% endif %}
+    })();
+</script>
+{% endblock %}
