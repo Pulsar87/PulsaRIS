@@ -126,13 +126,39 @@
                         </li>
 
                         <!-- Radiology Inventory -->
-                        <li class="nav-item">
+                        <li class="nav-item dropdown">
                             <a
-                                class="nav-link {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
-                                href="{% url 'inventory:dashboard' %}"
+                                class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
+                                href="#"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
                             >
                                 <i class="bi bi-box-seam me-1">{% trans "Inventory" %}</i>
                             </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'inventory:dashboard' %}">
+                                        <i class="bi bi-box-seam me-2"></i>{% trans "Stock dashboard" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'inventory:stock_receipt_create' %}">
+                                        <i class="bi bi-box-arrow-in-down me-2"></i>{% trans "Import stock from seller" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'inventory:stock_receipt_list' %}">
+                                        <i class="bi bi-receipt me-2"></i>{% trans "Stock receipts" %}
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'inventory:supplier_list' %}">
+                                        <i class="bi bi-truck me-2"></i>{% trans "Suppliers" %}
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <!-- Reports Dropdown -->

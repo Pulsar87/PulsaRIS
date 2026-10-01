@@ -1,9 +1,16 @@
+from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 from uuid import UUID
 
 from django.db import transaction
+from django.utils import timezone
 
-from .models import InventoryItem, StockTransaction
+from .models import (
+    InventoryItem,
+    StockReceipt,
+    StockReceiptItem,
+    StockTransaction,
+)
 
 
 class InventoryError(ValueError):
@@ -187,3 +194,164 @@ def consume_exam_materials(exam_id, items_used, user):
         "transactions": transactions,
         "low_stock_items": low_stock_items,
     }
+
+
+def classify_expiry(expiry_date, minimum_shelf_life_days):
+    """Return ('OK' | 'WARNING' | 'REJECTED') for a batch expiry date.
+
+    REJECTED  -> already expired, or shelf life shorter than the accepted
+                 minimum (e.g. contrast media arriving with <90 days left).
+    WARNING   -> acceptable, but expiring within the next 90 days.
+    OK        -> normal acceptance.
+    """
+    if expiry_date is None:
+        return "OK"
+    today = timezone.localdate()
+    days_left = (expiry_date - today).days
+    if days_left < 0:
+        return "REJECTED"
+    if days_left < int(minimum_shelf_life_days or 0):
+        return "REJECTED"
+    if days_left <= 90:
+        return "WARNING"
+    return "OK"
+
+
+@transaction.atomic
+def create_stock_receipt(*, supplier, lines, user, invoice_number="",
+                         delivery_note="", received_date=None, notes=""):
+    """Import goods from a seller into inventory as one stock receipt (GRN).
+
+    ``lines`` is an iterable of dicts with keys:
+        item, quantity, unit_price, batch_number, manufacture_date,
+        expiry_date, minimum_shelf_life_days (optional, default 90).
+
+    Every accepted line creates a StockTransaction (IN) and raises the
+    item's stock level atomically. Expired / short-shelf-life batches are
+    rejected and abort the whole receipt (row-level locks serialise
+    concurrent receipts for the same SKU). Returns the StockReceipt.
+    """
+    if not lines:
+        raise InventoryError("A receipt must contain at least one item line.")
+
+    parsed_lines = []
+    seen_item_ids = set()
+    for index, raw in enumerate(lines, start=1):
+        item = raw["item"]
+        if item.pk in seen_item_ids:
+            raise InventoryError(
+                f"Line {index}: duplicate item '{item.name}'. "
+                "Merge quantities into a single line."
+            )
+        seen_item_ids.add(item.pk)
+
+        quantity = _positive_quantity(raw.get("quantity"))
+        expiry_date = raw.get("expiry_date")
+        if expiry_date is None:
+            raise InventoryError(
+                f"Line {index} ({item.name}): expiry date is required "
+                "when importing stock from a seller."
+            )
+        manufacture_date = raw.get("manufacture_date")
+        if manufacture_date and expiry_date <= manufacture_date:
+            raise InventoryError(
+                f"Line {index} ({item.name}): expiry date must be after "
+                "the manufacture date."
+            )
+
+        min_shelf = int(raw.get("minimum_shelf_life_days") or 90)
+        status = classify_expiry(expiry_date, min_shelf)
+        if status == "REJECTED":
+            days_left = (expiry_date - timezone.localdate()).days
+            raise InventoryError(
+                f"Line {index} ({item.name}): batch rejected — only "
+                f"{days_left} day(s) shelf life left, minimum accepted is "
+                f"{min_shelf}. Expired or near-expiry stock cannot be "
+                "imported."
+            )
+
+        unit_price = raw.get("unit_price")
+        if unit_price is not None:
+            try:
+                unit_price = Decimal(str(unit_price))
+            except InvalidOperation:
+                raise InventoryError(
+                    f"Line {index}: unit price must be a number."
+                ) from None
+            if unit_price < 0:
+                raise InventoryError(
+                    f"Line {index}: unit price cannot be negative."
+                )
+
+        parsed_lines.append(
+            {
+                "item": item,
+                "quantity": quantity,
+                "unit_price": unit_price,
+                "total_price": (
+                    unit_price * quantity if unit_price is not None else None
+                ),
+                "batch_number": (raw.get("batch_number") or "").strip(),
+                "manufacture_date": manufacture_date,
+                "expiry_date": expiry_date,
+                "minimum_shelf_life_days": min_shelf,
+                "expiry_status": status,
+            }
+        )
+
+    receipt = StockReceipt.objects.create(
+        supplier=supplier,
+        invoice_number=invoice_number or "",
+        delivery_note=delivery_note or "",
+        received_date=received_date or timezone.localdate(),
+        received_by=user,
+        notes=notes or "",
+    )
+
+    # Lock all involved items up-front so concurrent receipts/outs on the
+    # same SKUs are serialised deterministically.
+    locked_items = {
+        locked.pk: locked
+        for locked in InventoryItem.objects.select_for_update().filter(
+            pk__in=seen_item_ids
+        )
+    }
+
+    for line in parsed_lines:
+        item = locked_items[line["item"].pk]
+        new_level = item.current_stock_level + line["quantity"]
+        if new_level >= Decimal("1000000000"):
+            raise InventoryError(
+                f"Stock level for {item.name} exceeds the supported maximum."
+            )
+        item.current_stock_level = new_level
+        save_fields = ["current_stock_level", "updated_at"]
+
+        # Keep the earliest known expiry on the master record so dashboards
+        # surface FEFO concerns; never move a later date backwards.
+        current_expiry = item.expiry_date
+        if current_expiry is None or line["expiry_date"] < current_expiry:
+            item.expiry_date = line["expiry_date"]
+            save_fields.append("expiry_date")
+        if line["batch_number"]:
+            item.batch_number = line["batch_number"]
+            save_fields.append("batch_number")
+        if line["manufacture_date"] and not item.manufacture_date:
+            item.manufacture_date = line["manufacture_date"]
+            save_fields.append("manufacture_date")
+        item.save(update_fields=list(dict.fromkeys(save_fields)))
+
+        transaction_entry = StockTransaction.objects.create(
+            item=item,
+            transaction_type=StockTransaction.TransactionType.IN,
+            quantity=line["quantity"],
+            user=user,
+        )
+        StockReceiptItem.objects.create(
+            receipt=receipt,
+            item=item,
+            **{k: v for k, v in line.items() if k != "item"},
+            transaction=transaction_entry,
+        )
+
+    return receipt

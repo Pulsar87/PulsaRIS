@@ -10,9 +10,20 @@
             <h1 class="h3 mb-1"><i class="bi bi-box-seam me-2 text-primary"></i>{% trans "Radiology Inventory" %}</h1>
             <p class="text-muted mb-0">{% trans "View consumables and update department stock." %}</p>
         </div>
-        <a class="btn btn-outline-primary" href="{% url 'inventory:dashboard' %}">
-            <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Clear filters" %}
-        </a>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary" href="{% url 'inventory:dashboard' %}">
+                <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Clear filters" %}
+            </a>
+            <a class="btn btn-outline-secondary" href="{% url 'inventory:supplier_list' %}">
+                <i class="bi bi-truck me-1"></i>{% trans "Suppliers" %}
+            </a>
+            <a class="btn btn-outline-secondary" href="{% url 'inventory:stock_receipt_list' %}">
+                <i class="bi bi-receipt me-1"></i>{% trans "Stock receipts" %}
+            </a>
+            <a class="btn btn-primary" href="{% url 'inventory:stock_receipt_create' %}">
+                <i class="bi bi-box-arrow-in-down me-1"></i>{% trans "Import from seller" %}
+            </a>
+        </div>
     </div>
 
     <div class="card border-0 shadow-sm mb-4">
@@ -51,6 +62,7 @@
                         <th scope="col">{% trans "SKU" %}</th>
                         <th scope="col">{% trans "Category" %}</th>
                         <th scope="col">{% trans "Unit" %}</th>
+                        <th scope="col">{% trans "Expiry" %}</th>
                         <th scope="col">{% trans "Current stock" %}</th>
                         <th scope="col" class="text-end">{% trans "Action" %}</th>
                     </tr>
@@ -72,6 +84,24 @@
                         <td><code>{{ item.sku }}</code></td>
                         <td>{{ item.category.name }}</td>
                         <td>{{ item.unit_of_measure }}</td>
+                        <td>
+                            {% if item.expiry_date %}
+                                {% if item.is_expired %}
+                                <span class="badge text-bg-danger">
+                                    <i class="bi bi-calendar-x me-1"></i>{{ item.expiry_date }}
+                                </span>
+                                {% elif item.is_expiring_soon %}
+                                <span class="badge text-bg-warning text-dark">
+                                    <i class="bi bi-calendar-alert me-1"></i>{{ item.expiry_date }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">{{ item.expiry_date }}</span>
+                                {% endif %}
+                                <div class="small text-muted">{{ item.days_to_expiry }} {% trans "days left" %}</div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
                         <td>
                             <span class="{% if item.is_low_stock %}text-danger fw-bold{% else %}fw-semibold{% endif %}">
                                 {{ item.current_stock_level|floatformat:"-3" }}
@@ -99,7 +129,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="text-center py-5">
+                        <td colspan="7" class="text-center py-5">
                             <i class="bi bi-inboxes display-6 text-muted"></i>
                             <p class="text-muted mt-2 mb-0">{% trans "No active inventory items found." %}</p>
                         </td>
