@@ -43,6 +43,7 @@ urlpatterns = [
     path("users/", include("users.urls")),
     path("orders/", include("orders.urls")),
     path("patients/", include("patients.urls")),
+    path("clinic/", include("clinic.urls")),
     path("reports/", include("reports.urls")),
     path("billing/", include("billing.urls")),
     path("inventory/", include("inventory.urls")),

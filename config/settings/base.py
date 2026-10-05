@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "audit",  # Audit logs
     "users",  # Authared resources (Facility, Modality, Device)
     "patients",
+    "clinic",  # Clinic Information System (appointments, encounters, clinical records)
     "orders",
     "reports",
     "integrations",
