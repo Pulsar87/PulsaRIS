@@ -17,17 +17,19 @@ class FacilityScopedQuerySet(models.QuerySet):
     def for_user(self, user):
         """Return rows visible to ``user``.
 
-        Default policy: staff see their home facility (``user.facility``);
-        multi-facility coverage via ``clinic.FacilityAssignment`` will be
-        layered on in Phase 0 without changing this call signature.
-        Superusers see everything.
+        Policy (Phase 0, addendum B.3): home facility (``user.facility``) plus
+        every site with an active, non-expired ``clinic.FacilityAssignment``.
+        Delegates to ``clinic.permissions.accessible_facility_ids`` so FBV,
+        DRF and ORM paths share one implementation. Superusers are unrestricted.
         """
-        if getattr(user, "is_superuser", False):
+        from clinic.permissions import accessible_facility_ids
+
+        ids = accessible_facility_ids(user)
+        if ids is None:  # superuser: unrestricted
             return self.all()
-        facility = getattr(user, "facility", None)
-        if facility is None:
+        if not ids:
             return self.none()
-        return self.filter(facility=facility)
+        return self.filter(facility_id__in=ids)
 
 
 class FacilityScopedModel(models.Model):

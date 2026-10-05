@@ -1,8 +1,2 @@
-# Python compiled files
-__pycache__/
-*.pyc
-
-# Django media/static (common in Django projects)
-media/
-staticfiles/__pycache__/
-*.pyc
+# Temp files
+tmp_verify.db
