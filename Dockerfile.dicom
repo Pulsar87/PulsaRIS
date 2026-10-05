@@ -1,0 +1,22 @@
+# DICOM server image — no native build toolchain needed.
+# pypiserver/pynetdicom and Django's psycopg support ship as wheels,
+# so we skip apt entirely (which is what was failing with exit code 100).
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 11112
+
+# Bypass the app entrypoint (which runs migrate/collectstatic) — migrations
+# are handled by the web service; this container only serves DICOM.
+ENTRYPOINT []
+CMD ["python", "manage.py", "run_dicom_server", "--host", "0.0.0.0", "--port", "11112"]
