@@ -93,9 +93,9 @@ class StockTransactionAdmin(admin.ModelAdmin):
     list_filter = ["transaction_type", "timestamp", "is_deleted"]
     search_fields = ["item__name", "item__sku", "exam__accession_number"]
     readonly_fields = [
-        "item",
-        "transaction_type",
-        "quantity",
+        #"item",
+        #"transaction_type",
+        #"quantity",
         "timestamp",
         "user",
         "exam",
