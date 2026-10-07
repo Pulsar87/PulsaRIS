@@ -85,14 +85,25 @@ The following refinements were validated directly against the existing models in
 2. Jurisdictional requirements: privacy/retention windows, e-prescribing mandates, legal definition of clinical signature (determines signing/hash-chain and retention rules in Phase 2).
 3. Whether receptionists may create encounters without a provider (affects encounter state machine initial states and permission matrix).
 
-### F. Phase 0 scaffolding — already completed in this repo
+### F. Phase 0 (Step 1) — COMPLETE & VERIFIED ✅
 
-The following groundwork is now in place and verified (`manage.py check`: no issues; `makemigrations --check`: no pending changes):
+Implemented in commit `3e1c4ff` + test fixes; verified against SQLite (`DATABASE_URL=sqlite://...`):
 
-- **`clinic/` app created** with `apps.py`, empty-phase `models.py` (documents which models land in which phase), placeholder `urls.py` (`app_name="clinic"`), `permissions.py` stub (documents the Phase 0 permission API), `admin.py`, `tests.py` (encodes Verification items 1–5 as test targets), and `migrations/__init__.py`.
-- **Registered** in `config/settings/base.py` `INSTALLED_APPS` immediately after `patients`.
-- **Wired** into `config/urls.py` as `path("clinic/", include("clinic.urls"))`.
-- **`core/mixins.py` added**: `FacilityScopedModel` abstract base + `FacilityScopedQuerySet` with `.for_facility()` / `.for_user()` — the reusable scoping layer from decision B.3.
-- **`templates/layout.html`**: marked the insertion point for the role-gated Clinic nav (Phase 1), following the existing inventory-dropdown pattern.
+- **Models shipped:** `clinic.FacilityAssignment`, `clinic.PatientFacilityIdentifier`, `clinic.Appointment` (+ status transitions w/ cancel reason), `clinic.Encounter` (planned→in_progress→completed lifecycle); `billing.ServiceLine.encounter` nullable FK + model-level XOR validation + DB `CheckConstraint`; `orders.ExamOrder.appointment` nullable FK.
+- **Permission layer:** `clinic.permissions.accessible_facility_ids()` / `has_facility_access()` (home facility + active, non-expired assignments; superuser unrestricted), consumed by `core.mixins.FacilityScopedQuerySet.for_user()`.
+- **Migrations generated and applied** for `clinic`, `billing`, `orders` (Postgres unreachable in sandbox; run `python manage.py migrate` on the live DB).
+- **Tests:** `python manage.py test clinic` → **16 tests, all passing** (Verification items 1, 4, 5; items 2–3 stubbed for Phases 1–2). Test-only fixture model removed to keep production migrations clean; scoping now asserted via a helper over `Encounter.objects`.
+- **Admin/audit hardening:** read-only audit log admin registration; clinic models registered with facility-scoped querysets.
 
-**Next actionable step (first real migration):** add `FacilityAssignment` and `PatientFacilityIdentifier` to `clinic/models.py`, then the `ServiceLine.encounter` FK + exclusivity `CheckConstraint` in `billing/models.py` and `ExamOrder.appointment` FK in `orders/models.py` — these three migrations unblock Phases 1–2. Run `python manage.py makemigrations clinic billing orders && python manage.py migrate` against a live DB (the sandbox here has no reachable Postgres host).
+**Open questions in section E remain unanswered but are NOT blocking Step 2** — they only gate Phase 2 note-template/signing details.
+
+## Step 2 — Phase 1: Operations (current work)
+
+Scope per addendum section C:
+
+1. `clinic.ProviderAvailability` + `clinic.RoomBooking` primitives (weekly template + exceptions).
+2. Unified availability/conflict engine in `clinic/scheduling.py`: overlap detection shared by Appointments and radiology slots; adapter reserves slots for `ExamOrder.scheduled_datetime` through the same engine (decision B.1; note field name is `scheduled_datetime`, finding A.2).
+3. Referral capture: create `Appointment` + linked `ExamOrder` from an encounter or walk-in.
+4. Check-in / waiting queue views + HTMX templates under `/clinic/`; role-gated Clinic nav in `templates/layout.html`.
+5. Cancellation / no-show transitions with recorded reasons (upgrades the Phase 0 stub tests into full Verification item 2 coverage).
+6. Permissions enforcement on every route via `clinic.permissions` + `FacilityScopedPermission` for DRF endpoints.

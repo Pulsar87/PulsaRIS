@@ -68,7 +68,9 @@ services:
           condition: service_started
 
   dicom-server:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dicom
     # Load .env file automatically
     env_file:
       - .env
