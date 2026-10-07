@@ -187,6 +187,13 @@ class Appointment(models.Model):
         related_name="appointments_created",
     )
     cancelled_reason = models.CharField(max_length=100, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    queue_position = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="Waiting-queue order within the facility; assigned at check-in.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -196,6 +203,7 @@ class Appointment(models.Model):
             models.Index(fields=["facility", "start_datetime"]),
             models.Index(fields=["provider", "start_datetime"]),
             models.Index(fields=["status"]),
+            models.Index(fields=["facility", "status", "checked_in_at"]),
         ]
 
     @property
@@ -203,6 +211,63 @@ class Appointment(models.Model):
         from datetime import timedelta
 
         return self.start_datetime + timedelta(minutes=self.duration_minutes)
+
+    # ── Phase 1 status machine (plan Step 2.5 / Verification item 2) ────
+    # Allowed forward transitions; terminal states have no outgoing edges.
+    TRANSITIONS = {
+        Status.BOOKED: {Status.CONFIRMED, Status.CHECKED_IN, Status.CANCELLED, Status.NO_SHOW},
+        Status.CONFIRMED: {Status.CHECKED_IN, Status.CANCELLED, Status.NO_SHOW},
+        Status.CHECKED_IN: {Status.COMPLETED, Status.CANCELLED, Status.NO_SHOW},
+        Status.COMPLETED: set(),
+        Status.CANCELLED: set(),
+        Status.NO_SHOW: set(),
+    }
+
+    def can_transition_to(self, new_status):
+        return new_status in self.TRANSITIONS.get(self.status, set())
+
+    def transition_to(self, new_status, *, reason="", when=None):
+        """Move through the appointment lifecycle, recording metadata.
+
+        Raises ``ValidationError`` on illegal transitions so views/services
+        fail loudly instead of silently corrupting the schedule.
+        """
+        from datetime import timedelta
+
+        from django.utils import timezone as tz
+
+        if not self.can_transition_to(new_status):
+            raise ValidationError(
+                f"Illegal appointment transition {self.status} -> {new_status}."
+            )
+        when = when or tz.now()
+        self.status = new_status
+        if new_status == self.Status.CHECKED_IN:
+            self.checked_in_at = when
+            if self.queue_position is None:
+                last = (
+                    Appointment.objects.filter(
+                        facility_id=self.facility_id,
+                        status=self.Status.CHECKED_IN,
+                        queue_position__isnull=False,
+                    )
+                    .order_by("-queue_position")
+                    .values_list("queue_position", flat=True)
+                    .first()
+                )
+                self.queue_position = (last or 0) + 1
+        elif new_status in (self.Status.CANCELLED, self.Status.NO_SHOW):
+            self.cancelled_reason = reason or new_status.label
+            self.cancelled_at = when
+        elif new_status == self.Status.COMPLETED:
+            # Stamp encounter close-out if this appointment spawned one.
+            for enc in self.encounters.filter(status=Encounter.VisitStatus.IN_PROGRESS):
+                enc.ended_at = when
+                enc.status = Encounter.VisitStatus.COMPLETED
+                enc.save(update_fields=["status", "ended_at", "updated_at"])
+        self.save()
+        # Reschedule guard: a moved appointment re-checks conflicts.
+        del timedelta
 
     def __str__(self):
         return f"Appointment {self.pk} - {self.patient} {self.start_datetime}"

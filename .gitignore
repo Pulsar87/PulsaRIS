@@ -1,2 +1,6 @@
-# Temp files
-tmp_verify.db
+# Compiled files
+__pycache__/
+*.pyc
+
+# Temp/Database files
+*.db
