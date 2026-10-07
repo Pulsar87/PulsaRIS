@@ -1,6 +1,7 @@
 import uuid
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
 
@@ -364,7 +365,19 @@ class PatientAccount(models.Model):
 class ServiceLine(models.Model):
     """Individual billable service line item"""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    exam_order = models.ForeignKey("orders.ExamOrder", on_delete=models.PROTECT, related_name='service_lines')
+    exam_order = models.ForeignKey("orders.ExamOrder", on_delete=models.PROTECT, related_name='service_lines', null=True, blank=True)
+    # Phase 0 (plan addendum A.1): encounter-originated charges. Exactly one of
+    # exam_order / encounter must be set — enforced by the CheckConstraint below.
+    # The DB constraint is authoritative; the model save() guard gives a clear
+    # Python error. Existing rows always have exam_order set, so the migration
+    # is data-backfill-safe (no default needed).
+    encounter = models.ForeignKey(
+        "clinic.Encounter",
+        on_delete=models.PROTECT,
+        related_name="service_lines",
+        null=True,
+        blank=True,
+    )
     patient_account = models.ForeignKey(PatientAccount, on_delete=models.PROTECT, related_name='service_lines')
 
     # Service Details
@@ -426,9 +439,29 @@ class ServiceLine(models.Model):
             models.Index(fields=['service_date']),
             models.Index(fields=['procedure_code']),
         ]
+        constraints = [
+            # Phase 0 (plan addendum A.1): a charge originates from exactly one
+            # source — an imaging ExamOrder (RIS path) or a clinic Encounter.
+            models.CheckConstraint(
+                check=(
+                    models.Q(exam_order__isnull=False, encounter__isnull=True)
+                    | models.Q(exam_order__isnull=True, encounter__isnull=False)
+                ),
+                name="%(app_label)s_%(class)s_source_exclusive",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.procedure_code} - {self.service_date} - {self.total_charge}"
+
+    def save(self, *args, **kwargs):
+        # DB-level CheckConstraint enforces exclusivity; this guard gives a
+        # clear Python error before hitting the database (Phase 0 addendum A.1).
+        if (self.exam_order_id is None) == (self.encounter_id is None):
+            raise ValidationError(
+                "ServiceLine requires exactly one source: exam_order or encounter."
+            )
+        super().save(*args, **kwargs)
 
 
 class Claim(models.Model):

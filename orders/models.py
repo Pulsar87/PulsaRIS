@@ -168,6 +168,15 @@ class ExamOrder(models.Model):
     status = models.CharField(
         max_length=20, choices=Status.choices, default=Status.REGISTERED, db_index=True
     )
+    # Phase 0 link (plan addendum B.2): an imaging order may carry the clinic
+    # Appointment that produced it. scheduled_datetime semantics unchanged.
+    appointment = models.ForeignKey(
+        "clinic.Appointment",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="exam_orders",
+    )
     scheduled_datetime = models.DateTimeField(null=True, blank=True)
     duration_minutes = models.PositiveIntegerField(default=15)
     room_station = models.ForeignKey(
