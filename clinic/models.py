@@ -1,24 +1,37 @@
 """Clinic Information System models.
 
 Implementation phases (see plan-clinicInformationSystem.prompt.md):
-- Phase 0: FacilityAssignment, PatientFacilityIdentifier (foundations)  <-- implemented here
+- Phase 0: FacilityAssignment, PatientFacilityIdentifier (foundations)
 - Phase 1: ProviderAvailability, RoomBooking, Appointment (operations)
 - Phase 2: Vitals, Problem, Allergy, Medication, Prescription,
-           EncounterNote (clinical records). Encounter exists as a Phase 0
-           shell (needed by billing.ServiceLine.encounter); extended in Phase 2.
+           EncounterNote (clinical records)  <-- implemented here. The
+           Phase 0 Encounter shell was extended with lifecycle helpers.
 
 Phase 0 design notes (addendum B.3 / B.5):
 - ``User.facility`` stays the *home/default* facility (no breaking change).
   Multi-facility coverage is expressed through ``FacilityAssignment`` rows.
 - Patients remain a single shared identity; per-site chart numbers live in
   ``PatientFacilityIdentifier`` — never duplicate demographics.
+
+Phase 2 design notes (addendum B.4):
+- Clinical records are append-only where immutability matters:
+  ``EncounterNote`` versions supersede one another and carry a SHA-256
+  content hash plus ``prev_version_hash`` for tamper evidence. A signed
+  note can never be edited or deleted (pre_save guard + admin lockdown;
+  django-auditlog middleware logs any attempted change).
+- django-auditlog registers every model automatically
+  (AUDITLOG_INCLUDE_ALL_MODELS); the custom ``audit.AuditLog`` receives
+  explicit business-event rows via ``clinic.permissions.record_audit``.
 """
 
+import hashlib
 import uuid
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import pre_save
+from django.utils import timezone
 
 
 class FacilityAssignment(models.Model):
@@ -408,12 +421,12 @@ class RoomBooking(models.Model):
 
 
 class Encounter(models.Model):
-    """Minimal Phase 0 shell — full clinical lifecycle lands in Phase 2.
+    """Clinical encounter (Phase 0 shell, extended with lifecycle in Phase 2).
 
-    Created now so `billing.ServiceLine.encounter` (addendum A.1) can be
-    migrated and deployed without waiting for the rest of Phase 2. Addendum E
-    open questions (required documentation set per specialty/jurisdiction) are
-    resolved before extending this model with vitals/problems/notes.
+    Created in Phase 0 so `billing.ServiceLine.encounter` (addendum A.1) could
+    be migrated and deployed early. Phase 2 added the lifecycle transitions
+    below plus the clinical-record child models (Vitals, Problem, Allergy,
+    Medication, Prescription, EncounterNote).
     """
 
     class VisitStatus(models.TextChoices):
@@ -451,6 +464,7 @@ class Encounter(models.Model):
     started_at = models.DateTimeField(null=True, blank=True)
     ended_at = models.DateTimeField(null=True, blank=True)
     reason = models.TextField(blank=True, help_text="Chief complaint / reason for visit.")
+    cancellation_reason = models.CharField(max_length=100, blank=True)
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -469,3 +483,408 @@ class Encounter(models.Model):
 
     def __str__(self):
         return f"Encounter {self.pk} - {self.patient} @ {self.facility} ({self.status})"
+
+    # ── Phase 2 lifecycle (plan Step 3 / Verification item 3) ──────────────
+
+    ENCOUNTER_TRANSITIONS = {
+        VisitStatus.PLANNED: {VisitStatus.IN_PROGRESS, VisitStatus.CANCELLED},
+        VisitStatus.IN_PROGRESS: {VisitStatus.COMPLETED, VisitStatus.CANCELLED},
+        VisitStatus.COMPLETED: set(),
+        VisitStatus.CANCELLED: set(),
+    }
+
+    def can_transition_to(self, new_status):
+        return new_status in self.ENCOUNTER_TRANSITIONS.get(self.status, set())
+
+    def start(self, when=None):
+        """PLANNED -> IN_PROGRESS; requires an assigned provider."""
+        if not self.provider_id:
+            raise ValidationError("Encounter needs a provider before it starts.")
+        self._transition(VisitStatus.IN_PROGRESS, started_at=when or timezone.now())
+
+    def complete(self, when=None):
+        """IN_PROGRESS -> COMPLETED; enforces the minimum documentation set
+        (addendum E.1 default until per-specialty templates are confirmed)."""
+        self.require_documentation()
+        self._transition(VisitStatus.COMPLETED, ended_at=when or timezone.now())
+
+    def cancel(self, reason="", when=None):
+        self._transition(
+            VisitStatus.CANCELLED, ended_at=when or timezone.now(),
+            cancellation_reason=reason or "cancelled",
+        )
+
+    def _transition(self, new_status, **fields):
+        if not self.can_transition_to(new_status):
+            raise ValidationError(
+                f"Illegal encounter transition {self.status} -> {new_status}."
+            )
+        self.status = new_status
+        for k, v in fields.items():
+            setattr(self, k, v)
+        self.save(update_fields=list(fields) + ["status", "updated_at"])
+
+    def require_documentation(self):
+        """A completed encounter must carry at least one signed note and one
+        vitals recording. Raises ValidationError listing what is missing."""
+        missing = []
+        if not self.notes.filter(signed_at__isnull=False).exists():
+            missing.append("a signed encounter note")
+        if not self.vitals.exists():
+            missing.append("recorded vitals")
+        if missing:
+            raise ValidationError(
+                "Cannot complete encounter — missing: " + ", ".join(missing) + "."
+            )
+
+
+# ── Phase 2: clinical records ─────────────────────────────────────────────
+# All child records hang off Encounter and inherit its facility through the
+# encounter FK; facility scoping on queries goes via encounter__facility_id
+# (core.mixins.FacilityScopedQuerySet.for_facility covers direct-FK models).
+
+
+class Vitals(models.Model):
+    """Structured vital-signs recording (Phase 2). Numeric fields are
+    nullable so partial sets are recordable without free-text hacks."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="vitals"
+    )
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="vitals_recorded",
+    )
+    recorded_at = models.DateTimeField(default=timezone.now)
+    systolic_bp = models.PositiveIntegerField(null=True, blank=True)
+    diastolic_bp = models.PositiveIntegerField(null=True, blank=True)
+    heart_rate = models.PositiveIntegerField(null=True, blank=True, help_text="bpm")
+    respiratory_rate = models.PositiveIntegerField(null=True, blank=True, help_text="breaths/min")
+    temperature_c = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1)
+    spo2_pct = models.DecimalField(null=True, blank=True, max_digits=4, decimal_places=1, help_text="%")
+    height_cm = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=1)
+    weight_kg = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=1)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-recorded_at"]
+        indexes = [models.Index(fields=["encounter", "recorded_at"])]
+
+    def clean(self):
+        if (self.systolic_bp is None) != (self.diastolic_bp is None):
+            raise ValidationError("Blood pressure requires both systolic and diastolic values.")
+
+    @property
+    def bmi(self):
+        if self.height_cm and self.weight_kg:
+            m = float(self.height_cm) / 100.0
+            return round(float(self.weight_kg) / (m * m), 1)
+        return None
+
+    def __str__(self):
+        return f"Vitals {self.recorded_at:%Y-%m-%d %H:%M} — encounter {self.encounter_id}"
+
+
+class Problem(models.Model):
+    """Active/inactive problem-list entry with optional ICD-10 coding
+    (addendum C Phase 2: 'ICD-10 coding column')."""
+
+    class Status(models.TextChoices):
+        ACTIVE = "ACTIVE", "Active"
+        RESOLVED = "RESOLVED", "Resolved"
+        HISTORY = "HISTORY", "History"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient = models.ForeignKey(
+        "patients.Patient", on_delete=models.CASCADE, related_name="problems"
+    )
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.SET_NULL, null=True, blank=True, related_name="problems"
+    )
+    code = models.CharField(max_length=10, blank=True, help_text="ICD-10-CM code")
+    description = models.CharField(max_length=250)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    onset_date = models.DateField(null=True, blank=True)
+    resolved_date = models.DateField(null=True, blank=True)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="problems_recorded",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    models.Q(status__in=["RESOLVED", "HISTORY"], resolved_date__isnull=False)
+                    | models.Q(resolved_date__isnull=True)
+                ),
+                name="%(app_label)s_%(class)s_resolved_needs_date",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.code} {self.description} ({self.status})"
+
+
+class Allergy(models.Model):
+    """Patient allergy/intolerance record (shared identity => patient-level,
+    not encounter-level; encounter records who documented it)."""
+
+    class Severity(models.TextChoices):
+        MILD = "MILD", "Mild"
+        MODERATE = "MODERATE", "Moderate"
+        SEVERE = "SEVERE", "Severe"
+
+    class ReactionType(models.TextChoices):
+        ALLERGIC = "ALLERGIC", "Allergic"
+        INTOLERANCE = "INTOLERANCE", "Intolerance"
+        UNKNOWN = "UNKNOWN", "Unknown"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient = models.ForeignKey(
+        "patients.Patient", on_delete=models.CASCADE, related_name="allergies"
+    )
+    substance = models.CharField(max_length=150, help_text="e.g., Penicillin, iodinated contrast")
+    reaction_type = models.CharField(
+        max_length=15, choices=ReactionType.choices, default=ReactionType.ALLERGIC
+    )
+    severity = models.CharField(max_length=10, choices=Severity.choices, default=Severity.MODERATE)
+    clinical_status = models.CharField(
+        max_length=10,
+        choices=[("ACTIVE", "Active"), ("CONFIRMED", "Confirmed"), ("ENTERED_IN_ERROR", "Entered in error")],
+        default="ACTIVE",
+    )
+    notes = models.TextField(blank=True)
+    documented_at = models.DateTimeField(default=timezone.now)
+    documented_in = models.ForeignKey(
+        Encounter, on_delete=models.SET_NULL, null=True, blank=True, related_name="allergies_documented"
+    )
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="allergies_recorded",
+    )
+
+    class Meta:
+        ordering = ["substance"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["patient", "substance", "reaction_type"],
+                condition=models.Q(clinical_status__in=["ACTIVE", "CONFIRMED"]),
+                name="unique_active_allergy_per_patient_substance",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.substance} ({self.severity})"
+
+
+class Medication(models.Model):
+    """Medication history entry (current or past) for the shared patient."""
+
+    class Status(models.TextChoices):
+        CURRENT = "CURRENT", "Current"
+        PAST = "PAST", "Past"
+        STOPPED = "STOPPED", "Stopped"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    patient = models.ForeignKey(
+        "patients.Patient", on_delete=models.CASCADE, related_name="medications"
+    )
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.SET_NULL, null=True, blank=True, related_name="medications_documented"
+    )
+    name = models.CharField(max_length=200, help_text="Drug name (generic preferred)")
+    dose = models.CharField(max_length=100, blank=True)
+    frequency = models.CharField(max_length=100, blank=True, help_text="e.g., BID, TID, q6h")
+    route = models.CharField(max_length=50, blank=True, help_text="e.g., PO, IV, SC")
+    start_date = models.DateField(null=True, blank=True)
+    end_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.CURRENT)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="medications_recorded",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return f"{self.name} {self.dose} {self.frequency}".strip()
+
+
+class Prescription(models.Model):
+    """Prescription issued during an encounter.
+
+    Addendum E.2 (e-prescribing mandates) remains open; this is an internal
+    record only — no external e-Rx transmission yet.
+    """
+
+    class Status(models.TextChoices):
+        ISSUED = "ISSUED", "Issued"
+        CANCELLED = "CANCELLED", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.PROTECT, related_name="prescriptions"
+    )
+    patient = models.ForeignKey(
+        "patients.Patient", on_delete=models.PROTECT, related_name="prescriptions"
+    )
+    prescriber = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="prescriptions_issued",
+    )
+    medication_name = models.CharField(max_length=200)
+    dose = models.CharField(max_length=100)
+    frequency = models.CharField(max_length=100)
+    route = models.CharField(max_length=50, blank=True)
+    quantity = models.PositiveIntegerField(null=True, blank=True)
+    days_supply = models.PositiveIntegerField(null=True, blank=True)
+    refills_allowed = models.PositiveSmallIntegerField(default=0)
+    instructions = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ISSUED)
+    issued_at = models.DateTimeField(default=timezone.now)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-issued_at"]
+
+    def __str__(self):
+        return f"Rx {self.medication_name} — {self.patient}"
+
+
+class EncounterNote(models.Model):
+    """Append-only, versioned, signable encounter note (addendum B.4).
+
+    Invariants enforced here + by ``_guard_immutable`` pre_save hook:
+    - version = max(existing)+1 per encounter; ``supersedes`` points at the
+      previous version (None for v1);
+    - ``content_hash`` = SHA-256 over body+author+signed_at+prev_version_hash;
+    - once ``signed_at`` is set, the row is immutable (no edits, no deletes);
+    - hash chain links versions so tampering with any row breaks verification.
+    django-auditlog (AUDITLOG_INCLUDE_ALL_MODELS) captures every DB change;
+    business events go to audit.AuditLog via clinic.permissions.record_audit.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="notes"
+    )
+    version = models.PositiveIntegerField(default=1)
+    supersedes = models.OneToOneField(
+        "self", on_delete=models.PROTECT, null=True, blank=True, related_name="superseded_by"
+    )
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="encounter_notes_authored",
+    )
+    body = models.TextField()
+    signed_at = models.DateTimeField(null=True, blank=True)
+    content_hash = models.CharField(max_length=64, blank=True, editable=False)
+    prev_version_hash = models.CharField(max_length=64, blank=True, editable=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["encounter", "version"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["encounter", "version"], name="unique_note_version_per_encounter"
+            ),
+        ]
+
+    def compute_hash(self):
+        payload = "|".join(
+            str(x) if x is not None else ""
+            for x in (self.body, self.author_id, self.signed_at.isoformat() if self.signed_at else "",
+                      self.prev_version_hash)
+        )
+        return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+    def next_version(self, *, body, author):
+        """Create the append-only successor of this note (draft until signed).
+
+        The predecessor must be signed first — you supersede finalized work,
+        never edit drafts in place.
+        """
+        if self.signed_at is None:
+            raise ValidationError("Only signed notes can be superseded; edit the draft instead.")
+        latest = self.encounter.notes.order_by("-version").first()
+        note = EncounterNote.objects.create(
+            encounter=self.encounter,
+            version=latest.version + 1,
+            supersedes=latest,
+            author=author,
+            body=body,
+            prev_version_hash=latest.content_hash,
+        )
+        return note
+
+    def sign(self, signing_user):
+        """Authenticated signature: author check + timestamp + hash seal."""
+        if self.signed_at is not None:
+            raise ValidationError("Note is already signed and immutable.")
+        if signing_user.pk != self.author_id:
+            raise ValidationError("Only the note author may sign it.")
+        self.signed_at = timezone.now()
+        self.content_hash = self.compute_hash()
+        self.save(update_fields=["signed_at", "content_hash", "updated_at"])
+        return self
+
+    def verify_integrity(self):
+        """True iff this row's stored hash matches recomputation AND, when
+        chained, the parent note's hash matches our prev_version_hash."""
+        ok = bool(self.content_hash) and self.content_hash == self.compute_hash()
+        if ok and self.supersedes_id:
+            ok = self.supersedes.content_hash == self.prev_version_hash
+        return ok
+
+    def delete(self, *args, **kwargs):
+        if self.signed_at is not None:
+            raise ValidationError("Signed notes are immutable and cannot be deleted.")
+        super().delete(*args, **kwargs)
+
+    def __str__(self):
+        state = "signed" if self.signed_at else "draft"
+        return f"Note v{self.version} ({state}) — encounter {self.encounter_id}"
+
+
+def _guard_note_immutable(sender, instance, **kwargs):
+    """pre_save guard (addendum B.4): block edits to signed note rows at the
+    ORM layer, not just the UI/API layer."""
+    if instance.pk is None:
+        return
+    try:
+        db = EncounterNote.objects.filter(pk=instance.pk).first()
+    except Exception:
+        return
+    if db is not None and db.signed_at is not None:
+        changed = (
+            db.body != instance.body
+            or db.author_id != instance.author_id
+            or db.encounter_id != instance.encounter_id
+            or db.version != instance.version
+            or db.signed_at != instance.signed_at
+            or db.content_hash != instance.content_hash
+            or db.prev_version_hash != instance.prev_version_hash
+        )
+        if changed:
+            raise ValidationError("Signed encounter notes are immutable.")
+
+
+pre_save.connect(_guard_note_immutable, sender=EncounterNote)

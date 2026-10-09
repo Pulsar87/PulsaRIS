@@ -1,12 +1,18 @@
 from django.contrib import admin
+from django.core.exceptions import PermissionDenied
 
 from clinic.models import (
+    Allergy,
     Appointment,
     Encounter,
+    EncounterNote,
     FacilityAssignment,
+    Medication,
     PatientFacilityIdentifier,
+    Problem,
     ProviderAvailability,
     RoomBooking,
+    Vitals,
 )
 
 
@@ -52,3 +58,52 @@ class RoomBookingAdmin(admin.ModelAdmin):
     list_display = ("room", "facility", "start_datetime", "duration_minutes",
                     "appointment", "exam_order", "is_cancelled")
     list_filter = ("facility", "is_cancelled")
+
+
+@admin.register(Vitals)
+class VitalsAdmin(admin.ModelAdmin):
+    list_display = ("encounter", "recorded_by", "recorded_at", "systolic_bp",
+                    "diastolic_bp", "heart_rate", "temperature_c")
+    list_filter = ("encounter__facility",)
+    search_fields = ("encounter__patient__mrn",)
+
+
+@admin.register(Problem)
+class ProblemAdmin(admin.ModelAdmin):
+    list_display = ("patient", "code", "description", "status", "recorded_by")
+    list_filter = ("status",)
+    search_fields = ("patient__mrn", "code", "description")
+
+
+@admin.register(Allergy)
+class AllergyAdmin(admin.ModelAdmin):
+    list_display = ("patient", "substance", "reaction_type", "severity", "clinical_status")
+    list_filter = ("severity", "clinical_status", "reaction_type")
+    search_fields = ("patient__mrn", "substance")
+
+
+@admin.register(Medication)
+class MedicationAdmin(admin.ModelAdmin):
+    list_display = ("patient", "name", "dose", "frequency", "status")
+    list_filter = ("status",)
+    search_fields = ("patient__mrn", "name")
+
+
+@admin.register(EncounterNote)
+class EncounterNoteAdmin(admin.ModelAdmin):
+    """Signed notes are immutable: no editing, no deleting (addendum B.4)."""
+
+    list_display = ("encounter", "version", "author", "signed_at", "content_hash")
+    list_filter = ("encounter__facility",)
+    search_fields = ("encounter__patient__mrn", "body")
+    readonly_fields = ("content_hash", "prev_version_hash", "signed_at")
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None and obj.signed_at is not None:
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_delete_permission(self, request, obj=None):
+        if obj is not None and obj.signed_at is not None:
+            return False
+        return super().has_delete_permission(request, obj)
