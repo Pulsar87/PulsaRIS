@@ -826,10 +826,15 @@ class EncounterNote(models.Model):
 
         The predecessor must be signed first — you supersede finalized work,
         never edit drafts in place.
+
+        ``select_for_update`` locks the *signed* predecessor row so concurrent
+        amendments serialize (lock-then-insert works on Postgres & SQLite;
+        locking the brand-new v1 row itself would deadlock on Postgres).
         """
         if self.signed_at is None:
             raise ValidationError("Only signed notes can be superseded; edit the draft instead.")
-        latest = self.encounter.notes.select_for_update().order_by("-version").first()
+        EncounterNote.objects.filter(pk=self.pk).select_for_update().first()
+        latest = self.encounter.notes.order_by("-version").first()
         if latest.pk != self.pk:
             raise ValidationError(
                 f"Note v{self.version} is no longer the latest version "
