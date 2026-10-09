@@ -1,2 +1,6 @@
-# Temp files
-tmp_verify.db
+# Compiled and build artifacts
+__pycache__/
+*.pyc
+
+# Environment files
+.env

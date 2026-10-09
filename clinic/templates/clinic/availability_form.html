@@ -1,0 +1,26 @@
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Add Availability' %}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:640px">
+  <h2 class="mb-4">{% trans 'Add Availability' %}</h2>
+  <form method="post" class="card card-body">{% csrf_token %}
+    <div class="row g-3">
+      <div class="col-md-6"><label class="form-label">{% trans 'Facility' %}</label>
+        <select name="facility" class="form-select" required>{% for f in facilities %}<option value="{{ f.pk }}">{{ f.name }}</option>{% endfor %}</select></div>
+      <div class="col-md-6"><label class="form-label">{% trans 'Kind' %}</label>
+        <select name="kind" class="form-select"><option value="TEMPLATE">{% trans 'Weekly template' %}</option><option value="EXCEPTION">{% trans 'Single-date exception' %}</option></select></div>
+      <div class="col-md-6"><label class="form-label">{% trans 'Weekday (templates)' %}</label>
+        <select name="weekday" class="form-select">{% for d in weekday_labels %}<option value="{{ forloop.counter0 }}">{{ d }}</option>{% endfor %}</select></div>
+      <div class="col-md-6"><label class="form-label">{% trans 'Exception date' %}</label>
+        <input type="date" name="exception_date" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">{% trans 'Start time' %}</label><input type="time" name="start_time" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">{% trans 'End time' %}</label><input type="time" name="end_time" class="form-control"></div>
+      <div class="col-md-4"><label class="form-label">{% trans 'Slot minutes' %}</label><input type="number" name="slot_minutes" value="20" class="form-control"></div>
+      <div class="col-12"><div class="form-check"><input type="checkbox" name="is_available" id="ia" class="form-check-input" checked>
+        <label class="form-check-label" for="ia">{% trans 'Available (uncheck = day off)' %}</label></div></div>
+      <div class="col-12"><label class="form-label">{% trans 'Note' %}</label><input name="note" class="form-control"></div>
+    </div>
+    <div class="mt-3"><button class="btn btn-primary">{% trans 'Save' %}</button>
+      <a class="btn btn-link" href="{% url 'clinic:availability_list' %}">{% trans 'Cancel' %}</a></div>
+  </form>
+</div>
+{% endblock %}

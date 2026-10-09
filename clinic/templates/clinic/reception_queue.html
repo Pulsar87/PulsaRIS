@@ -1,0 +1,23 @@
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Reception Queue' %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <h2 class="mb-4"><i class="bi bi-people me-2"></i>{% trans 'Waiting Queue' %}</h2>
+  <div class="row g-4">
+    <div class="col-lg-6"><div class="card"><div class="card-header">{% trans 'Checked in — waiting' %}</div>
+      <ul class="list-group list-group-flush">
+        {% for a in queue %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>#{{ a.queue_position }} {{ a.patient }} <small class="text-muted">({{ a.provider|default:"any" }})</small></span>
+          <a href="{% url 'clinic:appointment_detail' a.pk %}" class="btn btn-sm btn-outline-primary">{% trans 'Open' %}</a>
+        </li>{% empty %}<li class="list-group-item text-muted">{% trans 'Empty' %}</li>{% endfor %}
+      </ul></div></div>
+    <div class="col-lg-6"><div class="card"><div class="card-header">{% trans 'Encounters in progress' %}</div>
+      <ul class="list-group list-group-flush">
+        {% for e in in_progress %}
+        <li class="list-group-item">{{ e.patient }} — {{ e.provider|default:"unassigned" }}
+          <small class="text-muted">{{ e.started_at|date:"H:i" }}</small></li>
+        {% empty %}<li class="list-group-item text-muted">{% trans 'None' %}</li>{% endfor %}
+      </ul></div></div>
+  </div>
+</div>
+{% endblock %}

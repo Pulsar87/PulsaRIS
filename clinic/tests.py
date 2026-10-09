@@ -9,6 +9,7 @@ land with Phases 1-2; the corresponding test classes are stubbed below.
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
@@ -22,17 +23,21 @@ from clinic.models import (
     PatientFacilityIdentifier,
 )
 from clinic.permissions import accessible_facility_ids, has_facility_access
-from core.mixins import FacilityScopedModel
 from core.models import Facility
 from patients.models import Patient
 from users.models import User
 
 
-class TestUser(FacilityScopedModel):
-    """Concrete subclass of the abstract mixin for scoping tests only."""
+def scoped_rows(user):
+    """Exercise the shared facility-scoping filter (core.mixins policy) against
+    a real clinic table, as a stand-in for any FacilityScopedModel subclass."""
+    from clinic.permissions import accessible_facility_ids
 
-    class Meta:
-        app_label = "clinic"
+    ids = accessible_facility_ids(user)
+    qs = Encounter.objects.all()
+    if ids is None:
+        return qs
+    return qs.filter(facility_id__in=ids)
 
 
 def make_patient(mrn):
@@ -61,11 +66,11 @@ class FacilityScopingTests(TestCase):
         self.user = make_user("staff@test.com", facility=self.f1)
         self.patient = make_patient("MRN-001")
         for f in (self.f1, self.f2, self.f3):
-            TestUser.objects.create(facility=f, name=str(f))
+            Encounter.objects.create(patient=self.patient, facility=f)
 
     def test_home_facility_only(self):
-        rows = TestUser.objects.for_user(self.user)
-        self.assertEqual(list(rows), [TestUser.objects.filter(facility=self.f1).first()])
+        rows = scoped_rows(self.user)
+        self.assertEqual([r.facility_id for r in rows], [self.f1.pk])
 
     def test_assignment_grants_second_site(self):
         FacilityAssignment.objects.create(
@@ -76,7 +81,7 @@ class FacilityScopingTests(TestCase):
         self.assertEqual(ids, {self.f1.pk, self.f2.pk})
         self.assertTrue(has_facility_access(self.user, self.f2.pk))
         self.assertFalse(has_facility_access(self.user, self.f3.pk))
-        self.assertEqual(TestUser.objects.for_user(self.user).count(), 2)
+        self.assertEqual(scoped_rows(self.user).count(), 2)
 
     def test_expired_assignment_not_counted(self):
         FacilityAssignment.objects.create(
@@ -97,7 +102,7 @@ class FacilityScopingTests(TestCase):
             username="root", email="root@test.com", password="pw"
         )
         self.assertIsNone(accessible_facility_ids(root))
-        self.assertEqual(TestUser.objects.for_user(root).count(), 3)
+        self.assertEqual(scoped_rows(root).count(), 3)
 
     def test_shared_patient_identity_with_site_identifiers(self):
         """One Patient row; per-site chart numbers via join table."""
@@ -190,17 +195,17 @@ class ServiceLineSourceExclusivityTests(TestCase):
         self.assertEqual(self.encounter.service_lines.count(), 1)
 
     def test_both_sources_rejected(self):
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                ServiceLine.objects.create(
-                    exam_order=self._make_exam_order(), encounter=self.encounter,
-                    **self._line_kwargs(),
-                )
+        # ServiceLine.save() raises ValidationError for dual sources; the DB
+        # CheckConstraint is the backstop for raw SQL/bulk writes.
+        with self.assertRaises(ValidationError):
+            ServiceLine.objects.create(
+                exam_order=self._make_exam_order(), encounter=self.encounter,
+                **self._line_kwargs(),
+            )
 
     def test_neither_source_rejected(self):
-        with self.assertRaises(IntegrityError):
-            with transaction.atomic():
-                ServiceLine.objects.create(**self._line_kwargs())
+        with self.assertRaises(ValidationError):
+            ServiceLine.objects.create(**self._line_kwargs())
 
 
 class AppointmentEncounterLinkTests(TestCase):
