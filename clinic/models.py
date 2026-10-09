@@ -597,6 +597,7 @@ class Problem(models.Model):
         ACTIVE = "ACTIVE", "Active"
         RESOLVED = "RESOLVED", "Resolved"
         HISTORY = "HISTORY", "History"
+        ENTERED_IN_ERROR = "ENTERED_IN_ERROR", "Entered in error"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey(
@@ -607,7 +608,9 @@ class Problem(models.Model):
     )
     code = models.CharField(max_length=10, blank=True, help_text="ICD-10-CM code")
     description = models.CharField(max_length=250)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ACTIVE
+    )
     onset_date = models.DateField(null=True, blank=True)
     resolved_date = models.DateField(null=True, blank=True)
     recorded_by = models.ForeignKey(
@@ -658,7 +661,7 @@ class Allergy(models.Model):
     )
     severity = models.CharField(max_length=10, choices=Severity.choices, default=Severity.MODERATE)
     clinical_status = models.CharField(
-        max_length=10,
+        max_length=20,
         choices=[("ACTIVE", "Active"), ("CONFIRMED", "Confirmed"), ("ENTERED_IN_ERROR", "Entered in error")],
         default="ACTIVE",
     )
