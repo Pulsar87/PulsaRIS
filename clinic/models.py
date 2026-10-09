@@ -658,7 +658,7 @@ class Allergy(models.Model):
     )
     severity = models.CharField(max_length=10, choices=Severity.choices, default=Severity.MODERATE)
     clinical_status = models.CharField(
-        max_length=10,
+        max_length=16,
         choices=[("ACTIVE", "Active"), ("CONFIRMED", "Confirmed"), ("ENTERED_IN_ERROR", "Entered in error")],
         default="ACTIVE",
     )
