@@ -131,7 +131,9 @@ Migrations: `clinic/migrations/0003_encounter_cancellation_reason_medication_and
 
 **Test coverage gap (carried to Phase 3 pass):** Verification item 3 (lifecycle, signed-note immutability/versioning, audit records) and item 4 (encounter→ExamOrder / encounter→ServiceLine round-trips) need dedicated automated tests; currently validated by service-layer guards + manual walks. Add `clinic/tests.py` classes: `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`.
 
-## Step 4 — Phase 3: Interoperability & Rollout — CODE COMPLETE ✅ (pilot pending ops)
+## Step 4 — Phase 3: Interoperability & Rollout — FINISHED ✅
+
+Status: **Phase 3 code work is finished and re-verified** (2026-10-10): full clinic suite green again — `Ran 43 tests ... OK`, `manage.py check` clean, migrations 0001–0004 present. The pilot runbook below remains an operational task for the deployment team; it does not gate further engineering work. Section-E answers from owners are still required before freezing the FHIR contract (see Step 5).
 
 Scope per addendum section C Phase 3 — implementation status:
 
@@ -151,3 +153,32 @@ Scope per addendum section C Phase 3 — implementation status:
 7. Sign-off inputs needed from owners (section E): launch specialty, retention/signature rules, receptionist encounter-creation rights → then freeze API contract for FHIR mapping.
 
 **Next: Step 5 — Phase 4 (multi-site rollout & hardening)** once pilot sign-off received.
+
+## Step 5 — Phase 4: Multi-Site Rollout & Hardening — PREPARED 🚧 (current work)
+
+Phase 4 goal: take the clinic modules from single/pilot facility to all sites safely, then freeze interoperability contracts. Engineering scope (in dependency order):
+
+### 5.1 Pre-rollout audit (before any new site is enabled)
+- [ ] **Facility-scoping coverage sweep**: enumerate every list/detail view + API endpoint in `clinic`, `patients`, `orders`, `billing` and confirm each passes through `facility_scope_queryset` / `FacilityScopedQuerySet.for_user()`; add regression tests asserting cross-facility records are invisible (UI + API both 404). No second scoping implementation may be introduced.
+- [ ] **Permission matrix review**: finalize role × action matrix (receptionist / provider / biller / admin × appointment, encounter, note, billing, API) per section-E answer on receptionist encounter-creation rights; encode as tests in `clinic/tests.py` (`ClinicApiTests` extended with role-based cases).
+- [ ] **Patient-matching reconciliation tooling**: UI + service for merging duplicate `Patient` records created across facilities via `PatientFacilityIdentifier` (append-only merge log, integrated with `audit` app); decide auto-link vs. manual-review threshold.
+- [ ] **Data seeding playbook**: per-site checklist — Facility row, FacilityAssignment rows, providers, rooms, availability templates, service lines mapped to `Encounter` billing; scripted as a management command (`clinic/management/commands/seed_site.py`) instead of manual admin clicks.
+
+### 5.2 Hardening
+- [ ] **Concurrency**: DB-level guards for double-booking under load (unique constraints on provider/room slots already partially in place — verify with Postgres, not just SQLite; add advisory-lock or exclusion-constraint test run against real Postgres).
+- [ ] **Outbox consumer**: implement at least one real consumer path for `IntegrationEvent` (e.g., periodic exporter emitting HL7 v2 ADT/A01-style messages to a configurable TCP endpoint or file drop), with retry/backoff and dead-letter status transitions; keep it off the request path (celery task — `config/celery.py` exists).
+- [ ] **API contract freeze**: version the read-only API (`/api/clinic/v1/`), publish OpenAPI schema (drf-spectacular if acceptable), document field→FHIR mapping table; only after section-E answers land.
+- [ ] **Performance**: index review on appointment/encounter query patterns (facility+date ranges), pagination defaults, N+1 checks on day board & queue views.
+- [ ] **Observability**: structured logging tags for scheduling rejections and outbox failures; simple health endpoint reporting pending `IntegrationEvent` backlog depth.
+
+### 5.3 Rollout sequence
+1. Pilot site completes the Phase 3 runbook → sign-off recorded here.
+2. Enable site 2 via seed playbook; run walkthrough B checks (cross-facility isolation, MRN matching).
+3. Soak period (≥1 week): monitor conflict-engine rejections, outbox backlog, note-chain integrity (`verify_chain()` scheduled check).
+4. Remaining sites in batches; rollback plan = disable clinic URLs behind a feature flag per facility.
+
+### 5.4 Gates (blocking)
+- Section E answers required before: FHIR contract freeze (5.2) and multi-site ordering decisions (5.3).
+- Pilot sign-off required before enabling any additional site.
+
+**Current position:** awaiting pilot execution/sign-off; pre-rollout audit (5.1) can begin in parallel.
