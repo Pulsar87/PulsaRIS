@@ -597,6 +597,7 @@ class Problem(models.Model):
         ACTIVE = "ACTIVE", "Active"
         RESOLVED = "RESOLVED", "Resolved"
         HISTORY = "HISTORY", "History"
+        ENTERED_IN_ERROR = "ENTERED_IN_ERROR", "Entered in error"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     patient = models.ForeignKey(
@@ -607,7 +608,9 @@ class Problem(models.Model):
     )
     code = models.CharField(max_length=10, blank=True, help_text="ICD-10-CM code")
     description = models.CharField(max_length=250)
-    status = models.CharField(max_length=10, choices=Status.choices, default=Status.ACTIVE)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ACTIVE
+    )
     onset_date = models.DateField(null=True, blank=True)
     resolved_date = models.DateField(null=True, blank=True)
     recorded_by = models.ForeignKey(
@@ -658,7 +661,7 @@ class Allergy(models.Model):
     )
     severity = models.CharField(max_length=10, choices=Severity.choices, default=Severity.MODERATE)
     clinical_status = models.CharField(
-        max_length=16,
+        max_length=20,
         choices=[("ACTIVE", "Active"), ("CONFIRMED", "Confirmed"), ("ENTERED_IN_ERROR", "Entered in error")],
         default="ACTIVE",
     )
@@ -888,3 +891,46 @@ def _guard_note_immutable(sender, instance, **kwargs):
 
 
 pre_save.connect(_guard_note_immutable, sender=EncounterNote)
+
+
+class IntegrationEvent(models.Model):
+    """Transactional outbox for interoperability events (Phase 3).
+
+    Addendum C Phase 3: ORM post_save hooks in ``clinic.signals`` append one
+    row per business event (appointment booked/cancelled/completed, encounter
+    closed). Consumers (HL7 v2 / FHIR mappers) poll ``delivered_at IS NULL``;
+    actual consumer wiring is deferred until pilot feedback. The outbox itself
+    is append-only — updating only the delivery bookkeeping fields is allowed.
+    """
+
+    class EventType(models.TextChoices):
+        APPOINTMENT_BOOKED = "APPT_BOOKED", "Appointment booked"
+        APPOINTMENT_CANCELLED = "APPT_CANCELLED", "Appointment cancelled"
+        APPOINTMENT_COMPLETED = "APPT_COMPLETED", "Appointment completed"
+        ENCOUNTER_CLOSED = "ENCOUNTER_CLOSED", "Encounter closed"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    event_type = models.CharField(max_length=30, choices=EventType.choices, db_index=True)
+    facility = models.ForeignKey(
+        "core.Facility",
+        on_delete=models.PROTECT,
+        related_name="integration_events",
+        null=True,
+        blank=True,
+    )
+    entity_type = models.CharField(max_length=50)
+    entity_id = models.UUIDField()
+    payload = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
+    delivery_attempts = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["created_at"]
+        indexes = [
+            models.Index(fields=["event_type", "created_at"]),
+            models.Index(fields=["delivered_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.event_type} | {self.entity_type}:{self.entity_id}"

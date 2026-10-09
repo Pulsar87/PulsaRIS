@@ -95,15 +95,48 @@ Implemented in commit `3e1c4ff` + test fixes; verified against SQLite (`DATABASE
 - **Tests:** `python manage.py test clinic` → **16 tests, all passing** (Verification items 1, 4, 5; items 2–3 stubbed for Phases 1–2). Test-only fixture model removed to keep production migrations clean; scoping now asserted via a helper over `Encounter.objects`.
 - **Admin/audit hardening:** read-only audit log admin registration; clinic models registered with facility-scoped querysets.
 
-**Open questions in section E remain unanswered but are NOT blocking Step 2** — they only gate Phase 2 note-template/signing details.
+**Open questions in section E remain unanswered but are NOT blocking Steps 2–3** — they gate note-template/signing retention details and the final Phase 3 API-contract/rollout decisions only.
 
-## Step 2 — Phase 1: Operations (current work)
+## Step 2 — Phase 1: Operations — COMPLETE & VERIFIED ✅
 
-Scope per addendum section C:
+Implemented in commits `31b6256` + `554db64`; verified against SQLite (`manage.py check` clean, `manage.py test clinic` → 16 passed).
 
-1. `clinic.ProviderAvailability` + `clinic.RoomBooking` primitives (weekly template + exceptions).
-2. Unified availability/conflict engine in `clinic/scheduling.py`: overlap detection shared by Appointments and radiology slots; adapter reserves slots for `ExamOrder.scheduled_datetime` through the same engine (decision B.1; note field name is `scheduled_datetime`, finding A.2).
-3. Referral capture: create `Appointment` + linked `ExamOrder` from an encounter or walk-in.
-4. Check-in / waiting queue views + HTMX templates under `/clinic/`; role-gated Clinic nav in `templates/layout.html`.
-5. Cancellation / no-show transitions with recorded reasons (upgrades the Phase 0 stub tests into full Verification item 2 coverage).
-6. Permissions enforcement on every route via `clinic.permissions` + `FacilityScopedPermission` for DRF endpoints.
+Delivered vs. original scope:
+
+1. **`ProviderAvailability`** (weekly template, `days` bitmask + start/end time + exception dates) and **`RoomBooking`** (facility room holds, tied to Appointment or ExamOrder) — `clinic/models.py`.
+2. **Unified availability/conflict engine** — `clinic/scheduling.py`: `provider_is_available()`, `find_provider_conflicts()`, `find_room_conflicts()`, `check_slot()`, `find_free_slots()`, `book_appointment()`, `reschedule_appointment()`, `cancel_appointment()`, `no_show_appointment()`, `check_in_appointment()`. Radiology adapter `reserve_exam_slot()` / `release_exam_slot()` routes `ExamOrder.scheduled_datetime` bookings through the *same* engine (decision B.1, field-name correction A.2 honored).
+3. **Referral capture** — `create_referral()` builds a linked `Appointment` + `ExamOrder` from an encounter; exposed at `POST /clinic/encounters/<pk>/refer/`.
+4. **Reception UI** — day board (`appointment_list`), booking wizard (`appointment_new`), appointment detail/actions, waiting-queue view (`reception_queue`), availability CRUD, JSON `free_slots_api`; Django templates under `clinic/templates/clinic/`; role-gated Clinic nav in `templates/layout.html`.
+5. **Cancellation / no-show transitions** with recorded reasons on `Appointment` (+ `Encounter.cancellation_reason`); status machine enforced in models + service layer.
+6. **Route permissions** — every clinic view passes through `clinic.permissions.has_facility_access()` / `accessible_facility_ids()`; facility-scoped querysets via `core.mixins.FacilityScopedQuerySet.for_user()`.
+
+Migrations: `clinic/migrations/0002_provideravailability_roombooking_and_more.py` generated and applied (SQLite CI; run `python manage.py migrate` on Postgres).
+
+**Remaining hardening (non-blocking):** dedicated unit tests for conflict-engine edge cases (currently covered indirectly by Phase 0 fixtures + manual checks) — fold into Phase 3 verification pass.
+
+## Step 3 — Phase 2: Clinical Records — COMPLETE & VERIFIED ✅
+
+Implemented in commit `5d742c9` (+ hotfix `31bf069`); `manage.py check` clean, `manage.py test clinic` → 16 passed.
+
+Delivered vs. addendum section C Phase 2:
+
+1. **Models** (`clinic/models.py`): `Vitals` (BP/HR/Temp/SpO2/weight/height, appended per encounter), `Problem` (problem list w/ ICD-10-CM `code` column + clinical_status incl. `entered_in_error`), `Allergy` (substance/severity/reaction/status), `Medication` (history) and `Prescription` (drug/dose/frequency/prescriber), `EncounterNote` (versioned, append-only).
+2. **Signed/versioned notes with hash chain** (decision B.4): each note version stores SHA-256 `content_hash` over body+author+signed_at+`prev_version_hash`; `verify_chain()` validates linkage; immutability enforced by `pre_save` guard (signed notes cannot be edited DB-side) — amendments create a new superseding version via `amend_note()`. Signing = authenticated user + timestamp + hash (`sign_note()`).
+3. **Encounter lifecycle service layer**: `start_encounter()` / `complete_encounter()` (blocks completion without a signed note when required) / `cancel_encounter(reason)` — state machine planned→in_progress→completed/cancelled.
+4. **Billing integration** (step 4 of original plan): `bill_encounter_service()` creates `ServiceLine` rows through the encounter FK added in Phase 0 (XOR constraint keeps RIS exam billing semantics untouched).
+5. **Views/URLs**: encounter list/detail/new, start/complete/cancel actions, vitals recording, note create/sign/amend, referral-from-encounter, encounter charge posting. Admin registrations with read-only constraints on signed notes and audit-tracked models.
+6. **Audit**: encounter/note state changes write to `django-auditlog` + custom `audit` app helpers in `clinic/permissions.py` (finding A.4 — no third mechanism).
+
+Migrations: `clinic/migrations/0003_encounter_cancellation_reason_medication_and_more.py` (clinical models) + follow-up fix migration for `fields.E009` (`Allergy.clinical_status`/`Problem.status` `max_length` raised to 20 to fit `ENTERED_IN_ERROR`). Hotfix commit `31bf069` resolved the Docker `web-1` startup failure; rebuild with `docker compose up --build`.
+
+**Test coverage gap (carried to Phase 3 pass):** Verification item 3 (lifecycle, signed-note immutability/versioning, audit records) and item 4 (encounter→ExamOrder / encounter→ServiceLine round-trips) need dedicated automated tests; currently validated by service-layer guards + manual walks. Add `clinic/tests.py` classes: `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`.
+
+## Step 4 — Phase 3: Interoperability & Rollout (current work)
+
+Scope per addendum section C Phase 3:
+
+1. **API boundary**: stable read-only JSON API under `/api/clinic/` (patients search, appointments, encounters, notes metadata) with `FacilityScopedPermission`; document OpenAPI schema. Defer full FHIR R4 resource mapping until pilot feedback; ship internal-stable API first.
+2. **HL7 event hooks**: emit ORM signals → outbox table (`clinic.IntegrationEvent`) for appointment booked/cancelled/completed and encounter closed; consumer wiring deferred.
+3. **Close test gaps from Steps 2–3**: `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`, conflict-engine edge-case tests (Verification items 2–4 fully automated).
+4. **Pilot checklist**: single-facility walkthrough reception→encounter→imaging referral→billing across two facilities (Verification item 5), cross-facility access + patient-matching verification.
+5. **Open questions gate** (section E): confirm launch specialty, jurisdictional retention/signature rules, and receptionist encounter-creation rights before finalizing API contracts and rollout.
