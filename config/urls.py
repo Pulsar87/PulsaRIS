@@ -44,6 +44,8 @@ urlpatterns = [
     path("orders/", include("orders.urls")),
     path("patients/", include("patients.urls")),
     path("clinic/", include("clinic.urls")),
+    # Phase 3: read-only clinic JSON API (plan Step 4 item 1).
+    path("api/clinic/", include("clinic.api_urlpatterns")),
     path("reports/", include("reports.urls")),
     path("billing/", include("billing.urls")),
     path("inventory/", include("inventory.urls")),
@@ -52,6 +54,7 @@ urlpatterns = [
     # License check as first step
     # path("activation-required/", include("license.views")),
     # path('api/', include('core.api_urls')),
-    # path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # path("api/docs/", SpectacularSwaggerView.as_url(name="schema"), name="swagger-ui"),
+    # Phase 3 (plan Step 4 item 1): OpenAPI schema for the clinic JSON API.
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
 ]

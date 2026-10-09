@@ -7,6 +7,7 @@ from clinic.models import (
     Encounter,
     EncounterNote,
     FacilityAssignment,
+    IntegrationEvent,
     Medication,
     PatientFacilityIdentifier,
     Problem,
@@ -107,3 +108,22 @@ class EncounterNoteAdmin(admin.ModelAdmin):
         if obj is not None and obj.signed_at is not None:
             return False
         return super().has_delete_permission(request, obj)
+
+
+@admin.register(IntegrationEvent)
+class IntegrationEventAdmin(admin.ModelAdmin):
+    """Phase 3 outbox: read-only for humans; consumers update delivery fields."""
+
+    list_display = ("created_at", "event_type", "facility", "entity_type", "delivered_at", "delivery_attempts")
+    list_filter = ("event_type", "facility", "delivered_at")
+    search_fields = ("entity_id",)
+    readonly_fields = tuple(f.name for f in IntegrationEvent._meta.fields)
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
