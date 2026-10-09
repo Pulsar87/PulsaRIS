@@ -921,8 +921,17 @@ class IntegrationEvent(models.Model):
         APPOINTMENT_COMPLETED = "APPT_COMPLETED", "Appointment completed"
         ENCOUNTER_CLOSED = "ENCOUNTER_CLOSED", "Encounter closed"
 
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending"
+        DELIVERED = "DELIVERED", "Delivered"
+        FAILED = "FAILED", "Delivery failed (will retry)"
+        DEAD_LETTER = "DEAD_LETTER", "Dead letter (max attempts exceeded)"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event_type = models.CharField(max_length=30, choices=EventType.choices, db_index=True)
+    status = models.CharField(
+        max_length=15, choices=Status.choices, default=Status.PENDING, db_index=True
+    )
     facility = models.ForeignKey(
         "core.Facility",
         on_delete=models.PROTECT,
@@ -946,3 +955,47 @@ class IntegrationEvent(models.Model):
 
     def __str__(self):
         return f"{self.event_type} | {self.entity_type}:{self.entity_id}"
+
+
+class PatientMergeLog(models.Model):
+    """Append-only record of patient identity merges (Phase 4, plan Step 5.1).
+
+    Written by ``clinic.patient_matching.merge_patients`` inside the same
+    transaction as the merge itself; complements the generic AuditLog entry
+    with a queryable duplicate->canonical history for site admins. Rows are
+    immutable: save() after creation and delete raise unless flagged otherwise.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    duplicate = models.ForeignKey(
+        "patients.Patient", on_delete=models.PROTECT, related_name="merge_log_as_duplicate"
+    )
+    canonical = models.ForeignKey(
+        "patients.Patient", on_delete=models.PROTECT, related_name="merge_log_as_canonical"
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    summary = models.JSONField(default=dict, help_text="Counts/ids from merge_patients().")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                name="merge_log_distinct_patients",
+                check=models.Q(duplicate__pk__ne=models.OuterRef("canonical__pk")),
+            ),
+        ]
+        indexes = [models.Index(fields=["duplicate"]), models.Index(fields=["canonical"])]
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise ValidationError("PatientMergeLog rows are append-only.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("PatientMergeLog rows cannot be deleted.")
+
+    def __str__(self):
+        return f"Merged {self.duplicate_id} -> {self.canonical_id} @ {self.created_at}"
