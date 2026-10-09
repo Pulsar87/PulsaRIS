@@ -500,17 +500,19 @@ class Encounter(models.Model):
         """PLANNED -> IN_PROGRESS; requires an assigned provider."""
         if not self.provider_id:
             raise ValidationError("Encounter needs a provider before it starts.")
-        self._transition(VisitStatus.IN_PROGRESS, started_at=when or timezone.now())
+        self._transition(
+            self.VisitStatus.IN_PROGRESS, started_at=when or timezone.now()
+        )
 
     def complete(self, when=None):
         """IN_PROGRESS -> COMPLETED; enforces the minimum documentation set
         (addendum E.1 default until per-specialty templates are confirmed)."""
         self.require_documentation()
-        self._transition(VisitStatus.COMPLETED, ended_at=when or timezone.now())
+        self._transition(self.VisitStatus.COMPLETED, ended_at=when or timezone.now())
 
     def cancel(self, reason="", when=None):
         self._transition(
-            VisitStatus.CANCELLED, ended_at=when or timezone.now(),
+            self.VisitStatus.CANCELLED, ended_at=when or timezone.now(),
             cancellation_reason=reason or "cancelled",
         )
 
@@ -827,7 +829,12 @@ class EncounterNote(models.Model):
         """
         if self.signed_at is None:
             raise ValidationError("Only signed notes can be superseded; edit the draft instead.")
-        latest = self.encounter.notes.order_by("-version").first()
+        latest = self.encounter.notes.select_for_update().order_by("-version").first()
+        if latest.pk != self.pk:
+            raise ValidationError(
+                f"Note v{self.version} is no longer the latest version "
+                f"(v{latest.version} exists); amend the latest note instead."
+            )
         note = EncounterNote.objects.create(
             encounter=self.encounter,
             version=latest.version + 1,
