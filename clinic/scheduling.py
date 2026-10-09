@@ -383,3 +383,111 @@ def _next_accession(facility):
     while ExamOrder.objects.filter(accession_number=acc).exists():
         acc += "X"
     return acc
+
+
+# ── Phase 2: encounter lifecycle & clinical-record services ───────────────
+# Views call these so business rules (documentation minimums, note signing,
+# append-only versioning) live in ONE place; every mutation writes an
+# audit.AuditLog business-event row (addendum A.4 — django-auditlog already
+# captures the model-level change via middleware).
+
+
+@transaction.atomic
+def start_encounter(encounter, *, actor=None):
+    """PLANNED -> IN_PROGRESS (requires provider)."""
+    encounter.start()
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ENC_START", entity_type="Encounter", entity_id=encounter.pk,
+        user=actor, new={"status": encounter.status},
+    )
+    return encounter
+
+
+@transaction.atomic
+def complete_encounter(encounter, *, actor=None):
+    """IN_PROGRESS -> COMPLETED after enforcing the documentation minimum."""
+    encounter.complete()
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ENC_COMPLETE", entity_type="Encounter", entity_id=encounter.pk,
+        user=actor, new={"status": encounter.status},
+    )
+    return encounter
+
+
+@transaction.atomic
+def cancel_encounter(encounter, *, reason="", actor=None):
+    encounter.cancel(reason=reason)
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ENC_CANCEL", entity_type="Encounter", entity_id=encounter.pk,
+        user=actor, old={"status": "IN_PROGRESS"}, new={"status": encounter.status, "reason": reason},
+    )
+    return encounter
+
+
+@transaction.atomic
+def sign_note(note, *, signing_user):
+    """Seal a note version: author check + timestamp + SHA-256 hash (B.4)."""
+    note.sign(signing_user)
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_NOTE_SIGN", entity_type="EncounterNote", entity_id=note.pk,
+        user=signing_user, new={"version": note.version, "hash": note.content_hash},
+    )
+    return note
+
+
+@transaction.atomic
+def amend_note(note, *, body, author):
+    """Append-only amendment: supersede a signed note with a new draft version."""
+    new_note = note.next_version(body=body, author=author)
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_NOTE_AMEND", entity_type="EncounterNote", entity_id=new_note.pk,
+        user=author, old={"superseded_version": note.version},
+        new={"version": new_note.version, "supersedes": str(note.pk)},
+    )
+    return new_note
+
+
+@transaction.atomic
+def bill_encounter_service(encounter, *, code, name, unit_price, rendering_provider=None,
+                           quantity=1, service_date=None, created_by=None):
+    """Create a ServiceLine sourced from the Encounter (plan Step 4 /
+    Verification item 4). Reuses the existing PatientAccount abstraction;
+    does not touch the RIS exam-order billing path."""
+    from datetime import date as _date
+
+    from billing.models import PatientAccount, ServiceLine
+
+    account, _ = PatientAccount.objects.get_or_create(
+        patient=encounter.patient,
+        defaults={"account_number": f"PA-{encounter.patient.mrn}"},
+    )
+    line = ServiceLine.objects.create(
+        encounter=encounter,
+        patient_account=account,
+        service_date=service_date or _date.today(),
+        procedure_code=code,
+        procedure_name=name,
+        quantity=quantity,
+        unit_price=unit_price,
+        total_charge=unit_price * quantity,
+        rendering_provider=rendering_provider,
+        facility=encounter.facility,
+    )
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ENC_CHARGE", entity_type="ServiceLine", entity_id=line.pk,
+        user=created_by, new={"encounter": str(encounter.pk), "code": code,
+                              "total": str(line.total_charge)},
+    )
+    return line

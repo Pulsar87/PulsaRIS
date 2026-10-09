@@ -134,6 +134,21 @@ def record_audit(request, action, *, entity_type, entity_id, old=None, new=None)
     )
 
 
+def record_audit_service(action, *, entity_type, entity_id, user=None, old=None, new=None):
+    """Service-layer variant of ``record_audit`` for calls outside a request
+    (Phase 2 encounter/note services in clinic/scheduling.py)."""
+    AuditLog.objects.create(
+        user=user if getattr(user, "pk", None) else None,
+        action=action,
+        entity_type=entity_type,
+        entity_id=entity_id,
+        old_values=old or {},
+        new_values=new or {},
+        ip_address="127.0.0.1",
+        user_agent="service",
+    )
+
+
 try:  # optional DRF integration — package already installed in requirements
     from rest_framework.permissions import BasePermission
 
