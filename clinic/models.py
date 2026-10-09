@@ -232,8 +232,6 @@ class Appointment(models.Model):
         Raises ``ValidationError`` on illegal transitions so views/services
         fail loudly instead of silently corrupting the schedule.
         """
-        from datetime import timedelta
-
         from django.utils import timezone as tz
 
         if not self.can_transition_to(new_status):
@@ -266,11 +264,147 @@ class Appointment(models.Model):
                 enc.status = Encounter.VisitStatus.COMPLETED
                 enc.save(update_fields=["status", "ended_at", "updated_at"])
         self.save()
-        # Reschedule guard: a moved appointment re-checks conflicts.
-        del timedelta
 
     def __str__(self):
         return f"Appointment {self.pk} - {self.patient} {self.start_datetime}"
+
+
+class ProviderAvailability(models.Model):
+    """Weekly-recurring provider schedule template (Phase 1, plan Step 2.1).
+
+    One row = one repeating block (e.g. "Dr X, Mondays 09:00-13:00 at Site A").
+    ``EXCEPTION`` rows override the template for a single date — day off or an
+    extra clinic session. The conflict engine in ``clinic.scheduling`` reads
+    these rows; appointments never store availability themselves.
+    """
+
+    class Kind(models.TextChoices):
+        TEMPLATE = "TEMPLATE", "Weekly template"
+        EXCEPTION = "EXCEPTION", "Single-date exception"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    provider = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="availabilities",
+    )
+    facility = models.ForeignKey(
+        "core.Facility", on_delete=models.PROTECT, related_name="provider_availabilities"
+    )
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.TEMPLATE)
+    # TEMPLATE rows use weekday + times; EXCEPTION rows use exception_date.
+    weekday = models.PositiveSmallIntegerField(
+        null=True,
+        blank=True,
+        help_text="0=Monday … 6=Sunday (Python weekday numbering), template rows only.",
+    )
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    exception_date = models.DateField(null=True, blank=True)
+    is_available = models.BooleanField(
+        default=True,
+        help_text="EXCEPTION rows with False block the whole day (day off / leave).",
+    )
+    slot_minutes = models.PositiveIntegerField(
+        default=20, help_text="Default appointment length offered in this window."
+    )
+    note = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["provider", "weekday", "start_time"]
+        constraints = [
+            models.CheckConstraint(
+                name="provider_avail_template_fields",
+                check=(
+                    models.Q(kind="TEMPLATE", weekday__isnull=False, start_time__isnull=False)
+                    | models.Q(kind="EXCEPTION", exception_date__isnull=False)
+                ),
+            ),
+        ]
+        indexes = [
+            models.Index(fields=["provider", "facility", "kind"]),
+            models.Index(fields=["exception_date"]),
+        ]
+
+    def covers(self, dt):
+        """True if datetime ``dt`` falls inside this availability row."""
+        if self.kind == self.Kind.EXCEPTION:
+            return self.exception_date == dt.date()
+        if self.weekday != dt.weekday():
+            return False
+        t = dt.time()
+        return self.start_time <= t < self.end_time
+
+    def __str__(self):
+        if self.kind == self.Kind.EXCEPTION:
+            return f"{self.provider} {self.exception_date} ({'open' if self.is_available else 'off'})"
+        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        d = days[self.weekday] if self.weekday is not None else "?"
+        return f"{self.provider} {d} {self.start_time}-{self.end_time}"
+
+
+class RoomBooking(models.Model):
+    """A room/station occupied over a time window (Phase 1, plan Step 2.1).
+
+    Used by clinic appointments AND (via the scheduling adapter) radiology
+    exam slots so both modules share one room-conflict source of truth.
+    Bookings are soft-cancelled to preserve history.
+    """
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    room = models.ForeignKey(
+        "core.Device", on_delete=models.PROTECT, related_name="bookings"
+    )
+    facility = models.ForeignKey(
+        "core.Facility", on_delete=models.PROTECT, related_name="room_bookings"
+    )
+    start_datetime = models.DateTimeField(db_index=True)
+    duration_minutes = models.PositiveIntegerField(default=20)
+    appointment = models.OneToOneField(
+        Appointment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="room_booking",
+        help_text="Clinic appointment that holds this booking, if any.",
+    )
+    exam_order = models.OneToOneField(
+        "orders.ExamOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="room_booking",
+        help_text="Radiology order holding this booking via the scheduling adapter.",
+    )
+    purpose = models.CharField(max_length=100, blank=True)
+    is_cancelled = models.BooleanField(default=False, db_index=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["start_datetime"]
+        constraints = [
+            models.CheckConstraint(
+                name="room_booking_exactly_one_holder",
+                check=(
+                    models.Q(appointment__isnull=False, exam_order__isnull=True)
+                    | models.Q(appointment__isnull=True, exam_order__isnull=False)
+                ),
+            ),
+        ]
+        indexes = [models.Index(fields=["room", "start_datetime", "is_cancelled"])]
+
+    @property
+    def end_datetime(self):
+        from datetime import timedelta
+
+        return self.start_datetime + timedelta(minutes=self.duration_minutes)
+
+    def __str__(self):
+        return f"Room {self.room} {self.start_datetime} +{self.duration_minutes}m"
 
 
 class Encounter(models.Model):
