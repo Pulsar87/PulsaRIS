@@ -40,6 +40,24 @@ class ReadOnlyApiMixin:
         )
 
 
+class FacilityNotFound404Mixin:
+    """Hide cross-facility records as 404 instead of leaking existence via 403.
+
+    ``check_object_permissions`` runs before DRF's exception conversion, so we
+    wrap it and translate our own permission denial into Http404. Authentication
+    (401/403 from DRF) still surfaces normally because it happens earlier.
+    """
+
+    def check_object_permissions(self, request, obj):
+        from django.http import Http404
+
+        for permission in self.get_permissions():
+            if not hasattr(permission, "has_object_permission"):
+                continue
+            if not permission.has_object_permission(request, self, obj):
+                raise Http404
+
+
 def _scoped(user, qs):
     from clinic.permissions import facility_scope_queryset
 
@@ -72,8 +90,8 @@ class PatientSearchView(ClinicScopedListMixin, ListAPIView):
                 Q(facility_identifiers__facility_id__in=fac_ids)
                 | Q(appointments__facility_id__in=fac_ids)
                 | Q(encounters__facility_id__in=fac_ids)
-            ).distinct()
-            base = base.filter(vis)
+            )
+            base = base.filter(vis).distinct()
         q = self.request.GET.get("q", "").strip()
         if q:
             base = base.filter(
@@ -101,7 +119,7 @@ class AppointmentListView(ClinicScopedListMixin, ListAPIView):
         return qs.order_by("start_datetime")
 
 
-class AppointmentDetailView(ReadOnlyApiMixin, RetrieveAPIView):
+class AppointmentDetailView(FacilityNotFound404Mixin, ReadOnlyApiMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated, FacilityScopedPermission]
     serializer_class = AppointmentSerializer
     queryset = Appointment.objects.select_related("patient", "facility")
@@ -130,7 +148,7 @@ class EncounterListView(ClinicScopedListMixin, ListAPIView):
         return qs.order_by("-created_at")
 
 
-class EncounterDetailView(ReadOnlyApiMixin, RetrieveAPIView):
+class EncounterDetailView(FacilityNotFound404Mixin, ReadOnlyApiMixin, RetrieveAPIView):
     permission_classes = [IsAuthenticated, FacilityScopedPermission]
     serializer_class = EncounterSerializer
     queryset = Encounter.objects.select_related("patient", "facility")

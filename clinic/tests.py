@@ -280,6 +280,11 @@ class SchedulingTransitionTests(TestCase):
             patient=self.patient, facility=self.f1,
             start_datetime=timezone.now() + timedelta(days=1),
         )
+        # BOOKED -> COMPLETED skips required check-in; must be rejected.
+        with self.assertRaises(ValidationError):
+            appt.transition_to(A.Status.COMPLETED)
+        # Legal path: BOOKED -> CHECKED_IN -> COMPLETED, then terminal.
+        appt.transition_to(A.Status.CHECKED_IN)
         appt.transition_to(A.Status.COMPLETED)
         with self.assertRaises(ValidationError):
             appt.transition_to(A.Status.BOOKED)  # COMPLETED is terminal
@@ -443,7 +448,10 @@ class NoteSigningImmutabilityTests(TestCase):
         )
 
     def _note(self, body="Initial assessment."):
-        return EncounterNote.objects.create(encounter=self.enc, author=self.author, body=body)
+        # first note for the encounter is v1; later ones append a version
+        nxt = self.enc.notes.order_by("-version").values_list("version", flat=True).first()
+        return EncounterNote.objects.create(encounter=self.enc, author=self.author,
+                                            body=body, version=(nxt or 0) + 1)
 
     def test_only_author_can_sign(self):
         note = self._note()
@@ -512,15 +520,13 @@ class EncounterBillingIntegrationTests(TestCase):
         self.assertEqual(line.encounter_id, enc.pk)
         self.assertIsNone(line.exam_order_id)  # XOR constraint satisfied
         line.refresh_from_db()
-        self.assertEqual(line.total_price, Decimal("50.00"))
-        self.assertEqual(PatientAccount.objects.get(pk=self.account.pk).patient_id,
-                         self.patient.pk)
+        self.assertEqual(line.total_charge, Decimal("50.00"))
+        self.assertEqual(line.patient_account_id, self.account.pk)
 
     def test_exam_order_source_still_works(self):
         """RIS billing path untouched by the encounter link (addendum A.1)."""
-        from orders.models import ExamOrder, Modality as _M  # noqa: F401
-
         from core.models import Modality
+        from orders.models import ExamOrder
 
         mod = Modality.objects.create(code="CT", name="CT")
         order = ExamOrder.objects.create(
@@ -528,10 +534,12 @@ class EncounterBillingIntegrationTests(TestCase):
             modality=mod, procedure_code="CT-01", procedure_name_en="Head CT",
         )
         line = ServiceLine.objects.create(
-            account=self.account, exam_order=order, code="CT-01",
-            name="Head CT", unit_price=Decimal("200.00"), quantity=1,
+            patient_account=self.account, exam_order=order, procedure_code="CT-01",
+            procedure_name="Head CT", unit_price=Decimal("200.00"), quantity=1,
+            total_charge=Decimal("200.00"), service_date=date.today(),
         )
-        self.assertEqual(line.total_price, Decimal("200.00"))
+        self.assertEqual(line.total_charge, Decimal("200.00"))
+        self.assertIsNone(line.encounter_id)  # XOR holds on the RIS side too
 
 
 class IntegrationOutboxTests(TestCase):
@@ -599,7 +607,18 @@ class ClinicApiTests(TestCase):
     """Phase 3: read-only /api/clinic/ endpoints are facility-scoped & GET-only."""
 
     def setUp(self):
+        from datetime import date as _date
+
         from clinic import scheduling
+        from license.models import LicenseActivation
+
+        # LicenseMiddleware redirects any non-exempt request to the activation
+        # page when no LicenseActivation row exists — seed a valid one so the
+        # API under test is actually reached.
+        LicenseActivation.objects.create(
+            pk=1, expiry_date=_date.today() + timedelta(days=365),
+            signature="TESTSIG", max_orders=None,
+        )
 
         self.scheduling = scheduling
         self.f1 = Facility.objects.create(name="Site A", dicom_ae_title="AE_A")
@@ -629,7 +648,10 @@ class ClinicApiTests(TestCase):
     def test_appointments_scoped_to_home_facility(self):
         resp = self._get("/api/clinic/appointments/")
         self.assertEqual(resp.status_code, 200)
-        ids = [r["id"] for r in resp.json()]
+        # global DRF PageNumberPagination -> envelope with "results"
+        payload = resp.json()
+        results = payload.get("results", payload)
+        ids = [r["id"] for r in results]
         self.assertIn(str(self.appt.pk), ids)
         self.assertNotIn(str(self.foreign_appt.pk), ids)
 

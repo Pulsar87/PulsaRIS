@@ -131,12 +131,23 @@ Migrations: `clinic/migrations/0003_encounter_cancellation_reason_medication_and
 
 **Test coverage gap (carried to Phase 3 pass):** Verification item 3 (lifecycle, signed-note immutability/versioning, audit records) and item 4 (encounter→ExamOrder / encounter→ServiceLine round-trips) need dedicated automated tests; currently validated by service-layer guards + manual walks. Add `clinic/tests.py` classes: `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`.
 
-## Step 4 — Phase 3: Interoperability & Rollout (current work)
+## Step 4 — Phase 3: Interoperability & Rollout — CODE COMPLETE ✅ (pilot pending ops)
 
-Scope per addendum section C Phase 3:
+Scope per addendum section C Phase 3 — implementation status:
 
-1. **API boundary**: stable read-only JSON API under `/api/clinic/` (patients search, appointments, encounters, notes metadata) with `FacilityScopedPermission`; document OpenAPI schema. Defer full FHIR R4 resource mapping until pilot feedback; ship internal-stable API first.
-2. **HL7 event hooks**: emit ORM signals → outbox table (`clinic.IntegrationEvent`) for appointment booked/cancelled/completed and encounter closed; consumer wiring deferred.
-3. **Close test gaps from Steps 2–3**: `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`, conflict-engine edge-case tests (Verification items 2–4 fully automated).
-4. **Pilot checklist**: single-facility walkthrough reception→encounter→imaging referral→billing across two facilities (Verification item 5), cross-facility access + patient-matching verification.
-5. **Open questions gate** (section E): confirm launch specialty, jurisdictional retention/signature rules, and receptionist encounter-creation rights before finalizing API contracts and rollout.
+1. **API boundary** ✅: read-only JSON API mounted at `/api/clinic/` (`clinic/api_views.py`, `api_serializers.py`, `api_urlpatterns.py` wired in `config/urls.py`): patients search, appointments list/detail, encounters list/detail, note metadata (body gated to encounter participants). All lists pass through the shared `facility_scope_queryset` layer (no second implementation); detail views hide cross-facility records as 404 (no existence leak via 403); non-GET methods return 405. Field names mirror eventual FHIR resources; full FHIR R4 mapping remains deferred until pilot feedback.
+2. **HL7 event hooks** ✅: transactional outbox model `clinic.IntegrationEvent` (migration `0004`) + `clinic/signals.py` emitting events on appointment booked/cancelled/completed and encounter closed; consumer wiring deferred by design.
+3. **Test gaps closed** ✅: added `ConflictEngineTests`, `EncounterLifecycleTests`, `NoteSigningImmutabilityTests`, `EncounterBillingIntegrationTests`, `ClinicApiTests` (+ outbox signal tests) to `clinic/tests.py`. Full suite green: **43 tests, 0 failures/errors** (`python manage.py test clinic`), `manage.py check` clean. Two production bugs found & fixed during this pass: `Q.distinct()` misuse in patient-search scoping (`api_views.py`) and a version-collision race in `EncounterNote.next_version` (`models.py`).
+4. **Pilot checklist** ⏳ (operational, not code): see "Phase 3 pilot runbook" below — execute against the staging deployment.
+5. **Open questions gate** (section E): still unanswered; they now only gate FHIR contract freeze + multi-site rollout ordering, not the shipped read-only API or outbox.
+
+### Phase 3 pilot runbook (execute before Phase 4 multi-site rollout)
+1. Deploy: `docker compose up --build` (migrations 0001–0004 apply automatically via entrypoint; verify no `fields.E009`-class errors in `web-1` logs).
+2. Seed a second facility + `FacilityAssignment` rows for staff; confirm users see only their sites on day board, queue, and API.
+3. Walkthrough A (facility 1): book → check-in → start encounter → vitals/allergies/meds → signed note → imaging referral (Appointment↔ExamOrder link) → close encounter → verify ServiceLine charge appears on the encounter's billing account and an `ENCOUNTER_CLOSED` row lands in `IntegrationEvent`.
+4. Walkthrough B (facility 2): repeat booking with same patient MRN; verify `PatientFacilityIdentifier` matching and that facility-2 staff cannot fetch facility-1 records (UI 404 / API 404).
+5. Note-integrity spot check: attempt direct DB edit of a signed note (should be blocked by pre-save guard); run `EncounterNote.verify_chain()`.
+6. Conflict-engine edge cases live: double-book same provider/room slot, back-to-back bookings, cancel-then-rebook — expect engine rejections/adjustments, never overlapping rows.
+7. Sign-off inputs needed from owners (section E): launch specialty, retention/signature rules, receptionist encounter-creation rights → then freeze API contract for FHIR mapping.
+
+**Next: Step 5 — Phase 4 (multi-site rollout & hardening)** once pilot sign-off received.

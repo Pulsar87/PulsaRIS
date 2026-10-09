@@ -25,7 +25,7 @@ class PatientSearchSerializer(serializers.ModelSerializer):
 
 class AppointmentSerializer(serializers.ModelSerializer):
     patient = serializers.SerializerMethodField()
-    facility_id = serializers.UUIDField(source="facility_id", read_only=True)
+    facility_id = serializers.UUIDField(read_only=True)
     end_datetime = serializers.DateTimeField(read_only=True)
 
     class Meta:
