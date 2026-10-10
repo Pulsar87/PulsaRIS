@@ -993,7 +993,9 @@ class PatientMergeLog(models.Model):
         indexes = [models.Index(fields=["duplicate"]), models.Index(fields=["canonical"])]
 
     def save(self, *args, **kwargs):
-        if self.pk is not None:
+        # Append-only guard: block UPDATEs. A UUID pk is populated before the
+        # first insert, so `_state.adding` (not `pk`) distinguishes inserts.
+        if self.pk is not None and not self._state.adding:
             raise ValidationError("PatientMergeLog rows are append-only.")
         super().save(*args, **kwargs)
 

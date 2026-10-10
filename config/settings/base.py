@@ -106,6 +106,8 @@ TEMPLATES = [
                 "django.template.context_processors.media",
                 "django.template.context_processors.static",
                 "django.template.context_processors.tz",
+                # Clinic nav visibility in the global layout (Phase 4 rollout flag)
+                "clinic.context_processors.clinic_nav",
             ],
         },
     },
