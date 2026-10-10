@@ -778,8 +778,24 @@ class RolloutFlagTests(TestCase):
     # -- Layout nav visibility (Phase 4: clinic links gated by the rollout flag)
     def _nav_contains_clinic(self, user):
         self.client.force_login(user)
-        html = self.client.get("/worklist").content.decode()
-        return "bi-hospital" in html and "Clinic" in html
+        resp = self.client.get("/worklist")
+        self.assertEqual(resp.status_code, 200)
+        # The context processor runs at render time; assert on its *computed*
+        # value so a stray "Clinic" string elsewhere in the page can't create
+        # a false positive.
+        self.assertTrue(
+            resp.context["clinic_nav"]["visible"],
+            "clinic_nav context processor expected visible=True",
+        )
+        html = resp.content.decode()
+        self.assertIn("bi-hospital", html)
+        self.assertIn("Appointments", html)
+        # Sanity: anonymous visitors never see the nav either.
+        self.client.logout()
+        anon = self.client.get("/worklist")
+        if anon.status_code == 200:
+            self.assertFalse(anon.context["clinic_nav"]["visible"])
+        return True
 
     def test_nav_hides_clinic_links_for_disabled_site(self):
         # Staff whose only site is not rolled out must not see clinic links.
