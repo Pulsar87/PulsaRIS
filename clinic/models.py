@@ -30,6 +30,7 @@ import uuid
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import F, Q
 from django.db.models.signals import pre_save
 from django.utils import timezone
 
@@ -984,7 +985,9 @@ class PatientMergeLog(models.Model):
         constraints = [
             models.CheckConstraint(
                 name="merge_log_distinct_patients",
-                check=models.Q(duplicate__pk__ne=models.OuterRef("canonical__pk")),
+            #    check=models.Q(duplicate__pk__ne=models.OuterRef("canonical__pk")),
+                check=~Q(duplicate=F("canonical")),
+            
             ),
         ]
         indexes = [models.Index(fields=["duplicate"]), models.Index(fields=["canonical"])]
