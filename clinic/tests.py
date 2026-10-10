@@ -23,6 +23,7 @@ from clinic.models import (
     FacilityAssignment,
     IntegrationEvent,
     PatientFacilityIdentifier,
+    PatientMergeLog,
     ProviderAvailability,
     RoomBooking,
     Vitals,
@@ -676,3 +677,360 @@ class ClinicApiTests(TestCase):
         self.assertEqual([r["mrn"] for r in results], ["MRN-API1"])
         resp2 = self._get("/api/clinic/patients/?q=MRN-API2")
         self.assertEqual(resp2.json()["results"], [])
+
+
+class RolloutFlagTests(TestCase):
+    """Phase 4 (Step 5.3 rollback plan): per-facility clinic feature flag.
+
+    A site is live only when it has an active, started ADMIN
+    FacilityAssignment; disabling that assignment closes every clinic URL for
+    non-superusers without a redeploy.
+    """
+
+    def setUp(self):
+        from license.models import LicenseActivation
+
+        LicenseActivation.objects.create(
+            pk=1, expiry_date=date.today() + timedelta(days=365),
+            signature="TESTSIG", max_orders=None,
+        )
+        self.f1 = Facility.objects.create(name="Site A", dicom_ae_title="AE_A")
+        self.staff = make_user("rollout-staff@clinic.test", facility=self.f1)
+        self.superuser = User.objects.create_superuser(
+            username="rollout-root", email="rollout-root@clinic.test", password="pw"
+        )
+        # No ADMIN assignment yet -> f1 is NOT rolled out.
+
+    def _enable_site(self):
+        return FacilityAssignment.objects.create(
+            user=self.staff, facility=self.f1, role_at_facility="ADMIN",
+            start_date=date.today() - timedelta(days=1),
+        )
+
+    def test_flag_state_transitions(self):
+        from clinic import rollout
+
+        self.assertFalse(rollout.facility_clinic_enabled(self.f1.pk))
+        a = self._enable_site()
+        self.assertTrue(rollout.facility_clinic_enabled(self.f1.pk))
+        self.assertIn(self.f1.pk, rollout.enabled_facility_ids())
+        # rollback lever 1: deactivate the ADMIN assignment
+        a.is_active = False
+        a.save()
+        self.assertFalse(rollout.facility_clinic_enabled(self.f1.pk))
+        # rollback lever 2: future start date keeps the site closed
+        a.is_active = True
+        a.start_date = date.today() + timedelta(days=1)
+        a.save()
+        self.assertFalse(rollout.facility_clinic_enabled(self.f1.pk))
+
+    def test_ui_denied_for_disabled_site(self):
+        self.client.force_login(self.staff)
+        resp = self.client.get("/clinic/appointments/")
+        self.assertEqual(resp.status_code, 403)
+
+    def test_ui_allowed_once_site_live(self):
+        self._enable_site()
+        self.client.force_login(self.staff)
+        resp = self.client.get("/clinic/appointments/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_detail_view_gated_on_object_facility(self):
+        appt = Appointment.objects.create(
+            patient=make_patient("MRN-RO1"), facility=self.f1,
+            start_datetime=next_weekday_slot(),
+        )
+        self.client.force_login(self.staff)
+        resp = self.client.get(f"/clinic/appointments/{appt.pk}/")
+        self.assertEqual(resp.status_code, 403)
+        self._enable_site()
+        resp = self.client.get(f"/clinic/appointments/{appt.pk}/")
+        self.assertEqual(resp.status_code, 200)
+
+    def test_api_list_and_detail_gated(self):
+        appt = Appointment.objects.create(
+            patient=make_patient("MRN-RO2"), facility=self.f1,
+            start_datetime=next_weekday_slot(),
+        )
+        self.client.force_login(self.staff)
+        self.assertEqual(self.client.get("/api/clinic/appointments/").status_code, 403)
+        self.assertEqual(
+            self.client.get(f"/api/clinic/appointments/{appt.pk}/").status_code, 403
+        )
+        self._enable_site()
+        self.assertEqual(self.client.get("/api/clinic/appointments/").status_code, 200)
+        self.assertEqual(
+            self.client.get(f"/api/clinic/appointments/{appt.pk}/").status_code, 200
+        )
+
+    def test_superuser_bypasses_gate(self):
+        self.client.force_login(self.superuser)
+        self.assertEqual(self.client.get("/clinic/appointments/").status_code, 200)
+        self.assertEqual(self.client.get("/api/clinic/appointments/").status_code, 200)
+
+    def test_outbox_skips_disabled_facility(self):
+        from clinic import outbox as outbox_mod
+
+        ev = IntegrationEvent.objects.create(
+            event_type="ADT_A01", facility=self.f1,
+            payload={"a": 1}, status="PENDING",
+        )
+        delivered, dead = outbox_mod.deliver_pending()
+        self.assertEqual((delivered, dead), (0, 0))
+        ev.refresh_from_db()
+        self.assertEqual(ev.status, "PENDING")
+        self.assertEqual(ev.delivery_attempts, 0)  # skipped, not failed
+        self._enable_site()
+        delivered, dead = outbox_mod.deliver_pending()
+        self.assertGreaterEqual(delivered, 1)
+        ev.refresh_from_db()
+        self.assertEqual(ev.status, "DELIVERED")
+
+
+class PermissionMatrixTests(TestCase):
+    """Phase 4 (Step 5.1): role x action matrix encoded as tests.
+
+    Matrix (per section-E answer — receptionists may create encounters but
+    cannot open clinical documentation flows):
+      RECEPTIONIST : book/cancel appointments, check in, create encounter
+      PROVIDER     : everything clinical (notes, vitals, signing)
+      BILLER       : no clinical routes
+      ADMIN/staff  : availability config, duplicate review
+    """
+
+    def setUp(self):
+        from license.models import LicenseActivation
+
+        LicenseActivation.objects.create(
+            pk=1, expiry_date=date.today() + timedelta(days=365),
+            signature="TESTSIG", max_orders=None,
+        )
+        self.f1 = Facility.objects.create(name="Site A", dicom_ae_title="AE_A")
+        self.f2 = Facility.objects.create(name="Site B", dicom_ae_title="AE_B")
+        # Site A live (one ADMIN assignment opens the whole facility).
+        FacilityAssignment.objects.create(
+            user=make_user("admin-a@clinic.test"), facility=self.f1,
+            role_at_facility="ADMIN", start_date=date.today() - timedelta(days=1),
+        )
+        self.receptionist = make_user("recep@clinic.test", facility=self.f1)
+        self.provider = make_user("dr@clinic.test")
+        FacilityAssignment.objects.create(
+            user=self.provider, facility=self.f1, role_at_facility="PROVIDER",
+            start_date=date.today() - timedelta(days=1),
+        )
+        self.biller = make_user("biller@clinic.test")
+        FacilityAssignment.objects.create(
+            user=self.biller, facility=self.f1, role_at_facility="BILLER",
+            start_date=date.today() - timedelta(days=1),
+        )
+        self.patient = make_patient("MRN-MX1")
+        self.foreign_appt = Appointment.objects.create(
+            patient=make_patient("MRN-MX2"), facility=self.f2,
+            start_datetime=next_weekday_slot(),
+        )
+        self.enc = Encounter.objects.create(patient=self.patient, facility=self.f1)
+
+    def _get(self, user, url):
+        self.client.force_login(user)
+        return self.client.get(url)
+
+    def test_receptionist_can_view_queue_and_book(self):
+        self.assertEqual(
+            self._get(self.receptionist, "/clinic/queue/").status_code, 200
+        )
+        self.assertEqual(
+            self._get(self.receptionist, "/clinic/appointments/new/").status_code, 200
+        )
+
+    def test_receptionist_blocked_from_provider_only_routes(self):
+        self.assertEqual(
+            self._get(self.receptionist, "/clinic/availability/").status_code, 403
+        )
+        # section-E answer: receptionists MAY create encounters (registration
+        # workflow), so the encounter form stays open to them.
+        self.assertEqual(
+            self._get(self.receptionist, "/clinic/encounters/new/").status_code, 200
+        )
+
+    def test_provider_can_view_lists_and_availability(self):
+        # providers cover everything clinical + read access to ops views.
+        self.assertEqual(
+            self._get(self.provider, "/clinic/appointments/").status_code, 200
+        )
+        self.assertEqual(
+            self._get(self.provider, "/clinic/availability/").status_code, 200
+        )
+
+    def test_biller_has_no_clinic_html_access(self):
+        for url in ("/clinic/appointments/", "/clinic/encounters/", "/clinic/queue/"):
+            self.assertEqual(self._get(self.biller, url).status_code, 403, url)
+
+    def test_duplicate_review_is_admin_only(self):
+        self.assertEqual(
+            self._get(self.receptionist, "/clinic/patients/duplicates/").status_code, 403
+        )
+        self.assertEqual(
+            self._get(self.provider, "/clinic/patients/duplicates/").status_code, 403
+        )
+
+    def test_cross_facility_appointment_invisible(self):
+        # scoping regression: foreign-facility record 404s even at a live site
+        self.assertEqual(
+            self._get(self.provider, f"/clinic/appointments/{self.foreign_appt.pk}/")
+            .status_code,
+            404,
+        )
+
+
+class PatientMergeServiceTests(TestCase):
+    """Phase 4 (Step 5.1): duplicate-identity merge service + tooling."""
+
+    def setUp(self):
+        self.f1 = Facility.objects.create(name="Site A", dicom_ae_title="AE_A")
+        self.f2 = Facility.objects.create(name="Site B", dicom_ae_title="AE_B")
+        self.actor = make_user("merge-admin@clinic.test", facility=self.f1)
+        self.canonical = Patient.objects.create(
+            mrn="MRN-CANON", first_name_en="Same", last_name_en="Person",
+            dob=date(1985, 5, 5),
+        )
+        self.duplicate = Patient.objects.create(
+            mrn="MRN-DUP", first_name_en="same", last_name_en="PERSON",
+            dob=date(1985, 5, 5),
+        )
+
+    def _identifier(self, patient, facility, value, primary=True):
+        return PatientFacilityIdentifier.objects.create(
+            patient=patient, facility=facility, identifier_type="MRN",
+            identifier=value, is_primary=primary,
+        )
+
+    def test_candidate_detection_conservative(self):
+        from clinic import patient_matching
+
+        other = Patient.objects.create(
+            mrn="MRN-OTHER", first_name_en="Different", last_name_en="Person",
+            dob=date(1985, 5, 5),
+        )
+        pairs = dict((d.pk, c.pk) for c, d in patient_matching.find_candidate_duplicates())
+        self.assertEqual(pairs.get(self.duplicate.pk), self.canonical.pk)
+        self.assertNotIn(other.pk, pairs)
+
+    def test_merge_repoints_records_and_logs(self):
+        from clinic import patient_matching
+
+        self._identifier(self.canonical, self.f1, "A-1")
+        self._identifier(self.duplicate, self.f2, "B-1")
+        Encounter.objects.create(patient=self.duplicate, facility=self.f2)
+        Appointment.objects.create(
+            patient=self.duplicate, facility=self.f2,
+            start_datetime=next_weekday_slot(),
+        )
+
+        summary = patient_matching.merge_patients(
+            duplicate=self.duplicate, canonical=self.canonical, actor=self.actor
+        )
+        self.assertEqual(summary["repointed"]["clinic.Encounter"], 1)
+        self.assertEqual(summary["repointed"]["clinic.Appointment"], 1)
+        self.assertEqual(summary["identifiers_moved"], 1)
+        self.duplicate.refresh_from_db()
+        self.assertTrue(self.duplicate.is_deleted)
+        self.assertIn("-MERGED-", self.duplicate.mrn)
+        # identifiers now all on canonical
+        ids = PatientFacilityIdentifier.objects.filter(patient=self.canonical)
+        self.assertEqual(ids.count(), 2)
+        # append-only merge log + audit row written
+        log = PatientMergeLog.objects.get(duplicate=self.duplicate)
+        self.assertEqual(log.canonical_id, self.canonical.pk)
+        self.assertEqual(log.actor_id, self.actor.pk)
+        self.assertTrue(
+            AuditLog.objects.filter(
+                action="CLINIC_PATIENT_MERGE", entity_id=str(self.duplicate.pk)
+            ).exists()
+        )
+
+    def test_merge_log_is_append_only(self):
+        from clinic import patient_matching
+
+        patient_matching.merge_patients(
+            duplicate=self.duplicate, canonical=self.canonical, actor=self.actor
+        )
+        log = PatientMergeLog.objects.get()
+        with self.assertRaises(ValidationError):
+            log.summary = {"tampered": True}
+            log.save()
+        with self.assertRaises(ValidationError):
+            log.delete()
+
+    def test_self_merge_rejected(self):
+        from clinic import patient_matching
+
+        with self.assertRaises(ValidationError):
+            patient_matching.merge_patients(
+                duplicate=self.canonical, canonical=self.canonical, actor=self.actor
+            )
+
+    def test_identifier_collision_stays_detached(self):
+        from clinic import patient_matching
+
+        self._identifier(self.canonical, self.f1, "SAME-VALUE")
+        self._identifier(self.duplicate, self.f1, "SAME-VALUE", primary=False)
+        summary = patient_matching.merge_patients(
+            duplicate=self.duplicate, canonical=self.canonical, actor=self.actor
+        )
+        self.assertEqual(summary["identifiers_moved"], 0)
+
+
+class OrdersWorklistScopingTests(TestCase):
+    """Phase 4 (Step 5.1 sweep): legacy RIS order views share the one
+    facility-scoping layer; unaffiliated accounts keep global visibility."""
+
+    def setUp(self):
+        from license.models import LicenseActivation
+
+        LicenseActivation.objects.create(
+            pk=1, expiry_date=date.today() + timedelta(days=365),
+            signature="TESTSIG", max_orders=None,
+        )
+        from core.models import Modality
+
+        self.f1 = Facility.objects.create(name="Site A", dicom_ae_title="AE_A")
+        self.f2 = Facility.objects.create(name="Site B", dicom_ae_title="AE_B")
+        self.mod = Modality.objects.create(code="CT", name="CT")
+        self.patient = make_patient("MRN-ORD1")
+        self.affiliated = make_user("risc@clinic.test", facility=self.f1)
+        self.legacy = make_user("global-ris@clinic.test")  # no facility
+        self.o1 = ExamOrder.objects.create(
+            patient=self.patient, facility=self.f1, modality=self.mod,
+            accession_number="ACC-A1", procedure_code="C1", procedure_name_en="CT head",
+        )
+        self.o2 = ExamOrder.objects.create(
+            patient=self.patient, facility=self.f2, modality=self.mod,
+            accession_number="ACC-B1", procedure_code="C2", procedure_name_en="CT chest",
+        )
+        self.o3 = ExamOrder.objects.create(
+            patient=self.patient, facility=None, modality=self.mod,
+            accession_number="ACC-N1", procedure_code="C3", procedure_name_en="Unassigned",
+        )
+
+    def _get(self, user, url):
+        self.client.force_login(user)
+        return self.client.get(url)
+
+    def test_affiliated_user_sees_own_site_and_unassigned(self):
+        resp = self._get(self.affiliated, "/orders/")
+        self.assertEqual(resp.status_code, 200)
+        ids = {o.pk for o in resp.context["orders"]}
+        self.assertEqual(ids, {self.o1.pk, self.o3.pk})
+
+    def test_legacy_unaffiliated_user_sees_everything(self):
+        resp = self._get(self.legacy, "/orders/")
+        ids = {o.pk for o in resp.context["orders"]}
+        self.assertEqual(ids, {self.o1.pk, self.o2.pk, self.o3.pk})
+
+    def test_cross_facility_order_detail_404(self):
+        self.assertEqual(
+            self._get(self.affiliated, f"/orders/{self.o2.pk}/").status_code, 404
+        )
+        self.assertEqual(
+            self._get(self.affiliated, f"/orders/{self.o1.pk}/").status_code, 200
+        )

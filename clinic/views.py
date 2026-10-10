@@ -14,7 +14,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from clinic import scheduling
+from clinic import patient_matching, scheduling
 from clinic.models import (
     Allergy,
     Appointment,
@@ -542,3 +542,61 @@ def encounter_charge(request, pk):
             for e in msgs:
                 messages.error(request, e)
     return redirect("clinic:encounter_detail", pk=enc.pk)
+
+
+# ── Phase 4 (Step 5.1): patient-matching reconciliation UI ────────────────
+
+
+@role_required("ADMIN")
+def patient_duplicates(request):
+    """Manual-review queue for probable duplicate patient identities.
+
+    Surfaced by the conservative heuristic in ``clinic.patient_matching``
+    (same first/last name + DOB across active records). Merging is a manual,
+    admin-only decision — no automatic threshold-based merge exists yet (open
+    plan question: auto-link vs. manual review; defaults to manual).
+    """
+    enforce_rollout_gate(request)
+    candidates = patient_matching.find_candidate_duplicates()
+    recent_merges = patient_matching.PatientMergeLog.objects.select_related(
+        "duplicate", "canonical"
+    )[:20]
+    return render(
+        request,
+        "clinic/patient_duplicates.html",
+        {"pairs": candidates, "recent_merges": recent_merges},
+    )
+
+
+@role_required("ADMIN")
+def patient_merge(request, pk):
+    """Merge duplicate patient ``pk`` into the chosen canonical record."""
+    duplicate = get_object_or_404(Patient.objects.all(), pk=pk, is_deleted=False)
+    if request.method != "POST":
+        return redirect("clinic:patient_duplicates")
+    canonical_id = request.POST.get("canonical")
+    try:
+        canonical = Patient.objects.get(pk=canonical_id, is_deleted=False)
+    except (Patient.DoesNotExist, ValueError):
+        messages.error(request, "Canonical patient not found.")
+        return redirect("clinic:patient_duplicates")
+    try:
+        summary = patient_matching.merge_patients(
+            duplicate=duplicate, canonical=canonical, actor=request.user
+        )
+    except ValidationError as exc:
+        for e in getattr(exc, "messages", [str(exc)]):
+            messages.error(request, e)
+        return redirect("clinic:patient_duplicates")
+    record_audit(
+        request,
+        "CLINIC_PATIENT_MERGE_UI",
+        entity_type="Patient",
+        entity_id=duplicate.pk,
+        old={"status": "active_duplicate"},
+        new={"canonical": str(canonical.pk), "summary": summary},
+    )
+    messages.success(
+        request, f"Merged {duplicate.mrn} into {canonical.mrn} (append-only log written)."
+    )
+    return redirect("clinic:patient_duplicates")
