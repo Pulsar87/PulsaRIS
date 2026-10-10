@@ -91,7 +91,7 @@ def merge_patients(*, duplicate: Patient, canonical: Patient, actor=None):
             facility=ident.facility,
             identifier_type=ident.identifier_type,
             identifier=ident.identifier,
-        ).exclude(pk=ident.pk).exists()
+        ).exclude(patient=duplicate).exists()
         if clash:
             # Canonical already has this exact site identifier; keep the
             # duplicate's row detached by leaving it on the duplicate

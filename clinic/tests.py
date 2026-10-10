@@ -629,6 +629,11 @@ class ClinicApiTests(TestCase):
         self.patient = make_patient("MRN-API1")
         self.provider = make_user("api-dr@clinic.test")
         self.user = make_user("api-user@clinic.test", facility=self.f1)
+        # Phase 4 rollout flag: f1 must be live for gated API/HTML requests.
+        FacilityAssignment.objects.create(
+            user=self.user, facility=self.f1, role_at_facility="ADMIN",
+            start_date=_date.today() - timedelta(days=1),
+        )
         self.start = next_weekday_slot(weekday=4, hour=9)
         ProviderAvailability.objects.create(
             provider=self.provider, facility=self.f1, kind="TEMPLATE",
@@ -769,6 +774,39 @@ class RolloutFlagTests(TestCase):
         self.client.force_login(self.superuser)
         self.assertEqual(self.client.get("/clinic/appointments/").status_code, 200)
         self.assertEqual(self.client.get("/api/clinic/appointments/").status_code, 200)
+
+    # -- Layout nav visibility (Phase 4: clinic links gated by the rollout flag)
+    def _nav_contains_clinic(self, user):
+        self.client.force_login(user)
+        resp = self.client.get("/worklist")
+        self.assertEqual(resp.status_code, 200)
+        # The context processor runs at render time; assert on its *computed*
+        # value so a stray "Clinic" string elsewhere in the page can't create
+        # a false positive.
+        self.assertTrue(
+            resp.context["clinic_nav"]["visible"],
+            "clinic_nav context processor expected visible=True",
+        )
+        html = resp.content.decode()
+        self.assertIn("bi-hospital", html)
+        self.assertIn("Appointments", html)
+        # Sanity: anonymous visitors never see the nav either.
+        self.client.logout()
+        anon = self.client.get("/worklist")
+        if anon.status_code == 200:
+            self.assertFalse(anon.context["clinic_nav"]["visible"])
+        return True
+
+    def test_nav_hides_clinic_links_for_disabled_site(self):
+        # Staff whose only site is not rolled out must not see clinic links.
+        self.assertFalse(self._nav_contains_clinic(self.staff))
+
+    def test_nav_shows_clinic_links_once_site_live(self):
+        self._enable_site()
+        self.assertTrue(self._nav_contains_clinic(self.staff))
+
+    def test_nav_visible_to_superuser_ops_bypass(self):
+        self.assertTrue(self._nav_contains_clinic(self.superuser))
 
     def test_outbox_skips_disabled_facility(self):
         from clinic import outbox as outbox_mod

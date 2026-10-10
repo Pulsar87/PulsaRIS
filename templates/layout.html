@@ -122,10 +122,63 @@
                             </a>
                         </li>
 
-                        <!-- Clinic module nav (Appointments / Encounters / Reception)
-                             to be added here in Phase 1, gated by role, following the
-                             inventory dropdown pattern below. See
-                             plan-clinicInformationSystem.prompt.md (addendum D). -->
+                        <!-- Clinic module nav: dropdown following the inventory
+                             pattern, gated by the Phase 4 per-facility rollout
+                             flag (clinic/rollout.py via context processor) so
+                             disabled sites never see clinic links in the chrome.
+                             See plan-clinicInformationSystem.prompt.md Step 5.3. -->
+                        {% if clinic_nav.visible %}
+                        <li class="nav-item dropdown">
+                            <a
+                                class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'clinic' %}active{% endif %}"
+                                href="#"
+                                role="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i class="bi bi-hospital me-1">{% trans "Clinic" %}</i>
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:appointment_list' %}">
+                                        <i class="bi bi-calendar3 me-2"></i>{% trans "Appointments" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:appointment_new' %}">
+                                        <i class="bi bi-calendar-plus me-2"></i>{% trans "Schedule appointment" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:reception_queue' %}">
+                                        <i class="bi bi-person-walking me-2"></i>{% trans "Reception queue" %}
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:encounter_list' %}">
+                                        <i class="bi bi-clipboard2-pulse me-2"></i>{% trans "Encounters" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:encounter_new' %}">
+                                        <i class="bi bi-plus-circle me-2"></i>{% trans "New encounter" %}
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"/></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:availability_list' %}">
+                                        <i class="bi bi-clock-history me-2"></i>{% trans "Provider availability" %}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'clinic:patient_duplicates' %}">
+                                        <i class="bi bi-person-check me-2"></i>{% trans "Duplicate patients" %}
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        {% endif %}
 
                         <!-- Radiology Inventory -->
                         <li class="nav-item dropdown">

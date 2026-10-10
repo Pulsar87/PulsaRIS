@@ -69,3 +69,24 @@ def request_facility_ids(request, kwargs=None):
     kwargs = kwargs or {}
     fid = kwargs.get("facility_pk") or request.POST.get("facility") or request.GET.get("facility")
     return [fid] if fid else []
+
+
+def clinic_nav_visible(user):
+    """Whether the Clinic menu should appear in the global layout nav.
+
+    Shown when the user can actually reach at least one rolled-out site:
+    superusers always (ops bypass), otherwise any facility they can access
+    must pass the per-facility rollout gate. Anonymous users never see it.
+    Keeps disabled sites' links out of the chrome entirely (Step 5.3 flag is
+    the single source of truth — no separate nav setting)."""
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
+    from clinic.permissions import accessible_facility_ids
+
+    ids = accessible_facility_ids(user)
+    if ids is None:  # unrestricted (superuser handled above anyway)
+        return True
+    live = enabled_facility_ids()
+    return bool(ids & live)
