@@ -31,6 +31,8 @@ from clinic.permissions import (
     accessible_facility_ids,
     facility_scope_queryset,
     facility_scoped_view,
+    gated_detail_view,
+    gated_note_view,
     has_facility_access,
     record_audit,
     role_required,
@@ -125,6 +127,7 @@ def appointment_new(request):
 
 
 @role_required("RECEPTIONIST", "PROVIDER", "ADMIN")
+@gated_detail_view(Appointment)
 def appointment_detail(request, pk):
     appt = get_object_or_404(
         facility_scope_queryset(
@@ -137,6 +140,7 @@ def appointment_detail(request, pk):
 
 
 @role_required("RECEPTIONIST", "ADMIN")
+@gated_detail_view(Appointment)
 def appointment_action(request, pk, action):
     """Status transitions + reschedule via the engine (Step 2.5 / Verification 2)."""
     appt = get_object_or_404(
@@ -306,6 +310,7 @@ def encounter_list(request):
 
 
 @role_required("PROVIDER", "RECEPTIONIST", "ADMIN")
+@gated_detail_view(Encounter)
 def encounter_detail(request, pk):
     enc = get_object_or_404(
         facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk,
@@ -363,6 +368,7 @@ def encounter_new(request):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
 def encounter_action(request, pk, action):
     """Lifecycle actions: start / complete / cancel (Phase 2 services)."""
     enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
@@ -385,6 +391,7 @@ def encounter_action(request, pk, action):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
 def vitals_add(request, pk):
     enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
     if request.method == "POST":
@@ -412,6 +419,7 @@ def vitals_add(request, pk):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
 def note_create(request, pk):
     """Draft a new note version. Editing an *unsigned* draft happens here too
     (newest draft is replaced); signed notes are amended via note_amend."""
@@ -441,6 +449,7 @@ def note_create(request, pk):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_note_view(EncounterNote)
 def note_sign(request, pk):
     note = get_object_or_404(EncounterNote.objects.select_related("encounter"), pk=pk)
     if not has_facility_access(request.user, note.encounter.facility_id):
@@ -455,6 +464,7 @@ def note_sign(request, pk):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_note_view(EncounterNote)
 def note_amend(request, pk):
     """Append-only amendment of a signed note (Verification item 3)."""
     note = get_object_or_404(EncounterNote.objects.select_related("encounter"), pk=pk)
@@ -472,6 +482,7 @@ def note_amend(request, pk):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
 def referral_from_encounter(request, pk):
     """Create an imaging ExamOrder from the encounter (plan Step 4 / original
     Step 3 referral capture) through the shared engine."""
@@ -502,6 +513,7 @@ def referral_from_encounter(request, pk):
 
 
 @role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
 def encounter_charge(request, pk):
     """Bill a clinic service on the encounter (encounter -> ServiceLine)."""
     enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)

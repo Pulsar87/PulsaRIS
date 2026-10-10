@@ -23,6 +23,7 @@ from functools import wraps
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 
 from audit.models import AuditLog
 from clinic.models import FacilityAssignment
@@ -101,7 +102,11 @@ def role_required(*roles):
 def facility_scoped_view(view_func):
     """Decorator: resolve the target facility from kwargs/POST/GET
     (``facility`` pk) and require the user has access to it. Use together
-    with ``role_required`` on routes that act on a specific site."""
+    with ``role_required`` on routes that act on a specific site.
+
+    Phase 4 (plan Step 5.3 rollback): also enforces the per-facility clinic
+    feature flag — requests targeting a site that is not rolled out yet are
+    denied for non-superusers."""
 
     @wraps(view_func)
     def _wrapped(request, *args, **kwargs):
@@ -112,9 +117,83 @@ def facility_scoped_view(view_func):
         )
         if fid and not has_facility_access(request.user, fid):
             raise PermissionDenied("No access to this facility.")
+        enforce_rollout_gate(request, kwargs, explicit_facility_id=fid)
         return view_func(request, *args, **kwargs)
 
     return _wrapped
+
+
+def gated_detail_view(model):
+    """Phase 4 (Step 5.3): rollout gate for object-resolving detail/action
+    views that look a record up by ``pk`` from a facility-scoped queryset.
+
+    Applies the per-facility clinic feature flag against the resolved
+    object's own ``facility_id`` before the view body runs — one shared
+    implementation layered on top of ``facility_scope_queryset``
+    (addendum B.3), never a second scoping system::
+
+        @role_required("PROVIDER", "ADMIN")
+        @gated_detail_view(Encounter)
+        def encounter_detail(request, pk): ...
+
+    Records without a ``facility`` FK are not gated here; other permissions
+    still apply.
+    """
+
+    def resolve(request, pk):
+        return get_object_or_404(facility_scope_queryset(request.user, model.objects.all()), pk=pk)
+
+    return _gate_on_resolved_object(resolve)
+
+
+def gated_note_view(note_model):
+    """Variant of :func:`gated_detail_view` for versioned note rows whose
+    site lives on the parent encounter (``note.encounter.facility``)."""
+
+    def resolve(request, pk):
+        note = get_object_or_404(note_model.objects.select_related("encounter"), pk=pk)
+        return note.encounter
+
+    return _gate_on_resolved_object(resolve)
+
+
+def _gate_on_resolved_object(resolve):
+    def decorator(view_func):
+        @wraps(view_func)
+        def _wrapped(request, *args, **kwargs):
+            obj = resolve(request, **kwargs)
+            enforce_rollout_gate(request, kwargs, obj=obj)
+            return view_func(request, *args, **kwargs)
+
+        return _wrapped
+
+    return decorator
+
+
+def enforce_rollout_gate(request, kwargs=None, *, explicit_facility_id=None,
+                         obj=None):
+    """Phase 4 per-facility feature flag check (Step 5.3 rollback plan).
+
+    Denies access when every facility implicated by the request belongs to a
+    site whose clinic module is not rolled out. If no facility can be inferred
+    (e.g. a global list view), fall back to the user's home facility so the
+    flag still bites for single-site staff; superusers bypass entirely so ops
+    can always repair flag state."""
+    from clinic import rollout
+
+    if rollout.user_can_bypass_gate(getattr(request, "user", None)):
+        return
+    ids = [
+        f for f in (
+            [explicit_facility_id]
+            + rollout.request_facility_ids(request, kwargs)
+            + ([obj.facility_id] if obj is not None and getattr(obj, "facility_id", None) else [])
+        ) if f
+    ]
+    if not ids and getattr(request.user, "facility_id", None):
+        ids = [request.user.facility_id]
+    if ids and not any(rollout.facility_clinic_enabled(f) for f in ids):
+        raise PermissionDenied("Clinic module is not enabled at this facility yet.")
 
 
 def record_audit(request, action, *, entity_type, entity_id, old=None, new=None):
