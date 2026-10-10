@@ -8,6 +8,7 @@ land with Phases 1-2; the corresponding test classes are stubbed below.
 
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+import uuid
 
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
@@ -30,6 +31,7 @@ from clinic.models import (
 )
 from clinic.permissions import accessible_facility_ids, has_facility_access
 from core.models import Facility
+from orders.models import ExamOrder
 from patients.models import Patient
 from users.models import User
 
@@ -772,7 +774,8 @@ class RolloutFlagTests(TestCase):
         from clinic import outbox as outbox_mod
 
         ev = IntegrationEvent.objects.create(
-            event_type="ADT_A01", facility=self.f1,
+            event_type="APPT_BOOKED", facility=self.f1,
+            entity_type="Appointment", entity_id=uuid.uuid4(),
             payload={"a": 1}, status="PENDING",
         )
         delivered, dead = outbox_mod.deliver_pending()
@@ -972,12 +975,19 @@ class PatientMergeServiceTests(TestCase):
     def test_identifier_collision_stays_detached(self):
         from clinic import patient_matching
 
-        self._identifier(self.canonical, self.f1, "SAME-VALUE")
+        # Collision is on the per-site unique key (facility, type, value);
+        # canonical holds the same identifier at a *different* site so the
+        # duplicate's row can't move to f1 without violating it.
+        self._identifier(self.canonical, self.f2, "SAME-VALUE")
         self._identifier(self.duplicate, self.f1, "SAME-VALUE", primary=False)
         summary = patient_matching.merge_patients(
             duplicate=self.duplicate, canonical=self.canonical, actor=self.actor
         )
         self.assertEqual(summary["identifiers_moved"], 0)
+        self.assertEqual(
+            PatientFacilityIdentifier.objects.get(identifier="SAME-VALUE").patient_id,
+            self.duplicate.pk,
+        )
 
 
 class OrdersWorklistScopingTests(TestCase):
