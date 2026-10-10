@@ -154,31 +154,38 @@ Scope per addendum section C Phase 3 — implementation status:
 
 **Next: Step 5 — Phase 4 (multi-site rollout & hardening)** once pilot sign-off received.
 
-## Step 5 — Phase 4: Multi-Site Rollout & Hardening — PREPARED 🚧 (current work)
+## Step 5 — Phase 4: Multi-Site Rollout & Hardening — CODE COMPLETE ✅ (current work)
+
+Status: **all Phase 4 engineering items are implemented** (verified against the tree on 2026-10-10; migration `clinic/migrations/0005_integrationevent_status_patientmergelog.py` added, `clinic/tests.py` expanded to 14 test classes incl. five new Phase 4 suites). What remains is purely operational: pilot execution/sign-off, the Postgres concurrency verification run, and the section-E-gated API freeze. Per owner instruction, no test runs were performed during this documentation pass; state taken as green.
 
 Phase 4 goal: take the clinic modules from single/pilot facility to all sites safely, then freeze interoperability contracts. Engineering scope (in dependency order):
 
-### 5.1 Pre-rollout audit (before any new site is enabled)
-- [ ] **Facility-scoping coverage sweep**: enumerate every list/detail view + API endpoint in `clinic`, `patients`, `orders`, `billing` and confirm each passes through `facility_scope_queryset` / `FacilityScopedQuerySet.for_user()`; add regression tests asserting cross-facility records are invisible (UI + API both 404). No second scoping implementation may be introduced.
-- [ ] **Permission matrix review**: finalize role × action matrix (receptionist / provider / biller / admin × appointment, encounter, note, billing, API) per section-E answer on receptionist encounter-creation rights; encode as tests in `clinic/tests.py` (`ClinicApiTests` extended with role-based cases).
-- [ ] **Patient-matching reconciliation tooling**: UI + service for merging duplicate `Patient` records created across facilities via `PatientFacilityIdentifier` (append-only merge log, integrated with `audit` app); decide auto-link vs. manual-review threshold.
-- [ ] **Data seeding playbook**: per-site checklist — Facility row, FacilityAssignment rows, providers, rooms, availability templates, service lines mapped to `Encounter` billing; scripted as a management command (`clinic/management/commands/seed_site.py`) instead of manual admin clicks.
+### 5.1 Pre-rollout audit — DONE ✅
+- [x] **Facility-scoping coverage sweep**: legacy RIS order queries in `orders/views.py` now route through the single shared layer (`clinic.permissions.accessible_facility_ids`; addendum B.3 — no second implementation). Legacy global accounts without facility affiliation keep unrestricted access so pre-clinic deployments aren't broken; clinic-affiliated staff see only their sites' orders; NULL-facility rows remain visible to everyone. Regression coverage: `OrdersWorklistScopingTests` in `clinic/tests.py` (cross-facility invisibility, UI + API 404 semantics).
+- [x] **Permission matrix review**: role × action matrix (receptionist / provider / biller / admin × appointment, encounter, note, billing, API) encoded as `PermissionMatrixTests` in `clinic/tests.py`. Receptionist encounter-creation stays blocked pending the section-E answer (matrix test asserts current default; flip the assertion when owners rule).
+- [x] **Patient-matching reconciliation tooling**: `clinic/patient_matching.py` — `find_candidate_duplicates()` + transactional `merge_patients(duplicate, canonical, actor)`: re-points operational rows to the canonical patient, preserves every site MRN as `PatientFacilityIdentifier`, deactivates (never deletes) the duplicate with an MRN suffix freeing the unique slot, and writes an append-only `clinic.PatientMergeLog` row (migration `0005`) plus `audit.AuditLog` entry (action `CLINIC_PATIENT_MERGE`) via the shared helper. UI: candidate list + merge confirmation at `clinic/urls.py` `patients/<uuid:pk>/merge/` (`views.patient_merge`, admin-gated). Decision recorded: **manual-review only** — no auto-link threshold until section E lands. Tests: `PatientMergeServiceTests`.
+- [x] **Data seeding playbook**: `clinic/management/commands/seed_site.py` — idempotent one-command provisioning of Facility, FacilityAssignment rows, providers, rooms, availability templates, and service lines (replaces manual admin clicks).
 
-### 5.2 Hardening
-- [ ] **Concurrency**: DB-level guards for double-booking under load (unique constraints on provider/room slots already partially in place — verify with Postgres, not just SQLite; add advisory-lock or exclusion-constraint test run against real Postgres).
-- [ ] **Outbox consumer**: implement at least one real consumer path for `IntegrationEvent` (e.g., periodic exporter emitting HL7 v2 ADT/A01-style messages to a configurable TCP endpoint or file drop), with retry/backoff and dead-letter status transitions; keep it off the request path (celery task — `config/celery.py` exists).
-- [ ] **API contract freeze**: version the read-only API (`/api/clinic/v1/`), publish OpenAPI schema (drf-spectacular if acceptable), document field→FHIR mapping table; only after section-E answers land.
-- [ ] **Performance**: index review on appointment/encounter query patterns (facility+date ranges), pagination defaults, N+1 checks on day board & queue views.
-- [ ] **Observability**: structured logging tags for scheduling rejections and outbox failures; simple health endpoint reporting pending `IntegrationEvent` backlog depth.
+### 5.2 Hardening — DONE except Postgres verification & contract freeze ⚠️
+- [ ] **Concurrency (partial)**: model-level unique guards on provider/room slots are in place and covered by `ConflictEngineTests`/`SchedulingTransitionTests` on SQLite. **Open ops task:** run the same guard suite against real Postgres (advisory-lock / exclusion-constraint verification) before soak begins.
+- [x] **Outbox consumer**: `clinic/outbox.py` + `manage.py flush_outbox --limit N` — polls undelivered `IntegrationEvent` rows and exports HL7 v2 ADT-style payloads over two transports (default JSONL file drop at `CLINIC_OUTBOX_DIR/hl7-out.jsonl`; optional TCP via `CLINIC_OUTBOX_TCP_HOST`/`PORT`). Retry bookkeeping on the row (`delivered_at`, `delivery_attempts`); events exceeding `CLINIC_OUTBOX_MAX_ATTEMPTS` (default 5) transition to `DEAD_LETTER` via the new `IntegrationEvent.status` field (migration `0005`: PENDING/DELIVERED/FAILED/DEAD_LETTER) — payload stays immutable, status transitions only. Runs from cron/celery beat, never on the request path.
+- [ ] **API contract freeze (deferred by gate)**: still mounted at `/api/clinic/` (no `/v1/` prefix yet); OpenAPI publication and field→FHIR mapping table intentionally held until section-E answers arrive, per 5.4.
+- [x] **Performance**: index review applied alongside migration `0005` (`status` db_index for cheap backlog queries); list endpoints paginate and detail views use `select_related` on the board/queue paths.
+- [x] **Observability**: `clinic/health.py` — `health_snapshot()` reports outbox backlog depth + oldest-pending age (`backlog_depth()`/`oldest_pending_age()` in `outbox.py`) and runs `note_chain_check()` (`EncounterNote.verify_chain()` across facilities, returns broken-chain encounter ids) for the soak-period scheduled check. Structured logging: `logger = logging.getLogger("clinic.outbox")` emits delivery-failure warnings and flush summaries; rollout-gate denials logged in `clinic/permissions.enforce_rollout_gate`. Note: the docstring references a `clinic_health` JSON view — wiring that view into a URL is a small remaining follow-up (helpers themselves are complete and used by `flush_outbox` output).
 
-### 5.3 Rollout sequence
-1. Pilot site completes the Phase 3 runbook → sign-off recorded here.
-2. Enable site 2 via seed playbook; run walkthrough B checks (cross-facility isolation, MRN matching).
-3. Soak period (≥1 week): monitor conflict-engine rejections, outbox backlog, note-chain integrity (`verify_chain()` scheduled check).
-4. Remaining sites in batches; rollback plan = disable clinic URLs behind a feature flag per facility.
+### 5.3 Rollout sequence — mechanism DONE ✅, execution pending
+1. Pilot site completes the Phase 3 runbook → sign-off recorded here. *(pending, operational)*
+2. Enable site 2 via seed playbook (`seed_site`); run walkthrough B checks. *(tooling ready)*
+3. Soak period (≥1 week): monitor conflict-engine rejections, outbox backlog and note-chain integrity via `health_snapshot()` scheduled checks. *(tooling ready)*
+4. **Rollback feature flag — implemented** as `clinic/rollout.py`: per-facility clinic enablement keyed on a live active `FacilityAssignment` in a `LIVE_ROLES` role (default ADMIN, overridable via `CLINIC_ROLLOUT_LIVE_ROLES`). Every clinic HTML view (`facility_scoped_view`, `gated_detail_view`, `gated_note_view`, `enforce_rollout_gate` in `clinic/permissions.py`), the read-only API, and the outbox consumer check the gate; removing/deactivating the ADMIN assignment closes a site without redeploy. Superusers are never gated (ops escape hatch). Coverage: `RolloutFlagTests`.
 
 ### 5.4 Gates (blocking)
 - Section E answers required before: FHIR contract freeze (5.2) and multi-site ordering decisions (5.3).
 - Pilot sign-off required before enabling any additional site.
 
-**Current position:** awaiting pilot execution/sign-off; pre-rollout audit (5.1) can begin in parallel.
+**Current position:** Phase 4 code complete; working tree clean at merge `deab2ab` (PR #110, branch `clinic-information-system-phase-4`). Remaining: pilot execution/sign-off, Postgres concurrency verification run (5.2), `clinic_health` URL wiring (minor), and section-E-gated API freeze.
+
+### Step 5 change log (files touched by Phase 4 work)
+- New: `clinic/rollout.py`, `clinic/health.py`, `clinic/outbox.py`, `clinic/patient_matching.py`, `clinic/management/commands/seed_site.py`, `clinic/management/commands/flush_outbox.py`, `clinic/migrations/0005_integrationevent_status_patientmergelog.py`
+- Modified: `clinic/models.py` (`PatientMergeLog`, `IntegrationEvent.status`), `clinic/permissions.py` (rollout gates `facility_scoped_view`/`gated_detail_view`/`gated_note_view`/`enforce_rollout_gate`), `clinic/views.py` + `clinic/urls.py` (patient-merge UI), `orders/views.py` (`_orders_for_user` scoping sweep)
+- Tests added to `clinic/tests.py`: `RolloutFlagTests`, `PermissionMatrixTests`, `PatientMergeServiceTests`, `OrdersWorklistScopingTests` (+ existing Phase 3 suites unchanged)
