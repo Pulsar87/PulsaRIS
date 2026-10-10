@@ -64,7 +64,34 @@ def _scoped(user, qs):
     return facility_scope_queryset(user, qs)
 
 
-class ClinicScopedListMixin(ReadOnlyApiMixin):
+class RolloutGateMixin:
+    """Phase 4 (plan Step 5.3): per-facility clinic feature flag on the API.
+
+    List views gate before the queryset runs (``?facility=`` param, falling
+    back to the requester's home facility); detail views gate on the resolved
+    object's own facility inside ``get_object()`` — same shared implementation
+    as the HTML views (``enforce_rollout_gate``), no second gate. Superusers
+    bypass; disabled sites get 403 PermissionDenied -> HTTP 403.
+    """
+
+    def list(self, request, *args, **kwargs):
+        from clinic.permissions import enforce_rollout_gate
+
+        enforce_rollout_gate(
+            request, kwargs, explicit_facility_id=request.GET.get("facility")
+        )
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        from clinic.permissions import enforce_rollout_gate
+
+        obj = self.get_object()
+        enforce_rollout_gate(request, kwargs, obj=obj)
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
+
+
+class ClinicScopedListMixin(RolloutGateMixin, ReadOnlyApiMixin):
     permission_classes = [IsAuthenticated, FacilityScopedPermission]
 
     def get_scoped_queryset(self, qs):
@@ -119,7 +146,8 @@ class AppointmentListView(ClinicScopedListMixin, ListAPIView):
         return qs.order_by("start_datetime")
 
 
-class AppointmentDetailView(FacilityNotFound404Mixin, ReadOnlyApiMixin, RetrieveAPIView):
+class AppointmentDetailView(FacilityNotFound404Mixin, RolloutGateMixin, ReadOnlyApiMixin,
+                            RetrieveAPIView):
     permission_classes = [IsAuthenticated, FacilityScopedPermission]
     serializer_class = AppointmentSerializer
     queryset = Appointment.objects.select_related("patient", "facility")
@@ -148,7 +176,8 @@ class EncounterListView(ClinicScopedListMixin, ListAPIView):
         return qs.order_by("-created_at")
 
 
-class EncounterDetailView(FacilityNotFound404Mixin, ReadOnlyApiMixin, RetrieveAPIView):
+class EncounterDetailView(FacilityNotFound404Mixin, RolloutGateMixin, ReadOnlyApiMixin,
+                          RetrieveAPIView):
     permission_classes = [IsAuthenticated, FacilityScopedPermission]
     serializer_class = EncounterSerializer
     queryset = Encounter.objects.select_related("patient", "facility")

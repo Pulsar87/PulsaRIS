@@ -9,6 +9,23 @@ from core.models import Device, Facility
 from orders.models import ExamOrder
 
 
+def _orders_for_user(request, qs=None):
+    """Phase 4 (plan Step 5.1 scoping sweep): route legacy RIS order queries
+    through the single shared facility-scoping layer (addendum B.3 — no second
+    implementation). Users without a facility affiliation (legacy global RIS
+    accounts) keep unrestricted access so pre-clinic deployments are not
+    broken; clinic-affiliated staff see only their sites' orders. NULL-
+    facility rows stay visible to everyone (pre-existing unassigned data)."""
+    from clinic.permissions import accessible_facility_ids
+
+    if qs is None:
+        qs = ExamOrder.objects.all()
+    ids = accessible_facility_ids(request.user)
+    if ids is None or not ids:
+        return qs
+    return qs.filter(Q(facility_id__in=ids) | Q(facility__isnull=True))
+
+
 def worklist(request):
     """Display worklist of orders with advanced filtering."""
     query = request.GET.get("q", "")
@@ -18,9 +35,9 @@ def worklist(request):
     date_from = request.GET.get("date_from", "")
     date_to = request.GET.get("date_to", "")
 
-    orders = ExamOrder.objects.filter(is_deleted=False).select_related(
-        "patient", "modality", "room_station"
-    )
+    orders = _orders_for_user(
+        request, ExamOrder.objects.filter(is_deleted=False)
+    ).select_related("patient", "modality", "room_station")
 
     if query:
         orders = orders.filter(
@@ -63,7 +80,7 @@ def worklist(request):
 
 def order_detail(request, pk):
     """Display order details."""
-    order = get_object_or_404(ExamOrder, pk=pk)
+    order = get_object_or_404(_orders_for_user(request), pk=pk)
     from inventory.models import InventoryItem
 
     context = {
@@ -227,7 +244,7 @@ def add_order(request):
 
 def edit_order(request, pk):
     """Edit an existing order."""
-    order = get_object_or_404(ExamOrder, pk=pk)
+    order = get_object_or_404(_orders_for_user(request), pk=pk)
 
     if request.method == "POST":
         # Get form data
@@ -353,7 +370,7 @@ def delete_order(request, pk):
     """Delete an order (soft delete with audit logging)."""
     from audit.models import AuditLog
 
-    order = get_object_or_404(ExamOrder, pk=pk)
+    order = get_object_or_404(_orders_for_user(request), pk=pk)
 
     if request.method == "POST":
         try:
