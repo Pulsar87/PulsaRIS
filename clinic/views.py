@@ -29,6 +29,7 @@ from clinic.models import (
 )
 from clinic.permissions import (
     accessible_facility_ids,
+    enforce_rollout_gate,
     facility_scope_queryset,
     facility_scoped_view,
     gated_detail_view,
@@ -57,6 +58,7 @@ def _facility_choices(user):
 @role_required("RECEPTIONIST", "PROVIDER", "ADMIN")
 def appointment_list(request):
     """Day board of appointments scoped to the user's facilities."""
+    enforce_rollout_gate(request)
     date_str = request.GET.get("date") or timezone.localdate().isoformat()
     try:
         day = datetime.strptime(date_str, "%Y-%m-%d").date()
@@ -186,6 +188,7 @@ def appointment_action(request, pk, action):
 @role_required("RECEPTIONIST", "PROVIDER", "ADMIN")
 def reception_queue(request):
     """Waiting list: checked-in appointments ordered by queue_position."""
+    enforce_rollout_gate(request)
     appts = facility_scope_queryset(
         request.user,
         Appointment.objects.select_related("patient", "provider", "room"),
@@ -206,6 +209,7 @@ def reception_queue(request):
 
 @role_required("PROVIDER", "ADMIN")
 def availability_list(request):
+    enforce_rollout_gate(request)
     rows = facility_scope_queryset(
         request.user,
         ProviderAvailability.objects.select_related("provider", "facility"),
@@ -276,6 +280,10 @@ def free_slots_api(request):
     if not accessible_facility_ids(request.user) is None and \
        facility_id not in {str(x) for x in accessible_facility_ids(request.user)}:
         return JsonResponse({"error": "no access"}, status=403)
+    try:
+        enforce_rollout_gate(request, explicit_facility_id=facility_id)
+    except PermissionDenied as exc:
+        return JsonResponse({"error": str(exc)}, status=403)
     day = datetime.strptime(date_str, "%Y-%m-%d").date()
     from django.contrib.auth import get_user_model
     from core.models import Facility as F
@@ -292,6 +300,7 @@ def free_slots_api(request):
 
 @role_required("PROVIDER", "RECEPTIONIST", "ADMIN")
 def encounter_list(request):
+    enforce_rollout_gate(request)
     encs = facility_scope_queryset(
         request.user,
         Encounter.objects.select_related("patient", "facility", "provider"),

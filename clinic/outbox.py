@@ -81,11 +81,22 @@ def deliver_pending(limit=100):
     Returns ``(delivered_count, dead_lettered_count)``. Uses select_for_update
     on backends that support it (Postgres) so concurrent consumers don't
     double-send; SQLite falls back to plain ordering (single-process dev).
+
+    Phase 4 (plan Step 5.3 rollback): events belonging to a facility whose
+    clinic module is not rolled out are skipped (left PENDING, no attempt
+    counter burn) so disabling a site halts outbound integrations too;
+    facility-less events always flow.
     """
+    from clinic.rollout import facility_clinic_enabled
+
     qs = IntegrationEvent.objects.filter(delivered_at__isnull=True).order_by("created_at")
     if connection_supports_select_for_update():
         qs = qs.select_for_update(skip_locked=True)
-    events = list(qs[:limit])
+    events = []
+    for ev in qs[:limit]:
+        if ev.facility_id and not facility_clinic_enabled(ev.facility_id):
+            continue
+        events.append(ev)
     delivered = dead = 0
     now = timezone.now()
     for ev in events:
