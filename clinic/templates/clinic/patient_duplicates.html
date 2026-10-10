@@ -1,0 +1,54 @@
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Duplicate Patients' %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <h2 class="mb-1"><i class="bi bi-person-lines-fill me-2"></i>{% trans 'Patient Duplicate Review' %}</h2>
+  <p class="text-muted">{% trans 'Probable duplicate identities (same name + date of birth). Merging is a manual, admin-only decision; every merge is written to an append-only log.' %}</p>
+
+  <div class="card mb-4"><div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead><tr>
+        <th>{% trans 'Canonical (keep)' %}</th><th>{% trans 'Duplicate (merge away)' %}</th><th></th>
+      </tr></thead>
+      <tbody>
+      {% for canonical, dup in pairs %}
+        <tr>
+          <td>{{ canonical }}<br><small class="text-muted">MRN {{ canonical.mrn }} · DOB {{ canonical.dob }} · created {{ canonical.created_at|date:"Y-m-d" }}</small></td>
+          <td>{{ dup }}<br><small class="text-muted">MRN {{ dup.mrn }} · DOB {{ dup.dob }} · created {{ dup.created_at|date:"Y-m-d" }}</small></td>
+          <td>
+            <form method="post" action="{% url 'clinic:patient_merge' dup.pk %}" onsubmit="return confirm('{% trans "Merge this duplicate into the canonical record? This re-points appointments, encounters and orders." %}');">
+              {% csrf_token %}
+              <input type="hidden" name="canonical" value="{{ canonical.pk }}">
+              <button class="btn btn-sm btn-danger"><i class="bi bi-arrow-left-right me-1"></i>{% trans 'Merge into canonical' %}</button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="text-center text-muted py-4">{% trans 'No probable duplicates found.' %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+
+  <h5>{% trans 'Recent merges (append-only)' %}</h5>
+  <div class="card"><div class="table-responsive">
+    <table class="table table-sm mb-0">
+      <thead><tr>
+        <th>{% trans 'When' %}</th><th>{% trans 'By' %}</th><th>{% trans 'Duplicate' %}</th><th>{% trans 'Canonical' %}</th><th>{% trans 'Summary' %}</th>
+      </tr></thead>
+      <tbody>
+      {% for m in recent_merges %}
+        <tr>
+          <td>{{ m.created_at|date:"Y-m-d H:i" }}</td>
+          <td>{{ m.actor.get_username|default:"—" }}</td>
+          <td>{{ m.duplicate.mrn }}</td>
+          <td>{{ m.canonical.mrn }}</td>
+          <td><small class="text-muted">{{ m.summary.repointed }}</small></td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="text-center text-muted py-3">{% trans 'No merges recorded yet.' %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div></div>
+</div>
+{% endblock %}

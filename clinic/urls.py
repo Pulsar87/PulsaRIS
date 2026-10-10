@@ -30,4 +30,11 @@ urlpatterns = [
     path("encounters/<uuid:pk>/charge/", views.encounter_charge, name="encounter_charge"),
     path("notes/<uuid:pk>/sign/", views.note_sign, name="note_sign"),
     path("notes/<uuid:pk>/amend/", views.note_amend, name="note_amend"),
+    # ── Phase 4: patient-matching reconciliation (admin, manual review) ──
+    path("patients/duplicates/", views.patient_duplicates, name="patient_duplicates"),
+    path(
+        "patients/<uuid:pk>/merge/",
+        views.patient_merge,
+        name="patient_merge",
+    ),
 ]

@@ -24,7 +24,7 @@ from django.db import transaction
 from django.utils import timezone
 
 
-from clinic.models import PatientFacilityIdentifier
+from clinic.models import PatientFacilityIdentifier, PatientMergeLog
 from clinic.permissions import record_audit_service
 from patients.models import Patient
 
@@ -142,6 +142,12 @@ def merge_patients(*, duplicate: Patient, canonical: Patient, actor=None):
     duplicate.mrn = f"{duplicate.mrn}-MERGED-{str(canonical.pk)[:8]}"[:50]
     duplicate.save(update_fields=["is_deleted", "deleted_at", "mrn"])
     summary["merged_into"] = str(canonical.pk)
+
+    # Append-only, queryable merge history (clinic.PatientMergeLog) written in
+    # the same transaction as the merge; complements the generic AuditLog row.
+    PatientMergeLog.objects.create(
+        duplicate=duplicate, canonical=canonical, actor=actor, summary=summary
+    )
 
     record_audit_service(
         "CLINIC_PATIENT_MERGE",
