@@ -8,6 +8,11 @@ app_name = "clinic"
 # Phase 2 (Clinical records): encounters, vitals, notes, referrals, charges.
 urlpatterns = [
     path("appointments/", views.appointment_list, name="appointment_list"),
+    path(
+        "appointments/calendar-events/",
+        views.appointment_calendar_events,
+        name="appointment_calendar_events",
+    ),
     path("appointments/new/", views.appointment_new, name="appointment_new"),
     path("appointments/<uuid:pk>/", views.appointment_detail, name="appointment_detail"),
     path(

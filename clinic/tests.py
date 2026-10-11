@@ -686,6 +686,123 @@ class ClinicApiTests(TestCase):
         self.assertEqual(resp2.json()["results"], [])
 
 
+class ClinicAppointmentCalendarTests(TestCase):
+    def setUp(self):
+        from license.models import LicenseActivation
+
+        LicenseActivation.objects.create(
+            pk=1,
+            expiry_date=date.today() + timedelta(days=365),
+            signature="TESTSIG",
+            max_orders=None,
+        )
+        self.facility = Facility.objects.create(
+            name="Calendar Site", dicom_ae_title="CAL_AE"
+        )
+        self.foreign_facility = Facility.objects.create(
+            name="Foreign Site", dicom_ae_title="CAL_FOREIGN"
+        )
+        self.staff = make_user("calendar-staff@clinic.test", facility=self.facility)
+        FacilityAssignment.objects.create(
+            user=self.staff,
+            facility=self.facility,
+            role_at_facility="ADMIN",
+            start_date=date.today(),
+        )
+        self.provider = make_user("calendar-provider@clinic.test")
+        self.patient = make_patient("MRN-CALENDAR")
+        self.start = (timezone.now() + timedelta(days=1)).replace(
+            second=0, microsecond=0
+        )
+        self.appointment = Appointment.objects.create(
+            patient=self.patient,
+            facility=self.facility,
+            provider=self.provider,
+            start_datetime=self.start,
+            duration_minutes=30,
+            department="Primary care",
+        )
+        self.foreign_appointment = Appointment.objects.create(
+            patient=make_patient("MRN-CALENDAR-FOREIGN"),
+            facility=self.foreign_facility,
+            start_datetime=self.start,
+        )
+        self.client.force_login(self.staff)
+
+    def _calendar_events(self, **params):
+        return self.client.get(
+            "/clinic/appointments/calendar-events/",
+            {
+                "start": (self.start - timedelta(hours=1)).isoformat(),
+                "end": (self.start + timedelta(hours=2)).isoformat(),
+                **params,
+            },
+        )
+
+    def test_calendar_page_renders_provider_calendar(self):
+        response = self.client.get("/clinic/appointments/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "clinicAppointmentCalendar")
+        self.assertContains(response, str(self.provider.pk))
+        self.assertEqual(list(response.context["providers"]), [self.provider])
+
+    def test_calendar_events_are_facility_scoped_and_include_appointment_details(self):
+        response = self._calendar_events()
+
+        self.assertEqual(response.status_code, 200)
+        events = response.json()
+        self.assertEqual([event["id"] for event in events], [str(self.appointment.pk)])
+        self.assertEqual(events[0]["extendedProps"]["patient_mrn"], self.patient.mrn)
+        self.assertEqual(events[0]["extendedProps"]["department"], "Primary care")
+
+    def test_calendar_provider_filter_includes_unassigned_only_when_selected(self):
+        unassigned = Appointment.objects.create(
+            patient=make_patient("MRN-CALENDAR-UNASSIGNED"),
+            facility=self.facility,
+            start_datetime=self.start + timedelta(minutes=45),
+        )
+
+        response = self._calendar_events(
+            filter_providers="true", **{"providers[]": str(self.provider.pk)}
+        )
+        self.assertEqual(
+            {event["id"] for event in response.json()},
+            {str(self.appointment.pk)},
+        )
+
+        response = self._calendar_events(
+            filter_providers="true", **{"providers[]": "unassigned"}
+        )
+        self.assertEqual(
+            {event["id"] for event in response.json()},
+            {str(unassigned.pk)},
+        )
+
+    def test_calendar_rejects_invalid_date_range(self):
+        response = self.client.get(
+            "/clinic/appointments/calendar-events/",
+            {"start": "not-a-date", "end": "also-not-a-date"},
+        )
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_booking_form_uses_calendar_date_provider_and_facility(self):
+        response = self.client.get(
+            "/clinic/appointments/new/",
+            {
+                "datetime": self.start.strftime("%Y-%m-%dT%H:%M"),
+                "provider": str(self.provider.pk),
+                "facility": str(self.facility.pk),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["start_datetime"], self.start.strftime("%Y-%m-%d %H:%M"))
+        self.assertEqual(response.context["selected_provider_id"], str(self.provider.pk))
+        self.assertEqual(response.context["selected_facility_id"], str(self.facility.pk))
+
+
 class RolloutFlagTests(TestCase):
     """Phase 4 (Step 5.3 rollback plan): per-facility clinic feature flag.
 

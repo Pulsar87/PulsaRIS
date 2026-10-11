@@ -1,37 +1,576 @@
-{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'Appointments' %}{% endblock %}
+{% extends 'layout.html' %}
+{% load i18n %}
+
+{% block title %}{% trans 'Appointments' %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .appointment-calendar-shell {
+    display: flex;
+    gap: .5rem;
+    height: calc(100vh - 180px);
+    min-height: 600px;
+  }
+  .appointment-calendar-sidebar {
+    width: 260px;
+    flex: 0 0 260px;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+    min-height: 0;
+  }
+  .appointment-calendar-card,
+  .appointment-calendar-main {
+    background: var(--bs-body-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+  }
+  .appointment-mini-card {
+    padding: .75rem;
+  }
+  .appointment-mini-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+  }
+  .appointment-mini-nav button {
+    border: 0;
+    border-radius: 6px;
+    padding: .25rem .5rem;
+    color: var(--bs-secondary-color);
+    background: transparent;
+  }
+  .appointment-mini-nav button:hover {
+    color: var(--bs-primary);
+    background: rgba(var(--bs-primary-rgb), .08);
+  }
+  .appointment-mini-month {
+    margin: 0;
+    font-size: .9rem;
+    font-weight: 600;
+  }
+  .appointment-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+  }
+  .appointment-mini-day-header,
+  .appointment-mini-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    font-size: .8rem;
+  }
+  .appointment-mini-day-header {
+    color: var(--bs-secondary-color);
+    font-size: .68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  button.appointment-mini-day {
+    border: 0;
+    color: var(--bs-body-color);
+    background: transparent;
+  }
+  button.appointment-mini-day:hover {
+    background: rgba(var(--bs-primary-rgb), .1);
+  }
+  button.appointment-mini-day.selected {
+    color: #fff;
+    background: var(--bs-primary);
+    font-weight: 600;
+  }
+  button.appointment-mini-day.today {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: -2px;
+  }
+  button.appointment-mini-day.other-month {
+    color: var(--bs-secondary-color);
+    opacity: .5;
+  }
+  .appointment-resource-card {
+    flex: 1;
+    min-height: 180px;
+    overflow-y: auto;
+    padding: .75rem;
+  }
+  .appointment-resource-heading {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-bottom: .75rem;
+    font-size: .9rem;
+    font-weight: 600;
+  }
+  .appointment-resource-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: .4rem;
+    padding: .5rem .6rem;
+    border: 2px solid var(--bs-border-color);
+    border-radius: 10px;
+    background: var(--bs-tertiary-bg);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+  }
+  .appointment-resource-item.active {
+    color: #fff;
+    border-color: var(--bs-primary);
+    background: var(--bs-primary);
+  }
+  .appointment-resource-item input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+  }
+  .appointment-calendar-main {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .appointment-calendar-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .appointment-calendar-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+  .appointment-calendar-content {
+    flex: 1;
+    min-height: 0;
+    padding: .5rem;
+  }
+  #clinicAppointmentCalendar {
+    height: 100%;
+    min-height: 500px;
+  }
+  #clinicAppointmentCalendar .fc-theme-standard .fc-scrollgrid {
+    border: 0;
+  }
+  #clinicAppointmentCalendar .fc-theme-standard td,
+  #clinicAppointmentCalendar .fc-theme-standard th {
+    border-color: var(--bs-border-color);
+  }
+  #clinicAppointmentCalendar .fc-toolbar {
+    display: none;
+  }
+  #clinicAppointmentCalendar .fc-col-header-cell {
+    padding: .5rem;
+    color: var(--bs-body-color);
+    background: rgba(var(--bs-primary-rgb), .05);
+    font-size: .85rem;
+  }
+  #clinicAppointmentCalendar .fc-timegrid-slot {
+    height: 50px !important;
+  }
+  #clinicAppointmentCalendar .fc-timegrid-slot-label {
+    color: var(--bs-secondary-color);
+    font-size: .75rem;
+    font-weight: 500;
+  }
+  #clinicAppointmentCalendar .fc-day-today {
+    background: rgba(var(--bs-primary-rgb), .03) !important;
+  }
+  #clinicAppointmentCalendar .fc-event {
+    border: 0;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: .8rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (max-width: 767.98px) {
+    .appointment-calendar-shell {
+      height: auto;
+      min-height: 0;
+      flex-direction: column;
+    }
+    .appointment-calendar-sidebar {
+      width: 100%;
+      flex-basis: auto;
+    }
+    .appointment-resource-card {
+      max-height: 220px;
+    }
+    .appointment-calendar-main {
+      min-height: 620px;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0"><i class="bi bi-calendar3 me-2"></i>{% trans 'Appointments' %}</h2>
-    <a href="{% url 'clinic:appointment_new' %}" class="btn btn-primary">
-      <i class="bi bi-plus-lg me-1"></i>{% trans 'Book Appointment' %}</a>
+<div class="container-fluid py-3">
+  <div class="appointment-calendar-shell">
+    <aside class="appointment-calendar-sidebar">
+      <section class="appointment-calendar-card appointment-mini-card" aria-label="{% trans 'Choose a date' %}">
+        <div class="appointment-mini-nav">
+          <button type="button" id="appointmentMonthPrev" aria-label="{% trans 'Previous month' %}">
+            <i class="bi bi-chevron-left"></i>
+          </button>
+          <h2 class="appointment-mini-month" id="appointmentMonthYear"></h2>
+          <button type="button" id="appointmentMonthNext" aria-label="{% trans 'Next month' %}">
+            <i class="bi bi-chevron-right"></i>
+          </button>
+        </div>
+        <div class="appointment-mini-grid" aria-hidden="true">
+          <span class="appointment-mini-day-header">{% trans 'Sun' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Mon' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Tue' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Wed' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Thu' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Fri' %}</span>
+          <span class="appointment-mini-day-header">{% trans 'Sat' %}</span>
+        </div>
+        <div class="appointment-mini-grid" id="appointmentMonthDays"></div>
+      </section>
+
+      <section class="appointment-calendar-card appointment-resource-card">
+        <h2 class="appointment-resource-heading">
+          <i class="bi bi-person-badge"></i>{% trans 'Providers' %}
+        </h2>
+        {% for provider in providers %}
+        <label class="appointment-resource-item active" for="provider_{{ provider.pk }}">
+          <input class="form-check-input appointment-provider-filter" type="checkbox"
+                 value="{{ provider.pk }}" id="provider_{{ provider.pk }}" checked>
+          <span>{{ provider.get_full_name|default:provider.email }}</span>
+        </label>
+        {% endfor %}
+        <label class="appointment-resource-item active" for="provider_unassigned">
+          <input class="form-check-input appointment-provider-filter" type="checkbox"
+                 value="unassigned" id="provider_unassigned" checked>
+          <span>{% trans 'Unassigned' %}</span>
+        </label>
+        {% if not providers %}
+        <p class="small text-muted mb-2">{% trans 'No providers configured yet.' %}</p>
+        {% endif %}
+      </section>
+    </aside>
+
+    <main class="appointment-calendar-main">
+      <header class="appointment-calendar-header">
+        <h1 class="appointment-calendar-title">
+          <i class="bi bi-calendar-event me-2"></i><span id="appointmentSelectedDate"></span>
+        </h1>
+        <div class="d-flex align-items-center gap-2">
+          {% if facilities|length > 1 %}
+          <label class="visually-hidden" for="appointmentFacility">{% trans 'Facility' %}</label>
+          <select id="appointmentFacility" class="form-select form-select-sm" aria-label="{% trans 'Facility' %}">
+            <option value="">{% trans 'All facilities' %}</option>
+            {% for facility in facilities %}
+            <option value="{{ facility.pk }}" {% if selected_facility_id == facility.pk|stringformat:"s" %}selected{% endif %}>
+              {{ facility.name }}
+            </option>
+            {% endfor %}
+          </select>
+          {% endif %}
+          <a class="btn btn-primary btn-sm" href="{% url 'clinic:appointment_new' %}">
+            <i class="bi bi-plus-lg me-1"></i>{% trans 'Book Appointment' %}
+          </a>
+        </div>
+      </header>
+      <div class="appointment-calendar-content">
+        <div id="clinicAppointmentCalendar"></div>
+      </div>
+    </main>
   </div>
-  <form method="get" class="row g-2 mb-3">
-    <div class="col-auto">
-      <input type="date" name="date" value="{{ day }}" class="form-control">
-    </div>
-    <div class="col-auto"><button class="btn btn-outline-secondary">{% trans 'Go' %}</button></div>
-  </form>
-  <div class="card"><div class="table-responsive">
-    <table class="table table-hover mb-0">
-      <thead><tr>
-        <th>{% trans 'Time' %}</th><th>{% trans 'Patient' %}</th><th>{% trans 'Provider' %}</th>
-        <th>{% trans 'Facility' %}</th><th>{% trans 'Status' %}</th><th></th>
-      </tr></thead>
-      <tbody>
-      {% for a in appointments %}
-        <tr>
-          <td>{{ a.start_datetime|date:"H:i" }} ({{ a.duration_minutes }}m)</td>
-          <td>{{ a.patient }}</td><td>{{ a.provider|default:"—" }}</td>
-          <td>{{ a.facility.name }}</td>
-          <td><span class="badge bg-{% if a.status == 'CANCELLED' or a.status == 'NO_SHOW' %}secondary{% elif a.status == 'COMPLETED' %}success{% elif a.status == 'CHECKED_IN' %}info{% else %}primary{% endif %}">{{ a.get_status_display }}</span></td>
-          <td><a class="btn btn-sm btn-outline-primary" href="{% url 'clinic:appointment_detail' a.pk %}">{% trans 'Open' %}</a></td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="6" class="text-center text-muted py-4">{% trans 'No appointments on this day.' %}</td></tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div></div>
 </div>
+
+<div class="modal fade" id="clinicAppointmentModal" tabindex="-1"
+     aria-labelledby="clinicAppointmentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="clinicAppointmentModalLabel">
+          <i class="bi bi-calendar2-check me-2"></i>{% trans 'Appointment details' %}
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                aria-label="{% trans 'Close' %}"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'Patient' %}</span>
+              <strong id="appointmentModalPatient"></strong>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'MRN' %}</span>
+              <strong id="appointmentModalMrn"></strong>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'Provider' %}</span>
+              <strong id="appointmentModalProvider"></strong>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'Facility' %}</span>
+              <strong id="appointmentModalFacility"></strong>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'Room' %}</span>
+              <strong id="appointmentModalRoom"></strong>
+            </div>
+            <div class="d-flex justify-content-between border-bottom py-2">
+              <span class="text-muted">{% trans 'Status' %}</span>
+              <strong id="appointmentModalStatus"></strong>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between border-bottom py-2 mt-3">
+          <span class="text-muted">{% trans 'Scheduled time' %}</span>
+          <strong id="appointmentModalTime"></strong>
+        </div>
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <span class="text-muted">{% trans 'Department' %}</span>
+          <strong id="appointmentModalDepartment"></strong>
+        </div>
+        <div class="pt-3">
+          <div class="small text-muted text-uppercase fw-semibold">{% trans 'Reason' %}</div>
+          <div id="appointmentModalReason"></div>
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <a href="#" id="appointmentModalOpen" class="btn btn-primary">
+          <i class="bi bi-box-arrow-up-right me-1"></i>{% trans 'Open appointment' %}
+        </a>
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+          {% trans 'Close' %}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const calendarElement = document.getElementById("clinicAppointmentCalendar");
+  if (!calendarElement || !window.FullCalendar) return;
+
+  const eventUrl = "{% url 'clinic:appointment_calendar_events' %}";
+  const facilitySelect = document.getElementById("appointmentFacility");
+  let selectedDate = new Date("{{ day|date:'Y-m-d' }}T12:00:00");
+  let miniCalendarDate = new Date(selectedDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  function renderMiniCalendar() {
+    const year = miniCalendarDate.getFullYear();
+    const month = miniCalendarDate.getMonth();
+    const monthLabel = new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+      month: "long",
+      year: "numeric"
+    });
+    document.getElementById("appointmentMonthYear").textContent =
+      monthLabel.format(miniCalendarDate);
+
+    const container = document.getElementById("appointmentMonthDays");
+    container.replaceChildren();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPreviousMonth = new Date(year, month, 0).getDate();
+
+    for (let index = firstDay - 1; index >= 0; index -= 1) {
+      addDay(daysInPreviousMonth - index, new Date(year, month - 1, daysInPreviousMonth - index), true);
+    }
+    for (let number = 1; number <= daysInMonth; number += 1) {
+      addDay(number, new Date(year, month, number), false);
+    }
+    const remaining = 42 - container.children.length;
+    for (let number = 1; number <= remaining; number += 1) {
+      addDay(number, new Date(year, month + 1, number), true);
+    }
+  }
+
+  function addDay(number, date, otherMonth) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "appointment-mini-day";
+    button.textContent = number;
+    button.setAttribute("aria-label", new Intl.DateTimeFormat(
+      document.documentElement.lang || "en",
+      { dateStyle: "full" }
+    ).format(date));
+    if (otherMonth) button.classList.add("other-month");
+    if (date.toDateString() === today.toDateString()) button.classList.add("today");
+    if (date.toDateString() === selectedDate.toDateString()) button.classList.add("selected");
+    button.addEventListener("click", function () {
+      selectedDate = new Date(date);
+      miniCalendarDate = new Date(date);
+      renderMiniCalendar();
+      calendar.gotoDate(selectedDate);
+    });
+    document.getElementById("appointmentMonthDays").appendChild(button);
+  }
+
+  function setSelectedDateLabel(date) {
+    selectedDate = new Date(date);
+    miniCalendarDate = new Date(date);
+    document.getElementById("appointmentSelectedDate").textContent =
+      new Intl.DateTimeFormat(document.documentElement.lang || "en", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }).format(date);
+    renderMiniCalendar();
+  }
+
+  document.getElementById("appointmentMonthPrev").addEventListener("click", function () {
+    moveMiniCalendarMonth(-1);
+  });
+  document.getElementById("appointmentMonthNext").addEventListener("click", function () {
+    moveMiniCalendarMonth(1);
+  });
+  function moveMiniCalendarMonth(offset) {
+    const targetMonth = new Date(
+      miniCalendarDate.getFullYear(),
+      miniCalendarDate.getMonth() + offset,
+      1
+    );
+    const targetDay = Math.min(
+      selectedDate.getDate(),
+      new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0).getDate()
+    );
+    selectedDate = new Date(
+      targetMonth.getFullYear(),
+      targetMonth.getMonth(),
+      targetDay
+    );
+    miniCalendarDate = new Date(selectedDate);
+    renderMiniCalendar();
+    calendar.gotoDate(selectedDate);
+  }
+
+  const providerCheckboxes = Array.from(
+    document.querySelectorAll(".appointment-provider-filter")
+  );
+  const calendar = new FullCalendar.Calendar(calendarElement, {
+    initialView: "timeGridDay",
+    initialDate: "{{ day|date:'Y-m-d' }}",
+    timeZone: "Etc/GMT-3",
+    headerToolbar: false,
+    events: function (info, successCallback, failureCallback) {
+      const url = new URL(eventUrl, window.location.origin);
+      url.searchParams.set("start", info.startStr);
+      url.searchParams.set("end", info.endStr);
+      url.searchParams.set("filter_providers", "true");
+      if (facilitySelect && facilitySelect.value) {
+        url.searchParams.set("facility", facilitySelect.value);
+      }
+      providerCheckboxes.filter((checkbox) => checkbox.checked).forEach((checkbox) => {
+        url.searchParams.append("providers[]", checkbox.value);
+      });
+      fetch(url, { headers: { "Accept": "application/json" } })
+        .then((response) => {
+          if (!response.ok) throw new Error("Calendar request failed: " + response.status);
+          return response.json();
+        })
+        .then(successCallback)
+        .catch((error) => {
+          console.error(error);
+          failureCallback(error);
+        });
+    },
+    datesSet: function (info) {
+      setSelectedDateLabel(info.view.currentStart);
+    },
+    eventDidMount: function (info) {
+      const props = info.event.extendedProps;
+      info.el.title = [
+        info.event.title,
+        props.provider,
+        props.room,
+        props.status
+      ].filter(Boolean).join("\n");
+    },
+    eventClick: function (info) {
+      info.jsEvent.preventDefault();
+      const appointment = info.event;
+      const props = appointment.extendedProps;
+      document.getElementById("appointmentModalPatient").textContent = props.patient_name;
+      document.getElementById("appointmentModalMrn").textContent = props.patient_mrn;
+      document.getElementById("appointmentModalProvider").textContent = props.provider || "—";
+      document.getElementById("appointmentModalFacility").textContent = props.facility;
+      document.getElementById("appointmentModalRoom").textContent = props.room || "—";
+      document.getElementById("appointmentModalStatus").textContent = props.status;
+      document.getElementById("appointmentModalTime").textContent =
+        appointment.start.toLocaleString();
+      document.getElementById("appointmentModalDepartment").textContent =
+        props.department || "—";
+      document.getElementById("appointmentModalReason").textContent =
+        props.reason || "—";
+      document.getElementById("appointmentModalOpen").href = props.detail_url;
+      bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("clinicAppointmentModal")
+      ).show();
+    },
+    dateClick: function (info) {
+      const query = new URLSearchParams();
+      query.set("datetime", info.dateStr.replace("T", " ").slice(0, 16));
+      if (facilitySelect && facilitySelect.value) {
+        query.set("facility", facilitySelect.value);
+      } else if ("{{ facilities|length }}" === "1") {
+        query.set("facility", "{{ facilities.0.pk }}");
+      }
+      const selectedProviders = providerCheckboxes.filter(
+        (checkbox) => checkbox.checked && checkbox.value !== "unassigned"
+      );
+      if (selectedProviders.length === 1) {
+        query.set("provider", selectedProviders[0].value);
+      }
+      window.location.href = "{% url 'clinic:appointment_new' %}?" + query.toString();
+    },
+    height: "100%",
+    expandRows: true,
+    nowIndicator: true,
+    selectable: false,
+    editable: false,
+    slotMinTime: "07:00:00",
+    slotMaxTime: "22:00:00",
+    allDaySlot: false,
+    scrollTime: "08:00:00",
+    slotEventOverlap: true,
+    eventDisplay: "block",
+    slotLabelFormat: { hour: "numeric", minute: "2-digit" },
+    dayHeaderFormat: { weekday: "short" }
+  });
+  calendar.render();
+
+  providerCheckboxes.forEach((checkbox) => {
+    checkbox.addEventListener("change", function () {
+      checkbox.closest(".appointment-resource-item").classList.toggle("active", checkbox.checked);
+      calendar.refetchEvents();
+    });
+  });
+  if (facilitySelect) {
+    facilitySelect.addEventListener("change", function () {
+      const url = new URL(window.location.href);
+      if (facilitySelect.value) url.searchParams.set("facility", facilitySelect.value);
+      else url.searchParams.delete("facility");
+      url.searchParams.set("date", selectedDate.toLocaleDateString("en-CA"));
+      window.location.href = url.toString();
+    });
+  }
+  renderMiniCalendar();
+  setSelectedDateLabel(selectedDate);
+});
+</script>
 {% endblock %}

@@ -7,7 +7,7 @@
       <div class="col-md-6">
         <label class="form-label">{% trans 'Facility' %}</label>
         <select name="facility" class="form-select" required>
-          {% for f in facilities %}<option value="{{ f.pk }}">{{ f.name }}</option>{% endfor %}
+          {% for f in facilities %}<option value="{{ f.pk }}" {% if selected_facility_id == f.pk|stringformat:"s" %}selected{% endif %}>{{ f.name }}</option>{% endfor %}
         </select>
       </div>
       <div class="col-md-6">
@@ -18,7 +18,7 @@
       </div>
       <div class="col-md-6">
         <label class="form-label">{% trans 'Provider' %}</label>
-        <input name="provider" class="form-control" placeholder="{% trans 'User ID (optional)' %}">
+        <input name="provider" class="form-control" value="{{ selected_provider_id }}" placeholder="{% trans 'User ID (optional)' %}">
       </div>
       <div class="col-md-6">
         <label class="form-label">{% trans 'Room / Station' %}</label>
@@ -29,7 +29,7 @@
       </div>
       <div class="col-md-5">
         <label class="form-label">{% trans 'Start (YYYY-MM-DD HH:MM)' %}</label>
-        <input name="start_datetime" class="form-control" placeholder="2026-10-12 09:00" required>
+        <input name="start_datetime" class="form-control" value="{{ start_datetime }}" placeholder="2026-10-12 09:00" required>
       </div>
       <div class="col-md-3">
         <label class="form-label">{% trans 'Minutes' %}</label>

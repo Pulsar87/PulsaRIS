@@ -9,12 +9,16 @@ Templates follow the project's Django + Bootstrap conventions under
 from datetime import datetime, time, timedelta
 from decimal import Decimal
 
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db.models import Q
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 
-from clinic import patient_matching, scheduling
+from clinic import patient_matching, rollout, scheduling
 from clinic.models import (
     Allergy,
     Appointment,
@@ -57,24 +61,154 @@ def _facility_choices(user):
 
 @role_required("RECEPTIONIST", "PROVIDER", "ADMIN")
 def appointment_list(request):
-    """Day board of appointments scoped to the user's facilities."""
+    """Provider calendar of appointments scoped to the user's facilities."""
     enforce_rollout_gate(request)
     date_str = request.GET.get("date") or timezone.localdate().isoformat()
     try:
         day = datetime.strptime(date_str, "%Y-%m-%d").date()
     except ValueError:
         day = timezone.localdate()
-    start = timezone.make_aware(datetime.combine(day, time.min))
-    end = start + timedelta(days=1)
-    appts = facility_scope_queryset(
-        request.user,
-        Appointment.objects.select_related("patient", "provider", "room", "facility"),
-    ).filter(start_datetime__gte=start, start_datetime__lt=end)
+
+    facilities = _facility_choices(request.user)
+    if not request.user.is_superuser:
+        facilities = facilities.filter(pk__in=rollout.enabled_facility_ids())
+    facility_id = request.GET.get("facility")
+    if facility_id:
+        selected_facility = get_object_or_404(facilities, pk=facility_id)
+        enforce_rollout_gate(
+            request, explicit_facility_id=selected_facility.pk
+        )
+        facility_ids = [selected_facility.pk]
+    else:
+        facility_ids = list(facilities.values_list("pk", flat=True))
+
+    appointments = facility_scope_queryset(
+        request.user, Appointment.objects.all()
+    )
+    provider_ids = set(
+        appointments.filter(facility_id__in=facility_ids)
+        .exclude(provider_id__isnull=True)
+        .values_list("provider_id", flat=True)
+    )
+    provider_ids.update(
+        facility_scope_queryset(request.user, ProviderAvailability.objects.all())
+        .filter(facility_id__in=facility_ids)
+        .values_list("provider_id", flat=True)
+    )
+    providers = get_user_model().objects.filter(
+        pk__in=provider_ids, is_active=True
+    ).order_by("first_name", "last_name", "email")
+
     return render(
         request,
         "clinic/appointment_list.html",
-        {"appointments": appts, "day": day, "facilities": _facility_choices(request.user)},
+        {
+            "day": day,
+            "facilities": facilities,
+            "selected_facility_id": str(facility_id or ""),
+            "providers": providers,
+        },
     )
+
+
+@role_required("RECEPTIONIST", "PROVIDER", "ADMIN")
+def appointment_calendar_events(request):
+    """Return facility-scoped appointments as FullCalendar events."""
+    enforce_rollout_gate(request)
+
+    start_str = request.GET.get("start")
+    end_str = request.GET.get("end")
+    start = parse_datetime(start_str) if start_str else None
+    end = parse_datetime(end_str) if end_str else None
+    if not start or not end:
+        return JsonResponse(
+            {"error": "Valid start and end datetimes are required."}, status=400
+        )
+    if timezone.is_naive(start):
+        start = timezone.make_aware(start)
+    if timezone.is_naive(end):
+        end = timezone.make_aware(end)
+    if end <= start:
+        return JsonResponse(
+            {"error": "The end datetime must be after the start datetime."},
+            status=400,
+        )
+
+    appointments = facility_scope_queryset(
+        request.user,
+        Appointment.objects.select_related(
+            "patient", "provider", "room", "facility"
+        ),
+    ).filter(
+        start_datetime__gte=start,
+        start_datetime__lt=end,
+    ).exclude(status=Appointment.Status.CANCELLED)
+    if not request.user.is_superuser:
+        appointments = appointments.filter(
+            facility_id__in=rollout.enabled_facility_ids()
+        )
+
+    facility_id = request.GET.get("facility")
+    if facility_id:
+        facility = get_object_or_404(_facility_choices(request.user), pk=facility_id)
+        enforce_rollout_gate(request, explicit_facility_id=facility.pk)
+        appointments = appointments.filter(facility=facility)
+
+    if request.GET.get("filter_providers") == "true":
+        selected_providers = request.GET.getlist("providers[]")
+        include_unassigned = "unassigned" in selected_providers
+        provider_ids = []
+        user_pk_field = get_user_model()._meta.pk
+        try:
+            provider_ids = [
+                user_pk_field.to_python(value)
+                for value in selected_providers
+                if value != "unassigned"
+            ]
+        except (TypeError, ValueError, ValidationError):
+            return JsonResponse({"error": "Invalid provider filter."}, status=400)
+
+        if provider_ids and include_unassigned:
+            appointments = appointments.filter(
+                Q(provider_id__in=provider_ids) | Q(provider__isnull=True)
+            )
+        elif provider_ids:
+            appointments = appointments.filter(provider_id__in=provider_ids)
+        elif include_unassigned:
+            appointments = appointments.filter(provider__isnull=True)
+        else:
+            appointments = appointments.none()
+
+    status_colors = {
+        Appointment.Status.BOOKED: "#eab308",
+        Appointment.Status.CONFIRMED: "#0ea5e9",
+        Appointment.Status.CHECKED_IN: "#f97316",
+        Appointment.Status.COMPLETED: "#22c55e",
+        Appointment.Status.NO_SHOW: "#94a3b8",
+    }
+    events = [
+        {
+            "id": str(appointment.pk),
+            "title": str(appointment.patient),
+            "start": timezone.localtime(appointment.start_datetime).isoformat(),
+            "end": timezone.localtime(appointment.end_datetime).isoformat(),
+            "backgroundColor": status_colors.get(appointment.status, "#0ea5e9"),
+            "borderColor": status_colors.get(appointment.status, "#0ea5e9"),
+            "extendedProps": {
+                "patient_mrn": appointment.patient.mrn,
+                "patient_name": str(appointment.patient),
+                "provider": str(appointment.provider or ""),
+                "room": str(appointment.room or ""),
+                "facility": appointment.facility.name,
+                "department": appointment.department,
+                "reason": appointment.reason,
+                "status": appointment.get_status_display(),
+                "detail_url": f"/clinic/appointments/{appointment.pk}/",
+            },
+        }
+        for appointment in appointments.order_by("start_datetime")[:500]
+    ]
+    return JsonResponse(events, safe=False)
 
 
 @role_required("RECEPTIONIST", "ADMIN")
@@ -82,6 +216,8 @@ def appointment_list(request):
 def appointment_new(request):
     """Book form + conflict-checked creation through the shared engine."""
     facilities = _facility_choices(request.user)
+    if not request.user.is_superuser:
+        facilities = facilities.filter(pk__in=rollout.enabled_facility_ids())
     if request.method == "POST":
         fid = request.POST.get("facility")
         patient_id = request.POST.get("patient")
@@ -117,6 +253,15 @@ def appointment_new(request):
                      entity_id=appt.pk, new={"start": str(start), "patient": str(patient.pk)})
         messages.success(request, f"Appointment booked for {patient.full_name_display if hasattr(patient, 'full_name_display') else patient}.")
         return redirect("clinic:appointment_detail", pk=appt.pk)
+    selected_facility_id = request.GET.get("facility", "")
+    if selected_facility_id:
+        selected_facility_id = str(
+            get_object_or_404(facilities, pk=selected_facility_id).pk
+        )
+    start_datetime = request.GET.get("datetime", "")
+    if "T" in start_datetime:
+        start_datetime = start_datetime.replace("T", " ", 1)[:16]
+
     return render(
         request,
         "clinic/appointment_form.html",
@@ -124,6 +269,9 @@ def appointment_new(request):
             "facilities": facilities,
             "patients": Patient.objects.filter(is_deleted=False)[:500],
             "devices": Device.objects.filter(is_active=True),
+            "selected_facility_id": selected_facility_id,
+            "selected_provider_id": request.GET.get("provider", ""),
+            "start_datetime": start_datetime,
         },
     )
 
