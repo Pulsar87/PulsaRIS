@@ -1,0 +1,187 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'PACS Diagnostics' %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-activity me-2"></i>{% trans 'PACS System Diagnostics' %}
+        </h2>
+        <span class="small text-muted">
+            {% trans 'Generated' %}: {{ generated_at }}
+        </span>
+    </div>
+
+    <p class="small text-muted">
+        <i class="bi bi-shield-check me-1"></i>
+        {% trans 'Staff view: system state only — no DICOM payloads and no credentials are shown here.' %}
+    </p>
+
+    <!-- Archive health -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-hdd-network me-1"></i>{% trans 'Image Archive (Orthanc)' %}</div>
+                <div class="card-body">
+                    {% if metrics.archive.health == 'ok' %}
+                    <span class="badge bg-success mb-3">{% trans 'Healthy' %}</span>
+                    <dl class="row mb-0 small">
+                        <dt class="col-6">{% trans 'Stored DICOM files' %}</dt>
+                        <dd class="col-6">{{ metrics.archive.dicom_files|default:"—" }}</dd>
+                        <dt class="col-6">{% trans 'Disk size (MB)' %}</dt>
+                        <dd class="col-6">{{ metrics.archive.disk_size_mb|default:"—" }}</dd>
+                        <dt class="col-6">{% trans 'Changes count' %}</dt>
+                        <dd class="col-6">{{ metrics.archive.changes_count|default:"—" }}</dd>
+                        <dt class="col-6">{% trans 'Memory used (bytes)' %}</dt>
+                        <dd class="col-6">{{ metrics.archive.memory_bytes|default:"—" }}</dd>
+                    </dl>
+                    {% else %}
+                    <span class="badge bg-danger mb-3">{% trans 'Unreachable' %}</span>
+                    <p class="small mb-0">
+                        {% trans 'Error category:' %}
+                        <code>{{ metrics.archive.reason_category|default:metrics.archive.health }}</code>
+                    </p>
+                    <p class="small text-muted mt-2 mb-0">
+                        {% trans 'The sync worker will retry automatically. Verify the archive container is running.' %}
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Queue depths -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-hourglass-split me-1"></i>{% trans 'Sync & Reconciliation Queues' %}</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush small">
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Pending sync events' %}
+                            <span class="badge bg-secondary">{{ metrics.queue_depth.pending_sync_events }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Failed sync events' %}
+                            <span class="badge {% if metrics.queue_depth.failed_sync_events %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ metrics.queue_depth.failed_sync_events }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Studies needing reconciliation' %}
+                            <span class="badge {% if metrics.queue_depth.reconciliation_required %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
+                                {{ metrics.queue_depth.reconciliation_required }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Integrity conflicts' %}
+                            <span class="badge {% if metrics.queue_depth.integrity_conflicts %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ metrics.queue_depth.integrity_conflicts }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Sync errors' %}
+                            <span class="badge {% if metrics.queue_depth.sync_errors %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ metrics.queue_depth.sync_errors }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Event lag (seconds)' %}
+                            <span>{{ metrics.event_lag_seconds|default:"—" }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between px-0">
+                            {% trans 'Oldest unmatched study age (s)' %}
+                            <span>{{ metrics.unmatched_oldest_age_seconds|default:"—" }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study status counts -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-pie-chart me-1"></i>{% trans 'Mirror Study Status' %}</div>
+                <div class="card-body">
+                    <table class="table table-sm mb-0 small">
+                        <tbody>
+                            {% for key, count in metrics.study_status_counts.items %}
+                            <tr>
+                                <td><code>{{ key }}</code></td>
+                                <td class="text-end fw-semibold">{{ count }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr><td class="text-muted">{% trans 'No studies mirrored yet.' %}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent failed sync events (categories only — no PHI payloads) -->
+    <div class="card mb-4">
+        <div class="card-header"><i class="bi bi-x-octagon me-1"></i>{% trans 'Recent Failed Sync Events' %}</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans 'Change #' %}</th>
+                        <th scope="col">{% trans 'Error Category' %}</th>
+                        <th scope="col" class="text-end">{% trans 'Attempts' %}</th>
+                        <th scope="col">{% trans 'Last Processed' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in recent_failures %}
+                    <tr>
+                        <td class="small"><code>{{ ev.change }}</code></td>
+                        <td class="small">{{ ev.error_category|default:"—" }}</td>
+                        <td class="small text-end">{{ ev.attempts }}</td>
+                        <td class="small">{{ ev.processed_at|date:"Y-m-d H:i:s"|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4 small">
+                            {% trans 'No failed sync events. The mirror is current.' %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Registered sending devices (AE titles are non-PHI config) -->
+    <div class="card">
+        <div class="card-header"><i class="bi bi-printer me-1"></i>{% trans 'Registered Modality Devices' %}</div>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans 'Device' %}</th>
+                        <th scope="col">{% trans 'AE Title' %}</th>
+                        <th scope="col">{% trans 'Facility' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dev in devices %}
+                    <tr>
+                        <td class="small">{{ dev.name }}</td>
+                        <td class="small"><code>{{ dev.ae_title|default:"—" }}</code></td>
+                        <td class="small">{{ dev.facility|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4 small">
+                            {% trans 'No devices registered in your scope.' %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

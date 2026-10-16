@@ -235,6 +235,31 @@
                         <!-- Billing Dropdown -->
                         <li class="nav-item dropdown">
                             <a
+                                class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'pacs' %}active{% endif %}"
+                                href="#"
+                                data-bs-toggle="dropdown"
+                                aria-haspopup="true"
+                                aria-expanded="false"
+                            >
+                                <i class="bi bi-hospital me-1"></i>{% trans "PACS" %}
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm rounded-3">
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'pacs:study_list' %}">
+                                        <i class="bi bi-images me-2"></i>{% trans "Studies" %}
+                                    </a>
+                                </li>
+                                {% if user.is_staff %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'pacs:diagnostics' %}">
+                                        <i class="bi bi-activity me-2"></i>{% trans "Diagnostics" %}
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a
                                 class="nav-link dropdown-toggle {% if request.resolver_match.app_name == 'billing' %}active{% endif %}"
                                 href="#"
                                 data-bs-toggle="dropdown"
