@@ -10,11 +10,9 @@ from django.db.models import Q
 from clinic.permissions import accessible_facility_ids
 from orders.models import ExamOrder
 from reports.models import Report
-import uuid
-from datetime import datetime
-import pydicom
-from pydicom.dataset import Dataset, FileDataset
-from pydicom.uid import ExplicitVRLittleEndian, generate_uid
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def _reports_for_user(user, qs=None):
@@ -418,136 +416,60 @@ def save_report_draft(request):
 
 @login_required
 def export_report_dicom(request, report_id):
-    """Export a report as a DICOM SR (Structured Report) file."""
+    """Export a finalized report as a DICOM SR file (PACS plan Task 5.1).
+
+    The dataset is built by ``pacs.sr_export``: the SR is linked to the
+    order's real imaging StudyInstanceUID (never an invented one), gets
+    fresh unique Series/SOP instance UIDs, and is also stored into the
+    archive when reachable. Reports without a valid study linkage are
+    blocked with a clear message -- the documented standalone-export
+    policy for this deployment (no silent relationship invention).
+    Signed report text is never mutated here.
+    """
     _require_report_access(request)
-    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order")), id=report_id)
-    
+    report = get_object_or_404(
+        _reports_for_user(request.user, Report.objects.select_related("order")), id=report_id
+    )
+
     # Only allow export if report is finalized (FINAL or AMENDED status)
     if report.status not in [Report.Status.FINAL, Report.Status.AMENDED]:
         messages.error(request, _("Only finalized reports can be exported."))
         return redirect("reports:study_reports", order_id=report.order.id)
 
+    from pacs.orthanc_client import OrthancError
+    from pacs.sr_export import SRLinkageError, store_sr_for_report
+
     try:
-        from io import BytesIO
-        
-        # Create file_meta first
-        file_meta = Dataset()
-        file_meta.MediaStorageSOPClassUID = "1.2.840.10008.5.1.4.1.1.88.11"  # Basic Text SR IOD
-        file_meta.MediaStorageSOPInstanceUID = generate_uid()
-        file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
-        file_meta.ImplementationClassUID = "1.2.840.10008.3.1.1.1"  # Standard Implementation Class UID
-
-        # Create the FileDataset instance with preamble
-        ds = FileDataset(None, {}, file_meta=file_meta, preamble=b"\0" * 128)
-        
-        # Set SOP UIDs
-        ds.SOPClassUID = file_meta.MediaStorageSOPClassUID
-        ds.SOPInstanceUID = file_meta.MediaStorageSOPInstanceUID
-        ds.StudyInstanceUID = generate_uid()
-        ds.SeriesInstanceUID = generate_uid()
-
-        # Patient Information
-        patient = report.order.patient
-        ds.PatientName = f"{patient.last_name_en}^{patient.first_name_en}" if patient.last_name_en or patient.first_name_en else ""
-        ds.PatientID = patient.mrn or ""
-        ds.PatientSex = patient.gender or ""
-        if patient.dob:
-            ds.PatientBirthDate = patient.dob.strftime("%Y%m%d")
-
-        # Study Information
-        ds.StudyID = report.order.accession_number or str(uuid.uuid4())[:8].upper()
-        ds.AccessionNumber = report.order.accession_number or ""
-        ds.StudyDescription = report.order.procedure_name_en or "Radiology Report"
-        if report.order.scheduled_datetime:
-            ds.StudyDate = report.order.scheduled_datetime.strftime("%Y%m%d")
-            ds.StudyTime = report.order.scheduled_datetime.strftime("%H%M%S")
-        else:
-            ds.StudyDate = report.created_at.strftime("%Y%m%d")
-            ds.StudyTime = report.created_at.strftime("%H%M%S")
-
-        # Series Information
-        ds.Modality = "SR"  # Structured Report
-        ds.SeriesNumber = "1"
-        ds.SeriesDescription = "Radiology Report"
-
-        # Equipment Information
-        ds.Manufacturer = "Pulsar RIS"
-        ds.InstitutionName = report.order.tenant.name if hasattr(report.order, 'tenant') and hasattr(report.order.tenant, 'name') else ""
-
-        # Content - encode the report findings and impression
-        # Build proper DICOM SR Content Sequence with required attributes
-        
-        # Root content item (CONTAINER for the whole report)
-        root_item = Dataset()
-        root_item.RelationshipType = "CONTAINS"
-        root_item.ValueType = "CONTAINER"
-        # Concept Name Code Sequence - Title of the report
-        root_item.ConceptNameCodeSequence = [Dataset()]
-        root_item.ConceptNameCodeSequence[0].CodeValue = "113014"
-        root_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
-        root_item.ConceptNameCodeSequence[0].CodeMeaning = "Imaging Report"
-        
-        # Content Sequence for findings and impression
-        content_items = []
-        
-        # Add findings as TEXT content item
-        if report.findings_en:
-            findings_item = Dataset()
-            findings_item.RelationshipType = "CONTAINS"
-            findings_item.ValueType = "TEXT"
-            # Concept Name Code Sequence for Findings
-            findings_item.ConceptNameCodeSequence = [Dataset()]
-            findings_item.ConceptNameCodeSequence[0].CodeValue = "113016"
-            findings_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
-            findings_item.ConceptNameCodeSequence[0].CodeMeaning = "Findings"
-            findings_item.TextValue = report.findings_en
-            content_items.append(findings_item)
-        
-        # Add impression as TEXT content item
-        if report.impression_en:
-            impression_item = Dataset()
-            impression_item.RelationshipType = "CONTAINS"
-            impression_item.ValueType = "TEXT"
-            # Concept Name Code Sequence for Impression
-            impression_item.ConceptNameCodeSequence = [Dataset()]
-            impression_item.ConceptNameCodeSequence[0].CodeValue = "113017"
-            impression_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
-            impression_item.ConceptNameCodeSequence[0].CodeMeaning = "Conclusion"
-            impression_item.TextValue = report.impression_en
-            content_items.append(impression_item)
-        
-        # If no content, add a default text item
-        if not content_items:
-            default_item = Dataset()
-            default_item.RelationshipType = "CONTAINS"
-            default_item.ValueType = "TEXT"
-            default_item.ConceptNameCodeSequence = [Dataset()]
-            default_item.ConceptNameCodeSequence[0].CodeValue = "113016"
-            default_item.ConceptNameCodeSequence[0].CodingSchemeDesignator = "DCM"
-            default_item.ConceptNameCodeSequence[0].CodeMeaning = "Findings"
-            default_item.TextValue = "No report content available."
-            content_items.append(default_item)
-        
-        # Set the content sequence on root item
-        root_item.ContentSequence = content_items
-        
-        # Set the root content sequence on dataset
-        ds.ContentSequence = [root_item]
-
-        # Save to BytesIO for HTTP response
-        buffer = BytesIO()
-        ds.is_little_endian = True
-        ds.is_implicit_VR = False
-        ds.save_as(buffer, write_like_original=False)
-        buffer.seek(0)
-
-        # Create filename
-        filename = f"report_{report.id}_{report.order.accession_number}.dcm"
-
-        response = HttpResponse(buffer.getvalue(), content_type="application/dicom")
-        response["Content-Disposition"] = f'attachment; filename="{filename}"'
-        return response
-
-    except Exception as e:
-        messages.error(request, _("Error exporting report: %(error)s") % {"error": str(e)})
+        data, orthanc_id = store_sr_for_report(report)
+    except SRLinkageError as exc:
+        record_audit(
+            request,
+            "export_denied",
+            entity_type="Report",
+            entity_id=str(report.id),
+            new={"reason": exc.message[:500]},
+        )
+        messages.error(request, exc.message)
+        return redirect("reports:study_reports", order_id=report.order.id)
+    except Exception as e:  # pragma: no cover - defensive, keeps old UX
+        logger.exception("SR export failed for report %s", report.id)
+        messages.error(request, _("Error exporting report: %(error)s") % {"error": str(e)[:300]})
         return redirect("reports:view_report", report_id=report_id)
+
+    record_audit(
+        request,
+        "export",
+        entity_type="Report",
+        entity_id=str(report.id),
+        new={
+            "format": "dicom_sr",
+            "study_uid": report.order.dicom_study_instance_uid or "",
+            "archive_stored": bool(orthanc_id),
+            "orthanc_instance": orthanc_id,
+        },
+    )
+
+    filename = f"report_{report.id}_{report.order.accession_number}.dcm"
+    response = HttpResponse(data, content_type="application/dicom")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
