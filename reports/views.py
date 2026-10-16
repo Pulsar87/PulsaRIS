@@ -1,10 +1,13 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render, get_object_or_404
 from django.utils.translation import gettext as _
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db.models import Q
+from clinic.permissions import accessible_facility_ids
 from orders.models import ExamOrder
 from reports.models import Report
 import uuid
@@ -14,9 +17,36 @@ from pydicom.dataset import Dataset, FileDataset
 from pydicom.uid import ExplicitVRLittleEndian, generate_uid
 
 
+def _reports_for_user(user, qs=None):
+    from clinic.permissions import accessible_facility_ids
+
+    if qs is None:
+        qs = Report.objects.select_related("order__patient", "order__modality", "radiologist")
+    ids = accessible_facility_ids(user)
+    if ids is None:
+        return qs
+    if not ids:
+        return qs.none()
+    return qs.filter(order__facility_id__in=ids)
+
+
+def _require_report_access(request):
+    if not request.user.is_authenticated:
+        raise PermissionDenied("Authentication required.")
+    ids = accessible_facility_ids(request.user)
+    if ids is not None and not ids:
+        raise PermissionDenied("No facility access.")
+
+
+@login_required
 def create_report(request, order_id):
     """Create a new report for an exam order."""
-    order = get_object_or_404(ExamOrder, id=order_id)
+    _require_report_access(request)
+    ids = accessible_facility_ids(request.user)
+    if ids is None:
+        order = get_object_or_404(ExamOrder, id=order_id)
+    else:
+        order = get_object_or_404(ExamOrder.objects.filter(facility_id__in=ids), id=order_id)
 
     if request.method == "POST":
         report_content = request.POST.get("report_content", "").strip()
@@ -50,38 +80,40 @@ def create_report(request, order_id):
     return render(request, "reports/report_form.html", context)
 
 
+@login_required
 def edit_report(request, report_id):
     """Edit an existing report or view finalized reports with export/print options."""
-    report = get_object_or_404(Report, id=report_id)
+    _require_report_access(request)
+    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order", "radiologist")), id=report_id)
 
     # Check permission - only the author or staff can access
     if report.radiologist != request.user and not request.user.is_staff:
         messages.error(request, _("You don't have permission to access this report."))
         return redirect("reports:view_report", report_id=report_id)
-    
+
     # AMENDED reports can only be edited by staff, but all authorized users can view/print
     if report.status == Report.Status.AMENDED and not request.user.is_staff and request.method == "POST":
         messages.error(request, _("Amended reports can only be edited by supervising physicians."))
         return redirect("reports:view_report", report_id=report_id)
 
     if request.method == "POST":
-        # Prevent saving changes to finalized reports
         if report.status == Report.Status.FINAL:
             messages.error(request, _("Finalized reports cannot be edited. Please use the Amend function to make changes."))
             return redirect("reports:edit_report", report_id=report.id)
-        
+
         report_content = request.POST.get("report_content", "").strip()
-        # Only staff can change status directly in the form
+        allowed_statuses = {Report.Status.DRAFT, Report.Status.PRELIMINARY}
         if request.user.is_staff:
-            status = request.POST.get("status", report.status)
+            requested_status = request.POST.get("status", report.status)
+            if requested_status not in allowed_statuses and requested_status != Report.Status.FINAL:
+                requested_status = report.status
+            status = requested_status
         else:
-            # Non-staff users can only save as draft or preliminary
             status = report.status
             if request.POST.get("status") == Report.Status.FINAL:
                 messages.warning(request, _("Only supervising physicians can finalize reports."))
                 status = Report.Status.PRELIMINARY
 
-        # Update report
         report.findings_en = report_content
         report.status = status
 
@@ -90,7 +122,6 @@ def edit_report(request, report_id):
 
         report.save()
 
-        # Update order status if report is finalized
         if status == Report.Status.FINAL:
             report.order.status = ExamOrder.Status.REPORTED
             report.order.save(update_fields=["status"])
@@ -106,31 +137,29 @@ def edit_report(request, report_id):
     return render(request, "reports/report_form.html", context)
 
 
+@login_required
 def verify_report(request, report_id):
     """Verify/finalize a report (only for doctors/staff)."""
-    report = get_object_or_404(Report, id=report_id)
-    
-    # Only staff (doctors/supervisors) can verify reports
+    _require_report_access(request)
+    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order")), id=report_id)
+
     if not request.user.is_staff:
         messages.error(request, _("Only supervising physicians can verify reports."))
         return redirect("reports:view_report", report_id=report_id)
-    
+
     if request.method == "POST":
         action = request.POST.get("action")
-        
+
         if action == "verify":
-            # Verify/finalize the report
             old_status = report.status
             report.status = Report.Status.FINAL
             report.finalized_at = timezone.now()
             report.signed_at = timezone.now()
             report.save()
-            
-            # Update order status
+
             report.order.status = ExamOrder.Status.REPORTED
             report.order.save(update_fields=["status"])
-            
-            # Create audit log if available
+
             try:
                 from audit.models import AuditLog
                 AuditLog.objects.create(
@@ -143,20 +172,18 @@ def verify_report(request, report_id):
                     ip_address=request.META.get('REMOTE_ADDR'),
                     user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
                 )
-            except:
+            except Exception:
                 pass
-            
+
             messages.success(request, _("Report verified and finalized successfully!"))
-            
+
         elif action == "amend":
-            # Amend a finalized report (creates new version or changes status)
             if report.status == Report.Status.FINAL:
                 report.status = Report.Status.AMENDED
                 report.version += 1
                 report.finalized_at = timezone.now()
                 report.save()
-                
-                # Create audit log if available
+
                 try:
                     from audit.models import AuditLog
                     AuditLog.objects.create(
@@ -169,13 +196,13 @@ def verify_report(request, report_id):
                         ip_address=request.META.get('REMOTE_ADDR'),
                         user_agent=request.META.get('HTTP_USER_AGENT', '')[:500],
                     )
-                except:
+                except Exception:
                     pass
-                
+
                 messages.success(request, _("Report marked as amended. Please update the content."))
-        
+
         return redirect("reports:view_report", report_id=report.id)
-    
+
     context = {
         "report": report,
         "order": report.order,
@@ -183,9 +210,11 @@ def verify_report(request, report_id):
     return render(request, "reports/report_verify.html", context)
 
 
+@login_required
 def view_report(request, report_id):
     """View a single report."""
-    report = get_object_or_404(Report, id=report_id)
+    _require_report_access(request)
+    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order")), id=report_id)
 
     context = {
         "report": report,
@@ -194,9 +223,15 @@ def view_report(request, report_id):
     return render(request, "reports/report_detail.html", context)
 
 
+@login_required
 def study_reports(request, order_id):
     """View all reports for a study/order."""
-    order = get_object_or_404(ExamOrder, id=order_id)
+    _require_report_access(request)
+    ids = accessible_facility_ids(request.user)
+    if ids is None:
+        order = get_object_or_404(ExamOrder, id=order_id)
+    else:
+        order = get_object_or_404(ExamOrder.objects.filter(facility_id__in=ids), id=order_id)
     reports = order.reports.all().order_by("-created_at")
 
     context = {
@@ -206,11 +241,13 @@ def study_reports(request, order_id):
     return render(request, "reports/study_reports.html", context)
 
 
+@login_required
 def delete_report(request, report_id):
     """Delete a report (soft delete with audit logging)."""
+    _require_report_access(request)
     from audit.models import AuditLog
-    
-    report = get_object_or_404(Report, id=report_id)
+
+    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order")), id=report_id)
     order_id = report.order.id
 
     # Check permission - only staff can delete
@@ -254,8 +291,10 @@ def delete_report(request, report_id):
     }
     return render(request, "reports/report_confirm_delete.html", context)
 
+@login_required
 def report_list(request):
     """Display list of all reports with advanced filtering."""
+    _require_report_access(request)
     query = request.GET.get("q", "")
     status_filter = request.GET.get("status", "")
     radiologist_filter = request.GET.get("radiologist", "")
@@ -264,9 +303,9 @@ def report_list(request):
     date_to = request.GET.get("date_to", "")
     critical_filter = request.GET.get("critical", "")
 
-    reports = Report.objects.select_related(
+    reports = _reports_for_user(request.user, Report.objects.select_related(
         "order__patient", "order__modality", "radiologist"
-    )
+    ))
 
     # Search filter
     if query:
@@ -327,6 +366,7 @@ def report_list(request):
 
 
 
+@login_required
 @require_http_methods(["GET"])
 def get_report_templates(request):
     """Get available report templates via AJAX."""
@@ -339,14 +379,20 @@ def get_report_templates(request):
     return JsonResponse({"templates": templates})
 
 
+@login_required
 @require_http_methods(["POST"])
 def save_report_draft(request):
     """Save a report as draft via AJAX (auto-save functionality)."""
+    _require_report_access(request)
     order_id = request.POST.get("order_id")
     if not order_id:
         return JsonResponse({"error": "Order ID required"}, status=400)
 
-    order = get_object_or_404(ExamOrder, id=order_id)
+    ids = accessible_facility_ids(request.user)
+    if ids is None:
+        order = get_object_or_404(ExamOrder, id=order_id)
+    else:
+        order = get_object_or_404(ExamOrder.objects.filter(facility_id__in=ids), id=order_id)
     report_content = request.POST.get("report_content", "")
 
     # Get or create draft report
@@ -370,9 +416,11 @@ def save_report_draft(request):
     })
 
 
+@login_required
 def export_report_dicom(request, report_id):
     """Export a report as a DICOM SR (Structured Report) file."""
-    report = get_object_or_404(Report, id=report_id)
+    _require_report_access(request)
+    report = get_object_or_404(_reports_for_user(request.user, Report.objects.select_related("order")), id=report_id)
     
     # Only allow export if report is finalized (FINAL or AMENDED status)
     if report.status not in [Report.Status.FINAL, Report.Status.AMENDED]:

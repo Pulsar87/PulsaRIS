@@ -4,22 +4,30 @@ from pathlib import Path
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
-env = environ.Env()
+env = environ.Env(
+    DEBUG=(bool, False),
+    DJANGO_SECURE_SSL_REDIRECT=(bool, False),
+    DJANGO_SESSION_COOKIE_SECURE=(bool, False),
+    DJANGO_CSRF_COOKIE_SECURE=(bool, False),
+)
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
-TEMPLATES = [
-    {
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-    }
-]
+
 # ─────────────────────────────────────────────────────────────
 # Core Django Settings
 # ─────────────────────────────────────────────────────────────
 SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 AUDITLOG_DISABLE_REMOTE_ADDR = False
 ROOT_URLCONF = "config.urls"
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = env.bool("DJANGO_SECURE_SSL_REDIRECT", default=not DEBUG)
+SESSION_COOKIE_SECURE = env.bool("DJANGO_SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=not DEBUG)
+SECURE_HSTS_SECONDS = env.int("DJANGO_SECURE_HSTS_SECONDS", default=0 if DEBUG else 31536000)
+SECURE_HSTS_PRELOAD = env.bool("DJANGO_SECURE_HSTS_PRELOAD", default=not DEBUG)
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 # ─────────────────────────────────────────────────────────────
 # Authentication Settings
 # ─────────────────────────────────────────────────────────────

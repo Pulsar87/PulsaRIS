@@ -108,17 +108,9 @@ class PatientSearchView(ClinicScopedListMixin, ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        base = Patient.objects.filter(is_deleted=False)
-        from clinic.permissions import accessible_facility_ids
+        from clinic.permissions import patient_scope_queryset
 
-        fac_ids = accessible_facility_ids(user)
-        if fac_ids is not None:  # non-superuser: facility-anchored visibility
-            vis = (
-                Q(facility_identifiers__facility_id__in=fac_ids)
-                | Q(appointments__facility_id__in=fac_ids)
-                | Q(encounters__facility_id__in=fac_ids)
-            )
-            base = base.filter(vis).distinct()
+        base = patient_scope_queryset(user, Patient.objects.filter(is_deleted=False))
         q = self.request.GET.get("q", "").strip()
         if q:
             base = base.filter(

@@ -27,6 +27,28 @@ from django.shortcuts import get_object_or_404
 
 from audit.models import AuditLog
 from clinic.models import FacilityAssignment
+from patients.models import Patient
+
+
+def patient_scope_queryset(user, queryset=None):
+    """Restrict patient records to ones associated with the user's facilities.
+
+    Patients are shared across facilities, so visibility is anchored to the site's
+    patient identifiers, appointments, or encounters rather than a direct
+    `Patient.facility` field.
+    """
+    if queryset is None:
+        queryset = Patient.objects.all()
+    ids = accessible_facility_ids(user)
+    if ids is None:
+        return queryset
+    if not ids:
+        return queryset.none()
+    return queryset.filter(
+        Q(facility_identifiers__facility_id__in=ids)
+        | Q(appointments__facility_id__in=ids)
+        | Q(encounters__facility_id__in=ids)
+    ).distinct()
 
 
 def accessible_facility_ids(user):

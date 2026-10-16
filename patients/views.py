@@ -1,16 +1,29 @@
 import json
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
+from clinic.permissions import accessible_facility_ids, patient_scope_queryset
 from patients.models import Patient
 
 
+def _require_access(request):
+    if not request.user.is_authenticated:
+        raise PermissionDenied("Authentication required.")
+    ids = accessible_facility_ids(request.user)
+    if ids is not None and not ids:
+        raise PermissionDenied("No facility access.")
+
+
+@login_required
 def add_patient(request):
     """Handle patient creation page and form submission."""
+    _require_access(request)
     if request.method == "POST":
         # Get form data
         mrn = request.POST.get("mrn", "").strip()
@@ -97,11 +110,15 @@ def add_patient(request):
     return render(request, "patients/add_patient.html")
 
 
+@login_required
 def patient_list(request):
     """Display list of patients with search functionality."""
+    _require_access(request)
     query = request.GET.get("q", "")
 
-    patients = Patient.objects.filter(is_deleted=False)
+    patients = patient_scope_queryset(
+        request.user, Patient.objects.filter(is_deleted=False)
+    )
 
     if query:
         patients = patients.filter(
@@ -119,18 +136,28 @@ def patient_list(request):
     return render(request, "patients/patient_list.html", context)
 
 
+@login_required
 def patient_detail(request, pk):
     """Display patient details."""
-    patient = get_object_or_404(Patient, pk=pk)
+    _require_access(request)
+    patient = get_object_or_404(
+        patient_scope_queryset(request.user, Patient.objects.filter(is_deleted=False)),
+        pk=pk,
+    )
     context = {
         "patient": patient,
     }
     return render(request, "patients/patient_detail.html", context)
 
 
+@login_required
 def edit_patient(request, pk):
     """Edit an existing patient."""
-    patient = get_object_or_404(Patient, pk=pk)
+    _require_access(request)
+    patient = get_object_or_404(
+        patient_scope_queryset(request.user, Patient.objects.filter(is_deleted=False)),
+        pk=pk,
+    )
 
     if request.method == "POST":
         # Get form data
@@ -219,11 +246,16 @@ def edit_patient(request, pk):
     return render(request, "patients/edit_patient.html", context)
 
 
+@login_required
 def delete_patient(request, pk):
     """Delete a patient (soft delete with audit logging)."""
+    _require_access(request)
     from audit.models import AuditLog
 
-    patient = get_object_or_404(Patient, pk=pk)
+    patient = get_object_or_404(
+        patient_scope_queryset(request.user, Patient.objects.filter(is_deleted=False)),
+        pk=pk,
+    )
 
     if request.method == "POST":
         try:
@@ -267,19 +299,24 @@ def delete_patient(request, pk):
     return render(request, "patients/delete_patient.html", context)
 
 
+@login_required
 def search_patient(request):
     """HTMX endpoint for searching patients by MRN or name."""
+    _require_access(request)
     query = request.GET.get("q", "")
 
     patients = []
     if query:
-        patients = Patient.objects.filter(
-            Q(mrn__icontains=query)
-            | Q(first_name_en__icontains=query)
-            | Q(last_name_en__icontains=query)
-            | Q(first_name_ar__icontains=query)
-            | Q(last_name_ar__icontains=query)
-            | Q(national_id__icontains=query),
+        patients = patient_scope_queryset(
+            request.user,
+            Patient.objects.filter(is_deleted=False).filter(
+                Q(mrn__icontains=query)
+                | Q(first_name_en__icontains=query)
+                | Q(last_name_en__icontains=query)
+                | Q(first_name_ar__icontains=query)
+                | Q(last_name_ar__icontains=query)
+                | Q(national_id__icontains=query),
+            ),
         )[:10]  # Limit to 10 results
 
     context = {
@@ -288,25 +325,30 @@ def search_patient(request):
     return render(request, "patients/partials/search_results.html", context)
 
 
+@login_required
 def patient_lookup(request):
     """API endpoint for patient lookup supporting multiple search fields.
 
     Returns JSON response with matching patients.
     Search supports: MRN, name (English/Arabic), national ID, phone.
     """
+    _require_access(request)
     query = request.GET.get("q", "").strip()
 
     if not query:
         return JsonResponse({"patients": [], "error": "No search query provided"}, status=400)
 
-    patients = Patient.objects.filter(
-        Q(mrn__icontains=query)
-        | Q(first_name_en__icontains=query)
-        | Q(last_name_en__icontains=query)
-        | Q(first_name_ar__icontains=query)
-        | Q(last_name_ar__icontains=query)
-        | Q(national_id__icontains=query)
-        | Q(phone__icontains=query),
+    patients = patient_scope_queryset(
+        request.user,
+        Patient.objects.filter(is_deleted=False).filter(
+            Q(mrn__icontains=query)
+            | Q(first_name_en__icontains=query)
+            | Q(last_name_en__icontains=query)
+            | Q(first_name_ar__icontains=query)
+            | Q(last_name_ar__icontains=query)
+            | Q(national_id__icontains=query)
+            | Q(phone__icontains=query),
+        ),
     ).values(
         'id', 'mrn', 'first_name_en', 'last_name_en',
         'first_name_ar', 'last_name_ar', 'dob', 'gender', 'phone'
@@ -330,6 +372,7 @@ def patient_lookup(request):
 
 
 
+@login_required
 def patient_search_api(request):
     """Select2-compatible API endpoint for patient search.
 
@@ -337,6 +380,7 @@ def patient_search_api(request):
     Search supports: MRN, name (English/Arabic), national ID, phone.
     Excludes deleted patients.
     """
+    _require_access(request)
     query = request.GET.get("q", "").strip()
     page = int(request.GET.get("page", 1))
     page_size = 20
@@ -347,16 +391,17 @@ def patient_search_api(request):
             "pagination": {"more": False}
         })
 
-    patients_qs = Patient.objects.filter(
-        is_deleted=False
-    ).filter(
-        Q(mrn__icontains=query)
-        | Q(first_name_en__icontains=query)
-        | Q(last_name_en__icontains=query)
-        | Q(first_name_ar__icontains=query)
-        | Q(last_name_ar__icontains=query)
-        | Q(national_id__icontains=query)
-        | Q(phone__icontains=query),
+    patients_qs = patient_scope_queryset(
+        request.user,
+        Patient.objects.filter(is_deleted=False).filter(
+            Q(mrn__icontains=query)
+            | Q(first_name_en__icontains=query)
+            | Q(last_name_en__icontains=query)
+            | Q(first_name_ar__icontains=query)
+            | Q(last_name_ar__icontains=query)
+            | Q(national_id__icontains=query)
+            | Q(phone__icontains=query),
+        ),
     ).order_by('last_name_en', 'first_name_en')
 
     # Check if there are more results

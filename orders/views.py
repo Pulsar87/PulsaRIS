@@ -1,6 +1,7 @@
 import logging
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -10,22 +11,24 @@ from orders.models import ExamOrder
 
 
 def _orders_for_user(request, qs=None):
-    """Phase 4 (plan Step 5.1 scoping sweep): route legacy RIS order queries
-    through the single shared facility-scoping layer (addendum B.3 — no second
-    implementation). Users without a facility affiliation (legacy global RIS
-    accounts) keep unrestricted access so pre-clinic deployments are not
-    broken; clinic-affiliated staff see only their sites' orders. NULL-
-    facility rows stay visible to everyone (pre-existing unassigned data)."""
+    """Return only the orders visible to the current user.
+
+    Fail closed: users without an accessible facility cannot see any facility-
+    scoped orders, and superusers remain unrestricted.
+    """
     from clinic.permissions import accessible_facility_ids
 
     if qs is None:
         qs = ExamOrder.objects.all()
     ids = accessible_facility_ids(request.user)
-    if ids is None or not ids:
+    if ids is None:
         return qs
-    return qs.filter(Q(facility_id__in=ids) | Q(facility__isnull=True))
+    if not ids:
+        return qs.none()
+    return qs.filter(facility_id__in=ids)
 
 
+@login_required
 def worklist(request):
     """Display worklist of orders with advanced filtering."""
     query = request.GET.get("q", "")
@@ -78,6 +81,7 @@ def worklist(request):
     return render(request, "orders/worklist.html", context)
 
 
+@login_required
 def order_detail(request, pk):
     """Display order details."""
     order = get_object_or_404(_orders_for_user(request), pk=pk)
@@ -92,6 +96,7 @@ def order_detail(request, pk):
     return render(request, "orders/order_detail.html", context)
 
 
+@login_required
 def add_order(request):
     """Handle order creation page and form submission."""
     if request.method == "POST":
