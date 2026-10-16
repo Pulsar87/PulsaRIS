@@ -1,0 +1,208 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'PACS Studies' %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+
+    <!-- Page header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">
+            <i class="bi bi-hospital me-2"></i>{% trans 'PACS Studies' %}
+        </h2>
+        {% if can_reconcile %}
+        <a href="{% url 'pacs:diagnostics' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-activity me-1"></i>{% trans 'System Diagnostics' %}
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Filter validation errors (actionable, never silent) -->
+    {% for error in filter_errors %}
+    <div class="alert alert-warning py-2" role="alert">{{ error }}</div>
+    {% endfor %}
+
+    <!-- Filter bar (GET; all inputs validated server-side) -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'pacs:study_list' %}" class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label small text-muted" for="id_q">{% trans 'Search' %}</label>
+                    <input type="text" class="form-control" id="id_q" name="q"
+                           maxlength="120" value="{{ filters.q }}"
+                           placeholder="{% trans 'Accession, Patient ID, Name, Study UID' %}" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_accession">{% trans 'Accession #' %}</label>
+                    <input type="text" class="form-control" id="id_accession" name="accession"
+                           maxlength="50" value="{{ filters.accession }}" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_uid">{% trans 'Study Instance UID' %}</label>
+                    <input type="text" class="form-control" id="id_uid" name="uid"
+                           maxlength="64" value="{{ filters.uid }}" placeholder="1.2.826..." />
+                </div>
+                <div class="col-md-1">
+                    <label class="form-label small text-muted" for="id_modality">{% trans 'Modality' %}</label>
+                    <input type="text" class="form-control" id="id_modality" name="modality"
+                           maxlength="16" value="{{ filters.modality }}" list="modality-list"
+                           placeholder="CT" />
+                    <datalist id="modality-list">
+                        {% for m in modalities %}<option value="{{ m }}">{% endfor %}
+                    </datalist>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_status">{% trans 'Archive Status' %}</label>
+                    <select class="form-select" id="id_status" name="status">
+                        <option value="">{% trans 'All Statuses' %}</option>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_order_status">{% trans 'Order Status' %}</label>
+                    <select class="form-select" id="id_order_status" name="order_status">
+                        <option value="">{% trans 'Any Order Status' %}</option>
+                        {% for value, label in order_status_choices %}
+                        <option value="{{ value }}" {% if filters.order_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_date_from">{% trans 'Study Date From' %}</label>
+                    <input type="date" class="form-control" id="id_date_from" name="date_from"
+                           value="{{ filters.date_from }}" pattern="\d{4}-\d{2}-\d{2}" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label small text-muted" for="id_date_to">{% trans 'Study Date To' %}</label>
+                    <input type="date" class="form-control" id="id_date_to" name="date_to"
+                           value="{{ filters.date_to }}" pattern="\d{4}-\d{2}-\d{2}" />
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search me-1"></i>{% trans 'Apply' %}
+                    </button>
+                    <a href="{% url 'pacs:study_list' %}" class="btn btn-link">{% trans 'Reset' %}</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span>{% blocktrans with total=total_studies %}{{ total }} study records{% endblocktrans %}</span>
+            <span class="small text-muted">
+                {% if paginator.num_pages %}
+                {% blocktrans with page=page_obj.number pages=paginator.num_pages %}Page {{ page }} of {{ pages }}{% endblocktrans %}
+                {% endif %}
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" aria-label="{% trans 'PACS studies' %}">
+                <thead>
+                    <tr>
+                        <th scope="col">{% trans 'Received' %}</th>
+                        <th scope="col">{% trans 'Accession #' %}</th>
+                        <th scope="col">{% trans 'Patient ID' %}</th>
+                        <th scope="col">{% trans 'Modality' %}</th>
+                        <th scope="col">{% trans 'Description' %}</th>
+                        <th scope="col" class="text-end">{% trans 'Series' %}</th>
+                        <th scope="col" class="text-end">{% trans 'Instances' %}</th>
+                        <th scope="col">{% trans 'Facility' %}</th>
+                        <th scope="col">{% trans 'Status' %}</th>
+                        <th scope="col">{% trans 'RIS Link' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for study in page_obj %}
+                    <tr>
+                        <td class="small">
+                            {{ study.study_datetime|date:"Y-m-d H:i"|default:study.created_at|date:"Y-m-d H:i" }}
+                        </td>
+                        <td>
+                            <a href="{% url 'pacs:study_detail' pk=study.pk %}" class="fw-semibold">
+                                {{ study.accession_number|default:"—" }}
+                            </a>
+                        </td>
+                        <td class="small">{{ study.patient_id_as_received|default:"—" }}</td>
+                        <td><span class="badge bg-secondary">{{ study.modality|default:"?" }}</span></td>
+                        <td class="small text-truncate" style="max-width: 220px;">{{ study.study_description|default:"—" }}</td>
+                        <td class="text-end">{{ study.series_count }}</td>
+                        <td class="text-end">{{ study.instance_count }}</td>
+                        <td class="small">{{ study.facility.name|default:"—" }}</td>
+                        <td>
+                            {% if study.status == 'AVAILABLE' %}
+                                <span class="badge bg-success">{% trans 'Available' %}</span>
+                            {% elif study.status == 'INDEXED' %}
+                                <span class="badge bg-info text-dark">{% trans 'Indexed' %}</span>
+                            {% elif study.status == 'RECEIVED' %}
+                                <span class="badge bg-secondary">{% trans 'Receiving…' %}</span>
+                            {% elif study.status == 'RECONCILIATION_REQUIRED' %}
+                                <span class="badge bg-warning text-dark">{% trans 'Needs reconciliation' %}</span>
+                            {% elif study.status == 'SYNC_ERROR' %}
+                                <span class="badge bg-danger">{% trans 'Sync error' %}</span>
+                            {% elif study.status == 'INTEGRITY_CONFLICT' %}
+                                <span class="badge bg-danger">{% trans 'Integrity conflict' %}</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">{{ study.get_status_display }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if study.matched_order %}
+                                <a href="{% url 'orders:order_detail' pk=study.matched_order.pk %}" class="small">
+                                    <i class="bi bi-link-45deg me-1"></i>{{ study.matched_order.accession_number }}
+                                </a>
+                            {% else %}
+                                <span class="small text-danger">{% trans 'Unlinked' %}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-3 d-block mb-2"></i>
+                            {% trans 'No studies match the current filters.' %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination (preserves active filters) -->
+        {% if page_obj.has_other_pages %}
+        <div class="card-footer">
+            <nav aria-label="{% trans 'Pagination' %}">
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?q={{ filters.q|urlencode }}&accession={{ filters.accession|urlencode }}&uid={{ filters.uid|urlencode }}&modality={{ filters.modality|urlencode }}&status={{ filters.status|urlencode }}&order_status={{ filters.order_status|urlencode }}&facility={{ filters.facility|urlencode }}&date_from={{ filters.date_from|urlencode }}&date_to={{ filters.date_to|urlencode }}&page_size={{ filters.page_size }}&page={{ page_obj.previous_page_number }}"
+                           rel="prev" aria-label="{% trans 'Previous page' %}">&laquo;</a>
+                    </li>
+                    {% endif %}
+                    {% for num in paginator.page_range %}
+                        {% if num == page_obj.number %}
+                        <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?q={{ filters.q|urlencode }}&accession={{ filters.accession|urlencode }}&uid={{ filters.uid|urlencode }}&modality={{ filters.modality|urlencode }}&status={{ filters.status|urlencode }}&order_status={{ filters.order_status|urlencode }}&facility={{ filters.facility|urlencode }}&date_from={{ filters.date_from|urlencode }}&date_to={{ filters.date_to|urlencode }}&page_size={{ filters.page_size }}&page={{ num }}">{{ num }}</a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?q={{ filters.q|urlencode }}&accession={{ filters.accession|urlencode }}&uid={{ filters.uid|urlencode }}&modality={{ filters.modality|urlencode }}&status={{ filters.status|urlencode }}&order_status={{ filters.order_status|urlencode }}&facility={{ filters.facility|urlencode }}&date_from={{ filters.date_from|urlencode }}&date_to={{ filters.date_to|urlencode }}&page_size={{ filters.page_size }}&page={{ page_obj.next_page_number }}"
+                           rel="next" aria-label="{% trans 'Next page' %}">&raquo;</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Confirm Study Link' %}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width: 720px;">
+
+    <h2 class="mb-4">
+        <i class="bi bi-exclamation-diamond text-warning me-2"></i>{% trans 'Confirm Study Link' %}
+    </h2>
+
+    <!-- Never silently link: identity conflicts must be acknowledged. -->
+    <div class="alert alert-warning" role="alert">
+        {% blocktrans %}The automatic comparison found differences between this study and the selected order. Review them carefully; linking mismatched records can attach images to the wrong patient.{% endblocktrans %}
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body small">
+            <dl class="row mb-0">
+                <dt class="col-sm-4">{% trans 'Study Accession #' %}</dt>
+                <dd class="col-sm-8">{{ study.accession_number|default:"—" }}</dd>
+                <dt class="col-sm-4">{% trans 'Study Patient ID' %}</dt>
+                <dd class="col-sm-8">{{ study.patient_id_as_received|default:"—" }}</dd>
+                <dt class="col-sm-4">{% trans 'Order Accession #' %}</dt>
+                <dd class="col-sm-8">{{ order.accession_number }}</dd>
+                <dt class="col-sm-4">{% trans 'Order Patient' %}</dt>
+                <dd class="col-sm-8">{{ order.patient.mrn }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">{% trans 'Detected Differences' %}</div>
+        <ul class="list-group list-group-flush">
+            {% for diff in diffs %}
+            <li class="list-group-item small">
+                <i class="bi bi-arrow-left-right me-1 text-danger"></i>
+                <strong>{{ diff.field }}</strong>:
+                {% blocktrans with dicom=diff.dicom|default:"—" ris=diff.ris|default:"—" %}DICOM says “{{ dicom }}”, RIS order says “{{ ris }}”.{% endblocktrans %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <form method="post" action="{% url 'pacs:study_action' pk=study.pk %}" class="d-flex gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="link" />
+        <input type="hidden" name="order_pk" value="{{ order.pk }}" />
+        <input type="hidden" name="reason" value="{{ reason }}" />
+        <input type="hidden" name="confirm" value="yes" />
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-link-45deg me-1"></i>{% trans 'Link anyway (audited)' %}
+        </button>
+        <a href="{% url 'pacs:study_detail' pk=study.pk %}" class="btn btn-secondary">
+            {% trans 'Cancel' %}
+        </a>
+    </form>
+</div>
+{% endblock %}
