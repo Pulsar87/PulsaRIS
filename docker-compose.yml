@@ -112,7 +112,7 @@ services:
   # only on the internal `pacs` network (Django/celery join it).
   # ─────────────────────────────────────────────────────────────────────────
   orthanc:
-    image: orthancteam/orthanc:25.9.3
+    image: orthancteam/orthanc
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/opt/ris-orthanc/docker-entrypoint.sh"]
     command: ["Orthanc", "${ORTHANC_CONFIG_DIR:-/var/lib/orthanc/db/ris-config}/orthanc.json"]
