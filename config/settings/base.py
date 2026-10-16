@@ -202,3 +202,19 @@ if not DEBUG:
     X_FRAME_OPTIONS = "DENY"
 
 SESSION_SAVE_EVERY_REQUEST = True
+
+# ─────────────────────────────────────────────────────────────
+# PACS / Orthanc archive integration (PACS Phase 1, Task 1.1)
+# Credentials are service-to-service secrets from the environment only
+# (never defaults committed to Git). The Orthanc REST API is reachable only
+# on the private Docker network; see docs/PACS_IMPLEMENTATION.md §2.2/§3.
+# Django must keep working when the archive is down — these settings feed
+# the Phase 2 sync adapter's timeouts/retries, not request-path blocking.
+# ─────────────────────────────────────────────────────────────
+PACS_ORTHANC_API_URL = env("ORTHANC_API_URL", default="http://orthanc:8042")
+PACS_ORTHANC_AE_TITLE = env("ORTHANC_AE_TITLE", default="PULSAR_PACS")
+PACS_ORTHANC_DICOM_PORT = env.int("ORTHANC_DICOM_PORT", default=4242)
+PACS_ORTHANC_REST_USER = env("ORTHANC_RIS_USER", default="")
+PACS_ORTHANC_REST_PASSWORD = env("ORTHANC_RIS_PASSWORD", default="")
+PACS_ORTHANC_TIMEOUT_SECONDS = env.int("ORTHANC_TIMEOUT_SECONDS", default=10)
+PACS_ORTHANC_MAX_RETRIES = env.int("ORTHANC_MAX_RETRIES", default=5)
