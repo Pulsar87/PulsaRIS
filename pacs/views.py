@@ -437,6 +437,23 @@ def diagnostics(request):
 
     metrics = collect_metrics()
 
+    # Mirror coverage: how many of the archive's stored objects are already
+    # represented by an indexed row in Django (Orthanc is authoritative;
+    # this comparison only surfaces sync lag, never patient data).
+    try:
+        files = metrics["archive"].get("dicom_files")
+        indexed_rows = PACSStudy.objects.exclude(
+            status__in=[StudyStatus.RECEIVED, StudyStatus.SYNC_ERROR]
+        ).count()
+        if isinstance(files, int) and files > 0:
+            metrics["mirror_coverage"] = {
+                "indexed_studies": indexed_rows,
+                "archive_dicom_files": files,
+                "coverage_percent": round(min(100.0, indexed_rows / files * 100), 1),
+            }
+    except Exception:  # pragma: no cover - purely informational
+        pass
+
     recent_failures = list(
         SyncEvent.objects.filter(outcome=SyncEvent.Outcome.FAILED)
         .order_by("-change")[:20]
@@ -462,5 +479,11 @@ def diagnostics(request):
         "recent_failures": recent_failures,
         "devices": devices,
         "generated_at": metrics.get("generated_at"),
+        # Non-secret deployment config for the connection panel.
+        "pac_sync_interval_seconds": float(
+            getattr(settings, "CELERY_BEAT_SCHEDULE", {})
+            .get("pacs-sync-orthanc-changes", {})
+            .get("schedule", 0)
+        ),
     }
     return _no_phi_cache(render(request, "pacs/diagnostics.html", context))

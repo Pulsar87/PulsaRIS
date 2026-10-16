@@ -86,6 +86,10 @@ class OrthancClient:
     def get_statistics(self):
         return self._request("/statistics")
 
+    def get_summary(self):
+        """Orthanc build/version summary (GET /) — no PHI, safe for diagnostics."""
+        return self._request("/")
+
     def is_alive(self):
         try:
             self.get_statistics()

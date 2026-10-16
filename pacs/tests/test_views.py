@@ -234,3 +234,60 @@ class PacsViewAccessTests(ReconciliationFixtureMixin, TestCase):
         self.assertContains(response, "PACS System Diagnostics")
         # No credentials or raw payloads leak into the page.
         self.assertNotContains(response, "password")
+
+
+class DiagnosticsArchiveInsightTests(ReconciliationFixtureMixin, TestCase):
+    """Diagnostics page shows Orthanc archive state (no secrets, no PHI)."""
+
+    def setUp(self):
+        self.setUpFixtures()
+
+    def test_archive_version_and_connection_panel_rendered(self):
+        with patch("pacs.metrics.OrthancClient.get_statistics") as mock_stats, \
+             patch("pacs.metrics.OrthancClient.get_summary") as mock_summary:
+            mock_stats.return_value = {
+                "DicomFiles": 42, "DiskSize": 1024,
+                "ChangesCount": 7, "MemoryUsed": 999,
+            }
+            mock_summary.return_value = {
+                "Name": "PulsaRIS-PACS", "Version": "1.12.7", "ApiVersion": 8,
+            }
+            self.client.force_login(self.superuser)
+            response = self.client.get(reverse("pacs:diagnostics"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Image Archive (Orthanc)")
+        self.assertContains(response, "PulsaRIS-PACS")   # from GET / summary
+        self.assertContains(response, "1.12.7")          # version shown
+        self.assertContains(response, "Application")      # connection panel
+        self.assertContains(response, "http://orthanc:8042")  # endpoint URL
+        # Mirror coverage line appears once archive reports stored files.
+        self.assertContains(response, "indexed study rows")
+
+    def test_metrics_include_connection_without_credentials(self):
+        from pacs.metrics import collect_metrics
+
+        with patch("pacs.metrics.OrthancClient.get_statistics") as mock_stats, \
+             patch("pacs.metrics.OrthancClient.get_summary") as mock_summary:
+            mock_stats.return_value = {"DicomFiles": 0}
+            mock_summary.return_value = {"Name": "X", "Version": "Y"}
+            metrics = collect_metrics()
+        conn = metrics["connection"]
+        self.assertTrue(conn["api_url"])
+        self.assertIn(conn["ae_title"], ("PULSAR_PACS",))
+        self.assertIsInstance(conn["rest_user_configured"], bool)
+        # Never any secret material in the metric snapshot.
+        blob = str(metrics)
+        for needle in ("password", "ORTHANC_RIS_PASSWORD", "change-me"):
+            self.assertNotIn(needle.lower(), blob.lower())
+
+    def test_summary_failure_does_not_break_health(self):
+        """GET / failing must not flip an otherwise-healthy archive card."""
+        from pacs.metrics import collect_metrics
+
+        with patch("pacs.metrics.OrthancClient.get_statistics") as mock_stats, \
+             patch("pacs.metrics.OrthancClient.get_summary") as mock_summary:
+            mock_stats.return_value = {"DicomFiles": 3}
+            mock_summary.side_effect = RuntimeError("boom")
+            metrics = collect_metrics()
+        self.assertEqual(metrics["archive"]["health"], "ok")
+        self.assertNotIn("version", metrics["archive"])
