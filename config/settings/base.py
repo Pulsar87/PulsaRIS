@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "clinic",  # Clinic Information System (appointments, encounters, clinical records)
     "orders",
     "reports",
+    "pacs",  # PACS archive integration (Orthanc metadata mirror + sync worker)
     "integrations",
     "billing",  # Financial/Billing module
     "inventory",  # Radiology consumables inventory
@@ -218,3 +219,12 @@ PACS_ORTHANC_REST_USER = env("ORTHANC_RIS_USER", default="")
 PACS_ORTHANC_REST_PASSWORD = env("ORTHANC_RIS_PASSWORD", default="")
 PACS_ORTHANC_TIMEOUT_SECONDS = env.int("ORTHANC_TIMEOUT_SECONDS", default=10)
 PACS_ORTHANC_MAX_RETRIES = env.int("ORTHANC_MAX_RETRIES", default=5)
+
+# Periodic metadata sync cadence (Celery beat). The changes-feed cursor is
+# durable, so missed ticks are recovered by the next drain; no events lost.
+CELERY_BEAT_SCHEDULE = {
+    "pacs-sync-orthanc-changes": {
+        "task": "pacs.tasks.sync_orthanc_changes",
+        "schedule": env.float("PACS_SYNC_INTERVAL_SECONDS", default=30.0),
+    },
+}
