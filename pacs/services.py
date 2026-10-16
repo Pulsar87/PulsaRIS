@@ -27,7 +27,12 @@ from django.utils import timezone
 from orders.models import ExamOrder
 from pacs.dicom_uid import clean_dicom_uid, is_valid_dicom_uid
 from pacs.models import PACSStudy, StudyStatus, SyncEvent
-from pacs.orthanc_client import OrthancClient, OrthancError, OrthancUnavailable
+from pacs.orthanc_client import (
+    OrthancAPIError,
+    OrthancClient,
+    OrthancError,
+    OrthancUnavailable,
+)
 
 logger = logging.getLogger(__name__)
 

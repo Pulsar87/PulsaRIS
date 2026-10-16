@@ -169,6 +169,23 @@ class Command(BaseCommand):
         for order in queryset[:100]:  # Limit results
             item = Dataset()
 
+            # Study Instance UID (PACS plan Task 3.2): assign a stable UID
+            # at scheduling time when the order has none, so MWL responses
+            # carry it and devices that echo it produce rule-1 matches on
+            # receipt. Idempotent: once assigned the value never changes.
+            from pacs.dicom_uid import clean_dicom_uid, generate_study_uid
+
+            if not clean_dicom_uid(order.dicom_study_instance_uid):
+                new_uid = generate_study_uid()
+                # Conditional update guards against concurrent assignment;
+                # we adopt whichever value won the race.
+                ExamOrder.objects.filter(
+                    pk=order.pk, dicom_study_instance_uid=""
+                ).update(dicom_study_instance_uid=new_uid)
+                order.refresh_from_db(fields=["dicom_study_instance_uid"])
+            if clean_dicom_uid(order.dicom_study_instance_uid):
+                item.StudyInstanceUID = order.dicom_study_instance_uid
+
             # Patient Module
             patient = order.patient
             if patient:
