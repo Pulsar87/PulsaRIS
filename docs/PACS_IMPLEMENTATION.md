@@ -2,7 +2,7 @@
 
 **Prepared:** 2026-10-17
 **Plan reference:** `PACS_plan.md` (PulsaRIS PACS Implementation Plan, 2026-10-16)
-**Status:** Phase 0 — Repository reconnaissance and design freeze. No PACS code deployed yet.
+**Status:** Phase 0 design freeze reviewed/approved (2026-10-17). Phase 1 Task 1.1 implemented: pinned Orthanc service in `docker-compose.yml` with persistent volume, private REST, env-driven config renderer, health check, runbook (`docs/PACS_RUNBOOK.md`). Live acceptance tests still pending in a Docker environment; no real modality traffic until then.
 **Review basis:** Static inspection of branch `qwen-code-4f8d27e0-fd75-4dde-b94b-a21226e8db9a` (identical tree to `main` at this point; no unmerged PACS/Orthanc code was found in the working tree or branches). Findings below are source observations, not runtime verification.
 
 ---
@@ -115,4 +115,5 @@ All values are environment-configurable (`ORTHANC_*` variables); the compose def
 | `requests` missing from requirements for REST adapter | Dependency note | 2 |
 
 ## 5. Next steps
-Phase 0 acceptance gate: this note reviewed (security boundary + study ownership rules) **before any real modality is allowed to send data**. Then Phase 1 (deploy/harden Orthanc service, Storage SCP configuration, REST lockdown, storage/backup strategy) begins with concrete compose/config changes.
+Phase 0 acceptance gate: **reviewed and approved 2026-10-17** (security boundary + study ownership rules). Phase 1 Task 1.1 is implemented in this branch: pinned `orthanc` service (`orthancteam/orthanc:25.9.3`) in `docker-compose.yml`, persistent `orthanc-db` volume, private `pacs` network with REST unmapped to the host, env-driven config renderer (`deploy/orthanc/docker-entrypoint.sh`), authenticated health check, `.env.example` keys, Django `PACS_ORTHANC_*` settings, and ops runbook (`docs/PACS_RUNBOOK.md`). DICOM_SERVER.md updated to distinguish MWL from PACS storage (plan §2 finding).
+Remaining Phase 1 work: Tasks 1.2–1.4 live verification in a Docker environment — C-ECHO/C-STORE round-trip with an approved test sender, unknown-sender rejection test, container-recreation persistence, executed backup/restore drill, transfer-syntax conformance per device, then digest pinning for production. No real modality traffic until those acceptance items pass.
