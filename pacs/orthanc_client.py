@@ -148,3 +148,60 @@ class OrthancClient:
         """Return the shared identifier (global DICOM-level id) for a resource."""
         info = self._request(f"/{orthanc_id}")
         return info.get("ID") if isinstance(info, dict) else None
+
+    # -- authorized file retrieval (Phase 4, Task 4.2) -------------------------
+
+    def get_instance_file(self, instance_id, max_bytes=None):
+        """Return the original DICOM file bytes for one Orthanc instance.
+
+        Raw (non-JSON) GET. Authorization is the caller's responsibility —
+        this adapter never checks facility scope by itself. Responses are
+        capped so a runaway archive object cannot exhaust web memory.
+        """
+        import re as _re
+
+        if not _re.match(r"^[A-Za-z0-9_-]{1,64}$", instance_id):
+            raise OrthancError("invalid instance id")
+        cap = max_bytes or getattr(settings, "PACS_RETRIEVE_MAX_BYTES", 536870912)
+        url = f"{self.base_url}/instances/{instance_id}/file"
+        headers = {}
+        if self.username:
+            token = base64.b64encode(
+                f"{self.username}:{self.password}".encode()
+            ).decode()
+            headers["Authorization"] = f"Basic {token}"
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout * 6) as resp:
+                return resp.read(cap)
+        except urllib.error.HTTPError as exc:
+            if 500 <= exc.code < 600:
+                raise OrthancUnavailable(f"archive returned {exc.code}") from exc
+            raise OrthancAPIError(exc.code) from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise OrthancUnavailable(f"archive unreachable: {exc}") from exc
+
+    def get_study_archive_zip(self, orthanc_study_id, max_bytes=None):
+        """Return the study's original-object ZIP from Orthanc /archive."""
+        import re as _re
+
+        if not _re.match(r"^[A-Za-z0-9_-]{1,64}$", orthanc_study_id):
+            raise OrthancError("invalid study resource id")
+        cap = max_bytes or getattr(settings, "PACS_RETRIEVE_MAX_BYTES", 536870912)
+        url = f"{self.base_url}/studies/{orthanc_study_id}/archive"
+        headers = {}
+        if self.username:
+            token = base64.b64encode(
+                f"{self.username}:{self.password}".encode()
+            ).decode()
+            headers["Authorization"] = f"Basic {token}"
+        req = urllib.request.Request(url, headers=headers, method="GET")
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout * 6) as resp:
+                return resp.read(cap)
+        except urllib.error.HTTPError as exc:
+            if 500 <= exc.code < 600:
+                raise OrthancUnavailable(f"archive returned {exc.code}") from exc
+            raise OrthancAPIError(exc.code) from exc
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise OrthancUnavailable(f"archive unreachable: {exc}") from exc

@@ -219,6 +219,10 @@ PACS_ORTHANC_REST_USER = env("ORTHANC_RIS_USER", default="")
 PACS_ORTHANC_REST_PASSWORD = env("ORTHANC_RIS_PASSWORD", default="")
 PACS_ORTHANC_TIMEOUT_SECONDS = env.int("ORTHANC_TIMEOUT_SECONDS", default=10)
 PACS_ORTHANC_MAX_RETRIES = env.int("ORTHANC_MAX_RETRIES", default=5)
+# Phase 4 (Task 4.2): bounded retrieval — max response bytes and socket
+# timeout for proxied DICOM/ZIP downloads through the Django view.
+PACS_RETRIEVE_MAX_BYTES = env.int("PACS_RETRIEVE_MAX_BYTES", default=536870912)
+PACS_RETRIEVE_TIMEOUT_SECONDS = env.int("PACS_RETRIEVE_TIMEOUT_SECONDS", default=60)
 
 # Periodic metadata sync cadence (Celery beat). The changes-feed cursor is
 # durable, so missed ticks are recovered by the next drain; no events lost.
