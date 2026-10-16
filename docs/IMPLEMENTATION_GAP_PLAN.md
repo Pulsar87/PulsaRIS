@@ -290,6 +290,7 @@
 - Test malformed requests, timeouts, unavailable modalities, duplicate requests, and recovery after service restart.
 - Document supported SOP classes and conformance limits.
 - Confirm whether PACS/image archive, image viewer, storage SCP, DICOMweb, MPPS, and image retrieval are external integrations or unsupported features; do not assume a worklist SCP provides those capabilities.
+- **Update 2026-10-17 (PACS plan Phase 0):** Confirmed by source inspection — the current `run_dicom_server` SCP registers only Verification, MWL C-FIND, and MPPS contexts; it has no Storage SOP Class context and no C-STORE handler, so PulsaRIS is **not** an image archive today. The PACS implementation plan (`PACS_plan.md`) has been started: Phase 0 reconnaissance and design freeze are recorded in `docs/PACS_IMPLEMENTATION.md`. Planned capability: dedicated Orthanc archive service (separate AE title/port) with a Django metadata mirror. Until later phases deliver and test it, all PACS/storage/DICOMweb/retrieval items above remain **Feature gap**.
 
 ### Acceptance criteria
 - A test modality can query the worklist using the documented configuration.
