@@ -11,6 +11,7 @@ can be layered on ``collect_metrics`` later.
 import logging
 import time
 
+from django.conf import settings
 from django.db.models import Count, Max, Min
 from django.utils import timezone
 
@@ -143,11 +144,25 @@ def collect_metrics(client=None):
             }
     except Exception as exc:  # health probe must never crash the caller
         metrics["archive"] = {"health": "error", "reason_category": type(exc).__name__}
+
+    # Build/version metadata (GET /) — Orthanc Name/Version/API version.
+    # Best-effort: a failure here must not flip an otherwise-healthy archive.
+    try:
+        summary = client.get_summary()
+        if isinstance(summary, dict):
+            metrics["archive"]["name"] = summary.get("Name")
+            metrics["archive"]["version"] = summary.get("Version")
+            metrics["archive"]["api_version"] = summary.get("ApiVersion")
+    except Exception:  # pragma: no cover - non-critical enrichment
+        pass
+
+    # --- PACS connection identity (non-secret deployment config) ------------
+    # Lets staff see exactly which archive endpoint/AE the app talks to;
+    # credentials are never included.
+    metrics["connection"] = {
+        "api_url": settings.PACS_ORTHANC_API_URL,
+        "ae_title": settings.PACS_ORTHANC_AE_TITLE,
+        "dicom_port": settings.PACS_ORTHANC_DICOM_PORT,
+        "rest_user_configured": bool(settings.PACS_ORTHANC_REST_USER),
+    }
     return metrics
-
-
-def Min_dt():
-    """Oldest RECONCILIATION_REQUIRED study age input helper."""
-    from django.db.models import Min
-
-    return Min("created_at")

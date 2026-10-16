@@ -27,6 +27,10 @@
                     {% if metrics.archive.health == 'ok' %}
                     <span class="badge bg-success mb-3">{% trans 'Healthy' %}</span>
                     <dl class="row mb-0 small">
+                        {% if metrics.archive.name or metrics.archive.version %}
+                        <dt class="col-6">{% trans 'Name / Version' %}</dt>
+                        <dd class="col-6">{{ metrics.archive.name|default:"—" }} · {{ metrics.archive.version|default:"—" }}</dd>
+                        {% endif %}
                         <dt class="col-6">{% trans 'Stored DICOM files' %}</dt>
                         <dd class="col-6">{{ metrics.archive.dicom_files|default:"—" }}</dd>
                         <dt class="col-6">{% trans 'Disk size (MB)' %}</dt>
@@ -119,6 +123,19 @@
         </div>
     </div>
 
+    <!-- Mirror coverage vs. archive (sync lag indicator, no PHI) -->
+    {% if metrics.mirror_coverage %}
+    <div class="alert alert-secondary small d-flex justify-content-between align-items-center" role="alert">
+        <span>
+            <i class="bi bi-arrow-left-right me-1"></i>
+            {% blocktrans with idx=metrics.mirror_coverage.indexed_studies files=metrics.mirror_coverage.archive_dicom_files %}
+            Django mirror: {{ idx }} indexed study rows vs. {{ files }} DICOM files stored in the archive.
+            {% endblocktrans %}
+        </span>
+        <span class="fw-semibold">{{ metrics.mirror_coverage.coverage_percent }}%</span>
+    </div>
+    {% endif %}
+
     <!-- Recent failed sync events (categories only — no PHI payloads) -->
     <div class="card mb-4">
         <div class="card-header"><i class="bi bi-x-octagon me-1"></i>{% trans 'Recent Failed Sync Events' %}</div>
@@ -153,7 +170,7 @@
     </div>
 
     <!-- Registered sending devices (AE titles are non-PHI config) -->
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-header"><i class="bi bi-printer me-1"></i>{% trans 'Registered Modality Devices' %}</div>
         <div class="table-responsive">
             <table class="table table-sm align-middle mb-0">
@@ -180,6 +197,37 @@
                     {% endfor %}
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- How the app reaches the archive (non-secret config; credentials never shown) -->
+    <div class="card">
+        <div class="card-header"><i class="bi bi-plug me-1"></i>{% trans 'Application ↔ Archive Connection' %}</div>
+        <div class="card-body">
+            <dl class="row mb-0 small">
+                <dt class="col-sm-4">{% trans 'REST endpoint used by Django/Celery' %}</dt>
+                <dd class="col-sm-8"><code>{{ metrics.connection.api_url }}</code></dd>
+                <dt class="col-sm-4">{% trans 'PACS AE title / DICOM port' %}</dt>
+                <dd class="col-sm-8"><code>{{ metrics.connection.ae_title }}</code> · {{ metrics.connection.dicom_port }}</dd>
+                <dt class="col-sm-4">{% trans 'Service user configured' %}</dt>
+                <dd class="col-sm-8">
+                    {% if metrics.connection.rest_user_configured %}
+                    <span class="badge bg-success">{% trans 'Yes' %}</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark">{% trans 'No — set ORTHANC_RIS_USER/PASSWORD in .env' %}</span>
+                    {% endif %}
+                </dd>
+                <dt class="col-sm-4">{% trans 'Metadata sync cadence' %}</dt>
+                <dd class="col-sm-8">{% trans 'Celery beat every' %} {{ pac_sync_interval_seconds|floatformat:"-2" }} {% trans 'seconds' %}</dd>
+            </dl>
+            <p class="small text-muted mt-3 mb-0">
+                {% blocktrans %}
+                Orthanc is the authoritative image store; the tables above are a mirror.
+                The REST API (8042) is reachable only on the private Docker network, and
+                accepted senders are governed by ORTHANC_ALLOWED_SENDERS (empty = deny all).
+                See docs/PACS_RUNBOOK.md for operations.
+                {% endblocktrans %}
+            </p>
         </div>
     </div>
 
