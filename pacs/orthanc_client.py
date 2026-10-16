@@ -153,6 +153,27 @@ class OrthancClient:
         info = self._request(f"/{orthanc_id}")
         return info.get("ID") if isinstance(info, dict) else None
 
+    # -- hierarchy helpers (used by sync + SR export, Task 5.1) --------------
+
+    def get_series_ids(self, orthanc_study_id):
+        """Return the Orthanc series ids that are children of a study."""
+        study = self.get_study(orthanc_study_id) or {}
+        return list(study.get("SeriesIDs") or [])
+
+    def get_series_instance_ids(self, orthanc_series_id):
+        """Return the Orthanc instance ids that are children of a series."""
+        series = self._request(f"/series/{orthanc_series_id}") or {}
+        return list(series.get("ParentInstances") or series.get("InstanceIDs") or [])
+
+    def get_instance_metadata(self, instance_id):
+        """Return the DICOM tag dictionary Orthanc parsed for one instance."""
+        return self._request(f"/instances/{instance_id}/metadata") or {}
+
+    def get_series_main_dicom_id(self, orthanc_series_id):
+        """Return the SeriesInstanceUID shared by a series' instances."""
+        meta = self._request(f"/series/{orthanc_series_id}/metadata") or {}
+        return meta.get("ID", "") if isinstance(meta, dict) else ""
+
     # -- authorized file retrieval (Phase 4, Task 4.2) -------------------------
 
     def get_instance_file(self, instance_id, max_bytes=None):
@@ -184,6 +205,35 @@ class OrthancClient:
             raise OrthancAPIError(exc.code) from exc
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
             raise OrthancUnavailable(f"archive unreachable: {exc}") from exc
+
+    def submit_instance(self, dicom_bytes):
+        """Store a DICOM instance into the archive (POST /instances).
+
+        Used by the SR export path (PACS plan Task 5.1) so finalized
+        reports can be stored/retrieved by the archive itself. Raises
+        OrthancUnavailable (retryable) / OrthancAPIError (4xx) like all
+        other adapter calls. Returns the created Orthanc instance id.
+        """
+        req = urllib.request.Request(
+            f"{self.base_url}/instances",
+            data=dicom_bytes,
+            method="POST",
+            headers={"Content-Type": "application/dicom", "Accept": "application/json"},
+        )
+        if self.username:
+            token = base64.b64encode(f"{self.username}:{self.password}".encode()).decode()
+            req.add_header("Authorization", f"Basic {token}")
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                payload = json.loads(resp.read().decode())
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode(errors="replace")
+            if 500 <= exc.code or exc.code == 429:
+                raise OrthancUnavailable(f"Orthanc POST /instances -> {exc.code}: {body[:200]}")
+            raise OrthancAPIError(exc.code, body)
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            raise OrthancUnavailable(f"Orthanc POST /instances unreachable: {exc}")
+        return payload.get("ID", "")
 
     def get_study_archive_zip(self, orthanc_study_id, max_bytes=None):
         """Return the study's original-object ZIP from Orthanc /archive."""
