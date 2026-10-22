@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "billing",  # Financial/Billing module
     "inventory",  # Radiology consumables inventory
     "dashboard",  # Dashboard and statistics
+    "modules",  # Module browser ("app launcher") over the enabled modules
     "django.contrib.staticfiles",
     "django_filters",
     "rest_framework",
@@ -64,6 +65,15 @@ INSTALLED_APPS = [
     "whitenoise",
     "auditlog",  # ← Added: django-auditlog package for HIPAA compliance
 ]
+
+# ─────────────────────────────────────────────────────────────
+# Feature modules (Clinic / RIS / PACS / Billing / Inventory …)
+# See core/module_registry.py — single source of truth for the
+# nav, the module picker page and the disable-gate middleware.
+# DJANGO_ENABLED_MODULES=pacs,billing in .env restricts the set;
+# unset means every installed module is enabled (default).
+# ─────────────────────────────────────────────────────────────
+ENABLED_MODULES = env.list("DJANGO_ENABLED_MODULES", default=None)
 
 
 # ─────────────────────────────────────────────────────────────
@@ -82,6 +92,7 @@ MIDDLEWARE = [
     "license.middleware.LicenseMiddleware",  # License check middleware
     "django_htmx.middleware.HtmxMiddleware",
     "auditlog.middleware.AuditlogMiddleware",  # ← FIXED: correct middleware path
+    "core.middleware.ModuleGateMiddleware",  # 404 for URLs of disabled modules
 ]
 
 # ─────────────────────────────────────────────────────────────
@@ -117,6 +128,8 @@ TEMPLATES = [
                 "django.template.context_processors.tz",
                 # Clinic nav visibility in the global layout (Phase 4 rollout flag)
                 "clinic.context_processors.clinic_nav",
+                # Modular UI: enabled module list for nav + module picker
+                "core.context_processors.modules",
             ],
         },
     },

@@ -110,6 +110,18 @@
                             >
                         </li>
 
+                        <!-- Module browser ("app launcher") – grid of enabled modules -->
+                        <li class="nav-item">
+                            <a
+                                class="nav-link {% if request.resolver_match.app_name == 'modules' %}active{% endif %}"
+                                href="{% url 'modules:browser' %}"
+                            >
+                                <i class="bi bi-grid-3x3-gap me-1">
+                                    {% trans "Apps" %}</i
+                                >
+                            </a>
+                        </li>
+
                         <!-- Patients -->
                         <li class="nav-item">
                             <a
