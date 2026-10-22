@@ -1,0 +1,76 @@
+{% extends "layout.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Modules" %} — Pulsar RIS{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-grid-3x3-gap-fill me-2 text-primary"></i>
+                {% trans "Applications" %}
+            </h1>
+            <p class="text-secondary mb-0">
+                {% trans "Browse the modules enabled for this installation." %}
+            </p>
+        </div>
+        <input
+            type="search"
+            id="moduleFilter"
+            class="form-control w-auto"
+            placeholder="{% trans 'Search modules…' %}"
+            aria-label="{% trans 'Search modules' %}"
+        />
+    </div>
+
+    {% if enabled_modules %}
+    <div class="row g-4" id="moduleGrid">
+        {% for module in enabled_modules %}
+        <div class="col-6 col-md-4 col-lg-3 module-card-wrap" data-label="{{ module.label|lower }}">
+            <a
+                href="{{ module.resolved_url }}"
+                class="card h-100 border-0 shadow-sm rounded-4 module-card text-decoration-none"
+            >
+                <div class="card-body d-flex flex-column align-items-center text-center p-4">
+                    <div
+                        class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 mb-3"
+                        style="width: 72px; height: 72px"
+                    >
+                        <i class="bi {{ module.icon }} fs-1 text-primary"></i>
+                    </div>
+                    <h2 class="h5 mb-1 text-body">{{ module.label }}</h2>
+                    <p class="small text-secondary mb-0">{{ module.description }}</p>
+                </div>
+                {% if module.resolved_items %}
+                <div class="card-footer bg-transparent border-0 pb-3 text-center">
+                    {% for item in module.resolved_items %}
+                    <a
+                        href="{{ item.resolved_url }}"
+                        class="badge text-bg-light text-decoration-none me-1"
+                        onclick="event.stopPropagation(); event.preventDefault(); window.location.href=this.href;"
+                    >{{ item.label }}</a>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        {% trans "No modules are currently enabled." %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Simple client-side filter over the launcher grid.
+    document.getElementById("moduleFilter")?.addEventListener("input", function () {
+        const q = this.value.trim().toLowerCase();
+        document.querySelectorAll(".module-card-wrap").forEach((el) => {
+            el.style.display = el.dataset.label.includes(q) ? "" : "none";
+        });
+    });
+</script>
+{% endblock %}
