@@ -1,0 +1,89 @@
+{% load i18n static %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% trans 'Image Viewer' %} — {{ study.accession_number|default:study.study_instance_uid }}</title>
+    <style>
+        /* Full-screen viewer shell; OHIF renders into #root and brings its
+           own (dark) UI. This page deliberately does NOT extend layout.html:
+           a diagnostic viewport must not compete with app chrome. */
+        html, body { margin: 0; padding: 0; height: 100%; background: #111; }
+        #ris-viewer-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+            display: flex; align-items: center; gap: .75rem;
+            padding: .35rem .75rem; background: #1c2430; color: #e8edf3;
+            font: 13px/1.4 system-ui, -apple-system, sans-serif;
+            border-bottom: 1px solid #2c3a4d;
+        }
+        #ris-viewer-bar a { color: #7ab8ff; text-decoration: none; }
+        #ris-viewer-bar .accession { font-weight: 600; }
+        #ris-viewer-bar .spacer { flex: 1; }
+        #root { position: absolute; inset: 34px 0 0 0; }
+        #ris-viewer-fallback {
+            color: #cfd8e3; padding: 2rem; max-width: 44rem; margin: 0 auto;
+            font: 15px/1.6 system-ui, sans-serif; display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="ris-viewer-bar">
+        <a href="{% url 'pacs:study_detail' pk=study.pk %}">&larr; {% trans 'Study detail' %}</a>
+        <span class="accession">{{ study.accession_number|default:"—" }}</span>
+        <span>{{ study.patient_name_as_received }}</span>
+        <span class="spacer"></span>
+        <span>{{ study.modality }} · {{ study.study_date|default:"" }}</span>
+    </div>
+
+    <div id="root"></div>
+    <div id="ris-viewer-fallback">
+        <h2>{% trans 'Viewer bundle not installed' %}</h2>
+        <p>
+            {% blocktrans %}The OHIF viewer bundle is served from
+            <code>/static/ohif/index.umd.js</code>. In development, fetch it once with:
+            <code>python manage.py pacs_fetch_ohif</code>
+            then re-run <code>collectstatic</code> if applicable.{% endblocktrans %}
+        </p>
+    </div>
+
+    <script>
+        // Per-request OHIF configuration. Only same-origin Django URLs appear
+        // here — never Orthanc hostnames or archive credentials (plan §3).
+        window.config = {
+            routerBasename: '/pacs/viewer/',
+            showStudyList: false,
+            extensions: [],
+            modeInstances: [],
+            dataSources: [{
+                dataSourceKey: 'RisPacs',
+                dhb: {
+                    maxQidResults: 512,
+                    qidoRoot: '{{ qido_root|escapejs }}',
+                    wadoRoot: '{{ wado_root|escapejs }}',
+                    qidoSupportsIncludeField: false,
+                    imageRendering: 'wadors',
+                    thumbnailRendering: 'wadors',
+                    enableStudyLazyLoad: true,
+                    supportsFuzzyMatching: false,
+                },
+            }],
+            authentication: {
+                authorizationCheck: function () { return true; },
+            },
+            listModeOptions: { hidePatientId: true },
+            hideExportButton: true,
+            queryOnLoad: true,
+            OIDC: { clientIds: {} },
+        };
+    </script>
+    <script src="{{ ohif_static_url }}" onerror="document.getElementById('ris-viewer-fallback').style.display='block';"></script>
+    <script>
+        if (window.OHIFViewer && typeof window.OHIFViewer.installViewer === 'function') {
+            window.OHIFViewer.installViewer(window.config, 'root');
+        } else {
+            document.getElementById('ris-viewer-fallback').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

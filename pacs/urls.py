@@ -7,9 +7,9 @@ intentionally adds no trust of its own beyond stable, guess-resistant
 patterns (UUID pks, validated Orthanc instance ids).
 """
 
-from django.urls import path
+from django.urls import path, re_path
 
-from pacs import views
+from pacs import viewer_views, views
 
 app_name = "pacs"
 
@@ -35,6 +35,20 @@ urlpatterns = [
         "studies/<uuid:pk>/instances/<str:instance_id>/file/",
         views.instance_file,
         name="instance_file",
+    ),
+    # Task 4.3 — embedded OHIF viewer page for one scoped study.
+    path(
+        "studies/<uuid:pk>/viewer/",
+        viewer_views.study_viewer,
+        name="study_viewer",
+    ),
+    # Task 4.3 — audited QIDO-RS/WADO-RS proxy used by the OHIF bundle.
+    # ``subpath`` is everything after "dicomweb/" (e.g. studies/<id>/metadata);
+    # authorization happens per-request inside pacs.dicomweb_proxy.
+    re_path(
+        r"^viewer/dicomweb/(?P<path>.*)$",
+        viewer_views.dicomweb_proxy_view,
+        name="dicomweb_proxy",
     ),
     # Task 4.1 — staff-only system diagnostics (no payloads, no secrets).
     path("diagnostics/", views.diagnostics, name="diagnostics"),

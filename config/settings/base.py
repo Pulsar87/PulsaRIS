@@ -237,6 +237,14 @@ PACS_ORTHANC_MAX_RETRIES = env.int("ORTHANC_MAX_RETRIES", default=5)
 PACS_RETRIEVE_MAX_BYTES = env.int("PACS_RETRIEVE_MAX_BYTES", default=536870912)
 PACS_RETRIEVE_TIMEOUT_SECONDS = env.int("PACS_RETRIEVE_TIMEOUT_SECONDS", default=60)
 
+# Phase 4 (Task 4.3): embedded OHIF viewer. The prebuilt standalone bundle is
+# pinned to an exact version and fetched ONCE at image build time into
+# static/ohif/ (see Dockerfile); it is served same-origin by Django/WhiteNoise,
+# never from a CDN at runtime. The viewer talks DICOMweb exclusively to the
+# audited Django proxy (/pacs/viewer/dicomweb/...), so no archive credentials
+# or internal Orthanc URLs ever reach the browser.
+PACS_OHIF_VERSION = env("PACS_OHIF_VERSION", default="4.12.51")
+
 # Periodic metadata sync cadence (Celery beat). The changes-feed cursor is
 # durable, so missed ticks are recovered by the next drain; no events lost.
 CELERY_BEAT_SCHEDULE = {
