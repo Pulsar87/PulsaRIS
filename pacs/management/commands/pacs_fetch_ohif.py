@@ -38,7 +38,7 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--version",
+            "--ohif-version",
             default=None,
             help="Exact @ohif/viewer version (default: PACS_OHIF_VERSION setting).",
         )
@@ -56,7 +56,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         from pathlib import Path
 
-        version = options["version"] or getattr(settings, "PACS_OHIF_VERSION", "4.12.51")
+        version = options["ohif_version"] or getattr(settings, "PACS_OHIF_VERSION", "4.12.51")
         dest_dir = Path(options["dest"]) if options["dest"] else Path(settings.BASE_DIR) / "static" / "ohif"
         dest_dir.mkdir(parents=True, exist_ok=True)
         bundle_path = dest_dir / BUNDLE_FILE
