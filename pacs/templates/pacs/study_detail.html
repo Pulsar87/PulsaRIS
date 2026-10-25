@@ -201,6 +201,9 @@
                 <div class="card-header"><i class="bi bi-download me-1"></i>{% trans 'Image Retrieval' %}</div>
                 <div class="card-body d-flex gap-2 flex-wrap">
                     {% if study.orthanc_study_id %}
+                    <a href="{% url 'pacs:study_viewer' pk=study.pk %}" class="btn btn-success" target="_blank" rel="noopener">
+                        <i class="bi bi-search me-1"></i>{% trans 'View images (OHIF)' %}
+                    </a>
                     <a href="{% url 'pacs:retrieve_dicom' pk=study.pk %}" class="btn btn-primary">
                         <i class="bi bi-file-earmark-zip me-1"></i>{% trans 'Download DICOM (ZIP)' %}
                     </a>
