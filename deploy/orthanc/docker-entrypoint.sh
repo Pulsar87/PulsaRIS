@@ -94,6 +94,17 @@ config = {
     },
     # No remote script execution as a convenience (plan Task 1.3).
     "LuaScripts": [],
+    # Phase 4 (Task 4.3): DICOMweb plugin for the embedded OHIF viewer. The
+    # orthancteam/orthanc image ships the plugin pre-installed; enabling it
+    # here exposes /dicom-web/ ONLY on the internal REST port, which has no
+    # host mapping — the browser reaches it exclusively through the audited
+    # Django proxy (pacs/dicomweb_proxy.py), never directly (plan §3).
+    "Plugins": [
+        "/usr/local/share/orthanc/plugins",
+        "/usr/local/lib/orthanc/db"
+    ],
+    "EnableDICOMweb": True,
+    "EnableOnlineDeployment": False,
     # Bounded operations pending representative load tests (Tasks 1.2/1.3).
     "MaxConcurrentConnections": int(os.environ.get("ORTHANC_MAX_CONCURRENT_CONNECTIONS", "16")),
     "LimitQueries": int(os.environ.get("ORTHANC_LIMIT_QUERIES", "512")),
