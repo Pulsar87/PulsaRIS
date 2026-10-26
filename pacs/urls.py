@@ -54,6 +54,18 @@ urlpatterns = [
         viewer_views.study_viewer_by_uid,
         name="study_viewer_uid",
     ),
+    # Advanced viewer — 3D Slicer (SlicerMZ) workstation for one scoped study.
+    path(
+        "studies/<uuid:pk>/viewer/3d-slicer/",
+        viewer_views.study_slicer3d,
+        name="study_slicer3d",
+    ),
+    # Deep-linkable entry point for the advanced 3D Slicer viewer.
+    re_path(
+        r"^viewer/3d-slicer/(?P<study_uid>[0-9.]+)$",
+        viewer_views.study_slicer3d_by_uid,
+        name="study_slicer3d_uid",
+    ),
     # Query-string entry point retained for links such as
     # /pacs/viewer?studyInstanceUIDs=<UID>; it redirects to OHIF's native route.
     re_path(

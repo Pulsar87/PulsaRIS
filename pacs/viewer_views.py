@@ -84,6 +84,36 @@ def study_viewer_query(request):
     return redirect("pacs:study_viewer_uid", study_uid=study.study_instance_uid)
 
 
+@require_GET
+@login_required
+def study_slicer3d(request, pk):
+    """Advanced 3D Slicer / SlicerMZ page for one facility-scoped study.
+
+    Loads the *entire* study (all series) into the browser-side medical
+    imaging toolkit and enables the advanced "3D Slicer" workflows
+    (volume rendering, multi-planar reconstruction, segment editor) via the
+    Slicer/Medical Imaging Interaction extension. Same trust model as the
+    OHIF route: facility-scoped study lookup, audit before any pixel data
+    flows, and all image traffic through the audited DICOMweb proxy.
+    """
+    study = _study_or_404(request, pk)
+    return _render_slicer3d(request, study)
+
+
+@require_GET
+@login_required
+def study_slicer3d_by_uid(request, study_uid):
+    """Deep-linkable entry point for the 3D Slicer advanced viewer."""
+    if not is_valid_dicom_uid(study_uid):
+        raise Http404
+    study = reconciliation.scoped_studies(request.user).filter(
+        study_instance_uid=study_uid
+    ).first()
+    if study is None:
+        raise Http404
+    return _render_slicer3d(request, study)
+
+
 def _render_study_viewer(request, study):
     """Render the configured OHIF application for an authorized study."""
     if not study.orthanc_study_id or study.status == StudyStatus.RECEIVED:
@@ -116,6 +146,48 @@ def _render_study_viewer(request, study):
         "ohif_static_url": static("ohif/index.umd.js"),
     }
     response = render(request, "pacs/viewer.html", context)
+    return _no_phi_cache(response)
+
+
+def _render_slicer3d(request, study):
+    """Render the advanced 3D Slicer (SlicerMZ) page for an authorized study.
+
+    Reuses the pinned OHIF bundle (which ships the VTK.js-backed 3D Slicer /
+    volume-rendering extension) but configures it with the TMTV/3D-Slicer
+    mode so the whole study loads into the advanced workstation. Images are
+    fetched exclusively through the same audited DICOMweb proxy as the
+    standard viewer — no archive credentials reach the browser.
+    """
+    if not study.orthanc_study_id or study.status == StudyStatus.RECEIVED:
+        # Not synced into the archive yet — nothing for the viewer to show.
+        return redirect("pacs:study_detail", pk=study.pk)
+
+    record_audit(
+        request,
+        "pacs.viewer_open",
+        entity_type="PACSStudy",
+        entity_id=str(study.pk),
+        old=None,
+        new={"accession": study.accession_number, "viewer": "slicer3d"},
+    )
+
+    proxy_root = reverse(
+        "pacs:dicomweb_proxy",
+        kwargs={"scope_id": study.orthanc_study_id, "path": ""},
+    ).rstrip("/")
+    router_basename = reverse("pacs:study_list").rstrip("/")
+
+    context = {
+        "study": study,
+        "qido_root": proxy_root,
+        "wado_root": proxy_root,
+        "router_basename": router_basename,
+        "ohif_static_url": static("ohif/index.umd.js"),
+        "slicer_viewer_url": reverse(
+            "pacs:study_viewer", kwargs={"pk": study.pk}
+        ),
+    }
+    response = render(request, "pacs/viewer_3d_slicer.html", context)
     return _no_phi_cache(response)
 
 
