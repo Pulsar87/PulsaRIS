@@ -66,6 +66,13 @@ urlpatterns = [
         viewer_views.study_slicer3d_by_uid,
         name="study_slicer3d_uid",
     ),
+    # Advanced viewer data feed: PHI-light volume manifest (geometry tags +
+    # proxy-relative file URLs) consumed by the 3D Slicer workstation page.
+    path(
+        "studies/<uuid:pk>/viewer/3d-slicer/manifest/",
+        viewer_views.study_slicer3d_manifest,
+        name="study_slicer3d_manifest",
+    ),
     # Query-string entry point retained for links such as
     # /pacs/viewer?studyInstanceUIDs=<UID>; it redirects to OHIF's native route.
     re_path(

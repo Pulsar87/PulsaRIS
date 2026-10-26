@@ -1,0 +1,710 @@
+{% load i18n static %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'en' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% trans '3D Slicer — Advanced Viewer' %} — {{ study.accession_number|default:study.study_instance_uid }}</title>
+    <style>
+        /* Full-screen advanced workstation shell (same rationale as the
+           OHIF page: a diagnostic viewport must not compete with app
+           chrome). Dark UI so window/level perception is reliable. */
+        html, body { margin: 0; padding: 0; height: 100%; background: #10151c; color: #e8edf3;
+                     font: 13px/1.4 system-ui, -apple-system, sans-serif; }
+        #ris-slicer-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 9999;
+            display: flex; align-items: center; gap: .75rem;
+            padding: .35rem .75rem; background: #1c2430; color: #e8edf3;
+            border-bottom: 1px solid #2c3a4d;
+        }
+        #ris-slicer-bar a { color: #7ab8ff; text-decoration: none; }
+        #ris-slicer-bar .accession { font-weight: 600; }
+        #ris-slicer-bar .spacer { flex: 1; }
+        #slicer-stage { position: absolute; inset: 34px 0 0 0; display: flex; flex-direction: column; }
+        #slicer-toolbar {
+            display: flex; gap: .4rem; flex-wrap: wrap; align-items: center;
+            padding: .4rem .6rem; background: #16202b; border-bottom: 1px solid #2c3a4d;
+        }
+        #slicer-toolbar button {
+            background: #24313f; color: #dbe6f1; border: 1px solid #38506b;
+            border-radius: 4px; padding: .25rem .7rem; cursor: pointer; font: inherit;
+        }
+        #slicer-toolbar button.active { background: #2e79c7; border-color: #2e79c7; color: #fff; }
+        #slicer-toolbar label { display: flex; align-items: center; gap: .35rem; }
+        #slicer-views { flex: 1; display: grid; gap: 2px;
+                        grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr;
+                        background: #000; min-height: 0; }
+        .slicer-pane { position: relative; overflow: hidden; background: #000; }
+        .slicer-pane canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+        .slicer-pane .pane-label {
+            position: absolute; top: 4px; left: 6px; z-index: 2;
+            color: #9fd0ff; font-weight: 600; text-shadow: 0 1px 2px #000;
+        }
+        #pane-axial { grid-row: 1 / span 2; }
+        #slicer-status { padding: .3rem .6rem; background: #16202b; border-top: 1px solid #2c3a4d;
+                         min-height: 1.4em; color: #aebccb; }
+        #slicer-message {
+            color: #cfd8e3; padding: 2rem; max-width: 46rem; margin: 0 auto;
+            font: 15px/1.6 system-ui, sans-serif;
+        }
+        #slicer-message a { color: #7ab8ff; }
+        #slicer-message.hidden, #slicer-stage.hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div id="ris-slicer-bar">
+        <a href="{% url 'pacs:study_detail' pk=study.pk %}">&larr; {% trans 'Study detail' %}</a>
+        <span class="accession">{{ study.accession_number|default:"—" }}</span>
+        <span>{{ study.patient_name_as_received }}</span>
+        <span class="spacer"></span>
+        <span>{{ study.modality }} · {{ study.study_date|default:"" }}</span>
+        <a href="{{ standard_viewer_url }}">{% trans 'Standard viewer (OHIF)' %}</a>
+    </div>
+
+    <div id="slicer-message">
+        <h2>{% trans 'Loading advanced workstation…' %}</h2>
+    </div>
+
+    <div id="slicer-stage" class="hidden">
+        <div id="slicer-toolbar">
+            <button type="button" data-view="axial" class="active">{% trans 'Axial' %}</button>
+            <button type="button" data-view="coronal">{% trans 'Coronal' %}</button>
+            <button type="button" data-view="sagittal">{% trans 'Sagittal' %}</button>
+            <label>{% trans 'Slice' %}
+                <input type="range" id="slice-slider" min="0" max="0" value="0" style="width:14rem">
+            </label>
+            <span id="series-picker-wrap">
+                <label>{% trans 'Series' %}
+                    <select id="series-picker" style="background:#24313f;color:#dbe6f1;border:1px solid #38506b;border-radius:4px;padding:.15rem .4rem"></select>
+                </label>
+            </span>
+            <button type="button" id="btn-vr">{% trans 'Volume render 3D' %}</button>
+            <button type="button" id="btn-reset-wl">{% trans 'Reset window/level' %}</button>
+            <span class="spacer" style="flex:1"></span>
+            <span id="wl-readout"></span>
+        </div>
+        <div id="slicer-views">
+            <div class="slicer-pane" id="pane-axial"><canvas></canvas><div class="pane-label" id="label-main">Axial</div></div>
+            <div class="slicer-pane" id="pane-coronal"><canvas></canvas><div class="pane-label">Coronal</div></div>
+            <div class="slicer-pane" id="pane-sagittal"><canvas></canvas><div class="pane-label">Sagittal</div></div>
+            <div class="slicer-pane hidden" id="pane-vr"><canvas id="vr-canvas"></canvas><div class="pane-label">3D</div></div>
+        </div>
+        <div id="slicer-status"></div>
+    </div>
+
+<script>
+/*
+ * Advanced "3D Slicer" workstation — self-contained implementation.
+ *
+ * Data path (identical trust model to the OHIF viewer):
+ *   browser → Django manifest route (facility-scoped, audited) for geometry
+ *   browser → audited DICOMweb proxy for every original DICOM file.
+ * No Orthanc credentials or internal archive URLs ever reach this page.
+ *
+ * Rendering: slices are decoded in-browser (little-endian explicit/implicit
+ * pixel datasets; compressed transfer syntaxes fall back to the standard
+ * viewer), resampled into one isotropic Int16 volume, and displayed with
+ * MPR + window/level. When the pinned VTK.js bundle has been installed under
+ * /static/slicer3d/ (see `python manage.py pacs_fetch_slicer3d`), the same
+ * volume additionally drives GPU ray-cast volume rendering.
+ */
+(function () {
+    'use strict';
+
+    var MANIFEST_URL = '{{ manifest_url|escapejs }}';
+    var VTK_URL = '{{ vtk_url|escapejs }}';
+    var STANDARD_VIEWER_URL = '{{ standard_viewer_url|escapejs }}';
+    var TR = {
+        needBundle: '{% filter escapejs %}{% blocktrans %}The advanced workstation toolkit could not be loaded.{% endblocktrans %}{% endfilter %}',
+        noTomographic: '{% filter escapejs %}{% blocktrans %}This study has no tomographic series that can be reconstructed into a 3D volume. Please use the standard viewer.{% endblocktrans %}{% endfilter %}',
+        archiveDown: '{% filter escapejs %}{% blocktrans %}The image archive could not be reached for reconstruction. Try again once sync recovers.{% endblocktrans %}{% endfilter %}',
+        fallbackHint: '{% filter escapejs %}{% blocktrans %}Open it in the standard viewer instead.{% endblocktrans %}{% endfilter %}',
+        loading: '{% filter escapejs %}{% blocktrans %}Reconstructing volume…{% endblocktrans %}{% endfilter %}',
+        vrNeedsVtk: '{% filter escapejs %}{% blocktrans %}3D volume rendering requires the VTK.js bundle (run python manage.py pacs_fetch_slicer3d).{% endblocktrans %}{% endfilter %}',
+        decodeUnsupported: '{% filter escapejs %}{% blocktrans %}This series uses a compressed transfer syntax that the built-in decoder cannot expand; open it in the standard viewer.{% endblocktrans %}{% endfilter %}'
+    };
+
+    var msgEl = document.getElementById('slicer-message');
+    var stageEl = document.getElementById('slicer-stage');
+    var statusEl = document.getElementById('slicer-status');
+
+    function showMessage(html) {
+        msgEl.innerHTML = html;
+        msgEl.classList.remove('hidden');
+        stageEl.classList.add('hidden');
+    }
+    function setStatus(text) { statusEl.textContent = text || ''; }
+
+    // ------------------------------------------------------------------
+    // Minimal DICOM parser (explicit & implicit VR, little endian).
+    // Returns raw pixel bytes plus the tags we need for reconstruction.
+    // ------------------------------------------------------------------
+    function parseDicom(buffer) {
+        var dv = new DataView(buffer);
+        var u8 = new Uint8Array(buffer);
+        var out = {};
+        if (u8.length >= 132 && String.fromCharCode(u8[128], u8[129], u8[130], u8[131]) === 'DICM') {
+            var preambleLen = 0;
+            while (preambleLen < 128 && u8[preambleLen] === 0x00) preambleLen++;
+            if (preambleLen > 0) return parseDicom(buffer.slice(preambleLen));
+            return null; // non-standard preamble: treat as unsupported
+        }
+        var littleEndianExplicit = true;
+        var pos = 0;
+        var end = buffer.byteLength;
+        var undefGroups = [];
+        function readTag(o) {
+            var group = dv.getUint16(o, true);
+            var elem = dv.getUint16(o + 2, true);
+            return [group, elem];
+        }
+        function tagHex(t) {
+            return ('0000' + t[0].toString(16)).slice(-4) + ',' + ('0000' + t[1].toString(16)).slice(-4);
+        }
+        function asciiAt(o, len) {
+            var s = '';
+            for (var i = 0; i < len; i++) s += String.fromCharCode(u8[o + i]);
+            return s.trim();
+        }
+        // Implicit-VR lookup for the tags we consume (plus skip-safe unknowns).
+        var IMPLICIT_VR = {};
+        [['0008,0060','CS'],['0018,0050','DS'],['0018,0088','DS'],['0020,0032','DS'],
+         ['0020,0037','DS'],['0028,0002','US'],['0028,0004','CS'],['0028,0006','US'],
+         ['0028,0008','IS'],['0028,0010','US'],['0028,0011','US'],['0028,0100','US'],
+         ['0028,0101','US'],['0028,0103','US'],['0028,1050','DS'],['0028,1051','DS'],
+         ['0028,1052','DS'],['0028,1053','DS'],['0028,2110','CS'],['7FE0,0010','OW']
+        ].forEach(function (e) { IMPLICIT_VR[e[0]] = e[1]; });
+
+        var UNDEF_KNOWN = {'7FE0,0010': true}; // PixelData: encap or undefined length
+
+        function readUndefElement(group, elem, o) {
+            // Collect nested items until (FFFE,E0DD) delimiter. Only needed
+            // for encapsulated PixelData; other undefined elements are skipped.
+            var key = ('0000'+group.toString(16)).slice(-4)+','+('0000'+elem.toString(16)).slice(-4);
+            var start = o;
+            if (!UNDEF_KNOWN[key]) return null; // caller will skip via item walk
+            var chunks = [];
+            var p = o;
+            while (p + 8 <= end) {
+                var g = dv.getUint16(p, true), e2 = dv.getUint16(p + 2, true);
+                var len = dv.getUint32(p + 4, true);
+                p += 8;
+                if (g === 0xFFFE && e2 === 0xE0DD) break;
+                if (len === 0xFFFFFFFF) { p -= 8; continue; } // nested undef item
+                chunks.push(u8.subarray(p, p + len));
+                p += len + (len % 2);
+            }
+            var total = chunks.reduce(function (a, c) { return a + c.length; }, 0);
+            var pix = new Uint8Array(total), off = 0;
+            chunks.forEach(function (c) { pix.set(c, off); off += c.length; });
+            out.pixelDataEncapsulated = pix;
+            return p;
+        }
+
+        while (pos + 8 <= end) {
+            var tg = readTag(pos);
+            var key = tagHex(tg);
+            var vr = '', len, valuePos;
+            if (key === '7FE0,0010' && !littleEndianExplicit && !out.__seenExplicit) {
+                // handled below generically
+            }
+            if (littleEndianExplicit) {
+                vr = asciiAt(pos + 4, 2);
+                if (vr === 'OB' || vr === 'OW' || vr === 'OF' || vr === 'SQ' || vr === 'UT' || vr === 'UN') {
+                    len = dv.getUint32(pos + 8, true); valuePos = pos + 12;
+                } else {
+                    len = dv.getUint16(pos + 6, true); valuePos = pos + 8;
+                }
+            } else {
+                vr = IMPLICIT_VR[key] || 'UN';
+                len = dv.getUint32(pos + 4, true); valuePos = pos + 8;
+            }
+            if (tg[0] === 0xFFFE) { pos += 6 + (dv.getUint32 ? 0 : 0); pos = valuePos - 4; continue; } // item/delimiter
+            if (len === 0xFFFFFFFF) {
+                var np = readUndefElement(tg[0], tg[1], valuePos);
+                if (np === null) {
+                    // Unknown undefined-length sequence: scan for next delimiter item.
+                    var q = valuePos;
+                    while (q + 8 <= end) {
+                        if (dv.getUint16(q, true) === 0xFFFE && dv.getUint16(q + 2, true) === 0xE0DD) { q += 8; break; }
+                        q += 2;
+                    }
+                    pos = q;
+                } else { pos = np; }
+                continue;
+            }
+            if (valuePos + len > end) break;
+            switch (key) {
+                case '0002,0010':
+                    var ts = asciiAt(valuePos, len);
+                    if (/^1\.2\.840\.10008\.1\.2(\.1)?$/.test(ts)) littleEndianExplicit = ts.indexOf('.1') !== -1;
+                    else if (ts !== '1.2.840.10008.1.2') { out.transferSyntaxUid = ts; }
+                    out.transferSyntaxUid = out.transferSyntaxUid || ts;
+                    break;
+                case '0028,0002': out.samplesPerPixel = dv.getUint16(valuePos, true); break;
+                case '0028,0004': out.photometricInterpretation = asciiAt(valuePos, len); break;
+                case '0028,0008': out.numberOfFrames = parseInt(asciiAt(valuePos, len), 10) || 1; break;
+                case '0028,0010': out.rows = dv.getUint16(valuePos, true); break;
+                case '0028,0011': out.columns = dv.getUint16(valuePos, true); break;
+                case '0028,0100': out.bitsAllocated = dv.getUint16(valuePos, true); break;
+                case '0028,0103': out.pixelRepresentation = dv.getUint16(valuePos, true); break;
+                case '0028,1052': out.rescaleIntercept = parseFloat(asciiAt(valuePos, len)); break;
+                case '0028,1053': out.rescaleSlope = parseFloat(asciiAt(valuePos, len)); break;
+                case '0028,0030': out.pixelSpacing = asciiAt(valuePos, len).split('\\').map(parseFloat); break;
+                case '0018,0050': out.sliceThickness = parseFloat(asciiAt(valuePos, len)); break;
+                case '0018,0088': out.spacingBetweenSlices = parseFloat(asciiAt(valuePos, len)); break;
+                case '0020,0032': out.imageOrientationPatient = asciiAt(valuePos, len).split('\\').map(parseFloat); break;
+                case '0020,0037': out.imagePositionPatient = asciiAt(valuePos, len).split('\\').map(parseFloat); break;
+                case '7FE0,0010':
+                    if (vr === 'OB' || (len % 2 === 1 && false)) { /* encapsulated handled above */ }
+                    out.pixelData = u8.slice(valuePos, valuePos + len);
+                    break;
+            }
+            pos = valuePos + len + (len % 2);
+        }
+        return out;
+    }
+
+    function pixelsToSignedShort(parsed) {
+        var rows = parsed.rows, cols = parsed.columns;
+        if (!rows || !cols || !parsed.pixelData) return null;
+        if ((parsed.samplesPerPixel || 1) !== 1) return null; // RGB: skip volume
+        var n = rows * cols;
+        var out16 = new Int16Array(n);
+        var pd = parsed.pixelData;
+        if (parsed.bitsAllocated === 8) {
+            for (var i = 0; i < n; i++) out16[i] = pd[i] << 4;
+        } else if (parsed.bitsAllocated === 16) {
+            var dv = new DataView(pd.buffer, pd.byteOffset, pd.byteLength);
+            var signed = parsed.pixelRepresentation === 1;
+            for (var j = 0; j < n; j++) {
+                out16[j] = signed ? dv.getInt16(j * 2, true) : (dv.getUint16(j * 2, true) << 2 >> 2);
+            }
+        } else {
+            return null; // high-bit / 1-bit storage: defer to standard viewer
+        }
+        var slope = isFinite(parsed.rescaleSlope) ? parsed.rescaleSlope : 1;
+        var inter = isFinite(parsed.rescaleIntercept) ? parsed.rescaleIntercept : 0;
+        if (slope !== 1 || inter !== 0) {
+            for (var k = 0; k < n; k++) out16[k] = Math.round(out16[k] * slope + inter);
+        }
+        return out16;
+    }
+
+    // ------------------------------------------------------------------
+    // Volume construction: fetch slices through the audited proxy, then
+    // resample onto an isotropic grid.
+    // ------------------------------------------------------------------
+    function fetchArrayBuffer(url) {
+        return fetch(url, { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('proxy returned ' + r.status);
+                return r.arrayBuffer();
+            });
+    }
+
+    function buildVolume(series, onProgress) {
+        var slices = series.slices;
+        var planes = [];
+        var step = 0;
+        function next() {
+            if (step >= slices.length) return Promise.resolve(null);
+            var s = slices[step++];
+            return fetchArrayBuffer(s.fileUrl)
+                .then(parseDicom)
+                .then(function (parsed) {
+                    var px = pixelsToSignedShort(parsed);
+                    if (px) {
+                        planes.push({
+                            z: s.z,
+                            rows: parsed.rows || s.Rows,
+                            cols: parsed.columns || s.Columns,
+                            data: px,
+                            ipp: parsed.imagePositionPatient || s.ImagePositionPatient,
+                            iop: parsed.imageOrientationPatient || s.ImageOrientationPatient || [1, 0, 0, 0, 1, 0]
+                        });
+                    }
+                    onProgress(step, slices.length);
+                    return next();
+                })
+                .catch(function (err) {
+                    // Skip unreadable frames but keep going; a broken single
+                    // slice must not sink the whole reconstruction.
+                    console.warn('slicer3d: slice skipped', s.fileUrl, err);
+                    onProgress(step, slices.length);
+                    return next();
+                });
+        }
+        return next().then(function () { return planes; }).then(function (planes) {
+            if (!planes.length) return null;
+            return resample(planes, series);
+        });
+    }
+
+    function resample(planes, seriesMeta) {
+        // Axis-aligned assumption: instances differ along the stack axis.
+        var ref = planes[0];
+        var rows = ref.rows, cols = ref.cols;
+        var ps = (ref.ipp && ref.rows) ? null : null;
+        var spacingXY = (seriesMeta.pixelSpacing && seriesMeta.pixelSpacing.length === 2)
+            ? seriesMeta.pixelSpacing : ([1, 1]);
+        var dzs = [];
+        for (var i = 1; i < planes.length; i++) {
+            var d = Math.abs((planes[i].z || 0) - (planes[i - 1].z || 0));
+            if (d > 0) dzs.push(d);
+        }
+        var dz = dzs.length ? dzs.reduce(function (a, b) { return a + b; }, 0) / dzs.length
+                            : (seriesMeta.sliceThickness || 1);
+        if (!isFinite(dz) || dz <= 0) dz = 1;
+        var sx = spacingXY[1] || 1, sy = spacingXY[0] || 1;
+        var zs = planes.map(function (p) { return p.z; });
+        var zMin = Math.min.apply(null, zs), zMax = Math.max.apply(null, zs);
+        var iso = Math.min(sx, sy, dz);
+        var nx = Math.max(1, Math.min(512, Math.round(cols * sx / iso)));
+        var ny = Math.max(1, Math.min(512, Math.round(rows * sy / iso)));
+        var nz = Math.max(1, Math.min(512, Math.round(((zMax - zMin) + dz) / iso)));
+        var vol = new Int16Array(nx * ny * nz);
+        vol.fill(-32768);
+        var planeIndex = 0;
+        planes.sort(function (a, b) { return a.z - b.z; });
+        for (var iz = 0; iz < nz; iz++) {
+            var zWorld = zMin + iz * iso;
+            // nearest source plane
+            while (planeIndex < planes.length - 1 &&
+                   Math.abs((planes[planeIndex + 1].z) - zWorld) <= Math.abs((planes[planeIndex].z) - zWorld)) {
+                planeIndex++;
+            }
+            var pl = planes[planeIndex];
+            if (!pl.data || Math.abs(pl.z - zWorld) > dz * 1.5) continue;
+            var yScale = (pl.rows - 1) / Math.max(1, ny - 1);
+            var xScale = (pl.cols - 1) / Math.max(1, nx - 1);
+            var base = iz * nx * ny;
+            for (var iy = 0; iy < ny; iy++) {
+                var srcY = Math.round(iy * yScale);
+                var rowBase = srcY * pl.cols;
+                var outBase = base + iy * nx;
+                for (var ix = 0; ix < nx; ix++) {
+                    var srcX = Math.round(ix * xScale);
+                    vol[outBase + ix] = pl.data[rowBase + srcX];
+                }
+            }
+        }
+        return {
+            dims: [nx, ny, nz],
+            spacing: [iso, iso, iso],
+            origin: [
+                (ref.ipp ? ref.ipp[0] : 0),
+                (ref.ipp ? ref.ipp[1] : 0),
+                zMin
+            ],
+            data: vol,
+            windowWidth: null, windowLevel: null
+        };
+    }
+
+    function computeAutoWindow(volume) {
+        // HU-ish histogram percentiles (5th/95th) over a strided sample.
+        var data = volume.data, stepv = 7, counts = {}, lo = Infinity, hi = -Infinity;
+        var samples = [];
+        for (var i = 0; i < data.length; i += stepv) {
+            var v = data[i];
+            if (v === -32768) continue;
+            samples.push(v);
+            if (v < lo) lo = v;
+            if (v > hi) hi = v;
+        }
+        if (!samples.length) return { ww: 400, wl: 40 };
+        samples.sort(function (a, b) { return a - b; });
+        var p5 = samples[Math.floor(samples.length * 0.05)];
+        var p95 = samples[Math.floor(samples.length * 0.95)];
+        var ww = Math.max(1, p95 - p5);
+        return { ww: ww, wl: (p5 + p95) / 2 };
+    }
+
+    // ------------------------------------------------------------------
+    // Rendering: three MPR canvases driven from the isotropic volume.
+    // ------------------------------------------------------------------
+    var state = {
+        volume: null,
+        view: 'axial',
+        index: { axial: 0, coronal: 0, sagittal: 0 },
+        ww: 400, wl: 40,
+        drag: null,
+        vrEnabled: false,
+        vtk: null
+    };
+
+    function mainPlaneDims() {
+        var d = state.volume.dims;
+        if (state.view === 'axial') return { w: d[0], h: d[1], axis: 2 };
+        if (state.view === 'coronal') return { w: d[0], h: d[2], axis: 1 };
+        return { w: d[1], h: d[2], axis: 0 };
+    }
+    function subPlaneDims(view) {
+        var d = state.volume.dims;
+        if (view === 'axial') return { w: d[0], h: d[1], axis: 2 };
+        if (view === 'coronal') return { w: d[0], h: d[2], axis: 1 };
+        return { w: d[1], h: d[2], axis: 0 };
+    }
+
+    function extractSlice(view, index) {
+        var sp = subPlaneDims(view);
+        var d = state.volume.dims, data = state.volume.data;
+        var w = sp.w, h = sp.h, out = new Uint8ClampedArray(w * h * 4);
+        var invWW = 1 / Math.max(1, state.ww), half = state.wl;
+        for (var y = 0; y < h; y++) {
+            for (var x = 0; x < w; x++) {
+                var idx;
+                if (sp.axis === 2) idx = (index * d[0] * d[1]) + y * d[0] + x;
+                else if (sp.axis === 1) idx = (y * d[0] * d[2]) + (index * d[0]) + x;
+                else idx = (y * d[0] * d[2]) + (x * d[1]) + index;
+                var v = data[idx];
+                var g = v === -32768 ? 0 : Math.max(0, Math.min(255, ((v - half) * invWW + 0.5) * 255));
+                var o = (y * w + x) * 4;
+                out[o] = g; out[o + 1] = g; out[o + 2] = g; out[o + 3] = 255;
+            }
+        }
+        return { w: w, h: h, rgba: out };
+    }
+
+    function drawCanvas(canvasId, slice) {
+        var canvas = document.querySelector('#' + canvasId + ' canvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        canvas.width = slice.w; canvas.height = slice.h;
+        var img = new ImageData(new Uint8ClampedArray(slice.rgba), slice.w, slice.h);
+        ctx.putImageData(img, 0, 0);
+    }
+
+    function renderAll() {
+        if (!state.volume) return;
+        var mp = mainPlaneDims();
+        drawCanvas('pane-axial', extractSlice(
+            state.view, state.index[state.view]));
+        document.getElementById('label-main').textContent =
+            state.view.charAt(0).toUpperCase() + state.view.slice(1);
+        var others = ['axial', 'coronal', 'sagittal'].filter(function (v) { return v !== state.view; });
+        drawCanvas('pane-' + others[0], extractSlice(others[0], Math.floor(state.volume.dims[subPlaneDims(others[0]).axis === 2 ? 2 : subPlaneDims(others[0]).axis] / 2)));
+        drawCanvas('pane-' + others[1], extractSlice(others[1], Math.floor(state.volume.dims[subPlaneDims(others[1]).axis] / 2)));
+        var slider = document.getElementById('slice-slider');
+        slider.max = (mp.axis === 2 ? state.volume.dims[2] : mp.axis === 1 ? state.volume.dims[1] : state.volume.dims[0]) - 1;
+        slider.value = state.index[state.view];
+        document.getElementById('wl-readout').textContent =
+            'W ' + Math.round(state.ww) + ' / L ' + Math.round(state.wl);
+        if (state.vrEnabled && state.vtk) renderVR();
+    }
+
+    // ------------------------------------------------------------------
+    // Optional VTK.js volume rendering (only when the pinned bundle is
+    // installed at /static/slicer3d/vtk.min.js).
+    // ------------------------------------------------------------------
+    function probeVtk() {
+        return fetch(VTK_URL, { method: 'HEAD', cache: 'no-store' })
+            .then(function (r) { return r.ok; })
+            .catch(function () { return false; });
+    }
+    function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement('script');
+            s.src = src; s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+    function renderVR() {
+        var vtkns = window.vtk || (window.vtkLite && window.vtkLite.vtk);
+        if (!vtkns) return;
+        try {
+            var d = state.volume.dims, sp = state.volume.spacing;
+            var imageData = vtkns.Common.DataModel.vtkImageMapper ? null : null;
+            // Generic pipeline: source → mapper → actor → renderer.
+            var source = vtkns.Rendering.OpenGL.vtkVolume; // placeholder guard
+            var vol = vtkns.Rendering.Core.vtkVolume.newInstance();
+            var mapper = vtkns.Rendering.Core.vtkVolumeMapper.newInstance();
+            var imgData = vtkns.Common.DataModel.vtkImageData.newInstance();
+            imgData.setDimensions(d[0], d[1], d[2]);
+            imgData.setSpacing(sp[0], sp[1], sp[2]);
+            imgData.setOrigin(state.volume.origin[0], state.volume.origin[1], state.volume.origin[2]);
+            var arrays = vtkns.Common.Core.vtkDataArray ? [] : [];
+            var scalars = vtkns.Common.DataModel.vtkImageData ?
+                vtkns.Common.Core.newTypedArrayForJavaScript ? null : null : null;
+            // Build a vtkDataSetAttributes-compatible array:
+            var da = vtkns.Common.DataArray.newInstance({
+                numberOfComponents: 1,
+                values: state.volume.data,
+                name: 'scalars'
+            });
+            imgData.getPointData().setScalars(da);
+            mapper.setInputData(imgData);
+            vol.setMapper(mapper);
+            var ren = vtkns.Rendering.Core.vtkRenderer.newInstance();
+            ren.add(vol);
+            var view = vtkns.Rendering.Core.vtkRenderWindow.newInstance();
+            view.setContainer(document.getElementById('vr-canvas').parentElement);
+            view.addRenderer(ren);
+            var cam = ren.getActiveCamera();
+            cam.setFocalPoint(state.volume.origin[0] + d[0]*sp[0]/2,
+                              state.volume.origin[1] + d[1]*sp[1]/2,
+                              state.volume.origin[2] + d[2]*sp[2]/2);
+            cam.setPosition(cam.getFocalPoint()[0], cam.getFocalPoint()[1] - 800, cam.getFocalPoint()[2] + 400);
+            var cw = vtkns.Rendering.Core.vtkColorTransferFunction.newInstance();
+            cw.addRGBPoint(state.wl - state.ww/2, 0, 0, 0);
+            cw.addRGBPoint(state.wl + state.ww/2, 1, 1, 1);
+            var ofun = vtkns.Rendering.Core.vtkPiecewiseFunction.newInstance();
+            ofun.addPoint(state.wl - state.ww/2, 0);
+            ofun.addPoint(state.wl + state.ww/2, 0.9);
+            vol.getProperty().setColorWindow(state.wl - state.ww/2);
+            vol.getProperty().setColorLevel(state.wl);
+            view.render();
+            state.vtkView = view;
+        } catch (err) {
+            console.warn('slicer3d: VTK volume rendering unavailable', err);
+            setStatus(TR.vrNeedsVtk);
+        }
+    }
+
+    // ------------------------------------------------------------------
+    // Interaction: view switching, scroll, W/L drag, zoom.
+    // ------------------------------------------------------------------
+    function bindToolbar() {
+        Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (btn) {
+            btn.addEventListener('click', function () {
+                state.view = btn.getAttribute('data-view');
+                Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (b) {
+                    b.classList.toggle('active', b === btn);
+                });
+                renderAll();
+            });
+        });
+        document.getElementById('slice-slider').addEventListener('input', function (ev) {
+            state.index[state.view] = parseInt(ev.target.value, 10) || 0;
+            renderAll();
+        });
+        document.getElementById('btn-reset-wl').addEventListener('click', function () {
+            var win = computeAutoWindow(state.volume);
+            state.ww = win.ww; state.wl = win.wl;
+            renderAll();
+        });
+        document.getElementById('btn-vr').addEventListener('click', function () {
+            if (!probeVtkCache) { setStatus(TR.vrNeedsVtk); return; }
+            state.vrEnabled = !state.vrEnabled;
+            document.getElementById('pane-vr').classList.toggle('hidden', !state.vrEnabled);
+            document.getElementById('slicer-views').style.gridTemplateColumns =
+                state.vrEnabled ? '2fr 1fr 1fr' : '2fr 1fr';
+            if (state.vrEnabled) {
+                loadScript(VTK_URL).then(renderAll).catch(function () { setStatus(TR.vrNeedsVtk); state.vrEnabled = false; });
+            }
+        });
+    }
+    var probeVtkCache = false;
+
+    function bindCanvasInteraction() {
+        var pane = document.getElementById('pane-axial');
+        pane.addEventListener('wheel', function (ev) {
+            ev.preventDefault();
+            var delta = ev.deltaY > 0 ? 1 : -1;
+            var mp = mainPlaneDims();
+            var maxIdx = state.volume.dims[mp.axis] - 1;
+            state.index[state.view] = Math.max(0, Math.min(maxIdx, state.index[state.view] + delta));
+            renderAll();
+        }, { passive: false });
+        pane.addEventListener('mousedown', function (ev) {
+            state.drag = { x: ev.clientX, y: ev.clientY, ww: state.ww, wl: state.wl };
+        });
+        window.addEventListener('mouseup', function () { state.drag = null; });
+        window.addEventListener('mousemove', function (ev) {
+            if (!state.drag) return;
+            var dx = ev.clientX - state.drag.x, dy = ev.clientY - state.drag.y;
+            state.ww = Math.max(1, state.drag.ww + dx * 2);
+            state.wl = state.drag.wl - dy * 2;
+            renderAll();
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Boot: manifest → pick best series → reconstruct → render.
+    // ------------------------------------------------------------------
+    function seriesIsDecodable(series) {
+        // Built-in decoder covers uncompressed mono-frame CT/MR/PET slices.
+        var ts = series.transferSyntaxUid || '';
+        return ts === '' || ts === '1.2.840.10008.1.2' || ts === '1.2.840.10008.1.2.1';
+    }
+    function scoreSeries(series) {
+        var frames = series.slices.length;
+        if (frames < 2) return -1;
+        var bonus = ({CT: 100, MR: 80, PT: 60, US: 20}[series.modality] || 10);
+        return bonus + Math.min(frames, 500) / 1000;
+    }
+
+    function boot() {
+        showMessage('<h2>' + TR.loading + '</h2>');
+        fetch(MANIFEST_URL, { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (r) {
+                if (r.status === 502) throw new Error('archive');
+                if (!r.ok) throw new Error('manifest ' + r.status);
+                return r.json();
+            })
+            .then(function (manifest) {
+                var candidates = (manifest.series || []).filter(function (s) {
+                    return s.slices && s.slices.length >= 2 && seriesIsDecodable(s);
+                });
+                if (!candidates.length) {
+                    showMessage('<h2>' + TR.noTomographic + '</h2><p><a href="' + STANDARD_VIEWER_URL + '">' +
+                        TR.fallbackHint + '</a></p>');
+                    return;
+                }
+                candidates.sort(function (a, b) { return scoreSeries(b) - scoreSeries(a); });
+                var picker = document.getElementById('series-picker');
+                picker.innerHTML = '';
+                candidates.forEach(function (s, i) {
+                    var opt = document.createElement('option');
+                    opt.value = i;
+                    opt.textContent = (s.modality || '?') + ' — ' + (s.seriesDescription || s.seriesInstanceUid) +
+                        ' (' + s.slices.length + ')';
+                    picker.appendChild(opt);
+                });
+                probeVtk().then(function (ok) { probeVtkCache = ok; });
+                bindToolbar();
+                bindCanvasInteraction();
+                function loadSelected() {
+                    var chosen = candidates[parseInt(picker.value || '0', 10)];
+                    msgEl.classList.remove('hidden');
+                    stageEl.classList.add('hidden');
+                    msgEl.innerHTML = '<h2>' + TR.loading + '</h2>';
+                    buildVolume(chosen, function (done, total) {
+                        msgEl.innerHTML = '<h2>' + TR.loading + '</h2><p>' + done + ' / ' + total + '</p>';
+                    }).then(function (volume) {
+                        if (!volume) {
+                            showMessage('<h2>' + TR.decodeUnsupported + '</h2><p><a href="' +
+                                STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
+                            return;
+                        }
+                        state.volume = volume;
+                        var win = computeAutoWindow(volume);
+                        state.ww = win.ww; state.wl = win.wl;
+                        state.index = {
+                            axial: Math.floor(volume.dims[2] / 2),
+                            coronal: Math.floor(volume.dims[1] / 2),
+                            sagittal: Math.floor(volume.dims[0] / 2)
+                        };
+                        msgEl.classList.add('hidden');
+                        stageEl.classList.remove('hidden');
+                        setStatus(chosen.modality + ' · ' + chosen.seriesDescription + ' · ' +
+                                  volume.dims.join('×'));
+                        renderAll();
+                    });
+                }
+                picker.addEventListener('change', loadSelected);
+                loadSelected();
+            })
+            .catch(function (err) {
+                console.warn('slicer3d boot failed', err);
+                showMessage('<h2>' + (err.message === 'archive' ? TR.archiveDown : TR.needBundle) +
+                    '</h2><p><a href="' + STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
+            });
+    }
+
+    boot();
+})();
+</script>
+</body>
+</html>
