@@ -63,17 +63,15 @@
     "1.2.840.10008.1.2.4.70"
   ],
 
-  // Plugin activation. In orthancteam/orthanc:25.9.3 these plugins are
-  // pre-installed; listing them here enables them explicitly.
-  // DICOMweb is enabled but remains private to the service network until the
-  // Phase 4/4.3 authentication review. PostgreSQL index plugin is intentionally
-  // NOT enabled in development/staging (default filesystem store + local
-  // index); see docs/PACS_IMPLEMENTATION.md §2.3 for the production plan.
-  "Plugins": [
-    "/usr/local/share/orthanc/plugins",
-    "/usr/local/lib/orthanc/db"
-  ],
-  "EnableDICOMweb": true,
+  // Plugin activation. The orthancteam/orthanc image preinstalls plugins under
+  // /usr/share/orthanc/plugins; defining DicomWeb.Enable activates the plugin.
+  // DICOMweb remains private to the service network: REST has no host mapping,
+  // and browser traffic must pass through the audited Django proxy.
+  "Plugins": ["/usr/share/orthanc/plugins/"],
+  "DicomWeb": {
+    "Enable": true,
+    "Root": "/dicom-web/"
+  },
   "EnableOnlineDeployment": false,
 
   // Object storage path (persistent named volume `orthanc-db` in compose).

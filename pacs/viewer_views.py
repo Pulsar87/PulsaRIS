@@ -4,12 +4,11 @@ Serves the pinned, prebuilt OHIF standalone bundle *same-origin* under
 ``/static/ohif/`` and renders it full-screen for one study at a time. Design
 decisions, all traceable to the plan:
 
-- Per-study entry point (``/pacs/studies/<uuid>/viewer/``): the viewer is
-  opened from an authorized PACS study page, never as a free-standing study
-  list. The StudyInstanceUID travels in the URL hash only (not logs of other
-  apps), and images/metadata are fetched through the audited Django DICOMweb
-  proxy — the browser never receives Orthanc credentials or internal URLs
-  (plan §3 trust boundary, Task 4.2 retrieval rules).
+- Per-study entry point: the StudyInstanceUID is resolved only through the
+  user's facility-scoped studies, and images/metadata are fetched through
+  the audited Django DICOMweb proxy — the browser never receives Orthanc
+  credentials or internal URLs (plan §3 trust boundary, Task 4.2 retrieval
+  rules).
 - Access control identical to the existing retrieval views: facility-scoped
   mirror row lookup first (404 across facilities), audit record before any
   pixel data flows.
@@ -20,7 +19,7 @@ decisions, all traceable to the plan:
 import logging
 
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
@@ -29,6 +28,7 @@ from django.views.decorators.http import require_GET
 
 from clinic.permissions import record_audit
 from pacs import dicomweb_proxy, reconciliation
+from pacs.dicom_uid import is_valid_dicom_uid
 from pacs.models import StudyStatus
 from pacs.views import _no_phi_cache, _study_or_404
 
@@ -37,10 +37,55 @@ logger = logging.getLogger(__name__)
 
 @require_GET
 @login_required
-def study_viewer(request, pk):
+def study_viewer(request, pk, study_uid=None):
     """Full-screen OHIF page bound to one facility-scoped study."""
     study = _study_or_404(request, pk)
 
+    if study_uid is not None and study_uid != study.study_instance_uid:
+        raise Http404
+
+    return _render_study_viewer(request, study)
+
+
+@require_GET
+@login_required
+def study_viewer_by_uid(request, study_uid):
+    """Serve OHIF's native ``/viewer/:studyInstanceUIDs`` route safely."""
+    if not is_valid_dicom_uid(study_uid):
+        raise Http404
+    study = reconciliation.scoped_studies(request.user).filter(
+        study_instance_uid=study_uid
+    ).first()
+    if study is None:
+        raise Http404
+    return _render_study_viewer(request, study)
+
+
+@require_GET
+@login_required
+def study_viewer_query(request):
+    """Accept a query-string study link and redirect to OHIF's native route."""
+    uid_values = (
+        request.GET.getlist("studyInstanceUIDs")
+        + request.GET.getlist("StudyInstanceUIDs")
+    )
+    study_uid = uid_values[0].strip() if len(uid_values) == 1 else ""
+    if not is_valid_dicom_uid(study_uid):
+        return HttpResponse(
+            "A single valid StudyInstanceUIDs value is required.",
+            status=400,
+        )
+
+    study = reconciliation.scoped_studies(request.user).filter(
+        study_instance_uid=study_uid
+    ).first()
+    if study is None:
+        raise Http404
+    return redirect("pacs:study_viewer_uid", study_uid=study.study_instance_uid)
+
+
+def _render_study_viewer(request, study):
+    """Render the configured OHIF application for an authorized study."""
     if not study.orthanc_study_id or study.status == StudyStatus.RECEIVED:
         # Not synced into the archive yet — nothing for the viewer to show.
         return redirect("pacs:study_detail", pk=study.pk)
@@ -54,18 +99,20 @@ def study_viewer(request, pk):
         new={"accession": study.accession_number, "viewer": "ohif"},
     )
 
-    # DICOMweb roots for OHIF = our own same-origin proxy, namespaced by the
-    # Orthanc study id so every viewer request is prefix-checked server-side.
-    # Orthanc's DICOMweb answers ``.../studies/<id>/...`` under a per-study
-    # root; appending ``/studies`` yields exactly that shape.
-    proxy_root = reverse("pacs:dicomweb_proxy", args=[study.orthanc_study_id])
-    qido_root = proxy_root + "/studies"
-    wado_root = proxy_root + "/studies"
+    # OHIF expects roots at the DICOMweb service level and appends
+    # /studies[/<StudyInstanceUID>...]. The opaque Orthanc id is a separate
+    # scope segment consumed by Django, not forwarded to Orthanc.
+    proxy_root = reverse(
+        "pacs:dicomweb_proxy",
+        kwargs={"scope_id": study.orthanc_study_id, "path": ""},
+    ).rstrip("/")
+    router_basename = reverse("pacs:study_list").rstrip("/")
 
     context = {
         "study": study,
-        "qido_root": qido_root,
-        "wado_root": wado_root,
+        "qido_root": proxy_root,
+        "wado_root": proxy_root,
+        "router_basename": router_basename,
         "ohif_static_url": static("ohif/index.umd.js"),
     }
     response = render(request, "pacs/viewer.html", context)
@@ -74,15 +121,20 @@ def study_viewer(request, pk):
 
 @csrf_exempt  # DICOMweb clients do not send Django CSRF tokens; auth is the session.
 @login_required
-def dicomweb_proxy_view(request, path=""):
+def dicomweb_proxy_view(request, scope_id, path=""):
     """Audited QIDO-RS/WADO-RS proxy: browser ⇄ Django ⇄ private Orthanc.
 
-    ``path`` captures everything after ``/pacs/viewer/dicomweb/``. All real
-    validation/authorization happens in :mod:`pacs.dicomweb_proxy`.
+    ``scope_id`` pins every request to the Orthanc study that opened this
+    viewer; ``path`` contains the standard DICOMweb route from OHIF.
     """
     segments = [s for s in path.split("/") if s]
     try:
-        status, headers, body = dicomweb_proxy.fetch(request, segments, request.META.get("QUERY_STRING", ""))
+        status, headers, body = dicomweb_proxy.fetch(
+            request,
+            scope_id,
+            segments,
+            request.META.get("QUERY_STRING", ""),
+        )
     except dicomweb_proxy.DicomWebRequestError as exc:
         resp = HttpResponse(exc.detail or "", status=exc.status)
         return _no_phi_cache(resp)
@@ -92,7 +144,7 @@ def dicomweb_proxy_view(request, path=""):
     # metadata call the viewer makes while scrolling.
     if len(segments) >= 4 and segments[-1] == "file":
         study = reconciliation.scoped_studies(request.user).filter(
-            orthanc_study_id=segments[1]
+            orthanc_study_id=scope_id
         ).first()
         if study is not None:
             record_audit(

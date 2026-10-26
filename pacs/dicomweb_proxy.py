@@ -9,26 +9,15 @@ private Orthanc REST/DICOMweb endpoint using the service-to-service
 credentials from settings — the same pattern already used by
 ``pacs.views.retrieve_dicom`` for ZIP retrieval.
 
-Two layers of authorization, mirroring the existing retrieval views:
-
-1. **Prefix scoping** — every proxied path must live under a study prefix
-   (``studies/<orthanc-study-id>/...`` or the legacy ``searches/...`` QIDO
-   form). Instance/series ids are validated *by the archive* (Orthanc resolves
-   them), then checked against the mirror row below.
-2. **Facility scope after archive resolution** — whenever the response
-   reveals which Orthanc study the data belongs to (a ``ParentStudy`` field,
-   a resolved DICOM-level UID, or the prefix itself), the orthanc study id is
-   matched against ``reconciliation.scoped_studies(user)``. A cross-facility
-   guess returns 404 (existence is never leaked), exactly like ``_study_or_404``.
-
-The browser only ever sees session-authenticated Django URLs; Orthanc's host,
-port, username and password stay server-side. Responses carry PHI, so they get
-the same ``no-store`` cache headers as the rest of the PACS module.
+Every proxy URL carries the opaque Orthanc study id as a separate scope
+segment. The id must belong to a study in the user's facility scope, and each
+standard DICOMweb request is constrained to that study's DICOM Study Instance
+UID. Responses carry PHI, so they get the same ``no-store`` cache headers as
+the rest of the PACS module.
 """
 
 import json
 import logging
-import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -36,17 +25,9 @@ import urllib.request
 from django.conf import settings
 
 from pacs import reconciliation
+from pacs.dicom_uid import is_valid_dicom_uid
 
 logger = logging.getLogger(__name__)
-
-# Orthanc internal resource ids (letters/digits/_/- up to 64 chars).
-ORTHANC_ID_RE = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
-# DICOM UIDs appearing in QIDO/WADO paths.
-UID_RE = re.compile(r"^[0-9.]{1,64}$")
-
-# Prefixes accepted after ``dicomweb/``. Everything else is refused before any
-# archive request is made (allowlist beats deny-list here).
-_ALLOWED_PREFIXES = ("studies", "searches")
 
 _MAX_RESPONSE_BYTES = getattr(settings, "PACS_RETRIEVE_MAX_BYTES", 536870912)
 
@@ -93,88 +74,33 @@ def _auth_header():
     return {"Authorization": f"Basic {token}"}
 
 
-def _study_id_in_prefix(path_parts):
-    """Return the orthanc study id if the path is rooted at studies/<id>.
-
-    ``path_parts`` is the list of already-decoded path segments after
-    ``dicomweb/``. Raises DicomWebRequestError on malformed prefixes.
-    """
-    if not path_parts or path_parts[0] not in _ALLOWED_PREFIXES:
+def _authorize(user, scope_id, path_parts, query):
+    """Validate one DICOMweb request and constrain it to its viewer's study."""
+    study_uid = reconciliation.scoped_studies(user).filter(
+        orthanc_study_id=scope_id
+    ).values_list("study_instance_uid", flat=True).first()
+    if not study_uid:
+        raise DicomWebRequestError(404, "study not found in your scope")
+    if not path_parts or path_parts[0] != "studies":
         raise DicomWebRequestError(404, "unsupported DICOMweb route")
-    if path_parts[0] == "searches":
-        # Legacy Orthanc QIDO form: /searches/studies?... The query itself is
-        # answered by the archive within its whole index; the viewer can only
-        # reach this through our own study pages, and results contain metadata
-        # rows whose StudyInstanceUID we still resolve per-request below when
-        # fetched. Kept restricted to GET with no further resource segments.
-        if len(path_parts) != 2 or path_parts[1] != "studies":
-            raise DicomWebRequestError(404, "unsupported DICOMweb route")
-        return None
-    # studies/<id>[/<series>[/<instance>[/...]]]
-    if len(path_parts) < 2 or not ORTHANC_ID_RE.match(path_parts[1]):
-        raise DicomWebRequestError(404, "invalid study resource id")
-    return path_parts[1]
+    if any(part in (".", "..") or "\\" in part for part in path_parts):
+        raise DicomWebRequestError(404, "invalid DICOMweb path")
 
-
-def _check_study_scope(user, orthanc_study_id):
-    """404 unless the orthanc study id belongs to a study in the user's scope."""
-    qs = reconciliation.scoped_studies(user)
-    if not qs.filter(orthanc_study_id=orthanc_study_id).exists():
+    params = urllib.parse.parse_qsl(query or "", keep_blank_values=True)
+    requested_uids = [
+        value for key, value in params if key.lower() == "studyinstanceuid"
+    ]
+    if any(value != study_uid for value in requested_uids):
         raise DicomWebRequestError(404, "study not found in your scope")
 
-
-def _resolve_uid_to_study_id(uid):
-    """Map a DICOM StudyInstanceUID to its Orthanc study id via lookup."""
-    url = f"{_base_url()}/resources/{uid}/lookup"
-    data = json.dumps({"ExpandLevels": False}).encode()
-    req = urllib.request.Request(
-        url,
-        data=data,
-        method="POST",
-        headers={
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            **_auth_header(),
-        },
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=settings.PACS_ORTHANC_TIMEOUT_SECONDS) as r:
-            payload = json.loads(r.read().decode())
-    except (urllib.error.URLError, TimeoutError, OSError, ValueError):
-        raise DicomWebRequestError(502, "archive unavailable")
-    if isinstance(payload, dict) and payload.get("ID") and ORTHANC_ID_RE.match(str(payload["ID"])):
-        return str(payload["ID"])
-    return None
-
-
-def _authorize(user, path_parts, query):
-    """Validate + authorize one proxied request.
-
-    Returns the (possibly ``None``) orthanc study id governing the request.
-    Any path that names a concrete resource is checked against the mirror;
-    global search parameters naming a specific StudyInstanceUID are resolved
-    and checked too, so URL manipulation cannot widen scope.
-    """
-    study_id = _study_id_in_prefix(path_parts)
-
-    if study_id is not None:
-        _check_study_scope(user, study_id)
-        return study_id
-
-    # /searches/studies?StudyInstanceUID=... → pin to that study's scope.
-    params = urllib.parse.parse_qs(query or "")
-    uid_list = params.get("StudyInstanceUID") or []
-    if uid_list:
-        uid = uid_list[0].strip()
-        # Support '*' wildcard and '=' exact / '@' fuzzy forms minimally.
-        m = re.match(r"^(?:=?)([0-9.]{1,64})$", uid)
-        if m:
-            sid = _resolve_uid_to_study_id(m.group(1))
-            if sid:
-                _check_study_scope(user, sid)
-                return sid
-            raise DicomWebRequestError(404, "study not found in your scope")
-    return None
+    if len(path_parts) == 1:
+        # QIDO-RS collection queries are always pinned to this one UID.
+        if not requested_uids:
+            params.append(("StudyInstanceUID", study_uid))
+        query = urllib.parse.urlencode(params, doseq=True)
+    elif path_parts[1] != study_uid or not is_valid_dicom_uid(path_parts[1]):
+        raise DicomWebRequestError(404, "study not found in your scope")
+    return query
 
 
 def _upstream_headers(extra=None):
@@ -184,15 +110,16 @@ def _upstream_headers(extra=None):
     return headers
 
 
-def fetch(request, sub_path, query):
+def fetch(request, scope_id, sub_path, query):
     """Proxy one authenticated DICOMweb request to the private archive.
 
-    ``sub_path``: decoded path segments after ``dicomweb/`` (list of str).
+    ``scope_id``: opaque Orthanc id for the authorized viewer study.
+    ``sub_path``: decoded standard DICOMweb segments after the scope id.
     ``query``: raw query string (may be empty).
     Returns ``(status, response_headers_dict, body_bytes)``.
     Raises DicomWebRequestError for refused/unauthorized requests.
     """
-    study_id = _authorize(request.user, sub_path, query)
+    query = _authorize(request.user, scope_id, sub_path, query)
 
     # Rebuild the upstream path with safe re-quoting of each segment.
     encoded = "/".join(urllib.parse.quote(p, safe="") for p in sub_path)
@@ -240,12 +167,10 @@ def fetch(request, sub_path, query):
     }
     out_headers.setdefault("Content-Type", "application/octet-stream")
 
-    # Defense-in-depth: if the JSON body names a parent study (single-resource
-    # metadata endpoints), confirm it matches the authorized prefix. Mismatch
-    # would indicate archive inconsistency — refuse rather than serve.
+    # Defense-in-depth: confirm any returned parent-study id matches the
+    # authorized Orthanc scope.
     if (
-        study_id is not None
-        and len(sub_path) >= 3
+        len(sub_path) >= 3
         and "json" in out_headers.get("Content-Type", "").lower()
         and payload
     ):
@@ -256,7 +181,7 @@ def fetch(request, sub_path, query):
         parent = None
         if isinstance(parsed, dict):
             parent = parsed.get("ParentStudy")
-        if parent and parent != study_id:
+        if parent and parent != scope_id:
             raise DicomWebRequestError(404, "resource does not belong to this study")
 
     return status, out_headers, payload

@@ -47,43 +47,54 @@
         </p>
     </div>
 
-    <script>
-        // Per-request OHIF configuration. Only same-origin Django URLs appear
-        // here — never Orthanc hostnames or archive credentials (plan §3).
-        window.config = {
-            routerBasename: '/pacs/viewer/',
-            showStudyList: false,
-            extensions: [],
-            modeInstances: [],
-            dataSources: [{
-                dataSourceKey: 'RisPacs',
-                dhb: {
-                    maxQidResults: 512,
-                    qidoRoot: '{{ qido_root|escapejs }}',
-                    wadoRoot: '{{ wado_root|escapejs }}',
-                    qidoSupportsIncludeField: false,
-                    imageRendering: 'wadors',
-                    thumbnailRendering: 'wadors',
-                    enableStudyLazyLoad: true,
-                    supportsFuzzyMatching: false,
-                },
-            }],
-            authentication: {
-                authorizationCheck: function () { return true; },
+<script>
+    window.config = {
+    // Falls back gracefully if your Django context variable is empty
+    routerBasename: '{{ router_basename|escapejs }}',
+    showStudyList: false,
+    extensions: [],
+    modes: [],
+    // ⚡ OHIF v3/v4 uses dataSources instead of 'servers'
+    dataSources: [
+        {
+            namespace: '@ohif/extension-default.dataSourcesModule.dicomweb',
+            type: 'dicomweb',
+            configuration: {
+                name: 'RisPacs',
+                // Force an absolute route structure so it doesn't append to browser paths
+                qidoRoot: '{{ qido_root|escapejs }}',
+                wadoRoot: '{{ wado_root|escapejs }}',
+                //wadoUriRoot: '{{ qido_root|escapejs }}', // Often targets same endpoint
+                wadoUriRoot: '{{ wado_root|escapejs }}',
+                qidoSupportsIncludeField: true,
+                supportsReject: false,
+                imageRendering: 'wadors',
+                thumbnailRendering: 'wadors',
+                enableStudyLazyLoad: true,
+                supportsFuzzyMatching: false,
             },
-            listModeOptions: { hidePatientId: true },
-            hideExportButton: true,
-            queryOnLoad: true,
-            OIDC: { clientIds: {} },
-        };
-    </script>
-    <script src="{{ ohif_static_url }}" onerror="document.getElementById('ris-viewer-fallback').style.display='block';"></script>
-    <script>
-        if (window.OHIFViewer && typeof window.OHIFViewer.installViewer === 'function') {
-            window.OHIFViewer.installViewer(window.config, 'root');
-        } else {
-            document.getElementById('ris-viewer-fallback').style.display = 'block';
+        },
+    ],
+    defaultDataSourceName: 'RisPacs',
+    authentication: { authorizationCheck: function () { return true; } },
+    hideExportButton: true,
+    queryOnLoad: true,
+};
+</script>
+<script src="{{ ohif_static_url }}" onerror="document.getElementById('ris-viewer-fallback').style.display='block';"></script>
+<script>
+    if (window.OHIFViewer && typeof window.OHIFViewer.installViewer === 'function') {
+        const uid = '{{ study.study_instance_uid|escapejs }}';
+        const target = window.config.routerBasename.replace(/\/$/, '') + '/viewer/' + encodeURIComponent(uid);
+        if (window.location.pathname !== target) {
+            window.history.replaceState({}, '', target);
         }
-    </script>
+        // Set the deep link before OHIF initializes its router so it can
+        // resolve the study route on first load and after a page refresh.
+        window.OHIFViewer.installViewer(window.config, 'root');
+    } else {
+        document.getElementById('ris-viewer-fallback').style.display = 'block';
+    }
+</script>
 </body>
 </html>

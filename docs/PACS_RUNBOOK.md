@@ -110,6 +110,8 @@ docker compose start orthanc
 | Same SOP Instance UID retransmitted, identical content | Idempotent; no duplicate objects (`CheckIncomingIntegrity` on). |
 | Same SOP Instance UID, different content | Rejected/surfaced by integrity checks — never silent overwrite. |
 | Orthanc down | Health check goes unhealthy; Django/Celery unaffected; sync jobs retry (Phase 2); operators alerted via container health. |
+| OHIF shows “Sorry, this page does not exist” | Use the OHIF route `/pacs/viewer/<StudyInstanceUID>`; do not nest the RIS study UUID in the OHIF path. `/pacs/viewer?studyInstanceUIDs=<StudyInstanceUID>` is accepted and redirects to the native route. Both resolve only studies visible to the signed-in user's facility. |
+| OHIF DICOMweb request returns Orthanc `404 Unknown resource` | Confirm `GET /plugins` lists DICOMweb and authenticated `GET /dicom-web/studies` works from the private network. The runtime config must define `DicomWeb: { "Enable": true, "Root": "/dicom-web/" }`; restart Orthanc after changing the entrypoint/config. |
 | Container recreation | Data persists on `orthanc-db`; verify counts after recreate. |
 | Missing secret env vars | Compose/entrypoint fail fast with a clear message (no default credentials anywhere). |
 
@@ -126,7 +128,11 @@ docker compose start orthanc
 `docker compose ps` (health?) → `docker compose logs orthanc` → exec probe
 manually: `docker compose exec orthanc sh /opt/ris-orthanc/healthcheck.sh` →
 check volume mount/disk space → restart `orthanc` alone (safe: stateless
-process over persistent volume) → escalate with restore drill §5 if corrupted.
+process over persistent volume). For OHIF `404 Unknown resource` responses,
+verify the DICOMweb plugin is listed by `GET /plugins` and that
+`/dicom-web/studies` responds from within the private network; then restart
+Orthanc so its runtime config is regenerated. Escalate with restore drill §5
+if the archive is corrupted.
 
 ## 10. Pending before production (honest status)
 

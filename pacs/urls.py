@@ -42,11 +42,30 @@ urlpatterns = [
         viewer_views.study_viewer,
         name="study_viewer",
     ),
-    # Task 4.3 — audited QIDO-RS/WADO-RS proxy used by the OHIF bundle.
-    # ``subpath`` is everything after "dicomweb/" (e.g. studies/<id>/metadata);
-    # authorization happens per-request inside pacs.dicomweb_proxy.
+    # OHIF's study route must also resolve on refresh/deep-link navigation.
+    path(
+        "studies/<uuid:pk>/viewer/viewer/<str:study_uid>",
+        viewer_views.study_viewer,
+        name="study_viewer_study",
+    ),
+    # Standard OHIF route: routerBasename="/pacs" + /viewer/:studyInstanceUIDs.
     re_path(
-        r"^viewer/dicomweb/(?P<path>.*)$",
+        r"^viewer/(?P<study_uid>[0-9.]+)$",
+        viewer_views.study_viewer_by_uid,
+        name="study_viewer_uid",
+    ),
+    # Query-string entry point retained for links such as
+    # /pacs/viewer?studyInstanceUIDs=<UID>; it redirects to OHIF's native route.
+    re_path(
+        r"^viewer/?$",
+        viewer_views.study_viewer_query,
+        name="study_viewer_query",
+    ),
+    # Task 4.3 — audited QIDO-RS/WADO-RS proxy used by the OHIF bundle.
+    # ``scope_id`` pins the proxy to one Orthanc study; ``path`` is the
+    # standard DICOMweb path appended by OHIF (e.g. studies/<UID>/metadata).
+    re_path(
+        r"^viewer/dicomweb/(?P<scope_id>[A-Za-z0-9_-]{1,64})/(?P<path>.*)$",
         viewer_views.dicomweb_proxy_view,
         name="dicomweb_proxy",
     ),
