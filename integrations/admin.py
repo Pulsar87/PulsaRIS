@@ -1,3 +1,3 @@
 from django.contrib import admin
 
-# Register your models here.
+from integrations.hl7.admin import *  # noqa: F401,F403 — registers HL7VitalMessageAdmin

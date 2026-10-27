@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "reports",
     "pacs",  # PACS archive integration (Orthanc metadata mirror + sync worker)
     "integrations",
+    "integrations.hl7.apps.Hl7ListenerConfig",  # HL7 v2 lab/vitals listener (MLLP service)
     "billing",  # Financial/Billing module
     "inventory",  # Radiology consumables inventory
     "dashboard",  # Dashboard and statistics
@@ -244,6 +245,36 @@ PACS_RETRIEVE_TIMEOUT_SECONDS = env.int("PACS_RETRIEVE_TIMEOUT_SECONDS", default
 # audited Django proxy (/pacs/viewer/dicomweb/...), so no archive credentials
 # or internal Orthanc URLs ever reach the browser.
 PACS_OHIF_VERSION = env("PACS_OHIF_VERSION", default="4.12.51")
+
+# ─────────────────────────────────────────────────────────────
+# HL7 v2 laboratory / vital-signs listener (integrations.hl7)
+# Ported from hl7_lab_listener_edan_vitals_postgres_columns.py. The MLLP
+# service runs as a management command (`python manage.py run_hl7_listener`)
+# and stores every received message — raw, parsed JSON and dedicated vital
+# columns — in the SAME PostgreSQL database the app uses (DATABASES["default"]).
+# Run it as its own container/worker; never inside the gunicorn web workers.
+# ─────────────────────────────────────────────────────────────
+HL7_LISTENER = {
+    "ENABLED": env.bool("HL7_LISTENER_ENABLED", default=True),
+    "MODE": env("HL7_MODE", default="listen"),                # listen | connect
+    "HOST": env("HL7_HOST", default="0.0.0.0"),
+    "PORT": env.int("HL7_PORT", default=2575),
+    "DEVICE_HOST": env("HL7_DEVICE_HOST", default=""),
+    "DEVICE_PORT": env.int("HL7_DEVICE_PORT", default=2575),
+    "FRAMING": env("HL7_FRAMING", default="mllp"),            # mllp | raw-idle
+    "RAW_IDLE_SECONDS": env.float("HL7_RAW_IDLE_SECONDS", default=1.0),
+    "ACK_MODE": env("HL7_ACK_MODE", default="always"),        # always | never
+    "ACK_FRAMING": env("HL7_ACK_FRAMING", default="same"),    # same | mllp | raw
+    "DEDUPE": env("HL7_DEDUPE", default="control-id"),        # control-id | payload | none
+    "ALLOW_EMPTY_CONTROL_ID": env.bool("HL7_ALLOW_EMPTY_CONTROL_ID", default=False),
+    "ENCODING": env("HL7_ENCODING", default="utf-8"),
+    "OUR_APP": env("HL7_OUR_APP", default="HL7_RECEIVER"),
+    "OUR_FACILITY": env("HL7_OUR_FACILITY", default="LAB"),
+    "MAX_MESSAGE_BYTES": env.int("HL7_MAX_MESSAGE_BYTES", default=10 * 1024 * 1024),
+    "RECONNECT_SECONDS": env.float("HL7_RECONNECT_SECONDS", default=5.0),
+    # Optional directory with exact raw copies of every message (PHI!).
+    "ARCHIVE_DIR": env("HL7_ARCHIVE_DIR", default=None),
+}
 
 # Periodic metadata sync cadence (Celery beat). The changes-feed cursor is
 # durable, so missed ticks are recovered by the next drain; no events lost.
