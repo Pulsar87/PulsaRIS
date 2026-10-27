@@ -18,10 +18,11 @@ decisions, all traceable to the plan:
 
 import json
 import logging
+import re
 
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse, JsonResponse
+from django.http import Http404, HttpResponse, JsonResponse, StreamingHttpResponse
 from django.shortcuts import redirect, render
 from django.templatetags.static import static
 from django.urls import reverse
@@ -155,10 +156,12 @@ def _render_study_viewer(request, study):
 def _render_slicer3d(request, study):
     """Render the advanced 3D Slicer (SlicerMZ) page for an authorized study.
 
-    Reuses the pinned OHIF bundle (which ships the VTK.js-backed 3D Slicer /
-    volume-rendering extension) but configures it with the TMTV/3D-Slicer
-    mode so the whole study loads into the advanced workstation. Images are
-    fetched exclusively through the same audited DICOMweb proxy as the
+    The workstation is *always available*: any study already present in the
+    archive can be opened here — single-slice images (CR/DX/secondary
+    captures) render as a full 2D image with window/level, pan and zoom,
+    multi-slice series additionally get MPR/volume reconstruction. Only
+    studies that have not been archived yet fall back to the detail page.
+    Images are fetched exclusively through the same audited proxy as the
     standard viewer — no archive credentials reach the browser.
     """
     if not study.orthanc_study_id or study.status == StudyStatus.RECEIVED:
@@ -190,8 +193,14 @@ def _render_slicer3d(request, study):
         # OHIF bundle — served same-origin, never from a CDN at runtime.
         # The template probes these and falls back to the standard viewer's
         # capabilities if the workstation bundle has not been installed yet.
-        "cs3d_core_url": static("slicer3d/cornerstone.min.js"),
-        "cs3d_tools_url": static("slicer3d/cornerstone-tools.min.js"),
+        # Raw-file feed (audited, facility-scoped): one original DICOM file
+        # per Orthanc instance. Works for *every* transfer syntax — the
+        # browser decodes uncompressed data itself and hands compressed
+        # files to WebAssembly codecs — so the workstation can open any
+        # DICOM image, not only tomographic series.
+        "files_url": reverse(
+            "pacs:study_slicer3d_files", kwargs={"pk": study.pk}
+        ),
         "vtk_url": static("slicer3d/vtk.min.js"),
         "manifest_url": reverse(
             "pacs:study_slicer3d_manifest", kwargs={"pk": study.pk}
@@ -359,9 +368,9 @@ def study_slicer3d_manifest(request, pk):
             continue
         shared = s.get("SharedTags") or {}
         modality = shared.get("Modality", "")
-        # Volume reconstruction applies to tomographic series only; skip
-        # SC/localizer shots and non-image series so the workstation does not
-        # attempt to resample them into a 3D volume.
+        # Skip empty series and non-image (SR) content; every *image*
+        # series is listed — single-slice projections included — so the
+        # workstation can open any DICOM image, not only 3D-capable ones.
         if not s.get("Instances") or modality == "SR":
             continue
         series_entries.append(_series_to_manifest(s, wado_base))
@@ -373,9 +382,92 @@ def study_slicer3d_manifest(request, pk):
         "maxResponseBytes": int(
             getattr(settings, "PACS_RETRIEVE_MAX_BYTES", 536870912)
         ),
+        # Raw-file feed consumed by the workstation page: one original
+        # DICOM file per instance, regardless of transfer syntax.
+        "filesUrl": reverse("pacs:study_slicer3d_files", kwargs={"pk": study.pk}),
         "series": series_entries,
     }
     response = JsonResponse(payload, json_dumps_params={"separators": (",", ":")})
+    return _no_phi_cache(response)
+
+
+@require_GET
+@login_required
+def study_slicer3d_files(request, pk):
+    """Stream every original DICOM file of one study as a multipart body.
+
+    The advanced 3D Slicer workstation needs the *whole* study in the
+    browser — including single-slice images (CR/DX/US/secondary captures),
+    which have no reconstructable volume and therefore never appear in the
+    geometry manifest's slice URLs in a usable form. Rather than making
+    the browser issue N sequential WADO requests, this endpoint walks the
+    facility-scoped Orthanc hierarchy server-side (service credentials stay
+    in Django) and returns all instances as one ``multipart/related`` body
+    of original ``application/dicom`` parts — exactly the format standard
+    viewers parse, for *any* transfer syntax.
+
+    Trust model unchanged from the other viewer routes: facility-scoped
+    mirror lookup first (404 across facilities), audit before pixel data
+    flows, and a total byte cap so a runaway archive object cannot exhaust
+    web memory.
+    """
+    study = _study_or_404(request, pk)
+    if not study.orthanc_study_id or study.status == StudyStatus.RECEIVED:
+        raise Http404
+
+    record_audit(
+        request,
+        "pacs.dicom_retrieve",
+        entity_type="PACSStudy",
+        entity_id=str(study.pk),
+        old=None,
+        new={"kind": "slicer3d-files"},
+    )
+
+    client = OrthancClient()
+    boundary = "ris-slicer3d"
+
+    def chunks():
+        yield f"--{boundary}\r\n".encode()
+        sent = 0
+        cap = int(getattr(settings, "PACS_RETRIEVE_MAX_BYTES", 536870912))
+        try:
+            data = client.get_study(study.orthanc_study_id, expand=True) or {}
+        except OrthancError as exc:
+            logger.warning("slicer3d files: archive error for study %s: %s", pk, exc)
+            # Mid-stream we can only signal truncation; the page detects the
+            # missing terminator and shows an archive-unavailable message.
+            return
+        for series in data.get("Series") or []:
+            if not isinstance(series, dict):
+                continue
+            shared = series.get("SharedTags") or {}
+            if shared.get("Modality", "") == "SR":
+                continue  # structured reports carry no pixels to display
+            for inst in series.get("Instances") or []:
+                if not isinstance(inst, dict) or not inst.get("ID"):
+                    continue
+                instance_id = str(inst["ID"])
+                if not re.match(r"^[A-Za-z0-9_-]{1,64}$", instance_id):
+                    continue
+                try:
+                    file_bytes = client.get_instance_file(instance_id)
+                except OrthancError:
+                    continue  # one unreadable instance must not sink the feed
+                if not file_bytes:
+                    continue
+                sent += len(file_bytes)
+                if sent > cap:
+                    return
+                yield b"Content-Type: application/dicom\r\n\r\n"
+                yield file_bytes
+                yield f"\r\n--{boundary}\r\n".encode()
+        yield f"--{boundary}--\r\n".encode()
+
+    response = StreamingHttpResponse(
+        chunks(),
+        content_type=f'multipart/related; type="application/dicom"; boundary={boundary}',
+    )
     return _no_phi_cache(response)
 
 

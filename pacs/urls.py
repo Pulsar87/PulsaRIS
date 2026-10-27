@@ -73,6 +73,14 @@ urlpatterns = [
         viewer_views.study_slicer3d_manifest,
         name="study_slicer3d_manifest",
     ),
+    # Advanced viewer data feed: every original DICOM file of the study as one
+    # multipart/related body, so the workstation can open *any* image series
+    # (single-slice projections included), independent of transfer syntax.
+    path(
+        "studies/<uuid:pk>/viewer/3d-slicer/files/",
+        viewer_views.study_slicer3d_files,
+        name="study_slicer3d_files",
+    ),
     # Query-string entry point retained for links such as
     # /pacs/viewer?studyInstanceUIDs=<UID>; it redirects to OHIF's native route.
     re_path(

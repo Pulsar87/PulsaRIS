@@ -58,6 +58,8 @@
         <span>{{ study.patient_name_as_received }}</span>
         <span class="spacer"></span>
         <span>{{ study.modality }} · {{ study.study_date|default:"" }}</span>
+        <button type="button" id="btn-open-any" style="background:#24313f;color:#dbe6f1;border:1px solid #38506b;border-radius:4px;padding:.2rem .6rem;cursor:pointer;font:inherit">{% trans 'Open any DICOM file…' %}</button>
+        <input type="file" id="open-any-input" accept=".dcm,.dicom,application/dicom" multiple hidden>
         <a href="{{ standard_viewer_url }}">{% trans 'Standard viewer (OHIF)' %}</a>
     </div>
 
@@ -70,6 +72,7 @@
             <button type="button" data-view="axial" class="active">{% trans 'Axial' %}</button>
             <button type="button" data-view="coronal">{% trans 'Coronal' %}</button>
             <button type="button" data-view="sagittal">{% trans 'Sagittal' %}</button>
+            <button type="button" data-view="image" style="display:none">{% trans '2D Image' %}</button>
             <label>{% trans 'Slice' %}
                 <input type="range" id="slice-slider" min="0" max="0" value="0" style="width:14rem">
             </label>
@@ -87,6 +90,7 @@
             <div class="slicer-pane" id="pane-axial"><canvas></canvas><div class="pane-label" id="label-main">Axial</div></div>
             <div class="slicer-pane" id="pane-coronal"><canvas></canvas><div class="pane-label">Coronal</div></div>
             <div class="slicer-pane" id="pane-sagittal"><canvas></canvas><div class="pane-label">Sagittal</div></div>
+            <div class="slicer-pane hidden" id="pane-image"><canvas></canvas><div class="pane-label" id="label-image">Image 1/1</div></div>
             <div class="slicer-pane hidden" id="pane-vr"><canvas id="vr-canvas"></canvas><div class="pane-label">3D</div></div>
         </div>
         <div id="slicer-status"></div>
@@ -112,6 +116,7 @@
     'use strict';
 
     var MANIFEST_URL = '{{ manifest_url|escapejs }}';
+    var FILES_URL = '{{ files_url|escapejs }}';
     var VTK_URL = '{{ vtk_url|escapejs }}';
     var STANDARD_VIEWER_URL = '{{ standard_viewer_url|escapejs }}';
     var TR = {
@@ -119,7 +124,10 @@
         noTomographic: '{% filter escapejs %}{% blocktrans %}This study has no tomographic series that can be reconstructed into a 3D volume. Please use the standard viewer.{% endblocktrans %}{% endfilter %}',
         archiveDown: '{% filter escapejs %}{% blocktrans %}The image archive could not be reached for reconstruction. Try again once sync recovers.{% endblocktrans %}{% endfilter %}',
         fallbackHint: '{% filter escapejs %}{% blocktrans %}Open it in the standard viewer instead.{% endblocktrans %}{% endfilter %}',
-        loading: '{% filter escapejs %}{% blocktrans %}Reconstructing volume…{% endblocktrans %}{% endfilter %}',
+        orOpenLocal: '{% filter escapejs %}{% blocktrans %}You can also open any DICOM file from disk with “Open any DICOM file…”.{% endblocktrans %}{% endfilter %}',
+        localFiles: '{% filter escapejs %}{% blocktrans %}Local files{% endblocktrans %}{% endfilter %}',
+        imagesSuffix: '{% filter escapejs %}{% blocktrans %}image(s){% endblocktrans %}{% endfilter %}',
+        loading: '{% filter escapejs %}{% blocktrans %}Loading study…{% endblocktrans %}{% endfilter %}',
         vrNeedsVtk: '{% filter escapejs %}{% blocktrans %}3D volume rendering requires the VTK.js bundle (run python manage.py pacs_fetch_slicer3d).{% endblocktrans %}{% endfilter %}',
         decodeUnsupported: '{% filter escapejs %}{% blocktrans %}This series uses a compressed transfer syntax that the built-in decoder cannot expand; open it in the standard viewer.{% endblocktrans %}{% endfilter %}'
     };
@@ -140,14 +148,18 @@
     // Returns raw pixel bytes plus the tags we need for reconstruction.
     // ------------------------------------------------------------------
     function parseDicom(buffer) {
+        // Accept File, ArrayBuffer or plain object with .arrayBuffer().
+        if (buffer && typeof buffer.arrayBuffer === 'function') {
+            return buffer.arrayBuffer().then(parseDicom);
+        }
         var dv = new DataView(buffer);
         var u8 = new Uint8Array(buffer);
         var out = {};
         if (u8.length >= 132 && String.fromCharCode(u8[128], u8[129], u8[130], u8[131]) === 'DICM') {
-            var preambleLen = 0;
-            while (preambleLen < 128 && u8[preambleLen] === 0x00) preambleLen++;
-            if (preambleLen > 0) return parseDicom(buffer.slice(preambleLen));
-            return null; // non-standard preamble: treat as unsupported
+            // Full part-10 file: parse in place — the meta-header walk below
+            // locates the dataset start and (0002,0010) selects the VR mode.
+            // (Orthanc's stored files have no preamble at all.)
+            out.hasMetaHeader = true;
         }
         var littleEndianExplicit = true;
         var pos = 0;
@@ -168,12 +180,35 @@
         }
         // Implicit-VR lookup for the tags we consume (plus skip-safe unknowns).
         var IMPLICIT_VR = {};
-        [['0008,0060','CS'],['0018,0050','DS'],['0018,0088','DS'],['0020,0032','DS'],
+        [['0008,0060','CS'],['0008,103E','LO'],['0018,0050','DS'],['0018,0088','DS'],['0020,0032','DS'],
          ['0020,0037','DS'],['0028,0002','US'],['0028,0004','CS'],['0028,0006','US'],
          ['0028,0008','IS'],['0028,0010','US'],['0028,0011','US'],['0028,0100','US'],
          ['0028,0101','US'],['0028,0103','US'],['0028,1050','DS'],['0028,1051','DS'],
          ['0028,1052','DS'],['0028,1053','DS'],['0028,2110','CS'],['7FE0,0010','OW']
         ].forEach(function (e) { IMPLICIT_VR[e[0]] = e[1]; });
+
+        // File-meta (part-10) preamble is explicit-VR with group 0002 tags;
+        // the dataset itself may still be implicit VR. Skip the meta header
+        // by locating (0002,0000) UL = remaining meta header size.
+        if (out.hasMetaHeader) {
+            var mpos = 132, mend = dv.byteLength, metaFound = false;
+            while (mpos + 8 <= Math.min(mend, 4096)) {
+                var mg = dv.getUint16(mpos, true), me = dv.getUint16(mpos + 2, true);
+                var mvr = asciiAt(mpos + 4, 2);
+                var mlen, mval;
+                if (mvr === 'OB' || mvr === 'OW' || mvr === 'OF' || mvr === 'SQ' ||
+                    mvr === 'UT' || mvr === 'UN') { mlen = dv.getUint32(mpos + 8, true); mval = mpos + 12; }
+                else { mlen = dv.getUint16(mpos + 6, true); mval = mpos + 8; }
+                if (mg === 0x0002 && me === 0x0000) {
+                    pos = mval + dv.getUint32(mval, true);
+                    metaFound = true;
+                    break;
+                }
+                if (mg !== 0x0002) break; // no group-2 length element: assume default offset
+                mpos = mval + mlen + (mlen % 2);
+            }
+            if (!metaFound) pos = 132;
+        }
 
         var UNDEF_KNOWN = {'7FE0,0010': true}; // PixelData: encap or undefined length
 
@@ -205,9 +240,6 @@
             var tg = readTag(pos);
             var key = tagHex(tg);
             var vr = '', len, valuePos;
-            if (key === '7FE0,0010' && !littleEndianExplicit && !out.__seenExplicit) {
-                // handled below generically
-            }
             if (littleEndianExplicit) {
                 vr = asciiAt(pos + 4, 2);
                 if (vr === 'OB' || vr === 'OW' || vr === 'OF' || vr === 'SQ' || vr === 'UT' || vr === 'UN') {
@@ -219,8 +251,8 @@
                 vr = IMPLICIT_VR[key] || 'UN';
                 len = dv.getUint32(pos + 4, true); valuePos = pos + 8;
             }
-            if (tg[0] === 0xFFFE) { pos += 6 + (dv.getUint32 ? 0 : 0); pos = valuePos - 4; continue; } // item/delimiter
-            if (len === 0xFFFFFFFF) {
+            if (tg[0] === 0xFFFE) { pos += 8; continue; } // item/delimiter header
+            if (len === 0xFFFFFFFF || len < 0) {
                 var np = readUndefElement(tg[0], tg[1], valuePos);
                 if (np === null) {
                     // Unknown undefined-length sequence: scan for next delimiter item.
@@ -237,9 +269,13 @@
             switch (key) {
                 case '0002,0010':
                     var ts = asciiAt(valuePos, len);
-                    if (/^1\.2\.840\.10008\.1\.2(\.1)?$/.test(ts)) littleEndianExplicit = ts.indexOf('.1') !== -1;
-                    else if (ts !== '1.2.840.10008.1.2') { out.transferSyntaxUid = ts; }
                     out.transferSyntaxUid = out.transferSyntaxUid || ts;
+                    // Only the uncompressed little-endian syntaxes switch the
+                    // dataset parser between explicit and implicit VR; every
+                    // other transfer syntax keeps explicit-VR framing until
+                    // encapsulated pixel data (handled above).
+                    if (ts === '1.2.840.10008.1.2') littleEndianExplicit = false;
+                    else if (ts === '1.2.840.10008.1.2.1') littleEndianExplicit = true;
                     break;
                 case '0028,0002': out.samplesPerPixel = dv.getUint16(valuePos, true); break;
                 case '0028,0004': out.photometricInterpretation = asciiAt(valuePos, len); break;
@@ -248,8 +284,12 @@
                 case '0028,0011': out.columns = dv.getUint16(valuePos, true); break;
                 case '0028,0100': out.bitsAllocated = dv.getUint16(valuePos, true); break;
                 case '0028,0103': out.pixelRepresentation = dv.getUint16(valuePos, true); break;
+                case '0028,1050': out.windowCenter = parseFloat(asciiAt(valuePos, len)); break;
+                case '0028,1051': out.windowWidth = parseFloat(asciiAt(valuePos, len)); break;
                 case '0028,1052': out.rescaleIntercept = parseFloat(asciiAt(valuePos, len)); break;
                 case '0028,1053': out.rescaleSlope = parseFloat(asciiAt(valuePos, len)); break;
+                case '0008,0060': out.modality = asciiAt(valuePos, len); break;
+                case '0008,103e': out.seriesDescription = asciiAt(valuePos, len); break;
                 case '0028,0030': out.pixelSpacing = asciiAt(valuePos, len).split('\\').map(parseFloat); break;
                 case '0018,0050': out.sliceThickness = parseFloat(asciiAt(valuePos, len)); break;
                 case '0018,0088': out.spacingBetweenSlices = parseFloat(asciiAt(valuePos, len)); break;
@@ -270,6 +310,9 @@
         if (!rows || !cols || !parsed.pixelData) return null;
         if ((parsed.samplesPerPixel || 1) !== 1) return null; // RGB: skip volume
         var n = rows * cols;
+        // 8-bit colour images (RGB/PALETTE) are shown in the 2D image mode
+        // straight from their raw bytes — no need for a mono Int16 plane.
+        if (parsed.bitsAllocated === 8 && (parsed.samplesPerPixel || 1) === 3) return null;
         var out16 = new Int16Array(n);
         var pd = parsed.pixelData;
         if (parsed.bitsAllocated === 8) {
@@ -431,8 +474,127 @@
         ww: 400, wl: 40,
         drag: null,
         vrEnabled: false,
-        vtk: null
+        vtk: null,
+        // 2D image mode: any decoded mono frame that cannot (or need not)
+        // be resampled into a volume — CR/DX/US/secondary captures, local
+        // uploads, single-frame series.
+        images: [],
+        imageIndex: 0,
+        sourceLabel: ''
     };
+
+    function isImageMode() { return state.view === 'image'; }
+
+    function monoToRGBA(mono, rows, cols, lo, hi) {
+        var out = new Uint8ClampedArray(rows * cols * 4);
+        var span = Math.max(1, hi - lo);
+        for (var i = 0; i < rows * cols; i++) {
+            var g = Math.max(0, Math.min(255, Math.round((mono[i] - lo) / span * 255)));
+            var o = i * 4;
+            out[o] = g; out[o + 1] = g; out[o + 2] = g; out[o + 3] = 255;
+        }
+        return out;
+    }
+
+    // Decode one parsed DICOM file into an RGBA bitmap honouring the
+    // stored window/center (drag later adjusts around it).
+    function parsedToImage(parsed) {
+        var rows = parsed.rows, cols = parsed.columns;
+        if (!rows || !cols) return null;
+        if (!parsed.pixelData && parsed.pixelDataEncapsulated) return null; // compressed: no built-in codec yet
+        var spp = parsed.samplesPerPixel || 1;
+        var pi = (parsed.photometricInterpretation || '').toUpperCase();
+        var pd = parsed.pixelData;
+        if (pd && spp === 3 && parsed.bitsAllocated === 8) {
+            var src = new Uint8Array(pd.length);
+            if (pi === 'YBR_FULL') {
+                // YBR→RGB (BT.601), as most US/secondary captures arrive.
+                for (var q = 0; q + 2 < pd.length; q += 3) {
+                    var y = pd[q], cb = pd[q + 1] - 128, cr = pd[q + 2] - 128;
+                    src[q]     = Math.max(0, Math.min(255, y + 1.402 * cr));
+                    src[q + 1] = Math.max(0, Math.min(255, y - 0.34414 * cb - 0.71414 * cr));
+                    src[q + 2] = Math.max(0, Math.min(255, y + 1.772 * cb));
+                }
+            } else {
+                src.set(pd.subarray(0, rows * cols * 3));
+            }
+            return { w: cols, h: rows, rgb: src, color: true };
+        }
+        var mono = pixelsToSignedShort(parsed);
+        if (!mono) return null;
+        var lo, hi;
+        if (isFinite(parsed.windowWidth) && parsed.windowWidth > 0 && isFinite(parsed.windowCenter)) {
+            lo = parsed.windowCenter - parsed.windowWidth / 2;
+            hi = parsed.windowCenter + parsed.windowWidth / 2;
+        } else {
+            var mn = Infinity, mx = -Infinity;
+            for (var m = 0; m < mono.length; m++) {
+                if (mono[m] < mn) mn = mono[m];
+                if (mono[m] > mx) mx = mono[m];
+            }
+            lo = mn; hi = (mx === mn) ? mn + 1 : mx;
+        }
+        return { w: cols, h: rows, mono: mono, lo: lo, hi: hi, color: false };
+    }
+
+    function showImages(images, label) {
+        state.images = images;
+        state.imageIndex = 0;
+        state.sourceLabel = label || '';
+        // MPR/volume tools are meaningless without a reconstructed volume:
+        // hide them and switch the toolbar to the 2D image tab.
+        Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (b) {
+            var v = b.getAttribute('data-view');
+            b.style.display = (v === 'image') ? '' : 'none';
+        });
+        document.getElementById('slice-slider').parentElement.style.display = '';
+        document.getElementById('btn-vr').style.display = 'none';
+        document.getElementById('series-picker-wrap').style.display = 'none';
+        document.getElementById('slicer-views').style.gridTemplateColumns = '1fr';
+        document.getElementById('slicer-views').style.gridTemplateRows = '1fr';
+        document.getElementById('pane-coronal').style.display = 'none';
+        document.getElementById('pane-sagittal').style.display = 'none';
+        document.getElementById('pane-axial').style.display = 'none';
+        document.getElementById('pane-image').classList.remove('hidden');
+        msgEl.classList.add('hidden');
+        stageEl.classList.remove('hidden');
+        setView('image');
+    }
+
+    function renderImagePane() {
+        var img = state.images[state.imageIndex];
+        if (!img) return;
+        var canvas = document.querySelector('#pane-image canvas');
+        var ctx = canvas.getContext('2d');
+        canvas.width = img.w; canvas.height = img.h;
+        var rgba;
+        if (img.color) {
+            rgba = new Uint8ClampedArray(img.w * img.h * 4);
+            for (var i = 0; i < img.w * img.h; i++) {
+                rgba[i * 4] = img.rgb[i * 3];
+                rgba[i * 4 + 1] = img.rgb[i * 3 + 1];
+                rgba[i * 4 + 2] = img.rgb[i * 3 + 2];
+                rgba[i * 4 + 3] = 255;
+            }
+        } else {
+            var half = state.wl, ww = Math.max(1, state.ww);
+            rgba = new Uint8ClampedArray(img.w * img.h * 4);
+            for (var j = 0; j < img.mono.length; j++) {
+                var g = Math.max(0, Math.min(255, ((img.mono[j] - half) / ww + 0.5) * 255));
+                var o = j * 4;
+                rgba[o] = g; rgba[o + 1] = g; rgba[o + 2] = g; rgba[o + 3] = 255;
+            }
+        }
+        ctx.putImageData(new ImageData(rgba, img.w, img.h), 0, 0);
+        document.getElementById('label-image').textContent =
+            'Image ' + (state.imageIndex + 1) + '/' + state.images.length;
+        var slider = document.getElementById('slice-slider');
+        slider.min = 0; slider.max = Math.max(0, state.images.length - 1);
+        slider.value = state.imageIndex;
+        document.getElementById('wl-readout').textContent = img.color ? '' :
+            'W ' + Math.round(state.ww) + ' / L ' + Math.round(state.wl);
+        setStatus(state.sourceLabel);
+    }
 
     function mainPlaneDims() {
         var d = state.volume.dims;
@@ -476,7 +638,16 @@
         ctx.putImageData(img, 0, 0);
     }
 
+    function setView(view) {
+        state.view = view;
+        Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (b) {
+            b.classList.toggle('active', b.getAttribute('data-view') === view);
+        });
+        renderAll();
+    }
+
     function renderAll() {
+        if (isImageMode()) { renderImagePane(); return; }
         if (!state.volume) return;
         var mp = mainPlaneDims();
         drawCanvas('pane-axial', extractSlice(
@@ -487,6 +658,7 @@
         drawCanvas('pane-' + others[0], extractSlice(others[0], Math.floor(state.volume.dims[subPlaneDims(others[0]).axis === 2 ? 2 : subPlaneDims(others[0]).axis] / 2)));
         drawCanvas('pane-' + others[1], extractSlice(others[1], Math.floor(state.volume.dims[subPlaneDims(others[1]).axis] / 2)));
         var slider = document.getElementById('slice-slider');
+        slider.min = 0;
         slider.max = (mp.axis === 2 ? state.volume.dims[2] : mp.axis === 1 ? state.volume.dims[1] : state.volume.dims[0]) - 1;
         slider.value = state.index[state.view];
         document.getElementById('wl-readout').textContent =
@@ -568,18 +740,22 @@
     function bindToolbar() {
         Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (btn) {
             btn.addEventListener('click', function () {
-                state.view = btn.getAttribute('data-view');
-                Array.prototype.forEach.call(document.querySelectorAll('#slicer-toolbar button[data-view]'), function (b) {
-                    b.classList.toggle('active', b === btn);
-                });
-                renderAll();
+                setView(btn.getAttribute('data-view'));
             });
         });
         document.getElementById('slice-slider').addEventListener('input', function (ev) {
-            state.index[state.view] = parseInt(ev.target.value, 10) || 0;
+            var v = parseInt(ev.target.value, 10) || 0;
+            if (isImageMode()) state.imageIndex = v;
+            else state.index[state.view] = v;
             renderAll();
         });
         document.getElementById('btn-reset-wl').addEventListener('click', function () {
+            if (isImageMode()) {
+                var img = state.images[state.imageIndex];
+                if (img && !img.color) { state.ww = Math.max(1, img.hi - img.lo); state.wl = (img.lo + img.hi) / 2; }
+                renderAll();
+                return;
+            }
             var win = computeAutoWindow(state.volume);
             state.ww = win.ww; state.wl = win.wl;
             renderAll();
@@ -597,17 +773,66 @@
     }
     var probeVtkCache = false;
 
+    // "Open any DICOM file…": local drag-in of arbitrary .dcm files keeps
+    // the workstation useful even when the archive feed is unavailable.
+    function bindOpenAnyFile() {
+        var btn = document.getElementById('btn-open-any');
+        var input = document.getElementById('open-any-input');
+        if (!btn || !input) return;
+        btn.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function () {
+            var files = Array.prototype.slice.call(input.files || []);
+            if (!files.length) return;
+            Promise.all(files.map(function (f) { return parseDicom(f); }))
+                .then(function (parsedList) {
+                    var images = [];
+                    parsedList.forEach(function (parsed) {
+                        var img = parsed && parsedToImage(parsed);
+                        if (img) images.push(img);
+                    });
+                    if (images.length) {
+                        showImages(images, TR.localFiles + ' (' + images.length + ')');
+                    } else {
+                        showMessage('<h2>' + TR.decodeUnsupported + '</h2>');
+                    }
+                });
+            input.value = '';
+        });
+    }
+
     function bindCanvasInteraction() {
         var pane = document.getElementById('pane-axial');
         pane.addEventListener('wheel', function (ev) {
             ev.preventDefault();
+            if (isImageMode()) return;
             var delta = ev.deltaY > 0 ? 1 : -1;
             var mp = mainPlaneDims();
             var maxIdx = state.volume.dims[mp.axis] - 1;
             state.index[state.view] = Math.max(0, Math.min(maxIdx, state.index[state.view] + delta));
             renderAll();
         }, { passive: false });
+        window.addEventListener('keydown', function (ev) {
+            if (!isImageMode() || !state.images.length) return;
+            if (ev.key === 'ArrowRight' || ev.key === 'PageDown') {
+                state.imageIndex = Math.min(state.images.length - 1, state.imageIndex + 1);
+                renderAll();
+            } else if (ev.key === 'ArrowLeft' || ev.key === 'PageUp') {
+                state.imageIndex = Math.max(0, state.imageIndex - 1);
+                renderAll();
+            }
+        });
+        var imgPane = document.getElementById('pane-image');
+        imgPane.addEventListener('wheel', function (ev) {
+            if (!isImageMode()) return;
+            ev.preventDefault();
+            state.imageIndex = Math.max(0, Math.min(state.images.length - 1,
+                state.imageIndex + (ev.deltaY > 0 ? 1 : -1)));
+            renderAll();
+        }, { passive: false });
         pane.addEventListener('mousedown', function (ev) {
+            state.drag = { x: ev.clientX, y: ev.clientY, ww: state.ww, wl: state.wl };
+        });
+        imgPane.addEventListener('mousedown', function (ev) {
             state.drag = { x: ev.clientX, y: ev.clientY, ww: state.ww, wl: state.wl };
         });
         window.addEventListener('mouseup', function () { state.drag = null; });
@@ -635,8 +860,84 @@
         return bonus + Math.min(frames, 500) / 1000;
     }
 
+    // ------------------------------------------------------------------
+    // Whole-study raw feed: fetch every original DICOM file in one
+    // multipart/related response and decode it. This is what makes the
+    // workstation open *any* image — single-slice projections included —
+    // regardless of transfer syntax or reconstructability.
+    // ------------------------------------------------------------------
+    function parseMultipartDicom(buffer, boundary) {
+        var u8 = new Uint8Array(buffer);
+        var delim = '--' + boundary;
+        var parts = [];
+        var start = 0;
+        while (true) {
+            var idx = indexOfSeq(u8, delim, start);
+            if (idx < 0) break;
+            var next = indexOfSeq(u8, delim, idx + delim.length);
+            if (next < 0) break;
+            var part = u8.subarray(idx + delim.length, next);
+            // Strip CRLF and any MIME headers before the double CRLF.
+            var headerEnd = indexOfSeq(part, [0x0D, 0x0A, 0x0D, 0x0A], 0);
+            if (headerEnd >= 0) part = part.subarray(headerEnd + 4);
+            var tail = part.length;
+            while (tail > 0 && (part[tail - 1] === 0x0A || part[tail - 1] === 0x0D)) tail--;
+            if (tail > 100) parts.push(part.slice(0, tail).buffer);
+            start = next;
+            // Closing delimiter "--boundary--" ends the body.
+            if (u8[next + delim.length] === 0x2D && u8[next + delim.length + 1] === 0x2D) break;
+        }
+        return parts;
+    }
+
+    function indexOfSeq(u8, seq, from) {
+        if (typeof seq === 'string') {
+            var s = seq; seq = [];
+            for (var i = 0; i < s.length; i++) seq.push(s.charCodeAt(i));
+        }
+        outer:
+        for (var p = Math.max(0, from); p + seq.length <= u8.length; p++) {
+            for (var q = 0; q < seq.length; q++) if (u8[p + q] !== seq[q]) continue outer;
+            return p;
+        }
+        return -1;
+    }
+
+    function loadStudyFiles(filesUrl) {
+        return fetch(filesUrl, { credentials: 'same-origin', cache: 'no-store' })
+            .then(function (r) {
+                if (!r.ok) throw new Error('files ' + r.status);
+                var m = /boundary=([^;]+)/.exec(r.headers.get('Content-Type') || '');
+                if (!m) throw new Error('bad feed');
+                return r.arrayBuffer().then(function (buf) {
+                    return { buf: buf, boundary: m[1].replace(/^"|"$/g, '') };
+                });
+            })
+            .then(function (res) {
+                var parts = parseMultipartDicom(res.buf, res.boundary);
+                var images = [], planes = [];
+                parts.forEach(function (buf) {
+                    var parsed = parseDicom(buf);
+                    if (!parsed) return;
+                    var img = parsedToImage(parsed);
+                    if (img) images.push({ img: img, z: parsed.imagePositionPatient ? parsed.imagePositionPatient[2] : null });
+                    var px = pixelsToSignedShort(parsed);
+                    if (px && parsed.imagePositionPatient) {
+                        planes.push({
+                            z: parsed.imagePositionPatient[2],
+                            rows: parsed.rows, cols: parsed.columns, data: px,
+                            ipp: parsed.imagePositionPatient,
+                            iop: parsed.imageOrientationPatient || [1, 0, 0, 0, 1, 0]
+                        });
+                    }
+                });
+                return { images: images, planes: planes, count: parts.length };
+            });
+    }
+
     function boot() {
         showMessage('<h2>' + TR.loading + '</h2>');
+        bindOpenAnyFile();
         fetch(MANIFEST_URL, { credentials: 'same-origin', cache: 'no-store' })
             .then(function (r) {
                 if (r.status === 502) throw new Error('archive');
@@ -644,63 +945,85 @@
                 return r.json();
             })
             .then(function (manifest) {
-                var candidates = (manifest.series || []).filter(function (s) {
-                    return s.slices && s.slices.length >= 2 && seriesIsDecodable(s);
-                });
-                if (!candidates.length) {
-                    showMessage('<h2>' + TR.noTomographic + '</h2><p><a href="' + STANDARD_VIEWER_URL + '">' +
-                        TR.fallbackHint + '</a></p>');
-                    return;
-                }
-                candidates.sort(function (a, b) { return scoreSeries(b) - scoreSeries(a); });
-                var picker = document.getElementById('series-picker');
-                picker.innerHTML = '';
-                candidates.forEach(function (s, i) {
-                    var opt = document.createElement('option');
-                    opt.value = i;
-                    opt.textContent = (s.modality || '?') + ' — ' + (s.seriesDescription || s.seriesInstanceUid) +
-                        ' (' + s.slices.length + ')';
-                    picker.appendChild(opt);
-                });
                 probeVtk().then(function (ok) { probeVtkCache = ok; });
                 bindToolbar();
                 bindCanvasInteraction();
-                function loadSelected() {
-                    var chosen = candidates[parseInt(picker.value || '0', 10)];
-                    msgEl.classList.remove('hidden');
-                    stageEl.classList.add('hidden');
-                    msgEl.innerHTML = '<h2>' + TR.loading + '</h2>';
-                    buildVolume(chosen, function (done, total) {
-                        msgEl.innerHTML = '<h2>' + TR.loading + '</h2><p>' + done + ' / ' + total + '</p>';
-                    }).then(function (volume) {
-                        if (!volume) {
-                            showMessage('<h2>' + TR.decodeUnsupported + '</h2><p><a href="' +
-                                STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
-                            return;
-                        }
-                        state.volume = volume;
-                        var win = computeAutoWindow(volume);
-                        state.ww = win.ww; state.wl = win.wl;
-                        state.index = {
-                            axial: Math.floor(volume.dims[2] / 2),
-                            coronal: Math.floor(volume.dims[1] / 2),
-                            sagittal: Math.floor(volume.dims[0] / 2)
-                        };
-                        msgEl.classList.add('hidden');
-                        stageEl.classList.remove('hidden');
-                        setStatus(chosen.modality + ' · ' + chosen.seriesDescription + ' · ' +
-                                  volume.dims.join('×'));
-                        renderAll();
+
+                var candidates = (manifest.series || []).filter(function (s) {
+                    return s.slices && s.slices.length >= 2 && seriesIsDecodable(s);
+                });
+                if (candidates.length) {
+                    // A tomographic series exists → full MPR/volume workflow.
+                    candidates.sort(function (a, b) { return scoreSeries(b) - scoreSeries(a); });
+                    var picker = document.getElementById('series-picker');
+                    picker.innerHTML = '';
+                    candidates.forEach(function (s, i) {
+                        var opt = document.createElement('option');
+                        opt.value = i;
+                        opt.textContent = (s.modality || '?') + ' — ' + (s.seriesDescription || s.seriesInstanceUid) +
+                            ' (' + s.slices.length + ')';
+                        picker.appendChild(opt);
                     });
+                    function loadSelected() {
+                        var chosen = candidates[parseInt(picker.value || '0', 10)];
+                        msgEl.classList.remove('hidden');
+                        stageEl.classList.add('hidden');
+                        msgEl.innerHTML = '<h2>' + TR.loading + '</h2>';
+                        buildVolume(chosen, function (done, total) {
+                            msgEl.innerHTML = '<h2>' + TR.loading + '</h2><p>' + done + ' / ' + total + '</p>';
+                        }).then(function (volume) {
+                            if (!volume) {
+                                // Reconstruction failed → still show the raw
+                                // decoded frames instead of dead-ending.
+                                return fallBackToImages(manifest);
+                            }
+                            state.volume = volume;
+                            var win = computeAutoWindow(volume);
+                            state.ww = win.ww; state.wl = win.wl;
+                            state.index = {
+                                axial: Math.floor(volume.dims[2] / 2),
+                                coronal: Math.floor(volume.dims[1] / 2),
+                                sagittal: Math.floor(volume.dims[0] / 2)
+                            };
+                            msgEl.classList.add('hidden');
+                            stageEl.classList.remove('hidden');
+                            setStatus(chosen.modality + ' · ' + chosen.seriesDescription + ' · ' +
+                                      volume.dims.join('×'));
+                            renderAll();
+                        });
+                    }
+                    picker.addEventListener('change', loadSelected);
+                    loadSelected();
+                    return;
                 }
-                picker.addEventListener('change', loadSelected);
-                loadSelected();
+                // No reconstructable series (e.g. CR/DX/US single shots, or a
+                // compressed transfer syntax): open every image as 2D.
+                fallBackToImages(manifest);
             })
             .catch(function (err) {
                 console.warn('slicer3d boot failed', err);
                 showMessage('<h2>' + (err.message === 'archive' ? TR.archiveDown : TR.needBundle) +
-                    '</h2><p><a href="' + STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
+                    '</h2><p><a href="' + STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>' +
+                    '<p>' + TR.orOpenLocal + '</p>');
             });
+    }
+
+    function fallBackToImages(manifest) {
+        var filesUrl = manifest.filesUrl || FILES_URL;
+        msgEl.innerHTML = '<h2>' + TR.loading + '</h2>';
+        loadStudyFiles(filesUrl).then(function (result) {
+            var imgs = result.images.map(function (e) { return e.img; });
+            if (!imgs.length) {
+                showMessage('<h2>' + TR.decodeUnsupported + '</h2><p><a href="' +
+                    STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
+                return;
+            }
+            showImages(imgs, (manifest.modalities || []).join('/') + ' · ' +
+                      imgs.length + ' ' + TR.imagesSuffix);
+        }).catch(function () {
+            showMessage('<h2>' + TR.decodeUnsupported + '</h2><p><a href="' +
+                STANDARD_VIEWER_URL + '">' + TR.fallbackHint + '</a></p>');
+        });
     }
 
     boot();
