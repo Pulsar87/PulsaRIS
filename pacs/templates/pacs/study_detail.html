@@ -204,6 +204,9 @@
                     <a href="{% url 'pacs:study_viewer_query' %}?studyInstanceUIDs={{ study.study_instance_uid|urlencode }}" class="btn btn-success" target="_blank" rel="noopener">
                         <i class="bi bi-search me-1"></i>{% trans 'View images (OHIF)' %}
                     </a>
+                    <a href="{% url 'pacs:study_slicer3d' pk=study.pk %}" class="btn btn-outline-success" target="_blank" rel="noopener">
+                        <i class="bi bi-box me-1"></i>{% trans 'Advanced viewer (3D Slicer)' %}
+                    </a>
                     <a href="{% url 'pacs:retrieve_dicom' pk=study.pk %}" class="btn btn-primary">
                         <i class="bi bi-file-earmark-zip me-1"></i>{% trans 'Download DICOM (ZIP)' %}
                     </a>
