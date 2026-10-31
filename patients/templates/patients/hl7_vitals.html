@@ -1,0 +1,97 @@
+{% extends 'layout.html' %} {% load i18n %} {% block title %}{% trans 'HL7 Vitals Readings' %}{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="fas fa-heartbeat me-2"></i>{% trans 'HL7 Vitals Readings' %}
+                </h2>
+                <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-users me-1"></i>{% trans 'Back to Patients' %}
+                </a>
+            </div>
+
+            <!-- Summary strip -->
+            <div class="card mb-4">
+                <div class="card-body d-flex flex-wrap gap-4 align-items-center">
+                    <div>
+                        <span class="text-muted">{% trans 'Total readings' %}: </span>
+                        <strong>{{ reading_count }}</strong>
+                    </div>
+                    {% if truncated %}
+                    <span class="badge bg-warning text-dark">
+                        {% blocktrans with shown=rows|length %}Showing the latest {{ shown }} readings; averages cover all messages.{% endblocktrans %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Readings Table -->
+            <div class="card">
+                <div class="card-body p-0">
+                    {% if rows %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0 align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{% trans 'Received at' %}</th>
+                                    <th>{% trans 'Patient ID' %}</th>
+                                    <th>{% trans 'Patient name' %}</th>
+                                    <th>{% trans 'Sender' %}</th>
+                                    <th>{% trans 'Control ID' %}</th>
+                                    {% for column in columns %}
+                                    <th class="text-end">{{ column.label }}{% if column.unit %} <small class="text-muted">({{ column.unit }})</small>{% endif %}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in rows %}
+                                <tr>
+                                    <td>{{ row.message.received_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ row.message.patient_id|default:"—" }}</td>
+                                    <td>{{ row.message.patient_name|default:"—" }}</td>
+                                    <td>{{ row.message.sender_identity|default:"—" }}</td>
+                                    <td>{{ row.message.message_control_id|default:"—" }}</td>
+                                    {% for value in row.values %}
+                                    <td class="text-end">
+                                        {% if value %}{{ value }}{% else %}<span class="text-muted">—</span>{% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <!-- Averages record under the table -->
+                            <tfoot class="border-top border-3">
+                                <tr class="table-primary">
+                                    <td colspan="5">
+                                        <strong><i class="fas fa-calculator me-1"></i>{% trans 'Average of all readings' %}</strong>
+                                    </td>
+                                    {% for column in columns %}
+                                    <td class="text-end">
+                                        <strong>{{ column.average }}</strong>
+                                        <small class="text-muted">{{ column.unit }}</small>
+                                        <br />
+                                        <small class="text-muted">
+                                            {% blocktrans count counter=column.count %}{{ counter }} reading{% plural %}{{ counter }} readings{% endblocktrans %}
+                                        </small>
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-heartbeat fa-4x text-muted mb-3"></i>
+                        <h4 class="text-muted">{% trans 'No HL7 vitals readings yet' %}</h4>
+                        <p class="text-muted">{% trans 'Accepted messages from the HL7 listener will appear here.' %}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
