@@ -9,6 +9,9 @@
     --text-muted: #64748b;
     --nav-bg: rgba(255, 255, 255, 0.8);
     --border-color: rgba(226, 232, 240, 0.8);
+    /* Logo (stone slab with primitive binary engravings) */
+    --logo-slab: #111111;
+    --logo-engrave: #ffffff;
 }
 
 [data-bs-theme="dark"] {
@@ -20,6 +23,9 @@
     --text-muted: #94a3b8;
     --nav-bg: rgba(15, 23, 42, 0.85);
     --border-color: rgba(51, 65, 85, 0.8);
+    /* Logo: inverted for dark mode so the slab stays visible on dark nav/body */
+    --logo-slab: #f1f5f9;
+    --logo-engrave: #0f172a;
 }
 
 body {
@@ -31,6 +37,11 @@ body {
 /* Force text-dark to respect theme */
 .text-dark {
     color: var(--text-main) !important;
+}
+
+/* App logo (inline SVG uses --logo-slab / --logo-engrave via CSS vars) */
+.app-logo {
+    transition: all 0.3s ease;
 }
 .text-muted {
     color: var(--text-muted) !important;
