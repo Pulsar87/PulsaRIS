@@ -3,13 +3,132 @@ import json
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.db.models import Q
+from django.db.models import Avg, Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 
 from clinic.permissions import accessible_facility_ids, patient_scope_queryset
 from patients.models import Patient
+
+# Numeric vital columns displayed on the HL7 vitals page (model column ->
+# display label). Mirrors integrations.hl7.parsing.NUMERIC_DB_FIELDS order;
+# units live in the sibling "<column>_unit" text columns.
+HL7_VITAL_LABELS = {
+    "spo2": _("SpO2"),
+    "pulse_rate": _("Pulse rate"),
+    "heart_rate": _("Heart rate"),
+    "respiratory_rate": _("Resp. rate"),
+    "systolic_bp": _("Systolic BP"),
+    "diastolic_bp": _("Diastolic BP"),
+    "mean_bp": _("Mean BP"),
+    "nibp_pulse_rate": _("NIBP pulse"),
+    "body_temperature": _("Temperature"),
+    "etco2": _("EtCO2"),
+    "fio2": _("FiO2"),
+    "weight": _("Weight"),
+    "height": _("Height"),
+}
+
+
+def _fmt_number(value):
+    """Format a measurement to at most 2 decimals without trailing zeros."""
+    if value is None:
+        return ""
+    return f"{round(float(value), 2):g}"
+
+
+def _vitals_table_data(qs):
+    """Return (rows, columns) for the readings table.
+
+    ``columns`` lists only vitals that actually have readings —
+    ``{"key", "label", "unit"}`` — and each row contains ``message`` plus a
+    pre-formatted ``values`` list aligned with ``columns`` (empty string when
+    the reading lacks that vital). The averages summary row is computed over
+    *all* messages in ``qs`` (not just the displayed page).
+    """
+    aggregate_kwargs = {}
+    for column in HL7_VITAL_LABELS:
+        aggregate_kwargs[f"avg_{column}"] = Avg(column)
+        aggregate_kwargs[f"cnt_{column}"] = Count(column)
+    totals = qs.aggregate(**aggregate_kwargs)
+
+    columns = []
+    for column, label in HL7_VITAL_LABELS.items():
+        count = totals[f"cnt_{column}"]
+        if not count:
+            continue
+        unit_values = (
+            qs.exclude(**{f"{column}_unit": ""})
+            .exclude(**{f"{column}_unit": None})
+            .values(f"{column}_unit")
+            .annotate(n=Count("id"))
+            .order_by("-n")
+        )
+        unit = unit_values[0][f"{column}_unit"] if unit_values else ""
+        columns.append(
+            {
+                "key": column,
+                "label": label,
+                "unit": unit or "",
+                "count": count,
+                "average": _fmt_number(totals[f"avg_{column}"]),
+            }
+        )
+
+    rows = []
+    for msg in qs.order_by("-received_at")[:500]:
+        values = []
+        for column in columns:
+            value = getattr(msg, column["key"])
+            values.append(_fmt_number(value) if value is not None else "")
+        rows.append({"message": msg, "values": values})
+
+    return rows, columns
+
+
+def _hl7_vitals_context(request):
+    """Build the readings table + per-vital averages for accepted HL7 messages.
+
+    Non-superusers only see messages whose parsed patient identifier matches a
+    patient they are allowed to access (facility scoping, same rule as the rest
+    of the patients module).
+    """
+    from integrations.hl7.models import HL7VitalMessage, MessageStatus
+
+    qs = HL7VitalMessage.objects.filter(status=MessageStatus.ACCEPTED)
+    ids = accessible_facility_ids(request.user)
+    if ids is not None:
+        visible_mrns = list(
+            patient_scope_queryset(
+                request.user, Patient.objects.filter(is_deleted=False)
+            ).values_list("mrn", flat=True)
+        )
+        # Match on raw and normalized MRN forms (leading-zero variants).
+        mrn_candidates = set(visible_mrns)
+        for mrn in visible_mrns:
+            stripped = mrn.lstrip("0")
+            if stripped:
+                mrn_candidates.add(stripped)
+        qs = qs.filter(parsed_json__patient__patient_id__in=list(mrn_candidates))
+
+    rows, columns = _vitals_table_data(qs)
+    total_messages = qs.count()
+
+    return {
+        "rows": rows,
+        "columns": columns,
+        "reading_count": total_messages,
+        "truncated": total_messages > len(rows),
+    }
+
+
+@login_required
+def hl7_vitals(request):
+    """Page listing all HL7 vitals readings with an averages summary row."""
+    _require_access(request)
+    context = _hl7_vitals_context(request)
+    return render(request, "patients/hl7_vitals.html", context)
 
 
 def _require_access(request):
