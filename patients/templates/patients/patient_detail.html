@@ -37,6 +37,14 @@
                             >{% trans 'Create Order' %}</i
                         >
                     </a>
+                    <a
+                        href="{% url 'patients:patient_hl7_vitals' patient.pk %}"
+                        class="btn btn-outline-danger"
+                    >
+                        <i class="fas fa-heartbeat me-1"
+                            >{% trans 'HL7 Vitals' %}</i
+                        >
+                    </a>
                 </div>
             </div>
 
