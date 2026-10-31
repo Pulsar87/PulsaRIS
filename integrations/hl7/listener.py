@@ -86,19 +86,29 @@ async def send_ack(writer: asyncio.StreamWriter, parsed: dict, code: str, detail
         logger.exception("Could not send HL7 ACK")
 
 
-async def handle_payload(payload: bytes, writer: asyncio.StreamWriter, remote_host: str, remote_port: Optional[int], config: ListenerConfig) -> None:
-    # Long-lived listener connections hold DB cursors open across awaits; make
-    # sure every message starts on a fresh, valid database connection.
+def _persist_payload_sync(payload: bytes, remote_host: str, remote_port: Optional[int], config: ListenerConfig) -> dict:
+    """Synchronous DB write executed in a worker thread (see handle_payload).
+
+    ``close_old_connections`` first so long-lived listener connections never
+    hold stale DB cursors; the write itself must not run on the event loop
+    because Django forbids ORM access from an async context.
+    """
     close_old_connections()
+    return persist_payload(
+        payload,
+        remote_host=remote_host,
+        remote_port=remote_port,
+        dedupe=config.dedupe,
+        allow_empty_control_id=config.allow_empty_control_id,
+        archive_dir=config.archive_dir,
+    )
+
+
+async def handle_payload(payload: bytes, writer: asyncio.StreamWriter, remote_host: str, remote_port: Optional[int], config: ListenerConfig) -> None:
     try:
-        outcome = persist_payload(
-            payload,
-            remote_host=remote_host,
-            remote_port=remote_port,
-            dedupe=config.dedupe,
-            allow_empty_control_id=config.allow_empty_control_id,
-            archive_dir=config.archive_dir,
-        )
+        # The listener runs inside an asyncio event loop; Django's ORM is
+        # synchronous-only there, so hop to a thread for the database write.
+        outcome = await asyncio.to_thread(_persist_payload_sync, payload, remote_host, remote_port, config)
     except Exception as exc:
         logger.exception("Storage failed for incoming message from %s:%s (%s)", remote_host, remote_port, exc)
         await send_ack(writer, {}, "AE", "Receiver storage failure; please retry", config)
