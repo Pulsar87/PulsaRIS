@@ -30,9 +30,9 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from license import views as licenseview
 from orders import views as ordersview
 
-admin.site.site_header = "PulsaRIS Admin"
-admin.site.site_title = "PulsaRIS Admin Portal"
-admin.site.index_title = "Welcome to PulsaRIS Admin"
+admin.site.site_header = "RaqeemRIS Admin"
+admin.site.site_title = "RaqeemRIS Admin Portal"
+admin.site.index_title = "Welcome to RaqeemRIS Admin"
 
 urlpatterns = [
     path("admin/", admin.site.urls, name="activation_required"),

@@ -1,7 +1,7 @@
-# PulsaRIS PACS Implementation — Architecture Note (Phase 0)
+# RaqeemRIS PACS Implementation — Architecture Note (Phase 0)
 
 **Prepared:** 2026-10-17
-**Plan reference:** `PACS_plan.md` (PulsaRIS PACS Implementation Plan, 2026-10-16)
+**Plan reference:** `PACS_plan.md` (RaqeemRIS PACS Implementation Plan, 2026-10-16)
 **Status:** Phase 0 design freeze reviewed/approved (2026-10-17). Phase 1 Task 1.1 implemented: pinned Orthanc service in `docker-compose.yml` with persistent volume, private REST, env-driven config renderer, health check, runbook (`docs/PACS_RUNBOOK.md`). Live acceptance tests still pending in a Docker environment; no real modality traffic until then.
 **Review basis:** Static inspection of branch `qwen-code-4f8d27e0-fd75-4dde-b94b-a21226e8db9a` (identical tree to `main` at this point; no unmerged PACS/Orthanc code was found in the working tree or branches). Findings below are source observations, not runtime verification.
 
@@ -66,10 +66,10 @@ Per plan §1 decisions 1–7:
 ### 2.2 AE Titles and ports
 | Service | AE Title | Port | Exposure |
 |---|---|---|---|
-| PulsaRIS MWL SCP (existing) | `RIS_SCP` (unchanged, configurable via `--ae-title`) | 11112 (unchanged) | medical LAN/VPN only |
-| Orthanc PACS archive (new) | `PULSAR_PACS` (example default; configurable via `ORTHANC_AE_TITLE`) | 4242 (configurable via `ORTHANC_DICOM_PORT`) | private Docker network; published only to LAN/VPN interface |
+| RaqeemRIS MWL SCP (existing) | `RIS_SCP` (unchanged, configurable via `--ae-title`) | 11112 (unchanged) | medical LAN/VPN only |
+| Orthanc PACS archive (new) | `RAQEEM_PACS` (example default; configurable via `ORTHANC_AE_TITLE`) | 4242 (configurable via `ORTHANC_DICOM_PORT`) | private Docker network; published only to LAN/VPN interface |
 | Orthanc REST/DICOMweb | n/a | 8042 inside the `pacs` network; **not mapped to a host port by default** | internal Docker network only |
-| PulsaRIS → Orthanc API calls | service user via HTTP basic auth | internal network | credentials from env/secrets only |
+| RaqeemRIS → Orthanc API calls | service user via HTTP basic auth | internal network | credentials from env/secrets only |
 
 All values are environment-configurable (`ORTHANC_*` variables); the compose defaults above are development/staging values and must be finalized against the real deployment and device conformance statements before production.
 

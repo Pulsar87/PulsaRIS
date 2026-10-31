@@ -250,13 +250,13 @@ class DiagnosticsArchiveInsightTests(ReconciliationFixtureMixin, TestCase):
                 "ChangesCount": 7, "MemoryUsed": 999,
             }
             mock_summary.return_value = {
-                "Name": "PulsaRIS-PACS", "Version": "1.12.7", "ApiVersion": 8,
+                "Name": "RaqeemRIS-PACS", "Version": "1.12.7", "ApiVersion": 8,
             }
             self.client.force_login(self.superuser)
             response = self.client.get(reverse("pacs:diagnostics"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Image Archive (Orthanc)")
-        self.assertContains(response, "PulsaRIS-PACS")   # from GET / summary
+        self.assertContains(response, "RaqeemRIS-PACS")   # from GET / summary
         self.assertContains(response, "1.12.7")          # version shown
         self.assertContains(response, "Application")      # connection panel
         self.assertContains(response, "http://orthanc:8042")  # endpoint URL
@@ -273,7 +273,7 @@ class DiagnosticsArchiveInsightTests(ReconciliationFixtureMixin, TestCase):
             metrics = collect_metrics()
         conn = metrics["connection"]
         self.assertTrue(conn["api_url"])
-        self.assertIn(conn["ae_title"], ("PULSAR_PACS",))
+        self.assertIn(conn["ae_title"], ("RAQEEM_PACS",))
         self.assertIsInstance(conn["rest_user_configured"], bool)
         # Never any secret material in the metric snapshot.
         blob = str(metrics)

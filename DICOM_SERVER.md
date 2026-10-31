@@ -8,11 +8,11 @@ The RIS Platform includes a DICOM Modality Worklist (MWL) SCP server that allows
 > service described in this document answers MWL C-FIND queries (and MPPS
 > events) only. It does **not** register a Storage SOP Class and cannot receive
 > DICOM images (C-STORE). Image reception and durable storage are handled by
-> the separate **Orthanc PACS archive** service (`PULSAR_PACS`, DICOM port
+> the separate **Orthanc PACS archive** service (`RAQEEM_PACS`, DICOM port
 > 4242 by default; REST API internal-only on 8042), deployed as the `orthanc`
 > service in `docker-compose.yml`. Configure modalities to:
 > - **query the worklist** from `RIS_SCP` on port 11112 (this server), and
-> - **send images** to `PULSAR_PACS` on the configured storage port (4242).
+> - **send images** to `RAQEEM_PACS` on the configured storage port (4242).
 >
 > See `docs/PACS_IMPLEMENTATION.md` for the full architecture, AE titles,
 > ports, sender allowlisting, and trust boundary.

@@ -1,11 +1,11 @@
-PulsaRIS PACS Implementation Plan
+RaqeemRIS PACS Implementation Plan
 Goal: Add reliable DICOM reception, durable study storage, indexing, RIS-order reconciliation, and a safe path to study retrieval in the existing Django RIS.
-Target repository: Pulsar87/PulsaRIS
+Target repository: Raqeem87/RaqeemRIS
 Prepared: 2026-10-16
 Plan type: Step-by-step instructions for an AI coding agent
 Review status: Static repository inspection only. Confirm implementation details with tests and deployment configuration; do not assume that existing features are production-ready.
 1. Non-negotiable architecture decisions
-1. Keep Django/RIS responsible for clinical workflow. Patients, facilities/tenants, exam orders, reporting, users, permissions, and audit history remain in PulsaRIS.
+1. Keep Django/RIS responsible for clinical workflow. Patients, facilities/tenants, exam orders, reporting, users, permissions, and audit history remain in RaqeemRIS.
 2. Use a dedicated DICOM archive service, preferably Orthanc, for PACS storage and DICOM networking. It should accept incoming DICOM C-STORE associations and own the original DICOM objects, storage lifecycle, DICOM resource hierarchy, and low-level DICOM retrieval. Do not implement a full PACS archive from scratch inside Django or store image bytes in ordinary Django model/FileField rows.
 3. Keep the current Modality Worklist (MWL) service. It serves a different purpose from image reception. Do not remove or silently replace core/management/commands/run_dicom_server.py or its existing MWL behavior. Keep the current MWL endpoint/port configurable and introduce a separate, documented PACS AE Title and storage port for Orthanc.
 4. Treat the archive as the source of truth for DICOM objects. Django may keep a small metadata/index mirror for work queues, search, and order linking, but it must store stable archive IDs and DICOM UIDs—not duplicate the binary objects or directly query Orthanc's private database tables.
@@ -19,15 +19,15 @@ CT / MR / DX / US / Other DICOM Modality
 Orthanc PACS Archive (dedicated AE + storage port; persistent DICOM volume)
        | internal REST API / changes feed; DICOMweb optional
        v
-PulsaRIS PACS integration worker (idempotent metadata synchronization)
+RaqeemRIS PACS integration worker (idempotent metadata synchronization)
        |
        +--> PACS study/series/instance metadata mirror in Django/PostgreSQL
        +--> Match Study UID / accession / Patient ID to ExamOrder
        +--> Unmatched/ambiguous study reconciliation work queue
        +--> Study list and archive status in RIS UI
 
-Existing modality MWL queries continue to go to the existing PulsaRIS MWL SCP.
-Suggested initial network configuration: Keep the existing PulsaRIS MWL server on its configured port (currently documented as 11112) and configure a separate Orthanc PACS AE Title and storage port (commonly 4242, but make it configurable). Do not publish Orthanc HTTP/REST (commonly 8042) on a public host port. Use a private Docker network and explicit firewall rules. Production ports must be finalized against the actual deployment and device configuration.
+Existing modality MWL queries continue to go to the existing RaqeemRIS MWL SCP.
+Suggested initial network configuration: Keep the existing RaqeemRIS MWL server on its configured port (currently documented as 11112) and configure a separate Orthanc PACS AE Title and storage port (commonly 4242, but make it configurable). Do not publish Orthanc HTTP/REST (commonly 8042) on a public host port. Use a private Docker network and explicit firewall rules. Production ports must be finalized against the actual deployment and device configuration.
 2. Existing repository findings to account for
 These are observations from source inspection, not runtime verification.
 - core/management/commands/run_dicom_server.py is a pynetdicom server that declares Verification, Modality Worklist C-FIND, and MPPS contexts/handlers. The inspected code does not register a Storage SOP Class context or a C-STORE handler. Do not call this an image archive today.
@@ -80,7 +80,7 @@ Task 1.1 — Add Orthanc as a separate service
 - Keep the Orthanc REST API accessible only on the internal Docker network or localhost unless a reviewed reverse-proxy/authentication design requires otherwise. Do not map port 8042 publicly by default.
 - Do not reuse the Django database schema as an undocumented dependency. If using PostgreSQL for Orthanc's index, use a dedicated database and credentials. A common production pattern is a PostgreSQL-backed index plus filesystem/NAS storage for DICOM objects; test the chosen storage/index backup strategy as a pair.
 Task 1.2 — Configure Storage SCP / modality access
-- Configure the archive's DICOM listener with a unique PACS AE Title (example only: PULSAR_PACS) and a configurable private-network port (commonly 4242).
+- Configure the archive's DICOM listener with a unique PACS AE Title (example only: RAQEEM_PACS) and a configurable private-network port (commonly 4242).
 - Explicitly configure the known modalities: calling AE Title, IP/host, called AE Title, and facility/device mapping.
 - Enable C-ECHO and C-STORE for approved senders; reject unknown senders according to the selected security policy. Do not leave permissive “unknown modality” behavior without a documented and tested reason.
 - Start with the transfer syntaxes required by the connected devices and validate each device's conformance statement. Do not claim support for every DICOM SOP Class/transfer syntax without testing.
