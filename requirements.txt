@@ -19,6 +19,7 @@ djangorestframework==3.17.1
 dnspython==2.8.0
 drf-spectacular
 gunicorn==23.0.0
+hl7
 inflection==0.5.1
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
