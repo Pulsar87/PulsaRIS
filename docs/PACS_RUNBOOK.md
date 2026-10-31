@@ -14,7 +14,7 @@ must be executed in the target environment before any real modality sends data.*
 | Item | Value | Source of truth |
 |---|---|---|
 | Archive image (pinned) | `orthancteam/orthanc:25.9.3` | `docker-compose.yml` (`orthanc` service). Production must additionally pin the immutable digest `@sha256:...`. Record active plugin versions at deploy time (`GET /` and `/plugins` on the REST API). |
-| PACS AE Title | `PULSAR_PACS` (env `ORTHANC_AE_TITLE`) | DICOM Storage SCP for modalities |
+| PACS AE Title | `RAQEEM_PACS` (env `ORTHANC_AE_TITLE`) | DICOM Storage SCP for modalities |
 | DICOM storage port | `4242` (env `ORTHANC_DICOM_PORT`) | Published host interface via `ORTHANC_DICOM_BIND_IP` — **default `127.0.0.1`**; bind to the medical LAN/VPN interface only after the firewall review |
 | MWL SCP (unchanged) | AE `RIS_SCP`, port `11112` | `dicom-server` service — do not conflate with PACS |
 | REST/DICOMweb | `8042` inside the private `pacs` network only | **No host port mapping by design.** Never expose publicly (plan §1.7). |
@@ -51,11 +51,11 @@ docker compose logs --since 10m orthanc
    `docker compose up -d orthanc` (config re-renders at start). Unknown AE/IP →
    association rejected (deny-by-default; tested behavior, see §7).
 3. Configure the device: worklist → `RIS_SCP@<ris-host>:11112`; images →
-   `PULSAR_PACS@<pacs-host>:4242`.
+   `RAQEEM_PACS@<pacs-host>:4242`.
 4. Interoperability test (synthetic/de-identified data only):
    ```bash
-   echoscu  <pacs-host> 4242 -aet <DEVICE_AE> -aec PULSAR_PACS     # expect acceptance
-   storescu <pacs-host> 4242 -aet <DEVICE_AE> -aec PULSAR_PACS test.dcm
+   echoscu  <pacs-host> 4242 -aet <DEVICE_AE> -aec RAQEEM_PACS     # expect acceptance
+   storescu <pacs-host> 4242 -aet <DEVICE_AE> -aec RAQEEM_PACS test.dcm
    ```
    Verify against the device's conformance statement; extend
    `AcceptedTransferSyntaxes` in the entrypoint **only** for syntaxes validated

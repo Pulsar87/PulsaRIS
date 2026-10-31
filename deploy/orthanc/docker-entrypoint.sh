@@ -17,8 +17,8 @@ if [ "${RUNTIME_CONFIG:-1}" != "1" ]; then
     exec "$@"
 fi
 
-ORTHANC_NAME="${ORTHANC_NAME:-PulsaRIS-PACS}"
-ORTHANC_AE_TITLE="${ORTHANC_AE_TITLE:-PULSAR_PACS}"
+ORTHANC_NAME="${ORTHANC_NAME:-RaqeemRIS-PACS}"
+ORTHANC_AE_TITLE="${ORTHANC_AE_TITLE:-RAQEEM_PACS}"
 ORTHANC_DICOM_PORT="${ORTHANC_DICOM_PORT:-4242}"
 ORTHANC_REST_PORT="${ORTHANC_REST_PORT:-8042}"
 ORTHANC_DB_DIR="${ORTHANC_DB_DIR:-/var/lib/orthanc/db}"
@@ -71,7 +71,7 @@ def build_peers(spec):
     return peers
 
 config = {
-    "Name": os.environ.get("ORTHANC_NAME", "PulsaRIS-PACS"),
+    "Name": os.environ.get("ORTHANC_NAME", "RaqeemRIS-PACS"),
     # Dedicated PACS Storage SCP listener (separate AE/port from RIS_SCP MWL).
     "DicomAet": os.environ["ORTHANC_AE_TITLE"],
     "DicomPort": int(os.environ.get("ORTHANC_DICOM_PORT", "4242")),

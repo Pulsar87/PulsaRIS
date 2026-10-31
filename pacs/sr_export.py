@@ -40,10 +40,10 @@ BASIC_TEXT_SR_SOP_CLASS_UID = "1.2.840.10008.5.1.4.1.1.88.11"
 
 # Committed human-readable identity of this generator (Task 5.1 requires
 # stable, honest source information instead of the old fabricated values).
-SR_MANUFACTURER = "Pulsar RIS"
+SR_MANUFACTURER = "Raqeem RIS"
 SR_DEVICE_SERIAL_NUMBER = "RIS-SR"
-SR_STATION_NAME = "PULSAR_RIS"
-SR_OPERATOR_NAME = "Pulsar RIS"
+SR_STATION_NAME = "RAQEEM_RIS"
+SR_OPERATOR_NAME = "Raqeem RIS"
 
 
 class SRLinkageError(Exception):
@@ -113,7 +113,7 @@ def build_sr_dataset(report, study_uid):
     file_meta.MediaStorageSOPInstanceUID = generate_uid()
     file_meta.TransferSyntaxUID = ExplicitVRLittleEndian
     file_meta.ImplementationClassUID = "1.2.826.0.1.3680043.9.7341.1.1"
-    file_meta.ImplementationVersionName = "PULSARRIS_1"
+    file_meta.ImplementationVersionName = "RAQEEMRIS_1"
 
     ds = FileDataset(None, {}, file_meta=file_meta, preamble=b"\0" * 128)
     ds.SOPClassUID = file_meta.MediaStorageSOPClassUID

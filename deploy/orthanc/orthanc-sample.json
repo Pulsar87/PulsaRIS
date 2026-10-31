@@ -13,12 +13,12 @@
 // Replace every <...> placeholder; supply secrets via the environment.
 // ─────────────────────────────────────────────────────────────────────────────
 {
-  "Name": "PulsaRIS-PACS",
+  "Name": "RaqeemRIS-PACS",
 
   // DICOM Storage SCP listener — dedicated PACS AE title, separate from the
-  // PulsaRIS MWL SCP (RIS_SCP on 11112). Port published only to the LAN/VPN
+  // RaqeemRIS MWL SCP (RIS_SCP on 11112). Port published only to the LAN/VPN
   // interface by default; REST below stays internal-only.
-  "DicomAet": "PULSAR_PACS",
+  "DicomAet": "RAQEEM_PACS",
   "DicomPort": 4242,
 
   // Orthanc's own integrity checks are enabled; silent overwrite of an

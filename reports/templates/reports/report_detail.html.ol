@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% load i18n static %}
 
-{% block title %}{% trans "Report" %} #{{ report.id|truncatechars:8 }} - {{ order.accession_number }} - Pulsar RIS{% endblock %}
+{% block title %}{% trans "Report" %} #{{ report.id|truncatechars:8 }} - {{ order.accession_number }} - Raqeem RIS{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">

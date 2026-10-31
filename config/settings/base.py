@@ -227,7 +227,7 @@ SESSION_SAVE_EVERY_REQUEST = True
 # the Phase 2 sync adapter's timeouts/retries, not request-path blocking.
 # ─────────────────────────────────────────────────────────────
 PACS_ORTHANC_API_URL = env("ORTHANC_API_URL", default="http://orthanc:8042")
-PACS_ORTHANC_AE_TITLE = env("ORTHANC_AE_TITLE", default="PULSAR_PACS")
+PACS_ORTHANC_AE_TITLE = env("ORTHANC_AE_TITLE", default="RAQEEM_PACS")
 PACS_ORTHANC_DICOM_PORT = env.int("ORTHANC_DICOM_PORT", default=4242)
 PACS_ORTHANC_REST_USER = env("ORTHANC_RIS_USER", default="")
 PACS_ORTHANC_REST_PASSWORD = env("ORTHANC_RIS_PASSWORD", default="")

@@ -6,7 +6,7 @@ set -e
 
 APP_VERSION="0.1"
 EXPORT_DIR="./dist"
-PACKAGE_NAME="pulsaris_v${APP_VERSION}"
+PACKAGE_NAME="raqeemis_v${APP_VERSION}"
 
 echo "🚀 Building Production Export Package v${APP_VERSION}..."
 
@@ -62,14 +62,14 @@ find "${EXPORT_DIR}/${PACKAGE_NAME}/app" -name "*.py" -type f -delete
 # Create install script
 cat > "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh" << 'INSTALL_SCRIPT'
 #!/bin/bash
-# Installation script for PulsarRIS v0.1
+# Installation script for RaqeemRIS v0.1
 set -e
 
-INSTALL_DIR="${INSTALL_DIR:-/opt/pulsaris}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/raqeemis}"
 VENV_DIR="${INSTALL_DIR}/venv"
 APP_DIR="${INSTALL_DIR}/app"
 
-echo "📦 Installing PulsarRIS v0.1 to ${INSTALL_DIR}..."
+echo "📦 Installing RaqeemRIS v0.1 to ${INSTALL_DIR}..."
 
 # Create installation directory
 mkdir -p "${INSTALL_DIR}"
@@ -133,10 +133,10 @@ echo "  export PYTHONPATH=${APP_DIR}"
 echo "  cd app && ../venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4"
 echo ""
 echo "Or use systemd service (recommended for production):"
-echo "  sudo cp ${INSTALL_DIR}/systemd.service /etc/systemd/system/pulsaris.service"
+echo "  sudo cp ${INSTALL_DIR}/systemd.service /etc/systemd/system/raqeemis.service"
 echo "  sudo systemctl daemon-reload"
-echo "  sudo systemctl enable pulsaris"
-echo "  sudo systemctl start pulsaris"
+echo "  sudo systemctl enable raqeemis"
+echo "  sudo systemctl start raqeemis"
 INSTALL_SCRIPT
 
 chmod +x "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh"
@@ -144,16 +144,16 @@ chmod +x "${EXPORT_DIR}/${PACKAGE_NAME}/install.sh"
 # Create systemd service file
 cat > "${EXPORT_DIR}/${PACKAGE_NAME}/systemd.service" << 'SYSTEMD_SERVICE'
 [Unit]
-Description=PulsarRIS Production Service
+Description=RaqeemRIS Production Service
 After=network.target postgresql.service redis.service
 
 [Service]
 Type=notify
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/pulsaris
-Environment="PATH=/opt/pulsaris/venv/bin"
-ExecStart=/opt/pulsaris/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
+WorkingDirectory=/opt/raqeemis
+Environment="PATH=/opt/raqeemis/venv/bin"
+ExecStart=/opt/raqeemis/venv/bin/gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --timeout 120
 Restart=always
 RestartSec=5
 
@@ -167,7 +167,7 @@ version: '3.8'
 
 services:
   web:
-    image: pulsaris:0.1
+    image: raqeemis:0.1
     build:
       context: .
       dockerfile: Dockerfile.export
@@ -188,8 +188,8 @@ services:
   db:
     image: postgres:15-alpine
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-pulsaris}
-      - POSTGRES_USER=${POSTGRES_USER:-pulsaris}
+      - POSTGRES_DB=${POSTGRES_DB:-raqeemis}
+      - POSTGRES_USER=${POSTGRES_USER:-raqeemis}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
     volumes:
       - postgres_data:/var/lib/postgresql/data
@@ -238,7 +238,7 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]
 
 LABEL version="0.1" \
-      description="Production PulsarRIS - Installable Package"
+      description="Production RaqeemRIS - Installable Package"
 DOCKERFILE_EXPORT
 
 # Create README for deployment instructions
@@ -254,14 +254,14 @@ cat > "${EXPORT_DIR}/${PACKAGE_NAME}/DEPLOYMENT.md" << 'README_MD'
 sudo ./install.sh
 
 # Configure environment variables
-sudo cp /opt/pulsaris/.env.example /opt/pulsaris/.env
-sudo nano /opt/pulsaris/.env  # Edit with your values
+sudo cp /opt/raqeemis/.env.example /opt/raqeemis/.env
+sudo nano /opt/raqeemis/.env  # Edit with your values
 
 # Install systemd service
-sudo cp /opt/pulsaris/systemd.service /etc/systemd/system/pulsaris.service
+sudo cp /opt/raqeemis/systemd.service /etc/systemd/system/raqeemis.service
 sudo systemctl daemon-reload
-sudo systemctl enable pulsaris
-sudo systemctl start pulsaris
+sudo systemctl enable raqeemis
+sudo systemctl start raqeemis
 ```
 
 ### Option 2: Docker Deployment
@@ -280,7 +280,7 @@ docker run -d \
   -p 8000:8000 \
   -e SECRET_KEY=your-secret \
   -e DATABASE_URL=postgresql://... \
-  pulsaris:0.1
+  raqeemis:0.1
 ```
 
 ## Environment Variables Required
@@ -300,7 +300,7 @@ curl http://localhost:8000/health/
 
 ```bash
 # Systemd
-journalctl -u pulsaris -f
+journalctl -u raqeemis -f
 
 # Docker
 docker-compose logs -f web

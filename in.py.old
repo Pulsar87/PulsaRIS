@@ -13,10 +13,10 @@ else:
 
 # 2. Now create your new tenant correctly
 # Replace 'moas' with your desired schema name and subdomain
-tenant = Tenant(schema_name='pulsar', name='Pulsar')
+tenant = Tenant(schema_name='raqeem', name='Raqeem')
 tenant.save()  # This creates the schema
 
 # Create the domain (replace 'localhost' with your actual domain if different)
 domain = Domain.objects.create(domain='localhost', tenant=tenant, is_primary=True)
 
-print(f"Tenant '{tenant.name}' and Schema 'pulsar' created successfully!")
+print(f"Tenant '{tenant.name}' and Schema 'raqeem' created successfully!")

@@ -10,14 +10,14 @@ Extend the existing RIS into a multi-site outpatient clinic platform while keepi
 5. **Interoperability and rollout**: define stable API boundaries and mappings (FHIR resources and HL7 events where needed) after internal workflows stabilize. Pilot at one facility, verify cross-facility access and patient matching, then roll out to the remaining sites.
 
 **Relevant files**
-- `/home/pulsar/Documents/pulsaris/core/models.py` — extend `Facility` only for clinic/site configuration if needed; it already owns facility identity.
-- `/home/pulsar/Documents/pulsaris/patients/models.py` — retain `Patient` as shared identity; review whether patient merge/matching and facility-specific identifiers are required.
-- `/home/pulsar/Documents/pulsaris/orders/models.py` — preserve imaging-specific `ExamOrder`; link clinic referrals/encounters rather than overloading it.
-- `/home/pulsar/Documents/pulsaris/billing/models.py` — integrate encounter-originated services with existing `PatientAccount` and `ServiceLine`.
-- `/home/pulsar/Documents/pulsaris/users/models.py` — establish provider roles and facility assignments.
-- `/home/pulsar/Documents/pulsaris/config/settings/base.py` — register a dedicated clinic app and ensure security settings align with deployment.
-- `/home/pulsar/Documents/pulsaris/templates/layout.html` and `/home/pulsar/Documents/pulsaris/config/urls.py` — add navigation and routes following current Django template conventions.
-- `/home/pulsar/Documents/pulsaris/patients/tests.py`, `/home/pulsar/Documents/pulsaris/orders/tests.py`, `/home/pulsar/Documents/pulsaris/billing/tests.py` — expand workflow and permission coverage alongside implementation.
+- `/home/raqeem/Documents/raqeemis/core/models.py` — extend `Facility` only for clinic/site configuration if needed; it already owns facility identity.
+- `/home/raqeem/Documents/raqeemis/patients/models.py` — retain `Patient` as shared identity; review whether patient merge/matching and facility-specific identifiers are required.
+- `/home/raqeem/Documents/raqeemis/orders/models.py` — preserve imaging-specific `ExamOrder`; link clinic referrals/encounters rather than overloading it.
+- `/home/raqeem/Documents/raqeemis/billing/models.py` — integrate encounter-originated services with existing `PatientAccount` and `ServiceLine`.
+- `/home/raqeem/Documents/raqeemis/users/models.py` — establish provider roles and facility assignments.
+- `/home/raqeem/Documents/raqeemis/config/settings/base.py` — register a dedicated clinic app and ensure security settings align with deployment.
+- `/home/raqeem/Documents/raqeemis/templates/layout.html` and `/home/raqeem/Documents/raqeemis/config/urls.py` — add navigation and routes following current Django template conventions.
+- `/home/raqeem/Documents/raqeemis/patients/tests.py`, `/home/raqeem/Documents/raqeemis/orders/tests.py`, `/home/raqeem/Documents/raqeemis/billing/tests.py` — expand workflow and permission coverage alongside implementation.
 
 **Verification**
 1. Add tests proving clinic records are facility-scoped while shared patient identity remains accessible according to role and facility policy.
