@@ -87,30 +87,56 @@ def _vitals_table_data(qs):
     return rows, columns
 
 
-def _hl7_vitals_context(request):
-    """Build the readings table + per-vital averages for accepted HL7 messages.
+def _hl7_message_qs_for_mrn(mrn):
+    """QuerySet of accepted HL7 vital messages belonging to one MRN.
 
-    Non-superusers only see messages whose parsed patient identifier matches a
-    patient they are allowed to access (facility scoping, same rule as the rest
-    of the patients module).
+    Devices may transmit the MRN with or without leading zeros, so both the
+    raw and zero-stripped forms are matched against the parsed PID-3 patient
+    identifier.
     """
     from integrations.hl7.models import HL7VitalMessage, MessageStatus
 
-    qs = HL7VitalMessage.objects.filter(status=MessageStatus.ACCEPTED)
-    ids = accessible_facility_ids(request.user)
-    if ids is not None:
-        visible_mrns = list(
-            patient_scope_queryset(
-                request.user, Patient.objects.filter(is_deleted=False)
-            ).values_list("mrn", flat=True)
-        )
-        # Match on raw and normalized MRN forms (leading-zero variants).
-        mrn_candidates = set(visible_mrns)
-        for mrn in visible_mrns:
-            stripped = mrn.lstrip("0")
-            if stripped:
-                mrn_candidates.add(stripped)
-        qs = qs.filter(parsed_json__patient__patient_id__in=list(mrn_candidates))
+    candidates = {mrn}
+    stripped = mrn.lstrip("0")
+    if stripped:
+        candidates.add(stripped)
+    padded = mrn.zfill(8)
+    if padded != mrn:
+        candidates.add(padded)
+    return HL7VitalMessage.objects.filter(
+        status=MessageStatus.ACCEPTED,
+        parsed_json__patient__patient_id__in=list(candidates),
+    )
+
+
+def _hl7_vitals_context(request, patient=None):
+    """Build the readings table + per-vital averages for accepted HL7 messages.
+
+    When ``patient`` is given, only that patient's own readings are shown
+    (per-patient view linked from the patient details page). Otherwise the
+    listing covers every patient the user may access (facility scoping, same
+    rule as the rest of the patients module).
+    """
+    if patient is not None:
+        qs = _hl7_message_qs_for_mrn(patient.mrn)
+    else:
+        from integrations.hl7.models import HL7VitalMessage, MessageStatus
+
+        qs = HL7VitalMessage.objects.filter(status=MessageStatus.ACCEPTED)
+        ids = accessible_facility_ids(request.user)
+        if ids is not None:
+            visible_mrns = list(
+                patient_scope_queryset(
+                    request.user, Patient.objects.filter(is_deleted=False)
+                ).values_list("mrn", flat=True)
+            )
+            # Match on raw and normalized MRN forms (leading-zero variants).
+            mrn_candidates = set(visible_mrns)
+            for mrn in visible_mrns:
+                stripped = mrn.lstrip("0")
+                if stripped:
+                    mrn_candidates.add(stripped)
+            qs = qs.filter(parsed_json__patient__patient_id__in=list(mrn_candidates))
 
     rows, columns = _vitals_table_data(qs)
     total_messages = qs.count()
@@ -128,6 +154,19 @@ def hl7_vitals(request):
     """Page listing all HL7 vitals readings with an averages summary row."""
     _require_access(request)
     context = _hl7_vitals_context(request)
+    return render(request, "patients/hl7_vitals.html", context)
+
+
+@login_required
+def patient_hl7_vitals(request, pk):
+    """HL7 vitals readings for a single patient (linked from patient details)."""
+    _require_access(request)
+    patient = get_object_or_404(
+        patient_scope_queryset(request.user, Patient.objects.filter(is_deleted=False)),
+        pk=pk,
+    )
+    context = _hl7_vitals_context(request, patient=patient)
+    context["patient"] = patient
     return render(request, "patients/hl7_vitals.html", context)
 
 
