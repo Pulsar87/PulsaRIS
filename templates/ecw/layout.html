@@ -1,0 +1,241 @@
+{% load i18n static %}
+<!doctype html>
+<html
+    lang="{{ LANGUAGE_CODE }}"
+    dir="{% if LANGUAGE_CODE == 'ar' %}rtl{% else %}ltr{% endif %}"
+    data-bs-theme="light"
+>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="Raqeem RIS - eClinicalWorks-style UI template"
+        />
+        <title>{% block title %}Raqeem RIS{% endblock %} | eCW UI</title>
+
+        <!-- Favicon -->
+        <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml" />
+
+        <!-- Fonts - Local -->
+        <link rel="stylesheet" href="{% static 'css/fonts.css' %}" />
+
+        <!-- Bootstrap CSS -->
+        {% if LANGUAGE_CODE == 'ar' %}
+        <link rel="stylesheet" href="{% static 'css/bootstrap.rtl.min.css' %}" />
+        {% else %}
+        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
+        {% endif %}
+
+        <!-- Icons (Bootstrap Icons stands in for FontAwesome used by eCW) -->
+        <link rel="stylesheet" href="{% static 'css/bootstrap-icons.css' %}" />
+
+        <!-- FullCalendar -->
+        <link rel="stylesheet" href="{% static 'css/fullcalendar.css' %}" />
+
+        <!-- Base custom styles -->
+        <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+
+        <!-- eClinicalWorks-style chrome (this template family only) -->
+        <link rel="stylesheet" href="{% static 'css/ecw.css' %}" />
+
+        {% block extra_css %}{% endblock %}
+
+        <!-- Scripts -->
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+        <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static 'js/index.global.min.js' %}"></script>
+        <script type="text/javascript" src="{% static 'js/custom.js' %}" defer></script>
+
+        {% block extra_js %}{% endblock %}
+    </head>
+
+    <body class="ecw-body">
+        <!-- ============================================================
+             TOP UTILITY BAR (eCW "blue bar"): patient search on the left,
+             session / utilities on the right.
+             ============================================================ -->
+        <div class="ecw-topbar d-flex align-items-center px-2">
+            <a class="ecw-brand d-flex align-items-center me-3" href="/dashboard/">
+                <i class="bi bi-heart-pulse-fill me-2"></i>
+                <span>Raqeem&nbsp;RIS<small class="d-block ecw-brand-sub">eCW&nbsp;UI&nbsp;Preview</small></span>
+            </a>
+
+            <!-- Patient Search box (signature eCW element) -->
+            <form class="ecw-patient-search flex-grow-1 d-none d-md-block" method="get" action="/patients/">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-info"></i></span>
+                    <input
+                        type="text"
+                        class="form-control border-start-0"
+                        name="q"
+                        placeholder="{% trans 'Patient Search: Name, MRN, Phone' %}"
+                        aria-label="{% trans 'Patient Search' %}"
+                    />
+                    <button class="btn btn-warning btn-sm text-white fw-bold" type="submit">{% trans "Search" %}</button>
+                </div>
+            </form>
+
+            <div class="ecw-topbar-right d-flex align-items-center ms-auto gap-2 small">
+                <span class="d-none d-lg-inline text-white-50">
+                    <i class="bi bi-calendar-event me-1"></i>{{ now|date:"D m/d/Y"|default:"Today" }}
+                </span>
+                <span class="d-none d-lg-inline text-white-50 ecw-provider-chip">
+                    <i class="bi bi-person-badge me-1"></i>{% trans "Provider" %}:
+                    {{ user.get_full_name|default:user.username|default:"Demo User" }}
+                </span>
+
+                <!-- Language selector -->
+                <div class="dropdown">
+                    <a class="ecw-icon-btn" href="#" data-bs-toggle="dropdown" aria-expanded="false" title="{% trans 'Language' %}">
+                        <i class="bi bi-translate"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end ecw-dropdown border-0 shadow rounded-0">
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="language" value="en" />
+                                <input type="hidden" name="next" value="{{ request.path }}" />
+                                <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">English</button>
+                            </form>
+                        </li>
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="language" value="ar" />
+                                <input type="hidden" name="next" value="{{ request.path }}" />
+                                <button type="submit" class="dropdown-item border-0 bg-transparent w-100 text-start">العربية</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Theme toggle -->
+                <button class="ecw-icon-btn" id="theme-toggle" type="button" title="{% trans 'Toggle Theme' %}">
+                    <i class="bi bi-sun-fill"></i>
+                </button>
+
+                {% if user.is_authenticated %}
+                <div class="dropdown">
+                    <a class="ecw-icon-btn" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end ecw-dropdown border-0 shadow rounded-0 p-2">
+                        <li class="px-2 py-1 fw-bold">{{ user.username }}</li>
+                        {% if user.is_staff %}
+                        <li><a class="dropdown-item rounded-0" href="/admin"><i class="bi bi-gear me-2 text-secondary"></i>{% trans "Admin panel" %}</a></li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item rounded-0 text-danger" href="{% url 'users:logout' %}"><i class="bi bi-box-arrow-right me-2"></i>{% trans "Sign Out" %}</a></li>
+                    </ul>
+                </div>
+                {% else %}
+                <a class="btn btn-warning btn-sm text-white fw-bold" href="{% url 'users:login' %}">{% trans "Login" %}</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ============================================================
+             MODULE TAB BAR (eCW top tabs: Schedule / Patients / Billing…)
+             ============================================================ -->
+        <div class="ecw-tabbar d-flex align-items-stretch px-1 overflow-auto">
+            <a class="ecw-tab {% if request.resolver_match.url_name == 'dashboard_stats' %}active{% endif %}" href="/dashboard/">
+                <i class="bi bi-speedometer2"></i><span>{% trans "Dashboard" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'clinic' %}active{% endif %}" href="{% url 'clinic:appointment_list' %}">
+                <i class="bi bi-calendar3"></i><span>{% trans "Schedule" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.url_name == 'worklist' %}active{% endif %}" href="/worklist">
+                <i class="bi bi-list-task"></i><span>{% trans "Worklist" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'patients' %}active{% endif %}" href="/patients">
+                <i class="bi bi-person-lines-fill"></i><span>{% trans "Patients" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'orders' %}active{% endif %}" href="{% url 'orders:add_order' %}">
+                <i class="bi bi-clipboard2-plus"></i><span>{% trans "Orders" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'billing' %}active{% endif %}" href="{% url 'billing:claim_list' %}">
+                <i class="bi bi-cash-coin"></i><span>{% trans "Billing" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}" href="{% url 'inventory:dashboard' %}">
+                <i class="bi bi-box-seam"></i><span>{% trans "Inventory" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'pacs' %}active{% endif %}" href="{% url 'pacs:study_list' %}">
+                <i class="bi bi-images"></i><span>PACS</span>
+            </a>
+            <a class="ecw-tab {% if 'report' in request.resolver_match.url_name %}active{% endif %}" href="/reports">
+                <i class="bi bi-file-text"></i><span>{% trans "Reports" %}</span>
+            </a>
+            <a class="ecw-tab {% if request.resolver_match.app_name == 'modules' %}active{% endif %}" href="{% url 'modules:browser' %}">
+                <i class="bi bi-grid-3x3-gap"></i><span>{% trans "Apps" %}</span>
+            </a>
+        </div>
+
+        <!-- ============================================================
+             BODY: left rail + working area
+             ============================================================ -->
+        <div class="ecw-shell d-flex">
+            <!-- Left action rail (eCW vertical button strip) -->
+            <aside class="ecw-rail d-none d-lg-flex flex-column align-items-stretch py-2">
+                <a class="ecw-rail-btn" href="{% url 'clinic:appointment_new' %}">
+                    <i class="bi bi-calendar-plus"></i><span>{% trans "New Appt" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'clinic:reception_queue' %}">
+                    <i class="bi bi-person-walking"></i><span>{% trans "Check In" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'patients:add_patient' %}">
+                    <i class="bi bi-person-plus"></i><span>{% trans "New Patient" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'orders:add_order' %}">
+                    <i class="bi bi-clipboard2-plus"></i><span>{% trans "New Order" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'billing:payment_posting_list' %}">
+                    <i class="bi bi-cash-stack"></i><span>{% trans "Payments" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'billing:era_upload' %}">
+                    <i class="bi bi-cloud-download"></i><span>{% trans "ERA/EOB" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'clinic:encounter_list' %}">
+                    <i class="bi bi-clipboard2-pulse"></i><span>{% trans "Encounters" %}</span>
+                </a>
+                <a class="ecw-rail-btn" href="{% url 'inventory:stock_receipt_create' %}">
+                    <i class="bi bi-box-arrow-in-down"></i><span>{% trans "Stock In" %}</span>
+                </a>
+                <div class="ecw-rail-spacer flex-grow-1"></div>
+                <a class="ecw-rail-btn text-muted" href="/admin">
+                    <i class="bi bi-gear"></i><span>{% trans "Settings" %}</span>
+                </a>
+            </aside>
+
+            <!-- Working area -->
+            <section class="ecw-main flex-grow-1">
+                <!-- Flash Messages -->
+                {% if messages %}
+                <div class="px-3 pt-3">
+                    <div id="flash-messages-container">
+                        {% for message in messages %}
+                        <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show ecw-alert" role="alert">
+                            <i class="bi {% if message.tags == 'success' %}bi-check-circle-fill{% else %}bi-exclamation-triangle-fill{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <main class="ecw-content">
+                    {% block content %}{% endblock %}
+                </main>
+
+                <!-- Footer -->
+                <footer class="ecw-footer mt-4 py-2 px-3 small">
+                    &copy; {{ now.year }} Raqeem RIS —
+                    <span class="text-muted">{% trans "UI preview emulating the eClinicalWorks layout. All rights reserved." %}</span>
+                </footer>
+            </section>
+        </div>
+
+        {% block modals %}{% endblock %}
+    </body>
+</html>

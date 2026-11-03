@@ -1,0 +1,536 @@
+/* ==========================================================================
+   eClinicalWorks-style UI chrome for Raqeem RIS (templates/ecw/*).
+   Emulates the recognizable eCW look: sky-blue utility bar, folder-style
+   module tabs, left vertical action rail, dense bordered tables and
+   "field group" forms. Loaded ONLY by the ecw template family so the
+   existing app templates are untouched.
+   ========================================================================== */
+
+:root {
+    --ecw-blue: #4aa3df;          /* signature eCW top-bar blue            */
+    --ecw-blue-dark: #2f7fb8;
+    --ecw-orange: #f28c28;        /* eCW CTA / Search button orange        */
+    --ecw-tab-inactive: #dceaf6;
+    --ecw-tab-active: #ffffff;
+    --ecw-rail-bg: #eef4fa;
+    --ecw-border: #b8cfe4;
+    --ecw-header-bg: #dbeaf7;
+    --ecw-zebra: #f4f9fd;
+    --ecw-link: #1a6bb5;
+}
+
+[data-bs-theme="dark"] {
+    --ecw-blue: #20526f;
+    --ecw-blue-dark: #16394f;
+    --ecw-tab-inactive: #22384c;
+    --ecw-tab-active: var(--card-bg);
+    --ecw-rail-bg: #16283a;
+    --ecw-border: #33506b;
+    --ecw-header-bg: #1d3448;
+    --ecw-zebra: #1a2c3f;
+    --ecw-link: #7cc4ff;
+}
+
+.ecw-body {
+    background-color: #cfe3f3 !important;
+    font-size: 0.875rem;
+}
+
+[data-bs-theme="dark"] .ecw-body {
+    background-color: var(--bg-body) !important;
+}
+
+/* ---------- Top utility bar ---------------------------------------------- */
+.ecw-topbar {
+    background: linear-gradient(180deg, var(--ecw-blue) 0%, var(--ecw-blue-dark) 100%);
+    color: #fff;
+    height: 44px;
+    border-bottom: 2px solid var(--ecw-blue-dark);
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+}
+
+[data-bs-theme="dark"] .ecw-topbar {
+    color: var(--text-main);
+}
+
+.ecw-brand {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.ecw-brand:hover {
+    color: #fff;
+}
+
+.ecw-brand-sub {
+    font-size: 0.55rem;
+    font-weight: 400;
+    opacity: 0.85;
+    letter-spacing: 0.5px;
+}
+
+.ecw-patient-search {
+    max-width: 480px;
+}
+
+.ecw-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ecw-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #fff;
+}
+
+.ecw-provider-chip {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 4px;
+    padding: 2px 8px;
+    white-space: nowrap;
+}
+
+.ecw-dropdown {
+    border: 1px solid var(--ecw-border);
+    border-radius: 0 !important;
+    font-size: 0.85rem;
+}
+
+/* ---------- Module tab bar (folder tabs) --------------------------------- */
+.ecw-tabbar {
+    background: var(--ecw-blue-dark);
+    padding-top: 6px;
+    gap: 2px;
+    scrollbar-width: thin;
+}
+
+.ecw-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--ecw-tab-inactive);
+    color: #33556f;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    white-space: nowrap;
+    transition: background 0.15s ease;
+}
+
+[data-bs-theme="dark"] .ecw-tab {
+    color: var(--text-muted);
+}
+
+.ecw-tab:hover {
+    background: #eaf4fc;
+    color: #1a6bb5;
+}
+
+.ecw-tab.active,
+.ecw-tab[aria-current="page"] {
+    background: var(--ecw-tab-active);
+    color: var(--ecw-link);
+    box-shadow: inset 0 2px 0 var(--ecw-orange);
+    position: relative;
+    top: 1px;
+}
+
+[data-bs-theme="dark"] .ecw-tab.active {
+    color: var(--text-main);
+}
+
+/* ---------- Shell: left rail + main -------------------------------------- */
+.ecw-shell {
+    min-height: calc(100vh - 90px);
+    align-items: stretch;
+}
+
+.ecw-rail {
+    width: 118px;
+    flex: 0 0 118px;
+    background: var(--ecw-rail-bg);
+    border-right: 1px solid var(--ecw-border);
+    gap: 4px;
+    padding: 8px 6px;
+}
+
+.ecw-rail-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 8px 4px;
+    background: #fff;
+    border: 1px solid var(--ecw-border);
+    border-radius: 4px;
+    color: var(--ecw-link);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.15;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] .ecw-rail-btn {
+    background: var(--card-bg);
+}
+
+.ecw-rail-btn i {
+    font-size: 1.15rem;
+}
+
+.ecw-rail-btn:hover {
+    background: var(--ecw-header-bg);
+    color: var(--ecw-link);
+    border-color: var(--ecw-blue);
+}
+
+.ecw-main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.ecw-content {
+    padding: 12px 16px;
+}
+
+/* ---------- Panels ("cards" in eCW) -------------------------------------- */
+.ecw-panel {
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--ecw-border);
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    margin-bottom: 12px;
+}
+
+.ecw-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: linear-gradient(180deg, var(--ecw-header-bg), #cfe3f3);
+    border-bottom: 1px solid var(--ecw-border);
+    padding: 6px 10px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #20465f;
+    border-radius: 4px 4px 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+[data-bs-theme="dark"] .ecw-panel-header {
+    color: var(--text-main);
+}
+
+.ecw-panel-body {
+    padding: 10px;
+}
+
+/* Page title strip */
+.ecw-page-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.ecw-page-title h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #20465f;
+    margin: 0;
+}
+
+[data-bs-theme="dark"] .ecw-page-title h2 {
+    color: var(--text-main);
+}
+
+/* ---------- Dense data tables -------------------------------------------- */
+.ecw-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    font-size: 0.8rem;
+}
+
+[data-bs-theme="dark"] .ecw-table {
+    background: var(--card-bg);
+}
+
+.ecw-table thead th {
+    background: var(--ecw-header-bg);
+    color: #20465f;
+    border: 1px solid var(--ecw-border);
+    padding: 5px 8px;
+    font-weight: 700;
+    text-align: start;
+    white-space: nowrap;
+}
+
+[data-bs-theme="dark"] .ecw-table thead th {
+    color: var(--text-main);
+}
+
+.ecw-table tbody td {
+    border: 1px solid var(--ecw-border);
+    padding: 4px 8px;
+    vertical-align: middle;
+}
+
+.ecw-table tbody tr:nth-child(even) {
+    background: var(--ecw-zebra);
+}
+
+.ecw-table tbody tr:hover {
+    background: #e2f0fb;
+    cursor: pointer;
+}
+
+[data-bs-theme="dark"] .ecw-table tbody tr:hover {
+    background: #223c55;
+}
+
+.ecw-table a {
+    color: var(--ecw-link);
+    text-decoration: none;
+}
+
+.ecw-table a:hover {
+    text-decoration: underline;
+}
+
+/* Row status chips (eCW uses tiny colored status words) */
+.ecw-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ecw-status.open     { color: #0b6fb8; }
+.ecw-status.checkedin,
+.ecw-status.scheduled { color: #d97706; }
+.ecw-status.completed,
+.ecw-status.paid     { color: #15803d; }
+.ecw-status.cancelled,
+.ecw-status.denied   { color: #c026d3; }
+.ecw-status.billed   { color: #4f46e5; }
+.ecw-status.pending  { color: #a16207; }
+.ecw-status.error,
+.ecw-status.overdue  { color: #dc2626; }
+
+/* ---------- Forms: fieldset groups like eCW dialogs ----------------------- */
+.ecw-form fieldset {
+    border: 1px solid var(--ecw-border);
+    border-radius: 4px;
+    padding: 10px 12px 12px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+[data-bs-theme="dark"] .ecw-form fieldset {
+    background: var(--card-bg);
+}
+
+.ecw-form legend {
+    float: none;
+    width: auto;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--ecw-link);
+    background: var(--ecw-header-bg);
+    border: 1px solid var(--ecw-border);
+    border-radius: 3px;
+    padding: 2px 10px;
+    margin-bottom: 8px;
+}
+
+.ecw-form label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #45607a;
+}
+
+[data-bs-theme="dark"] .ecw-form label {
+    color: var(--text-muted);
+}
+
+.ecw-form .form-control,
+.ecw-form .form-select {
+    border: 1px solid var(--ecw-border);
+    border-radius: 3px;
+    font-size: 0.82rem;
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.ecw-form .form-control:focus,
+.ecw-form .form-select:focus {
+    border-color: var(--ecw-blue);
+    box-shadow: 0 0 0 2px rgba(74, 163, 223, 0.25);
+}
+
+.ecw-required::after {
+    content: " *";
+    color: #dc2626;
+    font-weight: 700;
+}
+
+/* ---------- Buttons -------------------------------------------------------- */
+.btn-ecw {
+    background: linear-gradient(180deg, #fdfefe, #e9eef3);
+    border: 1px solid #9db6cb;
+    border-radius: 3px;
+    color: #20465f;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.06);
+}
+
+[data-bs-theme="dark"] .btn-ecw {
+    background: linear-gradient(180deg, #2a3d52, #223346);
+    color: var(--text-main);
+}
+
+.btn-ecw:hover {
+    border-color: var(--ecw-blue);
+    color: var(--ecw-link);
+}
+
+.btn-ecw-primary {
+    background: linear-gradient(180deg, #f7a54a, var(--ecw-orange));
+    border: 1px solid #cf7415;
+    color: #fff;
+    font-weight: 700;
+}
+
+.btn-ecw-primary:hover {
+    color: #fff;
+    filter: brightness(1.05);
+}
+
+/* ---------- Alerts / footer ------------------------------------------------ */
+.ecw-alert {
+    border-radius: 3px;
+    border: 1px solid var(--ecw-border);
+    font-size: 0.82rem;
+}
+
+.ecw-footer {
+    border-top: 1px solid var(--ecw-border);
+    background: var(--ecw-rail-bg);
+    color: #45607a;
+}
+
+[data-bs-theme="dark"] .ecw-footer {
+    color: var(--text-muted);
+}
+
+/* ---------- Dashboard KPI tiles (eCW health-trends style) ------------------- */
+.ecw-kpi {
+    border: 1px solid var(--ecw-border);
+    border-radius: 4px;
+    background: #fff;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+[data-bs-theme="dark"] .ecw-kpi {
+    background: var(--card-bg);
+}
+
+.ecw-kpi .kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #fff;
+    flex: 0 0 42px;
+}
+
+.ecw-kpi .kpi-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #20465f;
+}
+
+[data-bs-theme="dark"] .ecw-kpi .kpi-value {
+    color: var(--text-main);
+}
+
+.ecw-kpi .kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #6b8aa5;
+}
+
+.kpi-blue   { background: #4aa3df; }
+.kpi-green  { background: #34a853; }
+.kpi-orange { background: #f28c28; }
+.kpi-red    { background: #d9534f; }
+.kpi-purple { background: #8b5cf6; }
+.kpi-teal   { background: #14b8a6; }
+
+/* ---------- Patient chart header band (eCW patient banner) ------------------ */
+.ecw-patient-banner {
+    background: linear-gradient(180deg, #eaf4fc, #d7e9f8);
+    border: 1px solid var(--ecw-border);
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+}
+
+[data-bs-theme="dark"] .ecw-patient-banner {
+    background: linear-gradient(180deg, #1c3044, #182a3c);
+}
+
+.ecw-patient-banner .patient-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #20465f;
+}
+
+[data-bs-theme="dark"] .ecw-patient-banner .patient-name {
+    color: var(--text-main);
+}
+
+.ecw-patient-banner .banner-sep {
+    color: #9db6cb;
+    margin: 0 6px;
+}
