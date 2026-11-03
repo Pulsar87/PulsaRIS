@@ -1,0 +1,100 @@
+{% extends 'ecw/layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Schedule" %}{% endblock %}
+
+{% block content %}
+<div class="ecw-page-title">
+    <h2><i class="bi bi-calendar3 me-2 text-info"></i>{% trans "Schedule — Appointments" %}</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'clinic:availability_list' %}" class="btn btn-ecw btn-sm"><i class="bi bi-clock-history me-1"></i>{% trans "Provider Availability" %}</a>
+        <a href="{% url 'clinic:appointment_new' %}" class="btn btn-ecw-primary btn-sm"><i class="bi bi-calendar-plus me-1"></i>{% trans "New Appointment" %}</a>
+    </div>
+</div>
+
+<!-- Calendar panel (FullCalendar is already loaded by the layout) -->
+<div class="ecw-panel">
+    <div class="ecw-panel-header">
+        <span><i class="bi bi-calendar-week me-2"></i>{% trans "Calendar" %}</span>
+        <span class="small fw-normal">{% trans "Click an appointment to open it" %}</span>
+    </div>
+    <div class="ecw-panel-body">
+        <div id="ecw-calendar"></div>
+    </div>
+</div>
+
+<!-- Appointment day list (eCW "Schedule" grid below the calendar) -->
+<div class="ecw-panel">
+    <div class="ecw-panel-header">
+        <span><i class="bi bi-table me-2"></i>{% trans "Today's Appointments" %} ({{ appointments|length|default:"0" }})</span>
+        <a class="text-decoration-none small" href="{% url 'clinic:reception_queue' %}">{% trans "Reception Queue" %} »</a>
+    </div>
+    <div class="ecw-panel-body p-0">
+        <div class="table-responsive">
+            <table class="ecw-table mb-0">
+                <thead>
+                    <tr>
+                        <th>{% trans "Time" %}</th>
+                        <th>{% trans "Patient" %}</th>
+                        <th>{% trans "Provider" %}</th>
+                        <th>{% trans "Type" %}</th>
+                        <th>{% trans "Status" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appt in appointments %}
+                    <tr>
+                        <td class="fw-bold">{{ appt.start_time|date:"H:i"|default:appt.scheduled_at|date:"H:i" }}</td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' appt.patient.pk %}">
+                                {{ appt.patient.last_name_en }}, {{ appt.patient.first_name_en }}
+                            </a>
+                            <span class="text-muted small">({{ appt.patient.mrn }})</span>
+                        </td>
+                        <td>{{ appt.provider|default:"—" }}</td>
+                        <td>{{ appt.get_appointment_type_display|default:appt.appointment_type|default:"Visit" }}</td>
+                        <td><span class="ecw-status {{ appt.status|lower }}">{{ appt.get_status_display|default:appt.status }}</span></td>
+                        <td class="text-nowrap">
+                            <a class="me-2" href="{% url 'clinic:appointment_detail' appt.pk %}" title="{% trans 'Open' %}"><i class="bi bi-folder2-open"></i></a>
+                            <a href="{% url 'clinic:encounter_new' %}" title="{% trans 'Start Encounter' %}"><i class="bi bi-play-circle"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">
+                        <i class="bi bi-calendar-x d-block fs-3 mb-2"></i>{% trans "No appointments scheduled for today." %}
+                    </td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const el = document.getElementById('ecw-calendar');
+    if (!el || !window.FullCalendar) return;
+    const cal = new FullCalendar.Calendar(el, {
+        initialView: 'timeGridWeek',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay' },
+        height: 520,
+        slotMinTime: '07:00:00',
+        slotMaxTime: '19:00:00',
+        events: [
+            {% for appt in appointments %}
+            {
+                title: "{{ appt.patient.last_name_en|escapejs }}, {{ appt.patient.first_name_en|escapejs }}",
+                start: "{{ appt.start_datetime|date:'c'|default:appt.scheduled_at|date:'c' }}",
+                url: "{% url 'clinic:appointment_detail' appt.pk %}",
+                color: '#4aa3df',
+            },
+            {% endfor %}
+        ],
+    });
+    cal.render();
+});
+</script>
+{% endblock %}

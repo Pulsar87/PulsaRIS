@@ -1,0 +1,171 @@
+{% extends 'ecw/layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Encounter — Patient Info" %}{% endblock %}
+
+{% block content %}
+<div class="ecw-page-title">
+    <h2><i class="bi bi-person-plus-fill me-2 text-info"></i>{% trans "New Encounter — Patient Information" %}</h2>
+    <div class="small text-muted">{% trans "Fields marked with" %} <span class="text-danger fw-bold">*</span> {% trans "are required" %}</div>
+</div>
+
+<form method="post" class="ecw-form" novalidate>
+    {% csrf_token %}
+
+    <div class="row g-2">
+        <div class="col-lg-6">
+            <!-- Demographics group -->
+            <fieldset>
+                <legend><i class="bi bi-person-vcard me-1"></i>{% trans "Demographics" %}</legend>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label ecw-required">{% trans "First Name (EN)" %}</label>
+                        <input type="text" name="first_name_en" class="form-control form-control-sm" value="{{ form.first_name_en.value|default:'' }}" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label ecw-required">{% trans "Last Name (EN)" %}</label>
+                        <input type="text" name="last_name_en" class="form-control form-control-sm" value="{{ form.last_name_en.value|default:'' }}" required />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "First Name (AR)" %}</label>
+                        <input type="text" name="first_name_ar" dir="rtl" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Last Name (AR)" %}</label>
+                        <input type="text" name="last_name_ar" dir="rtl" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label ecw-required">{% trans "MRN" %}</label>
+                        <input type="text" name="mrn" class="form-control form-control-sm" value="{{ form.mrn.value|default:'' }}" required />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label ecw-required">{% trans "Date of Birth" %}</label>
+                        <input type="date" name="dob" class="form-control form-control-sm" required />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label ecw-required">{% trans "Gender" %}</label>
+                        <select name="gender" class="form-select form-select-sm" required>
+                            <option value="M">{% trans "Male" %}</option>
+                            <option value="F">{% trans "Female" %}</option>
+                            <option value="O">{% trans "Other" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">{% trans "Nationality" %}</label>
+                        <input type="text" name="nationality" maxlength="3" class="form-control form-control-sm" placeholder="EGY" />
+                    </div>
+                    <div class="col-8">
+                        <label class="form-label">{% trans "National ID" %}</label>
+                        <input type="text" name="national_id" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Contact group -->
+            <fieldset>
+                <legend><i class="bi bi-telephone me-1"></i>{% trans "Contact" %}</legend>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Phone" %}</label>
+                        <input type="tel" name="phone" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Email" %}</label>
+                        <input type="email" name="email" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{% trans "Address" %}</label>
+                        <textarea name="address" rows="2" class="form-control form-control-sm"></textarea>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Emergency Contact" %}</label>
+                        <input type="text" name="emergency_contact_name" class="form-control form-control-sm" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Emergency Phone" %}</label>
+                        <input type="tel" name="emergency_contact_phone" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+
+        <div class="col-lg-6">
+            <!-- Insurance group -->
+            <fieldset>
+                <legend><i class="bi bi-shield-check me-1"></i>{% trans "Insurance" %}</legend>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Provider" %}</label>
+                        <select name="insurance_provider" class="form-select form-select-sm">
+                            <option value="">{% trans "Self Pay" %}</option>
+                            {% for payer in payers %}<option value="{{ payer.name }}">{{ payer.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Policy Number" %}</label>
+                        <input type="text" name="insurance_policy_number" class="form-control form-control-sm" />
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Visit / encounter group -->
+            <fieldset>
+                <legend><i class="bi bi-calendar2-event me-1"></i>{% trans "Visit Details" %}</legend>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <label class="form-label ecw-required">{% trans "Appointment Type" %}</label>
+                        <select name="visit_type" class="form-select form-select-sm" required>
+                            <option>{% trans "New Patient Visit" %}</option>
+                            <option>{% trans "Follow-up" %}</option>
+                            <option>{% trans "Annual Physical (E/M)" %}</option>
+                            <option>{% trans "Imaging Consult" %}</option>
+                            <option>{% trans "Telehealth" %}</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label ecw-required">{% trans "Provider" %}</label>
+                        <select name="provider" class="form-select form-select-sm" required>
+                            {% for p in providers %}<option value="{{ p.pk }}">{{ p }}</option>{% empty %}<option value="">{% trans "Select provider" %}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Facility / Location" %}</label>
+                        <select name="facility" class="form-select form-select-sm">
+                            {% for f in facilities %}<option value="{{ f.pk }}">{{ f }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">{% trans "Arrival Time" %}</label>
+                        <input type="time" name="arrival_time" class="form-control form-control-sm" value="{% now 'H:i' %}" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">{% trans "Chief Complaint" %}</label>
+                        <textarea name="chief_complaint" rows="2" class="form-control form-control-sm" placeholder="{% trans 'Reason for visit…' %}"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="walk_in" id="walk_in" />
+                            <label class="form-check-label small" for="walk_in">{% trans "Walk-In" %}</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="interpreter_needed" id="interpreter_needed" />
+                            <label class="form-check-label small" for="interpreter_needed">{% trans "Interpreter Needed" %}</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="consent_data_sharing" id="consent_data_sharing" />
+                            <label class="form-check-label small" for="consent_data_sharing">{% trans "Consent to Data Sharing" %}</label>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <!-- Action bar (eCW dialogs: Save / Save & Continue / Cancel) -->
+            <div class="d-flex justify-content-end gap-2 py-2 border-top bg-white px-2">
+                <button type="reset" class="btn btn-ecw"><i class="bi bi-x-lg me-1"></i>{% trans "Cancel" %}</button>
+                <button type="submit" name="save_only" class="btn btn-ecw"><i class="bi bi-save me-1"></i>{% trans "Save" %}</button>
+                <button type="submit" name="save_continue" class="btn btn-ecw-primary"><i class="bi bi-arrow-right-circle me-1"></i>{% trans "Save & Add Order" %}</button>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

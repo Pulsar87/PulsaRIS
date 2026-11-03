@@ -1,0 +1,90 @@
+{% extends 'ecw/layout.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Patient Search Results" %}{% endblock %}
+
+{% block content %}
+<div class="ecw-page-title">
+    <h2><i class="bi bi-person-lines-fill me-2 text-info"></i>{% trans "Patient Search" %}</h2>
+    <a href="{% url 'patients:add_patient' %}" class="btn btn-ecw-primary btn-sm">
+        <i class="bi bi-person-plus me-1"></i>{% trans "New Patient" %}
+    </a>
+</div>
+
+<!-- Search panel -->
+<div class="ecw-panel">
+    <div class="ecw-panel-header"><span><i class="bi bi-search me-2"></i>{% trans "Search Criteria" %}</span></div>
+    <div class="ecw-panel-body">
+        <form method="get" action="{{ request.path }}" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">{% trans "Name / MRN / National ID / Phone" %}</label>
+                <input type="text" name="q" value="{{ query|default:'' }}" class="form-control form-control-sm" autofocus />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">{% trans "Facility" %}</label>
+                <select name="facility" class="form-select form-select-sm">
+                    <option value="">{% trans "All Facilities" %}</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-ecw btn-sm w-100"><i class="bi bi-search me-1"></i>{% trans "Search" %}</button>
+            </div>
+            <div class="col-md-2">
+                <a href="{{ request.path }}" class="btn btn-ecw btn-sm w-100"><i class="bi bi-x-circle me-1"></i>{% trans "Clear" %}</a>
+            </div>
+            <div class="col-md-1 text-end">
+                <span class="badge text-bg-light border">{{ patients|length|default:"0" }}</span>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results grid (eCW dense table) -->
+<div class="ecw-panel">
+    <div class="ecw-panel-header">
+        <span><i class="bi bi-table me-2"></i>{% trans "Patients" %}</span>
+        {% if page_obj.has_next %}<a class="text-decoration-none small" href="?page={{ page_obj.next_page_number }}&q={{ query|urlencode }}">{% trans "Next" %} »</a>{% endif %}
+    </div>
+    <div class="ecw-panel-body p-0">
+        <div class="table-responsive">
+            <table class="ecw-table mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:30px">#</th>
+                        <th>{% trans "MRN" %}</th>
+                        <th>{% trans "Last Name" %}</th>
+                        <th>{% trans "First Name" %}</th>
+                        <th>{% trans "Gender" %}</th>
+                        <th>{% trans "Phone" %}</th>
+                        <th>{% trans "Actions" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for patient in patients %}
+                    <tr onclick="window.location.href='{% url 'patients:patient_detail' patient.pk %}'" title="{% trans 'Open chart' %}">
+                        <td class="text-muted">{{ forloop.counter }}</td>
+                        <td class="fw-bold">{{ patient.mrn }}</td>
+                        <td>{{ patient.last_name_en }}</td>
+                        <td>{{ patient.first_name_en }}</td>
+                        <td>{{ patient.get_gender_display|default:patient.gender }}</td>
+                        <td>{{ patient.phone|default:"—" }}</td>
+                        <td onclick="event.stopPropagation()">
+                            <a class="me-2" href="{% url 'patients:patient_detail' patient.pk %}" title="{% trans 'Chart' %}"><i class="bi bi-folder2-open"></i></a>
+                            <a class="me-2" href="{% url 'patients:edit_patient' patient.pk %}" title="{% trans 'Edit' %}"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'orders:add_order' %}?patient={{ patient.pk }}" title="{% trans 'New Order' %}"><i class="bi bi-clipboard2-plus"></i></a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox d-block fs-3 mb-2"></i>
+                            {% trans "No patients found. Adjust your search criteria." %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
