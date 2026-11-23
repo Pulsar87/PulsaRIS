@@ -4,6 +4,10 @@ from django.core.exceptions import PermissionDenied
 from clinic.models import (
     Allergy,
     Appointment,
+    ChiefComplaint,
+    ClinicalOrder,
+    Diagnosis,
+    FollowUpInstruction,
     Encounter,
     EncounterNote,
     FacilityAssignment,
@@ -127,3 +131,34 @@ class IntegrationEventAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return False
+
+
+@admin.register(ChiefComplaint)
+class ChiefComplaintAdmin(admin.ModelAdmin):
+    list_display = ("encounter", "summary", "onset", "duration", "severity", "recorded_by")
+    list_filter = ("onset",)
+    search_fields = ("summary", "body_part")
+
+
+@admin.register(Diagnosis)
+class DiagnosisAdmin(admin.ModelAdmin):
+    list_display = ("encounter", "code", "description", "kind", "is_primary", "recorded_by")
+    list_filter = ("kind", "is_primary")
+    search_fields = ("code", "description")
+
+
+@admin.register(ClinicalOrder)
+class ClinicalOrderAdmin(admin.ModelAdmin):
+    list_display = ("encounter", "order_type", "description", "priority", "status",
+                    "exam_order", "ordered_by", "ordered_at")
+    list_filter = ("order_type", "status", "priority")
+    search_fields = ("code", "description")
+    readonly_fields = ("completed_at",)
+
+
+@admin.register(FollowUpInstruction)
+class FollowUpInstructionAdmin(admin.ModelAdmin):
+    list_display = ("encounter", "instruction", "timeframe_days", "follow_up_date",
+                    "prn_instructions", "follow_up_appointment", "authored_by")
+    list_filter = ("prn_instructions",)
+    search_fields = ("instruction",)

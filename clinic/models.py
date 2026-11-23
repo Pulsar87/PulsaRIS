@@ -528,17 +528,36 @@ class Encounter(models.Model):
         self.save(update_fields=list(fields) + ["status", "updated_at"])
 
     def require_documentation(self):
-        """A completed encounter must carry at least one signed note and one
-        vitals recording. Raises ValidationError listing what is missing."""
+        """A completed encounter must carry at least one signed note, one
+        vitals recording and one coded diagnosis (the minimum documentation
+        set for the Clinical Encounter & Documentation module). Raises
+        ValidationError listing what is missing."""
         missing = []
         if not self.notes.filter(signed_at__isnull=False).exists():
             missing.append("a signed encounter note")
         if not self.vitals.exists():
             missing.append("recorded vitals")
+        if not self.diagnoses.exists():
+            missing.append("at least one diagnosis")
         if missing:
             raise ValidationError(
                 "Cannot complete encounter — missing: " + ", ".join(missing) + "."
             )
+
+    # ── Convenience accessors used by views/templates ──────────────────────
+
+    @property
+    def chief_complaint(self):
+        """Chief complaint = structured record when present, else the free
+        text captured on the visit (``reason``)."""
+        cc = self.chief_complaints.order_by("-created_at").first()
+        if cc is not None:
+            return cc.summary
+        return self.reason
+
+    @property
+    def primary_diagnosis(self):
+        return self.diagnoses.filter(is_primary=True).first() or self.diagnoses.first()
 
 
 # ── Phase 2: clinical records ─────────────────────────────────────────────
@@ -616,6 +635,16 @@ class Problem(models.Model):
     )
     onset_date = models.DateField(null=True, blank=True)
     resolved_date = models.DateField(null=True, blank=True)
+    # Set when the entry was mirrored from an encounter Diagnosis record so
+    # the problem list and the coded diagnosis stay in sync (and to prevent
+    # duplicate mirroring).
+    diagnosis = models.ForeignKey(
+        "clinic.Diagnosis",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="problem_entries",
+    )
     recorded_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
@@ -921,6 +950,7 @@ class IntegrationEvent(models.Model):
         APPOINTMENT_CANCELLED = "APPT_CANCELLED", "Appointment cancelled"
         APPOINTMENT_COMPLETED = "APPT_COMPLETED", "Appointment completed"
         ENCOUNTER_CLOSED = "ENCOUNTER_CLOSED", "Encounter closed"
+        CLINICAL_ORDER_PLACED = "CLINICAL_ORDER_PLACED", "Clinical order placed"
 
     class Status(models.TextChoices):
         PENDING = "PENDING", "Pending"
@@ -1004,3 +1034,298 @@ class PatientMergeLog(models.Model):
 
     def __str__(self):
         return f"Merged {self.duplicate_id} -> {self.canonical_id} @ {self.created_at}"
+
+
+# ── Clinical Encounter & Documentation: structured record types ────────────
+# Chief complaints, coded diagnoses, clinical orders (labs/imaging) and
+# follow-up instructions. All rows hang off Encounter; facility scoping on
+# queries goes via encounter__facility_id (see module header notes).
+
+
+class ChiefComplaint(models.Model):
+    """Structured chief-complaint record captured at pre-visit intake or at
+    the start of the encounter. The encounter's free-text ``reason`` remains
+    the fallback source (see ``Encounter.chief_complaint``)."""
+
+    class Onset(models.TextChoices):
+        SUDDEN = "SUDDEN", "Sudden"
+        GRADUAL = "GRADUAL", "Gradual"
+        INTERMITTENT = "INTERMITTENT", "Intermittent"
+        CONTINUOUS = "CONTINUOUS", "Continuous"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="chief_complaints"
+    )
+    summary = models.CharField(
+        max_length=250, help_text="Complaint in the patient's own words, e.g. 'Chest pain'."
+    )
+    onset = models.CharField(max_length=15, choices=Onset.choices, blank=True)
+    duration = models.CharField(
+        max_length=50, blank=True, help_text="e.g., '3 days', 'since this morning'."
+    )
+    severity = models.PositiveSmallIntegerField(
+        null=True, blank=True, help_text="Patient-reported 0–10 scale."
+    )
+    laterality = models.CharField(
+        max_length=3,
+        choices=[("L", "Left"), ("R", "Right"), ("B", "Bilateral")],
+        blank=True,
+    )
+    body_part = models.CharField(max_length=100, blank=True)
+    associated_symptoms = models.TextField(blank=True)
+    aggravating_factors = models.CharField(max_length=250, blank=True)
+    relieving_factors = models.CharField(max_length=250, blank=True)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="chief_complaints_recorded",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["encounter", "created_at"])]
+
+    def clean(self):
+        if self.severity is not None and not (0 <= self.severity <= 10):
+            raise ValidationError("Severity must be between 0 and 10.")
+
+    def __str__(self):
+        return f"CC: {self.summary}" + (f" ({self.duration})" if self.duration else "")
+
+
+class Diagnosis(models.Model):
+    """Coded diagnosis documented during the encounter (ICD-10-CM). When the
+    status becomes ACTIVE/RESOLVED the entry is mirrored onto the patient's
+    problem list so both views stay consistent."""
+
+    class Kind(models.TextChoices):
+        PRIMARY = "PRIMARY", "Primary"
+        SECONDARY = "SECONDARY", "Secondary"
+        DIFFERENTIAL = "DIFFERENTIAL", "Differential"
+        RULED_OUT = "RULED_OUT", "Ruled out"
+        ADMITTING = "ADMITTING", "Admitting"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="diagnoses"
+    )
+    code = models.CharField(
+        max_length=10, blank=True, help_text="ICD-10-CM code", db_index=True
+    )
+    description = models.CharField(max_length=250)
+    kind = models.CharField(
+        max_length=15, choices=Kind.choices, default=Kind.PRIMARY, db_index=True
+    )
+    is_primary = models.BooleanField(
+        default=False, help_text="At most one primary diagnosis per encounter."
+    )
+    note = models.TextField(blank=True)
+    recorded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="diagnoses_recorded",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_primary", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["encounter"],
+                condition=models.Q(is_primary=True),
+                name="%(app_label)s_%(class)s_single_primary_per_encounter",
+            ),
+        ]
+        indexes = [models.Index(fields=["encounter", "kind"])]
+
+    def save(self, *args, **kwargs):
+        creating = self._state.adding
+        super().save(*args, **kwargs)
+        # Mirror onto the patient problem list once per diagnosis so the
+        # encounter documentation and the chronic problem list stay in sync.
+        if creating and not Problem.objects.filter(diagnosis=self).exists():
+            Problem.objects.create(
+                patient=self.encounter.patient,
+                encounter=self.encounter,
+                code=self.code,
+                description=self.description,
+                status=Problem.Status.ACTIVE,
+                recorded_by=self.recorded_by,
+                diagnosis=self,
+            )
+
+    def __str__(self):
+        return f"{self.code} {self.description} ({self.kind})".strip()
+
+
+class ClinicalOrder(models.Model):
+    """Provider order raised during an encounter — laboratory tests, imaging
+    studies, procedures or referrals. Imaging orders are executed by the RIS
+    ``ExamOrder`` pipeline (one-to-one link); lab orders flow to the HL7
+    listener/results feed via the transactional outbox."""
+
+    class OrderType(models.TextChoices):
+        LAB = "LAB", "Laboratory"
+        IMAGING = "IMAGING", "Imaging"
+        PROCEDURE = "PROCEDURE", "Procedure"
+        REFERRAL = "REFERRAL", "Referral"
+
+    class Status(models.TextChoices):
+        DRAFT = "DRAFT", "Draft"
+        PLACED = "PLACED", "Placed"
+        IN_PROGRESS = "IN_PROGRESS", "In progress"
+        COMPLETED = "COMPLETED", "Completed"
+        CANCELLED = "CANCELLED", "Cancelled"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="clinical_orders"
+    )
+    order_type = models.CharField(max_length=15, choices=OrderType.choices, db_index=True)
+    code = models.CharField(
+        max_length=20, blank=True, help_text="LOINC (labs) / CPT (imaging & procedures)."
+    )
+    description = models.CharField(max_length=250, help_text="e.g., 'CBC', 'Chest X-Ray PA'")
+    priority = models.CharField(
+        max_length=10,
+        choices=[("STAT", "Stat"), ("URGENT", "Urgent"), ("ROUTINE", "Routine")],
+        default="ROUTINE",
+    )
+    status = models.CharField(
+        max_length=15, choices=Status.choices, default=Status.DRAFT, db_index=True
+    )
+    specimen = models.CharField(
+        max_length=100, blank=True, help_text="Lab specimen, e.g. 'Blood (EDTA)'."
+    )
+    notes = models.TextField(blank=True)
+    ordered_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="clinical_orders_placed",
+    )
+    ordered_at = models.DateTimeField(default=timezone.now)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    result_summary = models.TextField(
+        blank=True, help_text="Result comment / critical-value callback note."
+    )
+    # Imaging orders execute through the RIS ExamOrder pipeline.
+    exam_order = models.OneToOneField(
+        "orders.ExamOrder",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="clinical_order",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    ORDER_TRANSITIONS = {
+        Status.DRAFT: {Status.PLACED, Status.CANCELLED},
+        Status.PLACED: {Status.IN_PROGRESS, Status.COMPLETED, Status.CANCELLED},
+        Status.IN_PROGRESS: {Status.COMPLETED, Status.CANCELLED},
+        Status.COMPLETED: set(),
+        Status.CANCELLED: set(),
+    }
+
+    class Meta:
+        ordering = ["-ordered_at"]
+        indexes = [
+            models.Index(fields=["encounter", "order_type"]),
+            models.Index(fields=["status", "priority"]),
+        ]
+
+    def can_transition_to(self, new_status):
+        return new_status in self.ORDER_TRANSITIONS.get(self.status, set())
+
+    def place(self):
+        self._transition(self.Status.PLACED)
+
+    def complete(self, result_summary=""):
+        self._transition(
+            self.Status.COMPLETED,
+            completed_at=timezone.now(),
+            result_summary=result_summary or self.result_summary,
+        )
+
+    def cancel(self):
+        self._transition(self.Status.CANCELLED)
+
+    def _transition(self, new_status, **fields):
+        if not self.can_transition_to(new_status):
+            raise ValidationError(
+                f"Illegal clinical-order transition {self.status} -> {new_status}."
+            )
+        self.status = new_status
+        for k, v in fields.items():
+            setattr(self, k, v)
+        self.save(update_fields=list(fields) + ["status", "updated_at"])
+
+    def __str__(self):
+        return f"{self.get_order_type_display()} order: {self.description} ({self.status})"
+
+
+class FollowUpInstruction(models.Model):
+    """Post-visit plan given to the patient and/or a scheduled re-appointment
+    produced from the encounter (links back into front-desk scheduling)."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    encounter = models.ForeignKey(
+        Encounter, on_delete=models.CASCADE, related_name="follow_up_instructions"
+    )
+    instruction = models.TextField(help_text="Care-plan / return precautions text.")
+    timeframe_days = models.PositiveIntegerField(
+        null=True, blank=True, help_text="e.g., review in 7 days."
+    )
+    follow_up_date = models.DateField(null=True, blank=True)
+    department = models.CharField(max_length=100, blank=True)
+    prn_instructions = models.BooleanField(
+        default=False, help_text="'As needed' guidance rather than a fixed visit."
+    )
+    # Setting this schedules the next front-desk appointment for the patient.
+    follow_up_appointment = models.ForeignKey(
+        Appointment,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="originating_follow_ups",
+    )
+    authored_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="follow_ups_authored",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                name="%(app_label)s_%(class)s_prn_or_scheduled",
+                check=(
+                    Q(prn_instructions=True)
+                    | Q(follow_up_date__isnull=False)
+                    | Q(timeframe_days__isnull=False)
+                    | Q(follow_up_appointment__isnull=False)
+                ),
+            ),
+        ]
+        indexes = [models.Index(fields=["encounter", "created_at"])]
+
+    def clean(self):
+        if not self.prn_instructions and not (
+            self.follow_up_date or self.timeframe_days or self.follow_up_appointment_id
+        ):
+            raise ValidationError(
+                "Follow-up needs a date/timeframe, a linked appointment, "
+                "or must be marked as PRN (as-needed) guidance."
+            )
+
+    def __str__(self):
+        when = self.follow_up_date or (f"in {self.timeframe_days}d" if self.timeframe_days else "PRN")
+        return f"Follow-up ({when}): {self.instruction[:60]}"
