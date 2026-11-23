@@ -22,9 +22,13 @@ from clinic import patient_matching, rollout, scheduling
 from clinic.models import (
     Allergy,
     Appointment,
+    ChiefComplaint,
+    ClinicalOrder,
+    Diagnosis,
     Encounter,
     EncounterNote,
     FacilityAssignment,
+    FollowUpInstruction,
     Medication,
     Problem,
     ProviderAvailability,
@@ -481,6 +485,12 @@ def encounter_detail(request, pk):
         "medications": Medication.objects.filter(patient=enc.patient),
         "prescriptions": enc.prescriptions.all(),
         "notes": notes,
+        "chief_complaints": enc.chief_complaints.select_related("recorded_by"),
+        "diagnoses": enc.diagnoses.select_related("recorded_by"),
+        "clinical_orders": enc.clinical_orders.select_related(
+            "exam_order", "ordered_by"),
+        "follow_ups": enc.follow_up_instructions.select_related(
+            "follow_up_appointment", "authored_by"),
         "service_lines": enc.service_lines.all(),
         "exam_orders": ExamOrder.objects.filter(appointment=enc.appointment)
         if enc.appointment_id else ExamOrder.objects.none(),
@@ -748,3 +758,160 @@ def patient_merge(request, pk):
         request, f"Merged {duplicate.mrn} into {canonical.mrn} (append-only log written)."
     )
     return redirect("clinic:patient_duplicates")
+
+
+# ── Clinical Encounter & Documentation: record-type views ─────────────────
+
+
+def _int_or_none(raw):
+    try:
+        return int(raw) if raw not in (None, "") else None
+    except (TypeError, ValueError):
+        return None
+
+
+@role_required("PROVIDER", "RECEPTIONIST", "ADMIN")
+@gated_detail_view(Encounter)
+def chief_complaint_add(request, pk):
+    """Pre-visit intake / start-of-visit chief-complaint capture."""
+    enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
+    if request.method == "POST":
+        try:
+            scheduling.record_chief_complaint(
+                enc,
+                summary=request.POST.get("summary", ""),
+                actor=request.user,
+                onset=request.POST.get("onset", ""),
+                duration=request.POST.get("duration", ""),
+                severity=_int_or_none(request.POST.get("severity")),
+                laterality=request.POST.get("laterality", ""),
+                body_part=request.POST.get("body_part", ""),
+                associated_symptoms=request.POST.get("associated_symptoms", ""),
+                aggravating_factors=request.POST.get("aggravating_factors", ""),
+                relieving_factors=request.POST.get("relieving_factors", ""),
+            )
+            messages.success(request, "Chief complaint recorded.")
+        except ValidationError as exc:
+            for e in exc.messages:
+                messages.error(request, e)
+    return redirect("clinic:encounter_detail", pk=enc.pk)
+
+
+@role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
+def diagnosis_add(request, pk):
+    """Document a coded (ICD-10) diagnosis on the encounter."""
+    enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
+    if request.method == "POST":
+        try:
+            scheduling.add_diagnosis(
+                enc,
+                description=request.POST.get("description", ""),
+                code=request.POST.get("code", ""),
+                kind=request.POST.get("kind", Diagnosis.Kind.PRIMARY),
+                note=request.POST.get("note", ""),
+                actor=request.user,
+            )
+            messages.success(request, "Diagnosis documented.")
+        except ValidationError as exc:
+            for e in exc.messages:
+                messages.error(request, e)
+    return redirect("clinic:encounter_detail", pk=enc.pk)
+
+
+@role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
+def clinical_order_place(request, pk):
+    """Raise a lab or imaging order on the encounter. Imaging orders spawn a
+    linked RIS ExamOrder through the shared referral path."""
+    enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
+    if request.method == "POST":
+        book_at = None
+        raw_start = request.POST.get("book_at")
+        if raw_start:
+            book_at = parse_datetime(raw_start)
+            if book_at is None:
+                messages.error(request, "Invalid exam booking datetime.")
+                return redirect("clinic:encounter_detail", pk=enc.pk)
+            if timezone.is_naive(book_at):
+                book_at = timezone.make_aware(book_at)
+        room_id = request.POST.get("room")
+        room = get_object_or_404(Device, pk=room_id) if room_id else None
+        try:
+            scheduling.place_clinical_order(
+                enc,
+                order_type=request.POST.get("order_type", ClinicalOrder.OrderType.LAB),
+                description=request.POST.get("description", ""),
+                code=request.POST.get("code", ""),
+                priority=request.POST.get("priority", "ROUTINE"),
+                specimen=request.POST.get("specimen", ""),
+                notes=request.POST.get("notes", ""),
+                modality_code=request.POST.get("modality", ""),
+                procedure_name=request.POST.get("procedure_name", ""),
+                book_at=book_at, room=room, actor=request.user,
+            )
+            messages.success(request, "Order placed.")
+        except ValidationError as exc:
+            for e in exc.messages:
+                messages.error(request, e)
+    return redirect("clinic:encounter_detail", pk=enc.pk)
+
+
+@role_required("PROVIDER", "ADMIN")
+def clinical_order_action(request, pk, action):
+    """Lifecycle actions on a clinical order: complete / cancel."""
+    co = get_object_or_404(
+        ClinicalOrder.objects.select_related("encounter"), pk=pk,
+    )
+    if not has_facility_access(request.user, co.encounter.facility_id):
+        raise PermissionDenied
+    try:
+        scheduling.transition_clinical_order(
+            co, action=action,
+            result_summary=request.POST.get("result_summary", ""),
+            actor=request.user,
+        )
+        messages.success(request, f"Order {action} succeeded.")
+    except ValidationError as exc:
+        for e in exc.messages:
+            messages.error(request, e)
+    return redirect("clinic:encounter_detail", pk=co.encounter_id)
+
+
+@role_required("PROVIDER", "ADMIN")
+@gated_detail_view(Encounter)
+def follow_up_add(request, pk):
+    """Record post-visit instructions; optionally book the re-appointment."""
+    enc = get_object_or_404(facility_scope_queryset(request.user, Encounter.objects.all()), pk=pk)
+    if request.method == "POST":
+        from datetime import date as _date
+
+        fu_date = None
+        if request.POST.get("follow_up_date"):
+            try:
+                fu_date = _date.fromisoformat(request.POST["follow_up_date"])
+            except ValueError:
+                messages.error(request, "Invalid follow-up date.")
+                return redirect("clinic:encounter_detail", pk=enc.pk)
+        book_start = None
+        if request.POST.get("book_start"):
+            book_start = parse_datetime(request.POST["book_start"])
+            if book_start and timezone.is_naive(book_start):
+                book_start = timezone.make_aware(book_start)
+        try:
+            scheduling.add_follow_up(
+                enc,
+                instruction=request.POST.get("instruction", ""),
+                timeframe_days=_int_or_none(request.POST.get("timeframe_days")),
+                follow_up_date=fu_date,
+                department=request.POST.get("department", ""),
+                prn=bool(request.POST.get("prn")),
+                book_start=book_start,
+                duration_minutes=_int_or_none(request.POST.get("duration")) or 20,
+                actor=request.user,
+            )
+            messages.success(request, "Follow-up instructions saved.")
+        except ValidationError as exc:
+            for e in exc.messages:
+                messages.error(request, e)
+    return redirect("clinic:encounter_detail", pk=enc.pk)

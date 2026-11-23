@@ -18,7 +18,7 @@ Guards:
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from clinic.models import Appointment, Encounter, IntegrationEvent
+from clinic.models import Appointment, ClinicalOrder, Encounter, IntegrationEvent
 
 
 def _emit(event_type, *, facility_id, entity_type, entity_id, payload):
@@ -113,5 +113,34 @@ def encounter_outbox(sender, instance, created, update_fields, **kwargs):
             "provider": str(instance.provider_id) if instance.provider_id else None,
             "started_at": instance.started_at.isoformat() if instance.started_at else None,
             "ended_at": instance.ended_at.isoformat(),
+        },
+    )
+
+
+@receiver(post_save, sender=ClinicalOrder)
+def clinical_order_outbox(sender, instance, created, update_fields, **kwargs):
+    """Emit CLINICAL_ORDER_PLACED once when a lab/imaging order is placed —
+    downstream HL7 ORM^O23 / FHIR ServiceRequest mappers poll the outbox."""
+    if instance.status != ClinicalOrder.Status.PLACED:
+        return
+    if _already_emitted("ClinicalOrder", instance.pk,
+                        IntegrationEvent.EventType.CLINICAL_ORDER_PLACED):
+        return
+    _emit(
+        IntegrationEvent.EventType.CLINICAL_ORDER_PLACED,
+        facility_id=instance.encounter.facility_id,
+        entity_type="ClinicalOrder",
+        entity_id=instance.pk,
+        payload={
+            "clinical_order": str(instance.pk),
+            "encounter": str(instance.encounter_id),
+            "patient": str(instance.encounter.patient_id),
+            "order_type": instance.order_type,
+            "code": instance.code,
+            "description": instance.description,
+            "priority": instance.priority,
+            "specimen": instance.specimen,
+            "ordered_at": instance.ordered_at.isoformat(),
+            "exam_order": str(instance.exam_order_id) if instance.exam_order_id else None,
         },
     )

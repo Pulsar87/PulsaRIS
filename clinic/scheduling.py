@@ -491,3 +491,177 @@ def bill_encounter_service(encounter, *, code, name, unit_price, rendering_provi
                               "total": str(line.total_charge)},
     )
     return line
+
+
+# ── Clinical Encounter & Documentation services ────────────────────────────
+# Chief complaints, coded diagnoses, clinical orders (labs/imaging) and
+# follow-up instructions. Same conventions as the Phase 2 services above:
+# one place for business rules, audit row per mutation.
+
+
+@transaction.atomic
+def record_chief_complaint(encounter, *, summary, actor=None, **fields):
+    """Capture a structured chief complaint on the encounter."""
+    from clinic.models import ChiefComplaint
+
+    if not (summary or "").strip():
+        raise ValidationError("Chief complaint summary is required.")
+    cc = ChiefComplaint(
+        encounter=encounter, summary=summary.strip(), recorded_by=actor,
+        onset=fields.get("onset", ""), duration=fields.get("duration", ""),
+        severity=fields.get("severity"), laterality=fields.get("laterality", ""),
+        body_part=fields.get("body_part", ""),
+        associated_symptoms=fields.get("associated_symptoms", ""),
+        aggravating_factors=fields.get("aggravating_factors", ""),
+        relieving_factors=fields.get("relieving_factors", ""),
+    )
+    cc.full_clean(exclude=["encounter"])
+    cc.save()
+    # Keep the legacy free-text reason in sync when it is still empty.
+    if not encounter.reason:
+        encounter.reason = cc.summary
+        encounter.save(update_fields=["reason", "updated_at"])
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_CC_ADD", entity_type="ChiefComplaint", entity_id=cc.pk,
+        user=actor, new={"encounter": str(encounter.pk), "summary": cc.summary},
+    )
+    return cc
+
+
+@transaction.atomic
+def add_diagnosis(encounter, *, description, code="", kind="PRIMARY",
+                  actor=None, note=""):
+    """Document a coded diagnosis. The first PRIMARY entry becomes the
+    encounter's primary diagnosis; duplicates are demoted to SECONDARY."""
+    from clinic.models import Diagnosis
+
+    if not (description or "").strip():
+        raise ValidationError("Diagnosis description is required.")
+    is_primary = kind == Diagnosis.Kind.PRIMARY
+    if is_primary and encounter.diagnoses.filter(is_primary=True).exists():
+        kind, is_primary = Diagnosis.Kind.SECONDARY, False
+    dx = Diagnosis.objects.create(
+        encounter=encounter, description=description.strip(), code=code.strip(),
+        kind=kind, is_primary=is_primary, note=note, recorded_by=actor,
+    )
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_DX_ADD", entity_type="Diagnosis", entity_id=dx.pk, user=actor,
+        new={"encounter": str(encounter.pk), "code": dx.code,
+             "description": dx.description, "kind": dx.kind},
+    )
+    return dx
+
+
+@transaction.atomic
+def place_clinical_order(encounter, *, order_type, description, code="",
+                         priority="ROUTINE", specimen="", notes="",
+                         modality_code="", procedure_name="", book_at=None,
+                         room=None, actor=None):
+    """Raise a lab / imaging / procedure / referral order on the encounter.
+
+    Imaging and referral orders additionally spawn an RIS ``ExamOrder``
+    through the shared referral path so the study can be scheduled and
+    performed; the resulting order rows are linked one-to-one. Placing the
+    order fires the CLINICAL_ORDER_PLACED outbox event (clinic.signals).
+    """
+    from clinic.models import ClinicalOrder
+    from core.models import Modality
+
+    if not (description or "").strip():
+        raise ValidationError("Order description is required.")
+    if order_type not in ClinicalOrder.OrderType.values:
+        raise ValidationError(f"Unknown order type '{order_type}'.")
+    co = ClinicalOrder.objects.create(
+        encounter=encounter, order_type=order_type, code=code.strip(),
+        description=description.strip(), priority=priority,
+        specimen=specimen, notes=notes, ordered_by=actor,
+    )
+    if order_type in (ClinicalOrder.OrderType.IMAGING,
+                      ClinicalOrder.OrderType.REFERRAL):
+        mcode = (modality_code or order_type[:2]).upper()
+        try:
+            modality = Modality.objects.get(code=mcode)
+        except Modality.DoesNotExist:
+            modality = None
+        if modality is not None:
+            order = create_referral(
+                encounter=encounter, patient=encounter.patient,
+                facility=encounter.facility, modality=modality,
+                procedure_code=co.code or mcode,
+                procedure_name_en=procedure_name or co.description,
+                clinical_indication=encounter.chief_complaint or encounter.reason,
+                priority=priority, created_by=actor,
+            )
+            if book_at is not None:
+                reserve_exam_slot(order, start=book_at, room=room)
+            co.exam_order = order
+            co.save(update_fields=["exam_order", "updated_at"])
+    co.place()  # DRAFT -> PLACED; emits the outbox event via post_save
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ORDER_PLACE", entity_type="ClinicalOrder", entity_id=co.pk,
+        user=actor, new={"encounter": str(encounter.pk),
+                         "order_type": co.order_type, "description": co.description,
+                         "exam_order": str(co.exam_order_id) if co.exam_order_id else None},
+    )
+    return co
+
+
+@transaction.atomic
+def transition_clinical_order(order, *, action, result_summary="", actor=None):
+    """Lifecycle actions on a placed order: complete / cancel."""
+    if action == "complete":
+        order.complete(result_summary=result_summary)
+    elif action == "cancel":
+        order.cancel()
+    else:
+        raise ValidationError(f"Unknown order action '{action}'.")
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_ORDER_%s" % action.upper(), entity_type="ClinicalOrder",
+        entity_id=order.pk, user=actor, new={"status": order.status},
+    )
+    return order
+
+
+@transaction.atomic
+def add_follow_up(encounter, *, instruction, timeframe_days=None,
+                  follow_up_date=None, department="", prn=False,
+                  book_start=None, duration_minutes=20, actor=None):
+    """Record post-visit instructions; optionally book the re-appointment
+    straight into front-desk scheduling (conflict-checked by the engine)."""
+    from clinic.models import FollowUpInstruction
+
+    if not (instruction or "").strip():
+        raise ValidationError("Follow-up instruction text is required.")
+    fu = FollowUpInstruction(
+        encounter=encounter, instruction=instruction.strip(),
+        timeframe_days=timeframe_days, follow_up_date=follow_up_date,
+        department=department, prn_instructions=bool(prn), authored_by=actor,
+    )
+    appt = None
+    if book_start is not None:
+        appt = book_appointment(
+            patient=encounter.patient, facility=encounter.facility,
+            start=book_start, duration_minutes=duration_minutes,
+            provider=encounter.provider, department=department,
+            reason=f"Follow-up: {fu.instruction[:80]}", created_by=actor,
+        )
+        fu.follow_up_appointment = appt
+    fu.full_clean(exclude=["encounter"])
+    fu.save()
+    from clinic.permissions import record_audit_service
+
+    record_audit_service(
+        "CLINIC_FOLLOWUP_ADD", entity_type="FollowUpInstruction",
+        entity_id=fu.pk, user=actor,
+        new={"encounter": str(encounter.pk),
+             "appointment": str(appt.pk) if appt else None},
+    )
+    return fu

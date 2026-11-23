@@ -33,6 +33,12 @@ urlpatterns = [
     path("encounters/<uuid:pk>/notes/", views.note_create, name="note_create"),
     path("encounters/<uuid:pk>/refer/", views.referral_from_encounter, name="referral_from_encounter"),
     path("encounters/<uuid:pk>/charge/", views.encounter_charge, name="encounter_charge"),
+    # ── Clinical Encounter & Documentation: structured record types ──
+    path("encounters/<uuid:pk>/chief-complaint/", views.chief_complaint_add, name="chief_complaint_add"),
+    path("encounters/<uuid:pk>/diagnosis/", views.diagnosis_add, name="diagnosis_add"),
+    path("encounters/<uuid:pk>/orders/place/", views.clinical_order_place, name="clinical_order_place"),
+    path("clinical-orders/<uuid:pk>/<str:action>/", views.clinical_order_action, name="clinical_order_action"),
+    path("encounters/<uuid:pk>/follow-up/", views.follow_up_add, name="follow_up_add"),
     path("notes/<uuid:pk>/sign/", views.note_sign, name="note_sign"),
     path("notes/<uuid:pk>/amend/", views.note_amend, name="note_amend"),
     # ── Phase 4: patient-matching reconciliation (admin, manual review) ──
